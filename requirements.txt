@@ -1,0 +1,47 @@
+# Pinned dependencies for the code-mixed audio deepfake detection project.
+# Python 3.10+.  Versions pinned for reproducibility (verify availability on
+# your Kaggle/Colab base image; some Kaggle images pre-pin torch).
+#
+# NOTE: CI installs only a light subset (ruff, pytest, numpy, pandas, pyyaml)
+# so linting/tests stay fast — the heavy ML/telephony wheels below are for the
+# training and live-call environments, not the CI runner.
+
+# --- Core DL / audio ---
+torch==2.5.1
+torchaudio==2.5.1
+transformers==4.46.3
+peft==0.13.2
+librosa==0.10.2.post1
+soundfile==0.12.1
+silero-vad==5.1.2
+
+# --- ML utilities ---
+scikit-learn==1.5.2
+numpy==1.26.4
+pandas==2.2.3
+
+# --- Serving / live-call system ---
+fastapi==0.115.5
+uvicorn==0.32.1
+websockets==13.1
+aiortc==1.9.0
+
+# --- Inference optimisation ---
+onnx==1.17.0
+onnxruntime==1.20.1
+
+# --- Demo ---
+gradio==5.7.1
+
+# --- Experiment tracking ---
+wandb==0.18.7
+
+# --- Testing ---
+pytest==8.3.4
+
+# --- Supporting (needed by the code above but not called out by name) ---
+datasets==3.1.0            # HF streaming for eval-only Indic corpora
+huggingface-hub==0.26.2
+pyyaml==6.0.2              # config loading
+tqdm==4.67.1
+ruff==0.8.4               # linter (also used in CI)
