@@ -1,0 +1,2 @@
+# Stage-1 baseline: fine-tune on ASVspoof 2019 LA (English ONLY). Week 3/4, owner M.
+# TODO: model, lr, schedule, batch size, epochs, seed.

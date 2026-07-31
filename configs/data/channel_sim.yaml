@@ -1,0 +1,5 @@
+# Channel simulation config (Week 2, owner L).
+# TODO: codec choice, SNR levels, resample chain.
+# resample: {in_hz: 16000, mid_hz: 8000, out_hz: 16000}
+# codec: [g711_ulaw, amr_nb]
+# snr_db: [5, 10, 15, 20]

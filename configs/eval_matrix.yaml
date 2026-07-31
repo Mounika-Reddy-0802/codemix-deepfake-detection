@@ -1,0 +1,4 @@
+# Gap-matrix evaluation columns and conditions. Week 6, owner M.
+# columns: [english, hindi, tamil, codemixed]
+# conditions: [clean, channel_matched]
+# attacks: [seen_xtts, unseen_tortoise]

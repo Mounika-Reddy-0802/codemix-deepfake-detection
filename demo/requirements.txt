@@ -1,0 +1,6 @@
+# Slim dependency set for the Hugging Face Space (Week 8, owner SK).
+# Keep minimal so the Space builds fast. TODO: pin when the demo is built.
+# gradio
+# onnxruntime
+# soundfile
+# numpy
