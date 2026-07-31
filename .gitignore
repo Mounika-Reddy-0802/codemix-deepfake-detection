@@ -1,0 +1,45 @@
+.env.git
+# ^^^ LINE 1 IS MANDATORY: never commit git identities / GitHub PATs. ^^^
+
+# --- Other secrets ---
+.env
+.env.local
+*.pem
+
+# --- Large corpora & model artifacts: local / Kaggle only ---
+# Track the directory skeleton (.gitkeep) but ignore all real data files.
+data/**
+!data/**/
+!data/**/.gitkeep
+!data/**/README.md
+
+checkpoints/**
+!checkpoints/**/
+!checkpoints/**/.gitkeep
+
+wandb/
+
+# --- Generated audio (never committed, from any generated dir) ---
+**/generated/**/*.wav
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+~$*
+*.swp
+.idea/
+.vscode/

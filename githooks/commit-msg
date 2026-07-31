@@ -1,0 +1,14 @@
+#!/bin/sh
+# commit-msg hook (safety net for the project attribution rule).
+# Strips any co-author trailer or tool-attribution line from the commit message
+# BEFORE the commit is created, so no such line can ever reach history.
+#   - deletes lines matching /^Co-Authored-By:/  (any case)
+#   - deletes lines matching /Generated with/
+#
+# This is the tracked master copy. Every clone must install it once:
+#   sh scripts/install_hooks.sh      (or) git config core.hooksPath githooks
+msg_file="$1"
+tmp_file="$msg_file.codemix.tmp"
+grep -ivE '^Co-Authored-By:' "$msg_file" | grep -vE 'Generated with' > "$tmp_file"
+mv "$tmp_file" "$msg_file"
+exit 0
