@@ -90,3 +90,29 @@ Then open a PR for each branch (compare URLs printed in the session report).
 - [ ] The claude.ai Gmail / Google Calendar / Google Drive connectors are
       unauthorized in this environment. Authorize them in claude.ai connector
       settings if you want them available later.
+
+---
+
+# WEEK 2 — human-only steps (code is done + pushed)
+
+Week 2 code is on `week2/lahari`, `week2/mounika`, `week2/saikrishna`. These need a
+human (data, a GPU, or ears):
+
+- [ ] **Ethics sign-off must exist before any generation** (carried over from Week 1).
+      No XTTS pilots until `docs/ethics/` has the signed note.
+- [ ] Install the full ML stack + **ffmpeg** on the training box (ffmpeg is needed
+      for AMR-NB; without it channel_sim falls back to G.711 only).
+- [ ] **Run downloads** (say "run downloads now"), then
+      `bash scripts/02_preprocess_all.sh` to produce 16 kHz clean segments.
+- [ ] **L:** run channel simulation on ~20 sample clips and **listen** — confirm the
+      G.711/AMR + SNR output sounds like telephony audio (a paper-quality check).
+- [ ] **SK+L:** from preprocessed MUCS/HiACC-adult, build the clip index
+      (speaker, source, duration) and run `select_reference_speakers` to pick 30–50
+      adult speakers (≥30 s each); extract their code-mixed transcripts.
+- [ ] **SK+M:** carve the MUCS speakers into eval vs Stage-3 adaptation pools with
+      `build_manifests.carve_pools` (done in code) and freeze the pool lists.
+- [ ] **SK:** set up Coqui XTTS-v2 (Colab/Kaggle GPU) and generate **20 pilot clones**
+      via `scripts/03_generate_spoofs.sh --pilot`.
+- [ ] **ALL:** 1-hour session — listen to the pilot clones + channel-sim audio and
+      **agree the quality bar** for the spoof set; record the decision.
+- [ ] Each member: Week-2 log-book entry + review/merge a teammate's Week-2 PR.
