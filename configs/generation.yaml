@@ -1,0 +1,26 @@
+# Spoof generation config (Week 3, owner L).
+# XTTS-v2 code-mixed clone corpus (training-side seen attack) + held-out Tortoise
+# (eval-only unseen attack). Speaker pools come from build_manifests.carve_pools.
+
+xtts:
+  model: tts_models/multilingual/multi-dataset/xtts_v2
+  tool: xtts_v2
+  target_utterances: 2000        # 1,500-2,500 across selected speakers
+  languages: [hi, ta]
+  out_dir: data/generated/xtts_v2
+  metadata: data/generated/xtts_v2/metadata.jsonl
+
+heldout:
+  tool: tortoise                 # unseen attack, EVAL-ONLY (never in training)
+  target_utterances: 500         # ~400-600
+  out_dir: data/generated/heldout_tool
+  metadata: data/generated/heldout_tool/metadata.jsonl
+
+# References: >= 30 s clean adult audio per speaker (select_reference_speakers).
+reference:
+  min_total_seconds: 30.0
+  min_clip_seconds: 3.0
+  n_min: 30
+  n_max: 50
+
+seed: 1234
