@@ -1,50 +1,116 @@
-"""CRITICAL-PATH test (Week 4, owner M): anti-leakage split validation.
+"""CRITICAL-PATH tests (Week 2/4, owner M): anti-leakage split validation.
 
-Speaker leakage between train and eval is the single bug that could invalidate
-the whole paper, so this file enforces the anti-leakage checklist from the
-tech-stack doc (Section 4). Stubbed at bootstrap; real assertions land in Week 4
-when ``src/data/build_manifests.py`` and the manifests exist.
+Speaker leakage between train and eval is the single bug that could invalidate the
+whole paper. These tests exercise ``src/data/build_manifests.py`` on synthetic
+manifests (no real audio needed), so they run in CI and gate every training launch.
 
-Anti-leakage checklist enforced here:
-  1. No speaker in both a training and any eval manifest (bonafide AND spoof;
-     a cloned voice of speaker X counts as speaker X).
-  2. No Tortoise-generated file in any training manifest, ever.
-  3. No IndicSynth / IndicTTS / IndicVoices audio in any training manifest.
-  4. No HiACC child audio anywhere in the pipeline.
-  5. No spoof transcript paired with the same speaker's bonafide of the same
-     sentence in eval (near-duplicate leakage).
+Checklist (tech-stack Section 4): 1) speaker-disjoint train/eval incl. clones,
+2) no Tortoise in training, 3) no eval-only corpora in training, 4) no HiACC child
+audio anywhere. Check 5 (transcript near-duplicate) needs transcript metadata and
+lands in Week 4.
 """
 
+import pandas as pd
 import pytest
 
-
-@pytest.mark.skip(reason="TODO(week-4, M): implement once manifests exist")
-def test_no_speaker_overlap_train_vs_eval() -> None:
-    """Checklist 1: train and eval speaker sets are disjoint (incl. clones)."""
+from src.data import build_manifests as bm
 
 
-@pytest.mark.skip(reason="TODO(week-4, M): implement once manifests exist")
-def test_no_tortoise_in_training_manifests() -> None:
-    """Checklist 2: the held-out (Tortoise) tool never appears in training."""
+def _row(fp, label, lang, spk, source, tool, split, condition="clean"):
+    return {
+        "filepath": fp,
+        "label": label,
+        "language": lang,
+        "speaker": spk,
+        "source": source,
+        "tool": tool,
+        "condition": condition,
+        "split": split,
+    }
 
 
-@pytest.mark.skip(reason="TODO(week-4, M): implement once manifests exist")
-def test_no_eval_only_corpora_in_training() -> None:
-    """Checklist 3: IndicSynth / IndicTTS / IndicVoices are eval-only."""
+def _clean_manifest() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            _row("a.wav", "bonafide", "en", "spk1", "asvspoof2019_la", "none", "train"),
+            _row("b.wav", "spoof", "en", "spk1", "asvspoof2019_la", "none", "train"),
+            _row("c.wav", "bonafide", "hi-en", "spk2", "mucs2021", "none", "dev"),
+            _row("d.wav", "spoof", "hi-en", "spk2", "xtts_v2", "xtts_v2", "dev"),
+            _row("e.wav", "bonafide", "hi-en", "spk3", "hiacc", "none", "eval"),
+            _row("f.wav", "spoof", "hi-en", "spk3", "tortoise", "tortoise", "eval"),
+        ]
+    )
 
 
-@pytest.mark.skip(reason="TODO(week-4, M): implement once manifests exist")
-def test_no_hiacc_child_audio_anywhere() -> None:
-    """Checklist 4: no HiACC child utterance appears in any manifest."""
+def test_clean_manifest_passes_all_checks() -> None:
+    bm.run_all_checks(_clean_manifest())  # should not raise
 
 
-@pytest.mark.skip(reason="TODO(week-4, M): implement once manifests exist")
-def test_no_transcript_near_duplicate_leakage() -> None:
-    """Checklist 5: spoof transcript != same speaker's eval bonafide sentence."""
+def test_speaker_overlap_is_detected() -> None:
+    df = _clean_manifest()
+    # Leak spk1 (a training speaker) into eval via a cloned voice.
+    df = pd.concat(
+        [df, pd.DataFrame([_row("g.wav", "spoof", "en", "spk1", "xtts_v2", "xtts_v2", "eval")])],
+        ignore_index=True,
+    )
+    assert bm.speaker_overlap(df) == {"spk1"}
+    with pytest.raises(bm.LeakageError):
+        bm.check_speaker_disjoint(df)
+
+
+def test_tortoise_in_training_is_rejected() -> None:
+    df = _clean_manifest()
+    df.loc[df["filepath"] == "f.wav", "split"] = "train"  # move Tortoise into train
+    with pytest.raises(bm.LeakageError):
+        bm.check_no_heldout_tool_in_training(df)
+
+
+def test_eval_only_source_in_training_is_rejected() -> None:
+    df = _clean_manifest()
+    df = pd.concat(
+        [df, pd.DataFrame([_row("h.wav", "spoof", "hi", "spk9", "indicsynth", "vits", "train")])],
+        ignore_index=True,
+    )
+    with pytest.raises(bm.LeakageError):
+        bm.check_no_eval_only_sources_in_training(df)
+
+
+def test_child_audio_anywhere_is_rejected() -> None:
+    df = _clean_manifest()
+    df = pd.concat(
+        [
+            df,
+            pd.DataFrame(
+                [_row("k.wav", "bonafide", "hi-en", "child_07", "hiacc_child", "none", "eval")]
+            ),
+        ],
+        ignore_index=True,
+    )
+    with pytest.raises(bm.LeakageError):
+        bm.check_no_child_audio(df)
+
+
+def test_assign_split_by_speaker_is_disjoint() -> None:
+    rows = []
+    for s in range(20):
+        for i in range(3):
+            rows.append(_row(f"s{s}_{i}.wav", "bonafide", "en", f"spk{s}", "mucs2021", "none", "?"))
+    df = bm.assign_split_by_speaker(pd.DataFrame(rows), seed=7)
+    # No speaker may appear in more than one split.
+    per_speaker_splits = df.groupby("speaker")["split"].nunique()
+    assert (per_speaker_splits == 1).all()
+    assert bm.speaker_overlap(df) == set()
+
+
+def test_carve_pools_are_disjoint_and_cover_all() -> None:
+    speakers = [f"spk{i}" for i in range(50)]
+    evalp, adapt = bm.carve_pools(speakers, adaptation_frac=0.3, seed=1)
+    assert set(evalp) & set(adapt) == set()
+    assert set(evalp) | set(adapt) == set(speakers)
+    assert abs(len(adapt) - 15) <= 1
 
 
 def test_build_manifests_module_is_importable() -> None:
-    """Smoke: the module exists and imports (no heavy deps at import time)."""
     import importlib
 
     mod = importlib.import_module("src.data.build_manifests")

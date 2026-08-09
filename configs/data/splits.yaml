@@ -1,2 +1,24 @@
 # Speaker-disjoint split definitions (Week 2/4, owner M).
-# TODO: eval vs Stage-3 adaptation speaker pools; seeds.
+# A speaker is assigned wholly to one split; a cloned voice of speaker X counts
+# as speaker X (so disjointness holds across bonafide AND spoof).
+
+seed: 1234
+
+# Stage-1 split ratios (ASVspoof 2019 LA uses its own official splits; these
+# ratios apply when we split project-generated/code-mixed data by speaker).
+ratios:
+  train: 0.70
+  dev: 0.10
+  eval: 0.20
+
+# MUCS speaker pools carved up front (Week 2) so generation never crosses them.
+mucs_pools:
+  adaptation_frac: 0.30   # Stage-3 LoRA adaptation pool
+  # remaining 0.70 -> eval pool
+  seed: 1234
+
+# Anti-leakage rules enforced by tests/test_splits.py (see build_manifests.py).
+anti_leakage:
+  held_out_tool: tortoise
+  eval_only_sources: [indicsynth, indictts_deepfake, indicvoices]
+  exclude_child_audio: true
