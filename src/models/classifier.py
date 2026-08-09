@@ -1,5 +1,28 @@
-"""2-layer MLP classification head.
+"""2-layer MLP classification head."""
 
-TODO(week-3, M): implement. Placeholder committed at repo bootstrap so the
-package tree and imports stay stable from Week 1; no pipeline logic lives here yet.
-"""
+from __future__ import annotations
+
+import torch
+import torch.nn as nn
+
+
+class MLPHead(nn.Module):
+    """Two-layer MLP: ``Linear -> ReLU -> Dropout -> Linear`` returning logits."""
+
+    def __init__(
+        self,
+        input_dim: int,
+        hidden_dim: int = 256,
+        num_classes: int = 2,
+        dropout: float = 0.3,
+    ) -> None:
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, num_classes),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
