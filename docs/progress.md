@@ -14,3 +14,4 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-03 | W2-T1 | L | week2/lahari | preprocessing (resample/vad/loudness/segment) + g711+snr channel simulation chain |
 | 2026-08-03 | W2-T2 | M | week2/mounika | dataset+collate, speaker-disjoint splits + anti-leakage checks, metrics (eer/auc/f1/bootstrap) |
 | 2026-08-03 | W2-T3 | SK | week2/saikrishna | adult-speaker selection + xtts-v2 clone driver with metadata logging and held-out-tool firewall |
+| 2026-08-10 | W3-L | L | week3/lahari | xtts-v2 generation at scale: clone-job assembly + per-file metadata + generation stats |
