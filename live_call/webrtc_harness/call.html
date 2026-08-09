@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WebRTC dev harness — two-party call</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 30rem; margin: 3rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    label { display: block; margin: 1rem 0 0.25rem; font-weight: 600; }
+    input { padding: 0.4rem; width: 12rem; }
+    button { padding: 0.5rem 1rem; margin: 1rem 0.5rem 0 0; font-size: 1rem; cursor: pointer; }
+    #status { margin-top: 1rem; padding: 0.6rem; background: #f2f2f2; border-radius: 6px; }
+    #meter { width: 100%; height: 14px; margin-top: 1rem; background: #ddd; border-radius: 7px; overflow: hidden; }
+    #meterBar { height: 100%; width: 0%; background: #3a86ff; transition: width 0.06s linear; }
+    .note { color: #666; font-size: 0.85rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1>WebRTC dev harness</h1>
+  <p>Free browser ↔ server call for the live-call pipeline (Weeks 1–5).
+     Open this page in <strong>two tabs</strong>, join the same room, and Connect.
+     The server taps your mic audio at 16 kHz for streaming inference.</p>
+
+  <label for="room">Room</label>
+  <input id="room" value="default" />
+
+  <div>
+    <button id="connect">Connect</button>
+    <button id="hangup" disabled>Hang up</button>
+  </div>
+
+  <div id="meter" title="your mic level"><div id="meterBar"></div></div>
+  <p id="status">Idle.</p>
+  <audio id="remote" autoplay></audio>
+
+  <p class="note">Requires mic permission. Uses a public STUN server for
+     connectivity. No audio leaves your machine except to your own server.</p>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const connectBtn = document.getElementById("connect");
+    const hangupBtn = document.getElementById("hangup");
+    const meterBar = document.getElementById("meterBar");
+    const remoteAudio = document.getElementById("remote");
+
+    let pc = null;
+    let localStream = null;
+    let audioCtx = null;
+    let rafId = null;
+
+    function setStatus(msg) { statusEl.textContent = msg; }
+
+    function startMeter(stream) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      function tick() {
+        analyser.getByteTimeDomainData(data);
+        let sum = 0;
+        for (const v of data) { const x = (v - 128) / 128; sum += x * x; }
+        const rms = Math.sqrt(sum / data.length);
+        meterBar.style.width = Math.min(100, rms * 300).toFixed(0) + "%";
+        rafId = requestAnimationFrame(tick);
+      }
+      tick();
+    }
+
+    async function connect() {
+      connectBtn.disabled = true;
+      const room = document.getElementById("room").value || "default";
+      setStatus("Requesting microphone…");
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      } catch (err) {
+        setStatus("Mic permission denied: " + err);
+        connectBtn.disabled = false;
+        return;
+      }
+      startMeter(localStream);
+
+      pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+      localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
+      pc.ontrack = (ev) => { remoteAudio.srcObject = ev.streams[0]; setStatus("Connected — receiving remote audio."); };
+      pc.onconnectionstatechange = () => setStatus("Peer state: " + pc.connectionState);
+
+      const offer = await pc.createOffer({ offerToReceiveAudio: true });
+      await pc.setLocalDescription(offer);
+      setStatus("Negotiating…");
+
+      const resp = await fetch("/offer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sdp: pc.localDescription.sdp, type: pc.localDescription.type, room }),
+      });
+      const answer = await resp.json();
+      await pc.setRemoteDescription(answer);
+
+      hangupBtn.disabled = false;
+      setStatus("Connected to room “" + room + "”. Server is tapping your audio.");
+    }
+
+    function hangup() {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (audioCtx) audioCtx.close();
+      if (pc) pc.close();
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
+      pc = null; localStream = null; audioCtx = null;
+      meterBar.style.width = "0%";
+      hangupBtn.disabled = true;
+      connectBtn.disabled = false;
+      setStatus("Hung up.");
+    }
+
+    connectBtn.onclick = connect;
+    hangupBtn.onclick = hangup;
+  </script>
+</body>
+</html>
