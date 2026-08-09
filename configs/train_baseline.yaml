@@ -1,2 +1,30 @@
 # Stage-1 baseline: fine-tune on ASVspoof 2019 LA (English ONLY). Week 3/4, owner M.
-# TODO: model, lr, schedule, batch size, epochs, seed.
+# GOLDEN RULE: Stage-1 trains on ASVspoof 2019 LA only. No Indic/code-mixed/Tortoise
+# data in these manifests (enforced by tests/test_splits.py).
+
+encoder: wav2vec2-base        # wav2vec2-base | wavlm-base | xlsr-53
+
+train_manifest: data/manifests/asvspoof_train.csv
+dev_manifest: data/manifests/asvspoof_dev.csv
+out_dir: checkpoints/baseline
+
+# optimisation
+lr: 1.0e-4
+weight_decay: 1.0e-5
+batch_size: 8
+epochs: 15
+num_workers: 2
+seed: 1234
+amp: true
+
+# encoder freezing (CNN feature extractor frozen; transformer fine-tuned)
+freeze_feature_extractor: true
+freeze_encoder: false
+
+# smoke test: set subset_frac=0.01 + max_steps=20 (or pass --smoke) to verify the
+# loop learns on a 1% subset before spending GPU hours.
+subset_frac: 1.0
+max_steps: null
+
+wandb_project: codemix-deepfake-detection
+wandb_mode: online
