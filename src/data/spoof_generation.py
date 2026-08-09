@@ -155,3 +155,62 @@ def generate_batch(jobs: list[CloneJob], model, metadata_path: str) -> list[str]
         )
         written.append(out)
     return written
+
+
+# --------------------------------------------------------------------------- #
+# Generation at scale (Week 3, L) -- job assembly + stats (pure logic, testable)
+# --------------------------------------------------------------------------- #
+def build_clone_jobs(
+    speaker_refs: dict[str, str],
+    transcripts: list[tuple[str, str]],
+    pools: dict[str, str],
+    out_dir: str,
+    tool: str = TRAINING_TOOL,
+    language: str = "hi",
+    n_target: int | None = None,
+) -> list[CloneJob]:
+    """Pair code-mixed transcripts with speaker references into clone jobs.
+
+    ``speaker_refs``: speaker -> reference wav; ``transcripts``: (speaker, text)
+    pairs; ``pools``: speaker -> "eval"|"adaptation". A transcript is skipped if its
+    speaker has no reference or no pool assignment. Caps at ``n_target`` jobs.
+    """
+    jobs: list[CloneJob] = []
+    for i, (speaker, text) in enumerate(transcripts):
+        if speaker not in speaker_refs or speaker not in pools:
+            continue
+        out = str(Path(out_dir) / f"{tool}_{speaker}_{i:05d}.wav")
+        jobs.append(
+            CloneJob(
+                speaker=speaker,
+                reference_wav=speaker_refs[speaker],
+                transcript=text,
+                output_path=out,
+                pool=pools[speaker],
+                language=language,
+                tool=tool,
+                seed=i,
+            )
+        )
+        if n_target is not None and len(jobs) >= n_target:
+            break
+    return jobs
+
+
+def generation_stats(records: list[dict]) -> dict:
+    """Summarise generation metadata for the audit report (reviewers ask for this)."""
+    from collections import Counter
+
+    tools = Counter(r["tool"] for r in records)
+    langs = Counter(r["language"] for r in records)
+    pools = Counter(r["pool"] for r in records)
+    per_speaker = Counter(r["speaker"] for r in records)
+    return {
+        "total": len(records),
+        "by_tool": dict(tools),
+        "by_language": dict(langs),
+        "by_pool": dict(pools),
+        "n_speakers": len(per_speaker),
+        "per_speaker_min": min(per_speaker.values()) if per_speaker else 0,
+        "per_speaker_max": max(per_speaker.values()) if per_speaker else 0,
+    }
