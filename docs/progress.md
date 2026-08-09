@@ -15,3 +15,5 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-03 | W2-T2 | M | week2/mounika | dataset+collate, speaker-disjoint splits + anti-leakage checks, metrics (eer/auc/f1/bootstrap) |
 | 2026-08-03 | W2-T3 | SK | week2/saikrishna | adult-speaker selection + xtts-v2 clone driver with metadata logging and held-out-tool firewall |
 | 2026-08-10 | W3-M | M | week3/mounika | stage-1 training scaffolding: ssl encoder + attentive pooling + mlp head + amp training loop |
+| 2026-08-10 | W3-L | L | week3/lahari | xtts-v2 generation at scale: clone-job assembly + per-file metadata + generation stats |
+| 2026-08-10 | W3-SK | SK | week3/saikrishna | held-out tortoise tts driver for unseen-attack split with tool+pool firewall |
