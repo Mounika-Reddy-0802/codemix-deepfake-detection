@@ -1,5 +1,33 @@
 # Channel simulation config (Week 2, owner L).
-# TODO: codec choice, SNR levels, resample chain.
-# resample: {in_hz: 16000, mid_hz: 8000, out_hz: 16000}
-# codec: [g711_ulaw, amr_nb]
-# snr_db: [5, 10, 15, 20]
+# Chain: 16 kHz -> 8 kHz -> codec -> additive noise @ SNR -> 16 kHz.
+
+resample:
+  in_sr: 16000
+  narrowband_sr: 8000
+
+# Codecs to simulate. g711 (mu-law) is pure-numpy and always available;
+# amr_nb needs ffmpeg on PATH (falls back to g711 if absent).
+codecs:
+  - g711
+  - amr_nb
+
+# Additive-noise SNR sweep (dB). Each eval clip is rendered at each level.
+snr_db:
+  - 5
+  - 10
+  - 15
+  - 20
+
+# Noise source: "white" (generated) or a path to a noise corpus (e.g. MUSAN).
+noise:
+  source: white
+  seed: 1234
+
+# Preprocessing (applied before channel sim on the clean copy).
+preprocess:
+  target_sr: 16000
+  target_dbfs: -23.0
+  min_seconds: 2.0
+  max_seconds: 10.0
+  vad: true
+  vad_threshold: 0.5

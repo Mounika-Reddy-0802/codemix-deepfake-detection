@@ -1,5 +1,147 @@
-"""Resample, VAD-trim, loudness-normalise and segment raw audio.
+"""Preprocess raw audio: resample to 16 kHz mono, VAD-trim, loudness-normalise, segment.
 
-TODO(week-2, L): implement. Placeholder committed at repo bootstrap so the
-package tree and imports stay stable from Week 1; no pipeline logic lives here yet.
+Pipeline order:
+    load -> mono -> resample 16 kHz -> silero VAD trim -> RMS loudness norm ->
+    segment into 2-10 s chunks.
+
+The segmentation and loudness steps are pure numpy (unit-testable). Resampling and
+VAD import ``librosa`` / ``silero-vad`` lazily, so this module imports cheaply.
 """
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import numpy as np
+
+from src.utils.audio_utils import TARGET_SR, resample, rms_normalize, to_mono
+
+
+@dataclass
+class PreprocessConfig:
+    """Parameters for the preprocessing pipeline."""
+
+    target_sr: int = TARGET_SR
+    target_dbfs: float = -23.0
+    min_seconds: float = 2.0
+    max_seconds: float = 10.0
+    vad: bool = True
+    vad_threshold: float = 0.5
+
+
+def segment(
+    audio: np.ndarray,
+    sr: int,
+    min_seconds: float = 2.0,
+    max_seconds: float = 10.0,
+) -> list[np.ndarray]:
+    """Split audio into chunks of at most ``max_seconds``.
+
+    A trailing chunk shorter than ``min_seconds`` is dropped (too short to score).
+    A signal already within the window is returned as a single segment.
+    """
+    a = np.asarray(audio, dtype=np.float32)
+    min_len = int(round(min_seconds * sr))
+    max_len = int(round(max_seconds * sr))
+    if a.size == 0 or max_len <= 0:
+        return []
+    if a.size <= max_len:
+        return [a] if a.size >= min_len else []
+    segments: list[np.ndarray] = []
+    for start in range(0, a.size, max_len):
+        chunk = a[start : start + max_len]
+        if chunk.size >= min_len:
+            segments.append(chunk)
+    return segments
+
+
+def vad_trim(audio: np.ndarray, sr: int, threshold: float = 0.5) -> np.ndarray:
+    """Trim leading/trailing non-speech with silero-vad (lazy import).
+
+    Returns the concatenation of detected speech regions. If silero is unavailable
+    or finds no speech, the original signal is returned unchanged.
+    """
+    try:
+        import torch
+        from silero_vad import get_speech_timestamps, load_silero_vad
+    except ImportError:
+        return np.asarray(audio, dtype=np.float32)
+
+    model = load_silero_vad()
+    wav = torch.from_numpy(np.asarray(audio, dtype=np.float32))
+    stamps = get_speech_timestamps(wav, model, sampling_rate=sr, threshold=threshold)
+    if not stamps:
+        return np.asarray(audio, dtype=np.float32)
+    parts = [np.asarray(audio, dtype=np.float32)[s["start"] : s["end"]] for s in stamps]
+    return np.concatenate(parts).astype(np.float32)
+
+
+def preprocess_signal(
+    audio: np.ndarray, sr: int, config: PreprocessConfig | None = None
+) -> list[np.ndarray]:
+    """Run the full pipeline on an in-memory signal, returning 16 kHz segments."""
+    cfg = config or PreprocessConfig()
+    x = to_mono(audio)
+    if sr != cfg.target_sr:
+        x = resample(x, sr, cfg.target_sr)
+    if cfg.vad:
+        x = vad_trim(x, cfg.target_sr, cfg.vad_threshold)
+    x = rms_normalize(x, cfg.target_dbfs)
+    return segment(x, cfg.target_sr, cfg.min_seconds, cfg.max_seconds)
+
+
+def preprocess_file(path: str, out_dir: str, config: PreprocessConfig | None = None) -> list[str]:
+    """Preprocess one file and write its segments as 16 kHz WAVs. Returns paths."""
+    from pathlib import Path
+
+    from src.utils.audio_utils import load_wav, save_wav
+
+    cfg = config or PreprocessConfig()
+    audio, sr = load_wav(path, target_sr=cfg.target_sr)
+    segments = preprocess_signal(audio, cfg.target_sr, cfg)
+    stem = Path(path).stem
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    written: list[str] = []
+    for i, seg in enumerate(segments):
+        dest = out / f"{stem}_seg{i:03d}.wav"
+        save_wav(str(dest), seg, cfg.target_sr)
+        written.append(str(dest))
+    return written
+
+
+def preprocess_dir(in_dir: str, out_dir: str, config: PreprocessConfig | None = None) -> int:
+    """Preprocess every ``.wav``/``.flac`` under ``in_dir``. Returns segment count."""
+    from pathlib import Path
+
+    cfg = config or PreprocessConfig()
+    total = 0
+    files = sorted(p for ext in ("*.wav", "*.flac") for p in Path(in_dir).rglob(ext))
+    for i, path in enumerate(files, 1):
+        try:
+            total += len(preprocess_file(str(path), out_dir, cfg))
+        except Exception as exc:  # noqa: BLE001 - keep going, report at the end
+            print(f"  [skip] {path}: {type(exc).__name__}: {exc}")
+        if i % 200 == 0:
+            print(f"  processed {i}/{len(files)} files, {total} segments")
+    return total
+
+
+def main() -> None:
+    """CLI: ``python -m src.data.preprocess --in-dir RAW --out-dir OUT``."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Preprocess a corpus to 16 kHz segments")
+    parser.add_argument("--in-dir", required=True)
+    parser.add_argument("--out-dir", required=True)
+    parser.add_argument("--no-vad", action="store_true", help="disable silero VAD")
+    parser.add_argument("--target-dbfs", type=float, default=-23.0)
+    args = parser.parse_args()
+
+    cfg = PreprocessConfig(vad=not args.no_vad, target_dbfs=args.target_dbfs)
+    n = preprocess_dir(args.in_dir, args.out_dir, cfg)
+    print(f"done: {n} segments written to {args.out_dir}")
+
+
+if __name__ == "__main__":
+    main()
