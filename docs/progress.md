@@ -17,3 +17,5 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-10 | W3-M | M | week3/mounika | stage-1 training scaffolding: ssl encoder + attentive pooling + mlp head + amp training loop |
 | 2026-08-10 | W3-L | L | week3/lahari | xtts-v2 generation at scale: clone-job assembly + per-file metadata + generation stats |
 | 2026-08-10 | W3-SK | SK | week3/saikrishna | held-out tortoise tts driver for unseen-attack split with tool+pool firewall |
+| 2026-08-12 | W3-T3 | M | week3-mounika-affectdf-taxonomy | affectdf related-work anchor read from the pdf + precise gap statement; attack taxonomy in table-1 format |
+| 2026-08-12 | W3-T6 | M | week3-mounika-affectdf-taxonomy | env verification (ok=3 missing=7 manual=8), secrets never echoed; readme resource links |
