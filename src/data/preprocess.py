@@ -6,6 +6,11 @@ Pipeline order:
 
 The segmentation and loudness steps are pure numpy (unit-testable). Resampling and
 VAD import ``librosa`` / ``silero-vad`` lazily, so this module imports cheaply.
+
+**Quarantine:** any path under a directory named in :data:`EXCLUDED_DIR_NAMES` is
+skipped by :func:`preprocess_dir`. HiACC child recordings are quarantined into
+``data/raw/hiacc/_EXCLUDED_children/`` on extraction, and walking a corpus root
+with ``rglob`` would otherwise pull them straight back into the pipeline.
 """
 
 from __future__ import annotations
@@ -15,6 +20,10 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.utils.audio_utils import TARGET_SR, resample, rms_normalize, to_mono
+
+#: Directory names that are never read, at any depth. Ethics-critical: HiACC child
+#: audio must not enter the pipeline as bonafide, as a cloning reference, or at all.
+EXCLUDED_DIR_NAMES = ("_EXCLUDED_children",)
 
 
 @dataclass
@@ -110,13 +119,29 @@ def preprocess_file(path: str, out_dir: str, config: PreprocessConfig | None = N
     return written
 
 
-def preprocess_dir(in_dir: str, out_dir: str, config: PreprocessConfig | None = None) -> int:
-    """Preprocess every ``.wav``/``.flac`` under ``in_dir``. Returns segment count."""
+def is_excluded(path, excluded: tuple[str, ...] = EXCLUDED_DIR_NAMES) -> bool:
+    """Whether ``path`` sits under a quarantined directory, at any depth."""
     from pathlib import Path
 
+    return any(part in excluded for part in Path(path).parts)
+
+
+def audio_files(in_dir: str, excluded: tuple[str, ...] = EXCLUDED_DIR_NAMES) -> list:
+    """Every ``.wav``/``.flac`` under ``in_dir``, minus anything quarantined."""
+    from pathlib import Path
+
+    found = (p for ext in ("*.wav", "*.flac") for p in Path(in_dir).rglob(ext))
+    return sorted(p for p in found if not is_excluded(p, excluded))
+
+
+def preprocess_dir(in_dir: str, out_dir: str, config: PreprocessConfig | None = None) -> int:
+    """Preprocess every ``.wav``/``.flac`` under ``in_dir``. Returns segment count.
+
+    Quarantined directories (:data:`EXCLUDED_DIR_NAMES`) are never read.
+    """
     cfg = config or PreprocessConfig()
     total = 0
-    files = sorted(p for ext in ("*.wav", "*.flac") for p in Path(in_dir).rglob(ext))
+    files = audio_files(in_dir)
     for i, path in enumerate(files, 1):
         try:
             total += len(preprocess_file(str(path), out_dir, cfg))
