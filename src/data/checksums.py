@@ -32,10 +32,13 @@ MANIFEST_PATH = "docs/data_checksums.json"
 CHUNK_BYTES = 8 * 1024 * 1024
 
 #: Archives the project expects, relative to the data root, with their source.
+#: HiACC's asset is literally named ``Corpus.zip`` on Zenodo -- confirmed against
+#: the record on 12 Aug 2026, md5 dd6cc9354e1dee5e2f25bc5243df88ac.
 KNOWN_ARCHIVES = {
     "raw/asvspoof2019_LA/LA.zip": "https://datashare.ed.ac.uk/handle/10283/3336",
     "raw/mucs2021/Hindi-English_train.tar.gz": "https://www.openslr.org/104/",
     "raw/mucs2021/Hindi-English_test.tar.gz": "https://www.openslr.org/104/",
+    "raw/hiacc/Corpus.zip": "https://zenodo.org/records/15551669",
 }
 
 

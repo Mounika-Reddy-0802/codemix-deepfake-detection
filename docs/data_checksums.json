@@ -1,0 +1,26 @@
+{
+  "note": "SHA-256 of the ORIGINAL corpus archives. Data is gitignored; this file is how the project records what was actually used. Verify a copy with `python -m src.data.checksums --verify`.",
+  "archives": [
+    {
+      "relpath": "raw/hiacc/Corpus.zip",
+      "bytes": 531628684,
+      "sha256": "fd83414b3aba28a4ae86c110f4aab0981621f9f3a1b105c161bf2dfd14737ccf",
+      "source_url": "https://zenodo.org/records/15551669",
+      "mirror_url": ""
+    },
+    {
+      "relpath": "raw/mucs2021/Hindi-English_test.tar.gz",
+      "bytes": 443929204,
+      "sha256": "93e358b3bf8233a897fcd353c1f4f98fdda6b8c01b7eed17a70c7dd26e984b37",
+      "source_url": "https://www.openslr.org/104/",
+      "mirror_url": ""
+    },
+    {
+      "relpath": "raw/mucs2021/Hindi-English_train.tar.gz",
+      "bytes": 7332628101,
+      "sha256": "3b1fe87ecbc79362dae3ce884171171f707be9b79b4c61bb6fd8e6ed97ac0295",
+      "source_url": "https://www.openslr.org/104/",
+      "mirror_url": ""
+    }
+  ]
+}
