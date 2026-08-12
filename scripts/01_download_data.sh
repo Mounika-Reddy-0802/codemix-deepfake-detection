@@ -55,7 +55,10 @@ HIACC_ZENODO_API="https://zenodo.org/api/records/15551669"
 # Pattern used to identify CHILD speaker folders after extraction. HARD ETHICS
 # RULE: HiACC child audio is never used for anything. VERIFY this pattern against
 # the HiACC documentation before trusting the auto-quarantine (see warning below).
-HIACC_CHILD_PATTERN='(?i)child|kid|minor'
+# POSIX ERE, used with `grep -Ei`. The `-i` flag supplies case-insensitivity --
+# an inline `(?i)` is a PCRE construct and matches NOTHING under -E, which is the
+# second half of why the 12 Aug quarantine sweep found no child folders.
+HIACC_CHILD_PATTERN='child|kid|minor'
 
 # -----------------------------------------------------------------------------
 log()  { printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
@@ -63,6 +66,25 @@ warn() { printf '[%s] WARNING: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >&2; }
 die()  { printf '[%s] ERROR: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >&2; exit 1; }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"; }
+
+# Pick a Python that actually RUNS.
+# On Windows, `python3` is usually the Microsoft Store alias stub: it resolves on
+# PATH and prints "Python was not found; run without arguments to install from the
+# Microsoft Store" instead of executing anything. `command -v python3` therefore
+# selects a broken interpreter, which is exactly how the HiACC step failed on
+# 12 Aug 2026. Checking the interpreter's OUTPUT is the only reliable test -- the
+# stub cannot print 42.
+pick_python() {
+  local cand
+  for cand in python python3 py; do
+    command -v "$cand" >/dev/null 2>&1 || continue
+    if [ "$("$cand" -c 'print(42)' 2>/dev/null)" = "42" ]; then
+      printf '%s' "$cand"
+      return 0
+    fi
+  done
+  return 1
+}
 
 # md5 helper that works on Linux (md5sum) and macOS (md5 -q)
 md5_of() {
@@ -162,8 +184,9 @@ dl_mucs() {
 dl_hiacc() {
   log "=== HiACC (Zenodo 15551669) -- ADULT subset only ==="
   need_cmd curl
-  need_cmd python3 || need_cmd python
-  local py; py="$(command -v python3 || command -v python)"
+  local py
+  py="$(pick_python)" || die "no working Python found (tried python, python3, py)"
+  log "using interpreter: $(command -v "$py")"
 
   log "querying Zenodo API for the exact file URL + md5 ..."
   local meta; meta="$(curl -fsSL "$HIACC_ZENODO_API")" || die "could not reach Zenodo API"
@@ -195,6 +218,15 @@ dl_hiacc() {
 }
 
 # Move any CHILD speaker folder out of the pipeline BEFORE anything can use it.
+#
+# HISTORY (12 Aug 2026): this used `grep -P`, which on Git Bash dies with
+# "grep: -P supports only unibyte and UTF-8 locales". grep exited non-zero, the
+# `|| true` swallowed it, and the function cheerfully reported "moved 0 folder(s)"
+# on a corpus whose `Corpus/children/` directory was sitting right there. The
+# quarantine had silently done nothing. Now it uses the portable `grep -Ei` and,
+# far more importantly, VERIFIES the result instead of trusting it: if any
+# child-looking directory is still outside quarantine afterwards, the script dies
+# rather than letting the pipeline continue.
 quarantine_hiacc_children() {
   mkdir -p "$HIACC_EXCLUDED"
   log "scanning HiACC for child-speaker folders (pattern: ${HIACC_CHILD_PATTERN}) ..."
@@ -203,11 +235,27 @@ quarantine_hiacc_children() {
   while IFS= read -r d; do
     [ -z "$d" ] && continue
     case "$d" in "$HIACC_EXCLUDED"*) continue ;; esac
+    # A nested match (…/children/audio) moves with its parent, so by the time the
+    # loop reaches it the path is already gone. Skip rather than error.
+    [ -d "$d" ] || continue
     log "  quarantining: ${d}"
     mv "$d" "$HIACC_EXCLUDED"/ && moved=$((moved + 1))
-  done < <(find "$HIACC_DIR" -mindepth 1 -type d | grep -P "$HIACC_CHILD_PATTERN" || true)
+    # -Ei is POSIX and works everywhere; -P needs a PCRE build and a UTF-8 locale.
+  done < <(find "$HIACC_DIR" -mindepth 1 -type d | grep -Ei "$HIACC_CHILD_PATTERN" || true)
 
   write_exclusion_readme "$moved"
+
+  # VERIFY, do not trust. The whole point of the 12 Aug failure is that a broken
+  # scan is indistinguishable from a clean corpus unless you check afterwards.
+  local leftover
+  leftover="$(find "$HIACC_DIR" -mindepth 1 -type d \
+    | grep -Ei "$HIACC_CHILD_PATTERN" \
+    | grep -v "^${HIACC_EXCLUDED}" || true)"
+  if [ -n "$leftover" ]; then
+    warn "child-looking directories STILL outside quarantine after the sweep:"
+    printf '%s\n' "$leftover" | while IFS= read -r d; do warn "    ${d}"; done
+    die "quarantine failed -- refusing to continue. Move these into ${HIACC_EXCLUDED} by hand."
+  fi
 
   if [ "$moved" -eq 0 ]; then
     warn "No child folders matched the pattern. HiACC's adult/child layout MUST be"
@@ -217,6 +265,9 @@ quarantine_hiacc_children() {
   else
     log "quarantined ${moved} child folder(s) into ${HIACC_EXCLUDED}"
   fi
+
+  log "run the audit before using this corpus:"
+  log "    python -m src.data.quarantine --root ${HIACC_DIR}"
 }
 
 write_exclusion_readme() {
