@@ -59,7 +59,10 @@ def _assert_heldout(job: CloneJob) -> None:
 
 
 def load_tortoise():
-    """Load Tortoise-TTS (lazy import)."""
+    """Load Tortoise-TTS (lazy import). Gated before the model is fetched."""
+    from src.data.ethics_gate import require_signoff
+
+    require_signoff(action="loading Tortoise-TTS")
     from tortoise.api import TextToSpeech
 
     return TextToSpeech()
@@ -89,6 +92,9 @@ def generate_heldout_clone(model, job: CloneJob) -> str:
 
 def generate_heldout_batch(jobs: list[CloneJob], model, metadata_path: str) -> list[str]:
     """Generate the unseen-attack split, logging one metadata record per clone."""
+    from src.data.ethics_gate import require_signoff
+
+    require_signoff(action="held-out Tortoise generation")
     written: list[str] = []
     for job in jobs:
         _assert_heldout(job)

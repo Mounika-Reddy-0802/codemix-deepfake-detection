@@ -66,9 +66,10 @@ def test_read_metadata_missing_file_is_empty() -> None:
     assert sg.read_metadata("does/not/exist.jsonl") == []
 
 
-def test_heldout_tool_must_be_eval_pool() -> None:
+def test_heldout_tool_must_be_eval_pool(open_ethics_gate) -> None:
     # A Tortoise (held-out) clone tagged for the adaptation pool must be rejected
-    # before any generation happens.
+    # before any generation happens. The ethics gate is the outer check and fires
+    # first in real use; it is opened here so the tool firewall is what is tested.
     job = sg.CloneJob(
         speaker="spk_a",
         reference_wav="ref.wav",
@@ -78,4 +79,20 @@ def test_heldout_tool_must_be_eval_pool() -> None:
         tool=sg.HELD_OUT_TOOL,
     )
     with pytest.raises(AssertionError):
+        sg.generate_batch([job], model=None, metadata_path="unused.jsonl")
+
+
+def test_generation_is_blocked_before_the_tool_check_when_unsigned() -> None:
+    # With the gate closed (the repo's real state) nothing reaches the firewall.
+    from src.data.ethics_gate import EthicsGateError
+
+    job = sg.CloneJob(
+        speaker="spk_a",
+        reference_wav="ref.wav",
+        transcript="text",
+        output_path="out/y.wav",
+        pool="train",
+        tool=sg.TRAINING_TOOL,
+    )
+    with pytest.raises(EthicsGateError):
         sg.generate_batch([job], model=None, metadata_path="unused.jsonl")
