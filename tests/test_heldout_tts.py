@@ -53,7 +53,7 @@ def test_generate_refuses_non_eval_pool(open_ethics_gate) -> None:
         ht.generate_heldout_batch([bad], model=None, metadata_path="x.jsonl")
 
 
-def test_generation_is_blocked_before_the_pool_check_when_unsigned() -> None:
+def test_generation_is_blocked_before_the_pool_check_when_unsigned(closed_ethics_gate) -> None:
     # With the gate closed (the repo's real state) nothing reaches the firewall.
     from src.data.ethics_gate import EthicsGateError
 
