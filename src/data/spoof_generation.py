@@ -113,7 +113,14 @@ class CloneJob:
 
 
 def load_xtts(model_name: str = XTTS_MODEL, use_gpu: bool = True):
-    """Load a Coqui XTTS-v2 model (lazy ``TTS`` import)."""
+    """Load a Coqui XTTS-v2 model (lazy ``TTS`` import).
+
+    Gated: the ethics check runs before the model is fetched, so a blocked run
+    costs nothing and fails with a readable reason instead of a CUDA trace.
+    """
+    from src.data.ethics_gate import require_signoff
+
+    require_signoff(action="loading the XTTS-v2 model")
     from TTS.api import TTS
 
     return TTS(model_name, gpu=use_gpu)
@@ -133,6 +140,9 @@ def generate_clone(model, job: CloneJob) -> str:
 
 def generate_batch(jobs: list[CloneJob], model, metadata_path: str) -> list[str]:
     """Generate every job, logging one metadata record per successful clone."""
+    from src.data.ethics_gate import require_signoff
+
+    require_signoff(action="XTTS-v2 clone generation")
     written: list[str] = []
     for job in jobs:
         if job.tool == HELD_OUT_TOOL:

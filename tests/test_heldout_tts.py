@@ -38,7 +38,9 @@ def test_generate_refuses_non_heldout_tool() -> None:
         ht.generate_heldout_clone(model=None, job=bad)
 
 
-def test_generate_refuses_non_eval_pool() -> None:
+def test_generate_refuses_non_eval_pool(open_ethics_gate) -> None:
+    # The ethics gate is the OUTER check and fires first in real use; this test
+    # opens it so the pool firewall underneath is what is actually exercised.
     bad = CloneJob(
         speaker="s",
         reference_wav="r.wav",
@@ -49,3 +51,19 @@ def test_generate_refuses_non_eval_pool() -> None:
     )
     with pytest.raises(AssertionError):
         ht.generate_heldout_batch([bad], model=None, metadata_path="x.jsonl")
+
+
+def test_generation_is_blocked_before_the_pool_check_when_unsigned() -> None:
+    # With the gate closed (the repo's real state) nothing reaches the firewall.
+    from src.data.ethics_gate import EthicsGateError
+
+    job = CloneJob(
+        speaker="s",
+        reference_wav="r.wav",
+        transcript="t",
+        output_path="o.wav",
+        pool="eval",
+        tool="tortoise",
+    )
+    with pytest.raises(EthicsGateError):
+        ht.generate_heldout_batch([job], model=None, metadata_path="x.jsonl")
