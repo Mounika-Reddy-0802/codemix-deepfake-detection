@@ -21,3 +21,5 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-12 | W3-T4 | SK | week3-krishna-xtts-rvc-pilot | three-way speaker pool carve + sha256 freeze/verify; pools not yet frozen (needs shortlist) |
 | 2026-08-12 | W3-T3 | M | week3-mounika-affectdf-taxonomy | affectdf related-work anchor read from the pdf + precise gap statement; attack taxonomy in table-1 format |
 | 2026-08-12 | W3-T6 | M | week3-mounika-affectdf-taxonomy | env verification (ok=3 missing=7 manual=8), secrets never echoed; readme resource links |
+| 2026-08-12 | W3-T2 | L | week3-lahari-preprocess-mucs-hiacc | fixed quarantine bypass in the preprocessing walk; quarantine audit + report; channel-sim listening test builder |
+| 2026-08-12 | W3-T4 | L | week3-lahari-preprocess-mucs-hiacc | snr/duration speaker ranking + shortlist that is never padded; awaiting downloads |
