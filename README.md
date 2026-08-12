@@ -78,25 +78,63 @@ cp .env.example .env                  # fill in W&B / HF / (Twilio, from Week 6)
 
 ### Git identity / branching (project rule)
 
-Each member commits under their own GitHub identity. **One branch per person per
-week** (`week<N>/<firstname>`); all of that person's tasks for the week go on their
-branch as small lowercase commits. After a week is complete, its three branches
-are **merged into `main`** and pulled, so `main` always holds the finished weeks.
-Commit/documentation style follows the reference repo (see `CLAUDE.md`).
+Each member commits under their own GitHub identity. **One branch per member per
+week**, named `week<N>-<name>-<work-topic>` (the topic is the work, not the role).
+Branches fork from `dev`, and the weekly PR goes to **`dev`, never `main`**; a
+teammate reviews and merges, and `dev` → `main` happens once per completed week
+with a `week<N>-complete` tag. Full rules — commit style, PR template, reviewer
+duties, the ethics and download gates — in **`GIT_RULES.md`**.
+
+## Accounts, compute and dataset links (W3-T6)
+
+Run the machine-checkable half with:
+
+```bash
+python -m src.utils.env_check              # offline: secrets present, packages, GPU
+python -m src.utils.env_check --network    # also verifies the HF token authenticates
+python -m src.utils.env_check --encoders   # also loads the three SSL encoders
+```
+
+Everything below needs a human to confirm and a link pasted in. **Data and
+checkpoints never enter git** — record the Kaggle Dataset / Drive link plus the
+SHA-256 hash instead.
+
+| Resource | Owner | Link | Verified |
+|---|---|---|---|
+| Kaggle account 1 (GPU, 30 h/wk) | M | _paste_ | ☐ |
+| Kaggle account 2 (GPU, 30 h/wk) | L | _paste_ | ☐ |
+| Kaggle account 3 (GPU, 30 h/wk) | SK | _paste_ | ☐ |
+| W&B project | M | _paste_ | ☐ |
+| Hugging Face token owner | M | _paste_ | ☐ |
+| IndicVoices (gated — terms accepted) | M | _paste_ | ☐ |
+| IndicTTS-Deepfake (gated) | M | _paste_ | ☐ |
+| ASVspoof 2019 LA (S1 anchor) + SHA-256 | L | _paste_ | ☐ |
+| MUCS 2021 Hindi-English + SHA-256 | L | _paste_ | ☐ |
+| HiACC adult subset + SHA-256 | L | _paste_ | ☐ |
+| HF Spaces placeholder | SK | _paste_ | ☐ |
 
 ## Live-call demo — Twilio timing
 
-Weeks 1–5 use the **free WebRTC (`aiortc`) harness** in `live_call/webrtc_harness/`.
-**The Twilio trial is activated in Week 6, not before** (its 30-day window is timed
-to cover the integration + demo phase). See `live_call/README.md`.
+Weeks 1–6 use the **free WebRTC (`aiortc`) harness** in `live_call/webrtc_harness/`.
+**The Twilio trial is activated in Week 7** (W7-T4), so its 30-day window covers
+Weeks 7–10 including the midterm demo. See `live_call/README.md`.
 
 ## Status
 
-**Weeks 1–3 complete** and merged to `main`. Week 1: bootstrap + datasets +
-harness + ethics. Week 2: preprocessing, channel simulation, dataset + metrics.
-Week 3: spoof-generation drivers (XTTS-v2 + held-out Tortoise) and the Stage-1
-training scaffolding. Per-week phase docs in `docs/week*_phase.md`; task log in
-`docs/progress.md`; decisions in `docs/problems_and_decisions.md`.
+Planning is governed by **`PROJECT_PLAN_V2_AFFECTDF.md`** (the AffectDF-anchored
+v2 plan). It supersedes `PROJECT_PLAN_12_WEEKS.md`, which is kept for history only.
+
+**Weeks 1–2 complete.** Week 1: bootstrap, download scripts, eval-only streaming
+loaders, WebRTC harness, ethics/licence templates. Week 2: preprocessing, channel
+simulation, dataset + metrics modules, speaker-pool carving.
+
+**Week 3 in progress** — clearing the human gates (PR reviews, mentor ethics
+sign-off, downloads), AffectDF positioning and attack taxonomy, speaker selection.
+Task log in `docs/progress.md`; blockers in `Works updates.md`; decisions in
+`docs/problems_and_decisions.md`.
+
+> Spoof generation — including pilots — is **blocked** until a signed mentor
+> ethics note exists in `docs/ethics/`.
 
 ## Honest limitations
 
