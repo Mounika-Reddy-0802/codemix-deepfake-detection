@@ -13,6 +13,11 @@ data/**
 !data/**/.gitkeep
 !data/**/README.md
 
+# Manifests are metadata, not data: small text files that must be versioned so a
+# frozen split (speaker pools, clip index, dataset manifests) is reproducible and
+# reviewable. Audio never lives here.
+!data/manifests/*.csv
+
 checkpoints/**
 !checkpoints/**/
 !checkpoints/**/.gitkeep
