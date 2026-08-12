@@ -23,7 +23,13 @@ set -euo pipefail
 
 # --- paths (relative to repo root; script is run from repo root) --------------
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RAW_DIR="${REPO_ROOT}/data/raw"
+
+# DATA_ROOT lets the corpora live OUTSIDE the repo. This matters when the repo
+# sits inside a cloud-synced folder (OneDrive / Dropbox / Google Drive): those
+# clients ignore .gitignore and will happily try to upload 60+ GB of audio.
+#   DATA_ROOT=/c/dfdata bash scripts/01_download_data.sh --run
+DATA_ROOT="${DATA_ROOT:-${REPO_ROOT}/data}"
+RAW_DIR="${DATA_ROOT}/raw"
 LOG_DIR="${RAW_DIR}/logs"
 ASV_DIR="${RAW_DIR}/asvspoof2019_LA"
 MUCS_DIR="${RAW_DIR}/mucs2021"
@@ -66,14 +72,49 @@ md5_of() {
 }
 
 # Resumable download to a target path, logging to its own file in LOG_DIR.
+# Uses wget when present, else curl. Git Bash on Windows ships curl but NOT wget,
+# so requiring wget would block the whole pipeline on the team's own machines.
 # Usage: fetch <url> <outfile> <logname>
 fetch() {
   local url="$1" out="$2" logname="$3"
   local logfile="${LOG_DIR}/${logname}.log"
   mkdir -p "$(dirname "$out")"
   log "downloading -> ${out}  (log: ${logfile})"
-  # -c resume, --tries keeps retrying flaky college wifi, timestamping off.
-  wget -c --tries=20 --timeout=60 --waitretry=10 -O "$out" "$url" >>"$logfile" 2>&1
+  if command -v wget >/dev/null 2>&1; then
+    # -c resume, --tries keeps retrying flaky college wifi, timestamping off.
+    wget -c --tries=20 --timeout=60 --waitretry=10 -O "$out" "$url" >>"$logfile" 2>&1
+  else
+    # -C - resumes a partial file, --retry rides out drops, -L follows the
+    # redirects both Edinburgh DataShare and Zenodo use.
+    curl -L -C - --retry 20 --retry-delay 10 --connect-timeout 60 \
+      -o "$out" "$url" >>"$logfile" 2>&1
+  fi
+}
+
+# Refuse to start a multi-GB pull that cannot possibly fit.
+check_disk_space() {
+  local need_gb="$1"
+  local avail_gb
+  avail_gb="$(df -BG "$DATA_ROOT" 2>/dev/null | awk 'NR==2 {gsub(/[A-Za-z]/,"",$4); print $4}')"
+  [ -z "$avail_gb" ] && { warn "could not determine free space; continuing"; return 0; }
+  log "free space at ${DATA_ROOT}: ${avail_gb} GB (need ~${need_gb} GB)"
+  if [ "$avail_gb" -lt "$need_gb" ]; then
+    die "only ${avail_gb} GB free but ~${need_gb} GB needed. Free space, or set DATA_ROOT to another drive."
+  fi
+}
+
+# Cloud-sync clients do not honour .gitignore. Downloading tens of GB into a
+# synced folder uploads all of it and usually blows the account quota.
+warn_if_cloud_synced() {
+  case "$DATA_ROOT" in
+    *OneDrive*|*"One Drive"*|*Dropbox*|*"Google Drive"*|*GoogleDrive*)
+      warn "DATA_ROOT is inside a cloud-synced folder:"
+      warn "    ${DATA_ROOT}"
+      warn "The sync client will try to upload every GB downloaded here."
+      warn "Either pause syncing, exclude this folder, or re-run with e.g.:"
+      warn "    DATA_ROOT=/c/dfdata bash scripts/01_download_data.sh --run"
+      ;;
+  esac
 }
 
 size_of() { stat -c '%s' "$1" 2>/dev/null || stat -f '%z' "$1" 2>/dev/null || echo 0; }
@@ -243,9 +284,22 @@ main() {
     exit 0
   fi
 
-  need_cmd wget
+  if ! command -v wget >/dev/null 2>&1 && ! command -v curl >/dev/null 2>&1; then
+    die "need either wget or curl on PATH"
+  fi
   mkdir -p "$LOG_DIR" "$ASV_DIR" "$MUCS_DIR" "$HIACC_DIR"
+
+  warn_if_cloud_synced
+  # Archives + extracted copies roughly double the download size.
+  case "$only" in
+    asvspoof) check_disk_space 50 ;;
+    mucs)     check_disk_space 17 ;;
+    hiacc)    check_disk_space 2  ;;
+    *)        check_disk_space 68 ;;
+  esac
+
   log "RUN mode: downloads starting. Logs in ${LOG_DIR}"
+  log "data root: ${DATA_ROOT}"
 
   case "$only" in
     all)      dl_asvspoof2019_la; dl_mucs; dl_hiacc ;;
