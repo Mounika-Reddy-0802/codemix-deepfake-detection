@@ -27,6 +27,30 @@ CORPORA=(
   "hiacc:hiacc"          # adult only; _EXCLUDED_children/ is skipped below
 )
 
+# -----------------------------------------------------------------------------
+# HiACC ethics gate. The old version of this script only PRINTED a reassuring
+# line while src.data.preprocess walked the corpus root with rglob -- which would
+# have pulled the quarantined child audio straight back in. The exclusion now
+# lives in preprocess.audio_files(), and the audit below refuses to let
+# preprocessing start while anything child-looking is still outside quarantine.
+# -----------------------------------------------------------------------------
+hiacc_gate() {
+  local src="$1"
+  echo "--- HiACC child-quarantine audit ---"
+  python -m src.data.quarantine --root "$src" --out docs/qa/child_quarantine_check.md \
+    | tee /tmp/hiacc_audit.log
+  if grep -q "WARNING" /tmp/hiacc_audit.log; then
+    echo "REFUSING to preprocess HiACC: the audit raised a warning." >&2
+    echo "Read docs/qa/child_quarantine_check.md and fix the quarantine first." >&2
+    return 1
+  fi
+  if [ ! -f docs/qa/child_quarantine_check.md ]; then
+    echo "REFUSING to preprocess HiACC: no audit report was written." >&2
+    return 1
+  fi
+  echo "audit clean; the signed report is still required before generation."
+}
+
 for entry in "${CORPORA[@]}"; do
   src="${RAW}/${entry%%:*}"
   name="${entry##*:}"
@@ -34,11 +58,10 @@ for entry in "${CORPORA[@]}"; do
     echo "[skip] $src not found (download it first with scripts/01_download_data.sh --run)"
     continue
   fi
-  echo "=== preprocessing $name ==="
-  # Guard: never touch the quarantined child folder.
-  if [ "$name" = "hiacc" ] && [ -d "${src}/_EXCLUDED_children" ]; then
-    echo "  (HiACC child folder is quarantined and will not be processed)"
+  if [ "$name" = "hiacc" ]; then
+    hiacc_gate "$src" || { echo "[skip] hiacc blocked by the quarantine audit"; continue; }
   fi
+  echo "=== preprocessing $name ==="
   python -m src.data.preprocess --in-dir "$src" --out-dir "${OUT}/${name}"
 done
 
