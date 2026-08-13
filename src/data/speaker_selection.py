@@ -125,6 +125,57 @@ def index_clips(root: str, source: str, sr: int = TARGET_SR) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
+# SNR by sampling (the corpus is too large to decode in full)
+# --------------------------------------------------------------------------- #
+def sample_snr_by_speaker(
+    index: pd.DataFrame,
+    per_speaker: int = 5,
+    seed: int = 1234,
+    target_sr: int = TARGET_SR,
+) -> pd.DataFrame:
+    """Estimate each speaker's SNR from a sample of their clips.
+
+    MUCS alone is ~53,000 utterances; decoding every one to rank 520 speakers
+    would cost hours for a number that barely moves after a handful of clips.
+    Sampling ``per_speaker`` clips and taking the **median** is stable against the
+    occasional dead or clipped recording, and is reproducible given ``seed``.
+
+    Returns ``index`` with an ``snr_db`` column added (the speaker's median).
+    Clips that fail to decode are skipped and reported, not silently zeroed.
+    """
+    from src.data.corpora import load_clip
+
+    rng = np.random.default_rng(seed)
+    medians: dict[str, float] = {}
+    failures = 0
+
+    for speaker, group in index.groupby("speaker", sort=True):
+        take = (
+            group
+            if len(group) <= per_speaker
+            else group.sample(n=per_speaker, random_state=int(rng.integers(0, 2**31 - 1)))
+        )
+        values: list[float] = []
+        for row in take.itertuples(index=False):
+            try:
+                audio, sample_rate = load_clip(row, target_sr=target_sr)
+            except Exception as exc:  # noqa: BLE001 - a bad clip must not stop ranking
+                failures += 1
+                if failures <= 5:
+                    print(f"  [skip] {getattr(row, 'utt_id', '?')}: {type(exc).__name__}: {exc}")
+                continue
+            values.append(estimate_snr_db(audio, sample_rate))
+        medians[str(speaker)] = float(np.median(values)) if values else 0.0
+
+    if failures:
+        print(f"  ({failures} clip(s) failed to decode and were skipped)")
+
+    out = index.copy()
+    out["snr_db"] = out["speaker"].astype(str).map(medians).fillna(0.0)
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # Ranking + shortlist (pure pandas, testable)
 # --------------------------------------------------------------------------- #
 def rank_speakers(clips: pd.DataFrame, config: SelectionConfig | None = None) -> pd.DataFrame:
@@ -153,7 +204,9 @@ def rank_speakers(clips: pd.DataFrame, config: SelectionConfig | None = None) ->
         usable.groupby("speaker", dropna=False)
         .agg(
             source=("source", "first"),
-            n_clips=("filepath", "count"),
+            # Counted on `speaker` rather than a path column: the corpus index
+            # calls it `wav_path` and the legacy clip index calls it `filepath`.
+            n_clips=("speaker", "count"),
             total_seconds=("duration_seconds", "sum"),
             median_snr_db=("snr_db", "median"),
         )
@@ -203,30 +256,68 @@ def selection_summary(ranked: pd.DataFrame, config: SelectionConfig | None = Non
 
 
 def main() -> None:
-    """CLI: ``python -m src.data.speaker_selection --root DIR --source mucs2021``."""
+    """CLI: rank speakers from a corpus-aware clip index.
+
+    ``python -m src.data.speaker_selection --index data/manifests/clip_index.csv``
+    (build the index first with ``python -m src.data.corpora``), or point
+    ``--root``/``--source`` at a preprocessed directory for the legacy path.
+    """
     import argparse
     import json
     from pathlib import Path
 
     parser = argparse.ArgumentParser(description="Rank candidate reference speakers")
-    parser.add_argument("--root", required=True, help="preprocessed corpus directory")
-    parser.add_argument("--source", required=True, help="corpus name, e.g. mucs2021")
+    parser.add_argument("--index", help="clip index CSV from src.data.corpora")
+    parser.add_argument("--root", help="preprocessed corpus directory (legacy path)")
+    parser.add_argument("--source", help="corpus name when using --root")
     parser.add_argument("--index-out", default="data/manifests/clip_index.csv")
     parser.add_argument("--ranked-out", default="data/manifests/speaker_ranking.csv")
     parser.add_argument("--min-total-seconds", type=float, default=30.0)
     parser.add_argument("--min-snr-db", type=float, default=10.0)
+    parser.add_argument(
+        "--snr-sample",
+        type=int,
+        default=5,
+        help="clips decoded per speaker to estimate SNR (0 to skip and rank on duration only)",
+    )
+    parser.add_argument("--only-source", help="restrict the ranking to one corpus")
     args = parser.parse_args()
 
     cfg = SelectionConfig(min_total_seconds=args.min_total_seconds, min_snr_db=args.min_snr_db)
-    clips = index_clips(args.root, args.source)
+
+    if args.index:
+        clips = pd.read_csv(args.index)
+        if args.only_source:
+            clips = clips[clips["source"].astype(str) == args.only_source].reset_index(drop=True)
+        if args.snr_sample > 0:
+            print(f"estimating SNR from {args.snr_sample} clip(s) per speaker ...")
+            clips = sample_snr_by_speaker(clips, per_speaker=args.snr_sample)
+        else:
+            clips = clips.assign(snr_db=0.0)
+            cfg = SelectionConfig(
+                min_total_seconds=args.min_total_seconds,
+                min_snr_db=0.0,  # cannot gate on SNR that was never measured
+            )
+    elif args.root and args.source:
+        clips = index_clips(args.root, args.source)
+    else:
+        parser.error("pass --index (preferred) or both --root and --source")
+
     ranked = rank_speakers(clips, cfg)
 
-    for path, frame in ((args.index_out, clips), (args.ranked_out, ranked)):
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        frame.to_csv(path, index=False)
+    # When --index is an INPUT, never write back over it. Doing so once silently
+    # replaced the full two-corpus index with a MUCS-only filtered copy, and the
+    # next step (the listening test) then sampled 20 MUCS clips and zero HiACC.
+    written = [args.ranked_out]
+    Path(args.ranked_out).parent.mkdir(parents=True, exist_ok=True)
+    ranked.to_csv(args.ranked_out, index=False)
+    if not args.index:
+        Path(args.index_out).parent.mkdir(parents=True, exist_ok=True)
+        clips.to_csv(args.index_out, index=False)
+        written.append(args.index_out)
 
     print(json.dumps(selection_summary(ranked, cfg), indent=2))
-    print(f"\nwrote {args.index_out} and {args.ranked_out}")
+    print(f"\nwrote {' and '.join(written)}")
     print("next: the team listens to the top of the ranking and confirms the selection")
 
 
