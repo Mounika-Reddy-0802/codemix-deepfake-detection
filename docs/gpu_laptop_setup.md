@@ -124,7 +124,62 @@ python -m src.data.ethics_gate     # must print "ethics gate OPEN" and exit 0
 
 ---
 
-## 4. Get the dataset across
+## 4a. If the GPU laptop already has the archives
+
+This is the common case: the zips/tarballs were copied or downloaded there, but
+nothing is extracted, quarantined or indexed. **Do not extract by hand** — hand
+extraction is exactly how the HiACC child quarantine gets skipped, and that is the
+one mistake in this project that is an ethics violation rather than a bug.
+
+```bash
+# Git Bash. DATA_ROOT is where the dfdata tree should end up.
+cd codemix-deepfake-detection
+
+# Archives sitting in DATA_ROOT/raw/<corpus>/ already:
+DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only
+
+# Or archives sitting somewhere else (a USB drive, Downloads):
+DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only --archives /e/archives
+
+# One corpus at a time if you prefer:
+DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only --only hiacc
+```
+
+`--extract-only` runs the **same** extraction and the **same** child-quarantine
+sweep as the download path, with no network. It refuses to finish if a
+child-looking folder survives the sweep. Missing archives are reported and
+skipped rather than silently producing an empty corpus.
+
+Then reach the same state as the first laptop:
+
+```bash
+python -m src.data.quarantine --root /d/dfdata/raw/hiacc   # audit + evidence report
+python -m src.data.corpora --data-root /d/dfdata           # rebuild clip_index.csv (~1 min)
+```
+
+Expected result — compare against the first laptop:
+
+```
+raw/mucs2021/train/transcripts/{segments,utt2spk,wav.scp,text}
+raw/mucs2021/test/transcripts/...
+raw/hiacc/Corpus/adult/{audio/{train_split,val_split,test_split},metadata,annotations,transcription}
+raw/hiacc/_EXCLUDED_children/...          <- child audio, quarantined
+raw/asvspoof2019_LA/LA/...
+```
+
+Sanity numbers that must match: **MUCS 52,825 utterances / 520 speakers**,
+**HiACC 3,318 adult clips / 24 speakers**, **1,858 child files quarantined**.
+`python -m src.data.corpora` prints all of these. If they differ, stop — an
+archive is incomplete or a folder is in the wrong place.
+
+`speaker_pools.csv` is **frozen and committed** (SHA-256 `f57e0d85…`); it comes
+from git and must never be regenerated, or the two machines are no longer
+measuring the same split.
+
+`processed/` does not need copying — it is regenerable, and nothing downstream of
+`corpora.py` currently reads it.
+
+## 4b. Get the dataset across (if the GPU laptop does NOT have it)
 
 Current sizes under `C:\dfdata`:
 
