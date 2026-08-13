@@ -22,9 +22,10 @@ Two hard guards, both tested:
 - the job table records the pool with every row, so the firewall is auditable
   after the fact rather than trusted at generation time.
 
-Generation itself does not run here: Coqui TTS has no distribution for Python
-3.13 and this machine has no CUDA. The output of this module is a self-contained
-pack (reference wavs + ``generation_jobs.csv``) to carry to a Kaggle GPU session.
+This module only assembles the pack (reference wavs + ``generation_jobs.csv``);
+``src.data.spoof_generation`` synthesises from it. The pack is self-contained and
+path-portable, so the same one runs on a Colab GPU or, slowly, on a CPU laptop --
+the `coqui-tts` fork does ship for Python 3.13, contrary to the original note here.
 """
 
 from __future__ import annotations
@@ -60,6 +61,42 @@ CLIPS_PER_CELL = 5
 MIN_REFERENCE_SECONDS = 6.0
 #: Transcripts shorter than this produce clips too brief to judge.
 MIN_TRANSCRIPT_CHARS = 40
+
+#: XTTS-v2's per-language character limit. Text longer than this is **silently
+#: truncated** -- the model warns on stderr and synthesises the opening fragment.
+#: The first pilot run hit this on 19 of 20 jobs (median 278 chars against a
+#: 150-char Hindi limit) because transcripts were chosen longest-first. Raters
+#: would then have been scoring truncation instead of code-switch quality, which
+#: is the one thing the pilot exists to measure.
+XTTS_CHAR_LIMITS = {"en": 250, "hi": 150}
+#: Used for any language not listed above; XTTS's own default for unknown codes.
+DEFAULT_CHAR_LIMIT = 250
+
+#: Language tags for which XTTS's text cleaner cannot expand digits into words.
+#: It calls ``num2words(n, lang=...)`` unconditionally, and num2words has no Hindi
+#: implementation, so a transcript containing a digit raises ``NotImplementedError``
+#: mid-synthesis. MUCS is NPTEL lecture speech and is full of numbers, so this is
+#: common rather than exotic -- it killed the second pilot run at clip 7.
+NUMERALS_UNSUPPORTED = {"hi"}
+
+
+def char_limit(language: str) -> int:
+    """XTTS-v2's maximum synthesisable transcript length for a language tag."""
+    return XTTS_CHAR_LIMITS.get(str(language).lower(), DEFAULT_CHAR_LIMIT)
+
+
+def is_synthesisable(text: str, language: str) -> bool:
+    """Whether XTTS can actually say this transcript under this language tag.
+
+    Length and digits are the two ways a real MUCS utterance fails. Both are
+    checked here rather than discovered one crash at a time during a 4,000-clip
+    Week-4 run.
+    """
+    text = str(text)
+    if len(text) > char_limit(language):
+        return False
+    return not (str(language).lower() in NUMERALS_UNSUPPORTED and any(c.isdigit() for c in text))
+
 
 JOB_COLUMNS = [
     "job_id",
@@ -157,18 +194,41 @@ def choose_references(
     )
 
 
-def choose_transcripts(
-    index: pd.DataFrame, wanted: str, n: int, config: PilotConfig | None = None
-) -> pd.DataFrame:
-    """Pick ``n`` transcripts of a given script class, longest first.
+def pilot_char_limit() -> int:
+    """The transcript length every pilot cell must share.
 
-    Longest-first because a two-word utterance cannot exercise a code-switch
-    boundary, which is the thing the pilot is judging.
+    The tightest limit across the tags the pilot uses. Letting each cell run to
+    its own limit would give ``latn_en`` 250 characters and the ``hi`` cells 150,
+    so ``latn_en`` vs ``latn_hi`` would differ in tag *and* in utterance length --
+    and a rating difference between them could be either. The pilot's one job is
+    to isolate script and tag, so length is held constant instead.
+    """
+    return min(char_limit(language) for _, _, language, _ in PILOT_CELLS)
+
+
+def choose_transcripts(
+    index: pd.DataFrame,
+    wanted: str,
+    n: int,
+    config: PilotConfig | None = None,
+    language: str = "hi",
+    max_chars: int | None = None,
+) -> pd.DataFrame:
+    """Pick ``n`` transcripts of a given script class: the longest XTTS can say.
+
+    Longest-first, because a two-word utterance cannot exercise a code-switch
+    boundary and that boundary is the thing the pilot judges. But restricted to
+    what :func:`is_synthesisable` allows: past the character limit XTTS truncates
+    and synthesises only the opening fragment, and a digit under a ``hi`` tag
+    crashes it outright. Unfiltered, "longest" quietly becomes "most truncated".
     """
     cfg = config or PilotConfig()
+    cap = char_limit(language) if max_chars is None else min(max_chars, char_limit(language))
     frame = index.dropna(subset=["transcript"]).copy()
     frame["transcript"] = frame["transcript"].astype(str)
-    frame = frame[frame["transcript"].str.len() >= cfg.min_transcript_chars]
+    lengths = frame["transcript"].str.len()
+    frame = frame[(lengths >= cfg.min_transcript_chars) & (lengths <= cap)]
+    frame = frame[frame["transcript"].map(lambda t: is_synthesisable(t, language))]
     if frame.empty:
         return frame
     frame["script_class"] = frame["transcript"].map(script_class)
@@ -203,8 +263,11 @@ def build_pilot_jobs(
     rows: list[dict[str, object]] = []
     job_id = 0
 
+    shared_limit = pilot_char_limit()  # same utterance length in every cell
     for cell, wanted_script, language, _ in PILOT_CELLS:
-        transcripts = choose_transcripts(index, wanted_script, cfg.clips_per_cell, cfg)
+        transcripts = choose_transcripts(
+            index, wanted_script, cfg.clips_per_cell, cfg, language, max_chars=shared_limit
+        )
         for position in range(cfg.clips_per_cell):
             if position >= len(transcripts):
                 break

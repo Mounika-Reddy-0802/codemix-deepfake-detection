@@ -209,3 +209,104 @@ def test_loaded_jobs_have_distinct_outputs_and_seeds(tmp_path) -> None:
     loaded = pj.load_pilot_jobs(str(csv), str(tmp_path))
     assert len({j.output_path for j in loaded}) == 20
     assert len({j.seed for j in loaded}) == 20
+
+
+# --------------------------------------------------------------------------- #
+# XTTS character limit
+# --------------------------------------------------------------------------- #
+# The first real pilot run put 19 of 20 jobs over XTTS-v2's per-language limit
+# (median 278 chars against a 150-char Hindi cap). XTTS truncates silently and
+# synthesises only the opening fragment, so raters would have been scoring
+# truncation rather than code-switch quality -- the one thing the pilot measures.
+def _index_of_lengths(lengths: list[int], script: str = "deva") -> pd.DataFrame:
+    unit = "क" if script == "deva" else "a"
+    return pd.DataFrame(
+        {
+            "utt_id": [f"u{i}" for i in range(len(lengths))],
+            "speaker": ["trn0"] * len(lengths),
+            "source": "mucs2021",
+            "wav_path": "/data/trn0.wav",
+            "start_seconds": 0.0,
+            "end_seconds": 12.0,
+            "duration_seconds": 12.0,
+            "transcript": [unit * n for n in lengths],
+        }
+    )
+
+
+def test_hindi_limit_is_tighter_than_english() -> None:
+    assert pj.char_limit("hi") < pj.char_limit("en")
+
+
+def test_unknown_language_falls_back_to_the_default_limit() -> None:
+    assert pj.char_limit("ta") == pj.DEFAULT_CHAR_LIMIT
+
+
+def test_transcripts_over_the_limit_are_excluded() -> None:
+    chosen = pj.choose_transcripts(
+        _index_of_lengths([100, 140, 200, 400]), "mostly_devanagari", 5, language="hi"
+    )
+    assert len(chosen) == 2
+    assert chosen["transcript"].str.len().max() <= pj.char_limit("hi")
+
+
+def test_longest_sayable_transcript_still_wins() -> None:
+    # The bound must not invert the design: within the limit, longest-first holds.
+    chosen = pj.choose_transcripts(
+        _index_of_lengths([50, 140, 300]), "mostly_devanagari", 1, language="hi"
+    )
+    assert len(chosen.iloc[0]["transcript"]) == 140
+
+
+def test_the_english_cell_may_use_longer_text_than_the_hindi_cells() -> None:
+    index = _index_of_lengths([200], script="latn")
+    assert len(pj.choose_transcripts(index, "mostly_latin", 1, language="hi")) == 0
+    assert len(pj.choose_transcripts(index, "mostly_latin", 1, language="en")) == 1
+
+
+def test_every_built_job_is_within_its_own_language_limit() -> None:
+    jobs = pj.build_pilot_jobs(_index(), _pools())
+    over = [
+        (row.language, len(row.transcript))
+        for row in jobs.itertuples(index=False)
+        if len(row.transcript) > pj.char_limit(row.language)
+    ]
+    assert over == []
+
+
+def test_hindi_transcripts_with_digits_are_excluded() -> None:
+    # XTTS calls num2words(n, lang="hi"), which raises NotImplementedError. This
+    # crashed the second pilot run at clip 7 on a real MUCS lecture transcript.
+    assert pj.is_synthesisable("क" * 100, "hi") is True
+    assert pj.is_synthesisable("क" * 50 + " 42 " + "क" * 40, "hi") is False
+
+
+def test_english_transcripts_with_digits_are_allowed() -> None:
+    # num2words does support English, so digits are only a problem under "hi".
+    assert pj.is_synthesisable("a" * 50 + " 42 " + "a" * 40, "en") is True
+
+
+def test_over_length_transcripts_are_not_synthesisable() -> None:
+    assert pj.is_synthesisable("क" * (pj.char_limit("hi") + 1), "hi") is False
+
+
+def test_choose_transcripts_skips_numeric_hindi() -> None:
+    index = _index_of_lengths([100, 100])
+    index.loc[0, "transcript"] = "क" * 50 + " 2024 " + "क" * 40
+    chosen = pj.choose_transcripts(index, "mostly_devanagari", 5, language="hi")
+    assert len(chosen) == 1
+    assert not any(c.isdigit() for c in chosen.iloc[0]["transcript"])
+
+
+def test_the_pilot_uses_one_length_cap_across_all_cells() -> None:
+    # The tightest of the tags in use, so cells stay comparable.
+    assert pj.pilot_char_limit() == pj.char_limit("hi")
+
+
+def test_every_cell_gets_comparable_transcript_lengths() -> None:
+    # Without a shared cap the en cell would draw 250-char text while the hi cells
+    # drew 150, and a latn_en vs latn_hi rating difference could be length rather
+    # than the language tag -- the one comparison the cell exists to make.
+    jobs = pj.build_pilot_jobs(_index(), _pools())
+    longest = jobs.groupby("cell")["transcript"].apply(lambda s: s.str.len().max())
+    assert longest.max() <= pj.pilot_char_limit()
