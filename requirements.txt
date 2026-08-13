@@ -9,11 +9,23 @@
 # --- Core DL / audio ---
 torch==2.5.1
 torchaudio==2.5.1
-transformers==4.46.3
+# 4.57 is the floor coqui-tts requires; 5.x dropped transformers.pytorch_utils.
+# isin_mps_friendly, which XTTS-v2 imports -- installing it breaks generation with
+# an ImportError at `from TTS.api import TTS`. Keep the upper bound.
+transformers>=4.57,<5
 peft==0.13.2
 librosa==0.10.2.post1
 soundfile==0.12.1
 silero-vad==5.1.2
+
+# --- Voice cloning (spoof generation only; not needed to train or serve) ---
+# The original `TTS` package stops at Python 3.11. `coqui-tts` is the maintained
+# fork and packages the same XTTS-v2 weights for current Python -- it is what runs
+# on this project's Python 3.13 laptop and on Colab.
+coqui-tts==0.27.5
+# From torch 2.9 the TTS audio IO path requires torchcodec; without it `from
+# TTS.api import TTS` raises. Harmless on older torch.
+torchcodec==0.16.0
 
 # --- ML utilities ---
 scikit-learn==1.5.2
