@@ -17,8 +17,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-RAW="data/raw"
-OUT="data/processed/clean"
+# Same DATA_ROOT override as 01_download_data.sh -- the corpora live outside the
+# repo when it sits inside a cloud-synced folder. Processed audio is large too, so
+# it follows the raw data rather than landing back in the repo.
+DATA_ROOT="${DATA_ROOT:-${REPO_ROOT}/data}"
+RAW="${DATA_ROOT}/raw"
+OUT="${DATA_ROOT}/processed/clean"
 
 # corpus raw-subdir -> output name
 CORPORA=(
