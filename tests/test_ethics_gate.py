@@ -148,7 +148,21 @@ def test_generation_entry_points_are_gated(module: str, function: str) -> None:
     assert "require_signoff" in source, f"{module}.{function} is not gated"
 
 
-def test_real_repo_gate_is_currently_closed() -> None:
-    # The project's actual state: unsigned, so generation stays blocked. When the
-    # mentor signs, this flips and the assertion below is the thing to update.
-    assert gate.is_signed() is False
+def test_real_repo_gate_state_is_self_consistent() -> None:
+    """The gate's answer must match what is actually on disk.
+
+    The signed note carries real handwritten signatures, so it is deliberately
+    **never committed** (see .gitignore). That means this is True on a team
+    machine that holds the scan and False in CI or on a fresh clone -- both are
+    valid states. What must never happen is the three answers disagreeing, which
+    would mean the gate could report "open" while nothing had been signed.
+    """
+    status = gate.signoff_status()
+    assert status.signed == bool(gate.find_signoff())
+    assert status.signed == gate.is_signed()
+    if status.signed:
+        assert all(a.startswith("mentor_signoff") for a in status.artefacts)
+        gate.require_signoff()  # must not raise when a note is present
+    else:
+        with pytest.raises(gate.EthicsGateError):
+            gate.require_signoff()

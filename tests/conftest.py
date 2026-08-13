@@ -24,3 +24,21 @@ def open_ethics_gate(monkeypatch):
 
     monkeypatch.setattr(ethics_gate, "require_signoff", lambda *a, **kw: None)
     return ethics_gate
+
+
+@pytest.fixture
+def closed_ethics_gate(monkeypatch):
+    """Force the ethics gate shut for one test.
+
+    The signed note is never committed -- it carries real signatures -- so whether
+    it exists depends on the machine. A test asserting "generation is blocked when
+    unsigned" therefore has to state the closed condition explicitly instead of
+    relying on the repository happening to be unsigned.
+    """
+    from src.data import ethics_gate
+
+    def _refuse(directory: str = ethics_gate.SIGNOFF_DIR, action: str = "spoof generation"):
+        raise ethics_gate.EthicsGateError(f"{action} is blocked (no signed note)")
+
+    monkeypatch.setattr(ethics_gate, "require_signoff", _refuse)
+    return ethics_gate

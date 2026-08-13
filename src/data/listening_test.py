@@ -82,6 +82,22 @@ def sample_clips(clips: pd.DataFrame, config: ListeningTestConfig | None = None)
     return out.head(cfg.n_clips).reset_index(drop=True)
 
 
+def source_path(row) -> str:
+    """The audio a row points at, whichever index it came from.
+
+    A corpus-index row (``src.data.corpora``) names the recording in ``wav_path``;
+    a legacy preprocessed row names the file in ``filepath``. Both the sheet and
+    the renderer must resolve this the SAME way -- when they disagreed, the sheet
+    listed ``pair08_.clean.wav`` while the renderer wrote
+    ``pair08_AD34112.clean.wav``, and every path in the sheet was dead.
+    """
+    for attr in ("wav_path", "filepath"):
+        value = row.get(attr) if isinstance(row, dict) else getattr(row, attr, None)
+        if value not in (None, ""):
+            return str(value)
+    return ""
+
+
 def channel_filename(filepath: str, pair_id: int) -> str:
     """Output name for the channel-matched copy of a clip."""
     from pathlib import PurePosixPath
@@ -105,7 +121,7 @@ def build_rating_sheet(
     cfg = config or ListeningTestConfig()
     rows: list[dict[str, object]] = []
     for pair_id, row in enumerate(sampled.itertuples(index=False), start=1):
-        filepath = getattr(row, "filepath", "")
+        filepath = source_path(row)
         for rater in cfg.raters:
             rows.append(
                 {
@@ -153,9 +169,16 @@ def render_pairs(
 
     written = 0
     for pair_id, row in enumerate(sampled.itertuples(index=False), start=1):
-        filepath = getattr(row, "filepath", "")
+        # A corpus-index row names a span inside a long recording (`wav_path` +
+        # start/end); a legacy row names a whole preprocessed file (`filepath`).
+        filepath = source_path(row)
         try:
-            audio, sr = load_wav(str(filepath), target_sr=TARGET_SR)
+            if hasattr(row, "wav_path"):
+                from src.data.corpora import load_clip
+
+                audio, sr = load_clip(row, target_sr=TARGET_SR)
+            else:
+                audio, sr = load_wav(str(filepath), target_sr=TARGET_SR)
         except Exception as exc:  # noqa: BLE001 - a bad clip must not stop the set
             print(f"  [skip] {filepath}: {type(exc).__name__}: {exc}")
             continue

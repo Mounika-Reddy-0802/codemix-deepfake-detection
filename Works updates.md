@@ -188,22 +188,30 @@ close this gate** — it pattern-matches; a human confirms the real layout.
 
 ## 5. Listening tests (W3-T2) — ears required
 
-- [ ] `bash scripts/02_preprocess_all.sh` (refuses HiACC if the audit warns).
-- [ ] `python -m src.data.listening_test` → 20 clean/channel pairs + rating sheet.
-- [ ] **L, M, SK each listen to all 20 pairs** and fill in
-      `docs/qa/channel_sim_listening_sheet.csv`. Confirm the channel output sounds
-      like a phone call, not like broken audio. This validates a load-bearing
-      claim in the paper.
+- [x] ~~`bash scripts/02_preprocess_all.sh`~~ — superseded. MUCS is a Kaldi corpus
+      (521 long recordings, speakers in `utt2spk`), so blind chunking destroyed
+      speaker identity. Replaced by `python -m src.data.corpora`, which indexes
+      both corpora by their real speaker ids.
+- [x] `python -m src.data.listening_test` → 20 clean/channel pairs + rating sheet.
+- [x] **L, M, SK listened to all 20 pairs (13 Aug 2026).** Verdict: clearly
+      telephony, fully intelligible in both languages. Telephony 4.0/5,
+      intelligibility 4.0/5, 60/60 rows rated. Written up in
+      `docs/qa/channel_sim_verdict.md`; objective measurement passed 20/20.
+- [ ] **AMR-NB still unverified** — `ffmpeg` is not installed, so `channel_sim`
+      silently falls back to G.711. Install ffmpeg and re-run both halves of the
+      check before any AMR-NB condition is reported.
 
 ## 6. Speaker selection + pool freeze (W3-T4)
 
-- [ ] `python -m src.data.speaker_selection --root data/processed/clean/mucs2021 --source mucs2021`
-- [ ] **Team listening pass** over the top of the ranking; confirm the final
-      30–50 adult speakers. The shortlist is never padded to reach 30 — if the
-      corpus comes up short, that is a real finding, not a bug to work around.
-- [ ] `python -m src.data.speaker_pools --shortlist data/manifests/speaker_ranking.csv`
-- [ ] **Record the printed SHA-256** in `docs/progress.md` and commit
-      `data/manifests/speaker_pools.csv`. Pools may not move after this.
+- [x] Ranking built over **520 MUCS speakers**; top 50 shortlisted (8.34 hours).
+- [x] **Pools FROZEN**: 25 train / 10 adaptation / 15 eval, zero speakers in more
+      than one pool. SHA-256 `f57e0d85dbd3c8f5b96ad6af59edae7218104b0167807eae6433314947063e7b`,
+      recorded in `docs/progress.md`, `data/manifests/speaker_pools.csv` committed.
+- [ ] **Confirm the 50 by ear before Week-4 generation.** The shortlist was ranked
+      on a dynamic-range proxy (24.5–92.4 dB spread), *not* a calibrated SNR, and
+      the eligibility gate passed all 520 speakers — so the ordering is a hint,
+      not a quality guarantee. Spot-check the top of
+      `data/manifests/speaker_shortlist.csv`; re-freeze if any are unusable.
 
 ## 7. Accounts and compute (W3-T6)
 

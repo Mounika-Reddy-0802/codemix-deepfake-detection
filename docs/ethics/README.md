@@ -1,9 +1,23 @@
 # Ethics & licence sign-off
 
-The mentor must sign off the ethics/licence note **before any spoof generation**
-(Week 2+). Voice cloning is the ethically sensitive step, so the gate comes first.
-This page states **what the sign-off must cover**; the signed artefact is scanned
-into this folder.
+The mentor must sign off the ethics/licence note **before any spoof generation**.
+Voice cloning is the ethically sensitive step, so the gate comes first.
+
+> ## → The form to print and sign is **[`mentor_signoff_form.docx`](mentor_signoff_form.docx)**
+>
+> It is a single self-contained document covering the revised (v2) scope, the
+> corpora and their licences, the ten rules the team commits to, a student
+> declaration block, and the mentor's approval box. Nothing else needs to be
+> printed. Source of truth is [`mentor_signoff_form.md`](mentor_signoff_form.md);
+> regenerate the .docx with `python scripts/make_signoff_docx.py` after editing it.
+>
+> **Once signed:** scan it to `docs/ethics/mentor_signoff_<yyyy-mm-dd>.pdf` and
+> commit. That filename is what opens the gate — `src/data/ethics_gate.py` looks
+> for `mentor_signoff*.pdf` (or `.png` / `.jpg`) in this folder. Verify with
+> `python -m src.data.ethics_gate`, which must exit 0.
+
+This page states **what the sign-off must cover**; the form above is the artefact
+that gets signed.
 
 ## What the sign-off must cover
 
