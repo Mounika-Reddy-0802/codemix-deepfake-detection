@@ -225,13 +225,33 @@ Run `python -m src.utils.env_check` — it reports what it can and labels the re
 - [ ] Colab GPU runtime confirmed.
 - [ ] Paste every link into the resource table in `README.md`.
 
-## 8. Pilots — AFTER the sign-off only (W3-T5)
+## 8. Pilots — sign-off obtained, ready to run (W3-T5)
 
-- [ ] XTTS-v2 pilot: 20 clips (Devanagari vs romanised script, `hi` vs `en` tag).
+**Platform: Google Colab** (team decision, 13 Aug 2026 — replaces Kaggle).
+Run `notebooks/pilot_xtts_colab.ipynb` on a T4 runtime.
+
+- [ ] Upload to Drive: `C:\dfdata\generated\pilot\` → `MyDrive/capstone/pilot/`
+      and the signed PDF → `MyDrive/capstone/ethics/`. The signed note is
+      gitignored, so cloning the repo will NOT bring it — without it the ethics
+      gate refuses and nothing generates.
+- [ ] Run the notebook: 20 clips, 4 script/tag cells × the same 5 train-pool
+      speakers (constant speakers so the cells are comparable).
 - [ ] RVC pilot: 1 speaker model, 10 conversions.
 - [ ] **All three rate all 30** and agree the quality bar; record the four
       decisions in `docs/problems_and_decisions.md`
       (script, language tag, quality bar, RVC viability).
+
+> **Compute-plan consequence of moving to Colab.** The v2 plan sizes Weeks 5–9
+> around *3 Kaggle accounts × 30 GPU-hours/week*, with S1 and S3 training in
+> parallel on separate accounts (W5-T3). Colab has no comparable weekly quota and
+> disconnects idle sessions, so that parallelism no longer holds. **Revisit the
+> Week-5 training plan before launching S1/S3** — decide whether to buy Colab Pro,
+> keep Kaggle purely for the long training runs, or serialise S1 then S3.
+
+> **ASVspoof via Colab too.** The local download stalled at 25% (1.75 GB of
+> 7.11 GB) — `datashare.ed.ac.uk` resets the connection after sustained
+> transfers. Since S1 trains on Colab anyway, fetch it there or from a Drive
+> mirror instead of fighting the throttle.
 
 ## 9. Log book
 
