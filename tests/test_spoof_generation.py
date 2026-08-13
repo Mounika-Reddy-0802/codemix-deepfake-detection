@@ -82,7 +82,7 @@ def test_heldout_tool_must_be_eval_pool(open_ethics_gate) -> None:
         sg.generate_batch([job], model=None, metadata_path="unused.jsonl")
 
 
-def test_generation_is_blocked_before_the_tool_check_when_unsigned() -> None:
+def test_generation_is_blocked_before_the_tool_check_when_unsigned(closed_ethics_gate) -> None:
     # With the gate closed (the repo's real state) nothing reaches the firewall.
     from src.data.ethics_gate import EthicsGateError
 

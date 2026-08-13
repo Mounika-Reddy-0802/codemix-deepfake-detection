@@ -23,3 +23,9 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-12 | W3-T6 | M | week3-mounika-affectdf-taxonomy | env verification (ok=3 missing=7 manual=8), secrets never echoed; readme resource links |
 | 2026-08-12 | W3-T2 | L | week3-lahari-preprocess-mucs-hiacc | fixed quarantine bypass in the preprocessing walk; quarantine audit + report; channel-sim listening test builder |
 | 2026-08-12 | W3-T4 | L | week3-lahari-preprocess-mucs-hiacc | snr/duration speaker ranking + shortlist that is never padded; awaiting downloads |
+| 2026-08-12 | W3-T2 | L | dev | mucs + hiacc downloaded to C:/dfdata; quarantine bug found on real data: 1858 child files were live, now excluded; 3318 adult reachable |
+| 2026-08-12 | W3-T2 | L | dev | corpus-aware indexing: mucs kaldi tables (52825 utts / 520 spk) + hiacc prefix ids (3318 / 24 spk); 20-clip listening set rendered |
+| 2026-08-12 | W3-T4 | L | dev | speaker ranking over 520 mucs speakers, top 50 shortlisted; pools NOT frozen pending the team listening pass |
+| 2026-08-13 | W3-T4 | SK | dev | speaker pools FROZEN: 25 train / 10 adaptation / 15 eval, sha256 f57e0d85dbd3c8f5b96ad6af59edae7218104b0167807eae6433314947063e7b |
+| 2026-08-13 | W3-T2 | L | dev | channel sim verified objectively: 20/20 band-limited (hf energy 0.6% clean -> 0.0001% channel), snr 17.6 db, corr 0.99 |
+| 2026-08-13 | W3-T2 | ALL | dev | listening test passed: all three rated 20 pairs, telephony 4.0/5, intelligible 4.0/5; channel protocol verified for g711 at 20 db |

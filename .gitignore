@@ -6,6 +6,17 @@
 .env.local
 *.pem
 
+# --- Signed ethics artefacts: CONFIDENTIAL, never committed ---
+# The signed mentor note carries real handwritten signatures of the team and the
+# faculty mentor. It lives only on team machines and is shared privately, never
+# through this repository. src/data/ethics_gate.py reads it from the working tree,
+# so the gate still opens locally without the file ever entering git history.
+# The BLANK form (mentor_signoff_form.md / .docx) is not confidential and stays tracked.
+docs/ethics/*.pdf
+docs/ethics/*.png
+docs/ethics/*.jpg
+docs/ethics/*.jpeg
+
 # --- Large corpora & model artifacts: local / Kaggle only ---
 # Track the directory skeleton (.gitkeep) but ignore all real data files.
 data/**
@@ -14,9 +25,15 @@ data/**
 !data/**/README.md
 
 # Manifests are metadata, not data: small text files that must be versioned so a
-# frozen split (speaker pools, clip index, dataset manifests) is reproducible and
-# reviewable. Audio never lives here.
+# frozen split (speaker pools, dataset manifests) is reproducible and reviewable.
+# Audio never lives here.
 !data/manifests/*.csv
+
+# ...except the raw clip index. It is ~14 MB of absolute machine-local paths
+# (C:\dfdata\...), so it is neither portable nor reviewable, and it regenerates in
+# about a minute: `python -m src.data.corpora --data-root <your DATA_ROOT>`.
+# The derived speaker_ranking.csv and the frozen speaker_pools.csv ARE committed.
+data/manifests/clip_index.csv
 
 checkpoints/**
 !checkpoints/**/
