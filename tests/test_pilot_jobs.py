@@ -175,3 +175,37 @@ def test_summary_reports_the_design() -> None:
     assert summary["speakers"] == 5
     assert summary["pools_used"] == ["train"]
     assert sorted(summary["languages"]) == ["en", "hi"]
+
+
+# --------------------------------------------------------------------------- #
+# Loading the pack for the generator
+# --------------------------------------------------------------------------- #
+def test_load_pilot_jobs_resolves_pack_relative_references(tmp_path) -> None:
+    # References are stored as `refs/<speaker>.wav` so the pack can move between
+    # machines (local -> Drive -> Colab) without anyone editing the CSV.
+    jobs_table = pj.build_pilot_jobs(_index(), _pools())
+    csv = tmp_path / "generation_jobs.csv"
+    jobs_table.to_csv(csv, index=False)
+
+    loaded = pj.load_pilot_jobs(str(csv), str(tmp_path), out_dir="outputs")
+    assert len(loaded) == 20
+    assert all(str(tmp_path) in j.reference_wav for j in loaded)
+    assert all(j.reference_wav.endswith(".wav") for j in loaded)
+
+
+def test_loaded_jobs_keep_the_train_pool_tag(tmp_path) -> None:
+    jobs_table = pj.build_pilot_jobs(_index(), _pools())
+    csv = tmp_path / "generation_jobs.csv"
+    jobs_table.to_csv(csv, index=False)
+    loaded = pj.load_pilot_jobs(str(csv), str(tmp_path))
+    assert {j.pool for j in loaded} == {"train"}
+    assert {j.tool for j in loaded} == {"xtts_v2"}
+
+
+def test_loaded_jobs_have_distinct_outputs_and_seeds(tmp_path) -> None:
+    jobs_table = pj.build_pilot_jobs(_index(), _pools())
+    csv = tmp_path / "generation_jobs.csv"
+    jobs_table.to_csv(csv, index=False)
+    loaded = pj.load_pilot_jobs(str(csv), str(tmp_path))
+    assert len({j.output_path for j in loaded}) == 20
+    assert len({j.seed for j in loaded}) == 20

@@ -235,6 +235,37 @@ def build_pilot_jobs(
     return jobs
 
 
+def load_pilot_jobs(jobs_csv: str, pack_dir: str, out_dir: str = "outputs") -> list:
+    """Turn the pilot job table into :class:`CloneJob` objects for the generator.
+
+    Kept here rather than in the Colab notebook so the notebook holds no pipeline
+    logic (CLAUDE.md section 9) and the path rewriting is unit-tested. Reference
+    paths in the CSV are relative to the pack (``refs/<speaker>.wav``) so the pack
+    can be moved between machines without editing anything.
+    """
+    from pathlib import Path
+
+    from src.data.spoof_generation import CloneJob
+
+    frame = pd.read_csv(jobs_csv)
+    pack = Path(pack_dir)
+    jobs = []
+    for row in frame.itertuples(index=False):
+        jobs.append(
+            CloneJob(
+                speaker=str(row.speaker),
+                reference_wav=str(pack / str(row.reference_wav)),
+                transcript=str(row.transcript),
+                output_path=str(Path(out_dir) / Path(str(row.output_path)).name),
+                pool=str(row.pool),
+                language=str(row.language),
+                tool=str(row.tool),
+                seed=int(row.seed),
+            )
+        )
+    return jobs
+
+
 def pilot_summary(jobs: pd.DataFrame) -> dict:
     """What the pilot will actually produce."""
     if jobs.empty:
