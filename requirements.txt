@@ -7,8 +7,15 @@
 # training and live-call environments, not the CI runner.
 
 # --- Core DL / audio ---
-torch==2.5.1
-torchaudio==2.5.1
+# Lower bound: 2.5.1 has no Python 3.13 wheel; 2.6 is the first that does.
+# Upper bound: from 2.9 torchaudio routes all audio IO through `torchcodec`, which
+# loads FFmpeg's shared libraries and fails against FFmpeg 8/9 (`WinError 127` on
+# libtorchcodec_image.dll). 2.8 uses torchaudio's own backends and works.
+# Keep torch/torchaudio/torchvision on the SAME minor -- a mismatched torchvision
+# raises "operator torchvision::nms does not exist" from inside transformers.
+torch>=2.6,<2.9
+torchaudio>=2.6,<2.9
+torchvision>=0.21,<0.24   # not used directly; transformers imports it
 # 4.57 is the floor coqui-tts requires; 5.x dropped transformers.pytorch_utils.
 # isin_mps_friendly, which XTTS-v2 imports -- installing it breaks generation with
 # an ImportError at `from TTS.api import TTS`. Keep the upper bound.
