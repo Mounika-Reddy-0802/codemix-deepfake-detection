@@ -153,9 +153,16 @@ def render_pairs(
 
     written = 0
     for pair_id, row in enumerate(sampled.itertuples(index=False), start=1):
-        filepath = getattr(row, "filepath", "")
+        # A corpus-index row names a span inside a long recording (`wav_path` +
+        # start/end); a legacy row names a whole preprocessed file (`filepath`).
+        filepath = getattr(row, "wav_path", None) or getattr(row, "filepath", "")
         try:
-            audio, sr = load_wav(str(filepath), target_sr=TARGET_SR)
+            if hasattr(row, "wav_path"):
+                from src.data.corpora import load_clip
+
+                audio, sr = load_clip(row, target_sr=TARGET_SR)
+            else:
+                audio, sr = load_wav(str(filepath), target_sr=TARGET_SR)
         except Exception as exc:  # noqa: BLE001 - a bad clip must not stop the set
             print(f"  [skip] {filepath}: {type(exc).__name__}: {exc}")
             continue
