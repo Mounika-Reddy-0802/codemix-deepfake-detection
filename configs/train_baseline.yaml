@@ -26,5 +26,15 @@ freeze_encoder: false
 subset_frac: 1.0
 max_steps: null
 
+# --- portability: same file on the CPU laptop and on a Colab/Kaggle GPU --------
+# device: null/"auto" detects (cuda -> mps -> cpu). "cpu" forces a laptop smoke
+#   run; "cuda" makes the run FAIL LOUDLY if no GPU is attached, which is what you
+#   want on Colab. $DFD_DEVICE and --device override this.
+device: null
+# data_root: where this machine keeps data/ (C:/dfdata here, /content/data on
+#   Colab). Manifest clip paths are rebased onto it, so a frozen manifest is never
+#   edited to move machines. $DATA_ROOT and --data-root override this.
+data_root: null
+
 wandb_project: codemix-deepfake-detection
 wandb_mode: online
