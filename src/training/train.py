@@ -4,6 +4,11 @@ Config-driven (``configs/train_baseline.yaml``). Heavy imports (torch/transforme
 wandb) are lazy inside :func:`train`, so importing this module is cheap (CI-safe).
 Use ``--smoke`` (or ``max_steps`` in the config) to verify the loop learns on a
 1% subset before committing GPU hours.
+
+The same config runs on the CPU laptop and on a Colab/Kaggle GPU: the device comes
+from :mod:`src.utils.device` (override with ``$DFD_DEVICE`` or ``--device``), AMP
+switches itself off when there is no GPU to use it, and clip paths are resolved
+against ``$DATA_ROOT`` so the manifest itself never has to be edited.
 """
 
 from __future__ import annotations
@@ -30,6 +35,8 @@ class TrainConfig:
     freeze_encoder: bool = False
     max_steps: int | None = None  # smoke-test cap
     subset_frac: float = 1.0  # fraction of the train manifest to use
+    device: str | None = None  # None/"auto" -> detect; "cpu"/"cuda" -> force
+    data_root: str | None = None  # None -> $DATA_ROOT, else this machine's data dir
     wandb_project: str = "codemix-deepfake-detection"
     wandb_mode: str = "online"
 
@@ -73,30 +80,40 @@ def train(cfg: TrainConfig) -> dict[str, float]:
 
     from src.data.dataset import AudioManifestDataset, collate_fn
     from src.models.detector import Detector
+    from src.utils.device import (
+        amp_enabled,
+        dataloader_kwargs,
+        describe,
+        device_family,
+        make_grad_scaler,
+        resolve_device,
+    )
     from src.utils.seed import set_seed
 
     set_seed(cfg.seed)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = resolve_device(cfg.device)
+    print(describe(device))
+    loader_opts = dataloader_kwargs(device, cfg.num_workers)
 
-    train_ds = AudioManifestDataset(cfg.train_manifest)
+    train_ds = AudioManifestDataset(cfg.train_manifest, data_root=cfg.data_root)
     if cfg.subset_frac < 1.0:
         n = max(1, int(len(train_ds) * cfg.subset_frac))
         train_ds.df = train_ds.df.sample(n=n, random_state=cfg.seed).reset_index(drop=True)
-    dev_ds = AudioManifestDataset(cfg.dev_manifest)
+    dev_ds = AudioManifestDataset(cfg.dev_manifest, data_root=cfg.data_root)
 
     train_loader = DataLoader(
         train_ds,
         batch_size=cfg.batch_size,
         shuffle=True,
-        num_workers=cfg.num_workers,
         collate_fn=collate_fn,
+        **loader_opts,
     )
     dev_loader = DataLoader(
         dev_ds,
         batch_size=cfg.batch_size,
         shuffle=False,
-        num_workers=cfg.num_workers,
         collate_fn=collate_fn,
+        **loader_opts,
     )
 
     model = Detector(
@@ -110,8 +127,9 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         weight_decay=cfg.weight_decay,
     )
     criterion = torch.nn.CrossEntropyLoss()
-    use_amp = cfg.amp and device == "cuda"
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    use_amp = amp_enabled(device, cfg.amp)
+    autocast_type = device_family(device)
+    scaler = make_grad_scaler(device, enabled=use_amp)
 
     run = _init_wandb(cfg)
     Path(cfg.out_dir).mkdir(parents=True, exist_ok=True)
@@ -124,7 +142,7 @@ def train(cfg: TrainConfig) -> dict[str, float]:
             lengths = batch["lengths"].to(device)
             labels = batch["labels"].to(device)
             optimizer.zero_grad()
-            with torch.autocast(device_type=device, enabled=use_amp):
+            with torch.autocast(device_type=autocast_type, enabled=use_amp):
                 logits = model(wav, lengths=lengths)
                 loss = criterion(logits, labels)
             scaler.scale(loss).backward()
@@ -171,9 +189,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train the spoof detector")
     parser.add_argument("--config", required=True)
     parser.add_argument("--smoke", action="store_true", help="1%% subset, few steps")
+    parser.add_argument(
+        "--device",
+        default=None,
+        help="auto | cpu | cuda[:N] | mps; overrides the config and $DFD_DEVICE",
+    )
+    parser.add_argument(
+        "--data-root",
+        default=None,
+        help="this machine's data directory; overrides the config and $DATA_ROOT",
+    )
     args = parser.parse_args()
 
     cfg = load_config(args.config)
+    if args.device is not None:
+        cfg.device = args.device
+    if args.data_root is not None:
+        cfg.data_root = args.data_root
     if args.smoke:
         cfg.subset_frac = 0.01
         cfg.max_steps = 20

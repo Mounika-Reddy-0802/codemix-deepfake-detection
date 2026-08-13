@@ -4,15 +4,22 @@ Kept import-light: only numpy + pandas at module top (both available in CI), wit
 torch imported lazily inside :func:`collate_fn`. The dataset is a map-style object
 (``__len__`` + ``__getitem__``) so it works with ``torch.utils.data.DataLoader``
 without importing torch here. ``pad_batch`` is pure numpy and unit-tested.
+
+Clip paths go through :mod:`src.utils.paths`, so one frozen manifest loads on the
+CPU laptop and on a Colab GPU runtime without being edited — only ``$DATA_ROOT``
+differs between the two machines.
 """
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
+
+from src.utils.paths import resolve as resolve_path
 
 LABEL_TO_INT = {"bonafide": 1, "spoof": 0}
 
@@ -51,12 +58,16 @@ class AudioManifestDataset:
         manifest: str | pd.DataFrame,
         target_sr: int = 16_000,
         split: str | None = None,
+        data_root: str | os.PathLike[str] | None = None,
     ) -> None:
         df = pd.read_csv(manifest) if isinstance(manifest, str) else manifest.copy()
         if split is not None:
             df = df[df["split"] == split].reset_index(drop=True)
         self.df = df.reset_index(drop=True)
         self.target_sr = target_sr
+        #: Resolved lazily per item so ``$DATA_ROOT`` set after construction (or in
+        #: a DataLoader worker process) is still honoured.
+        self.data_root = data_root
 
     def __len__(self) -> int:
         return len(self.df)
@@ -65,7 +76,8 @@ class AudioManifestDataset:
         from src.utils.audio_utils import load_wav
 
         row = self.df.iloc[index]
-        waveform, _ = load_wav(row["filepath"], target_sr=self.target_sr)
+        filepath = resolve_path(row["filepath"], self.data_root)
+        waveform, _ = load_wav(filepath, target_sr=self.target_sr)
         return AudioSample(
             waveform=waveform,
             label=LABEL_TO_INT[str(row["label"]).lower()],
