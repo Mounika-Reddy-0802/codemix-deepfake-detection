@@ -139,20 +139,25 @@ signature. **Ordered by what unblocks the most.**
       `Mounika-Reddy-0802/codemix-deepfake-detection`.
 - [ ] Then push, each branch under its own account (commands in the session report).
 
-## 1. BLOCKING ALL GENERATION — mentor ethics sign-off (W3-T1)
+## 1. ~~BLOCKING ALL GENERATION~~ — mentor ethics sign-off (W3-T1) — **CLEARED**
 
-- [ ] Mentor reviews `docs/licences.md` + `docs/ethics/README.md` and **signs the
+- [x] Mentor reviewed `docs/licences.md` + `docs/ethics/README.md` and **signed the
       ethics note on the REVISED v2 scope**: larger spoof volume (~4,000+ XTTS
       utterances), **RVC added** as a second attack family, and **AffectDF
       cross-evaluation** (CC BY-NC 4.0, research use).
-- [ ] Scan to `docs/ethics/mentor_signoff_<date>.pdf`.
+- [x] Scanned to `docs/ethics/mentor_signoff_2026-08-12.pdf` (12 Aug 2026).
 
-Verify the gate opens: `python -m src.data.ethics_gate` must exit 0. Until then
-the XTTS pilot, the RVC pilot, Tortoise, and all Week-4 generation refuse to run —
-there is no override flag.
+`python -m src.data.ethics_gate` exits 0: *"ethics gate OPEN: signed note found
+(mentor_signoff_2026-08-12.pdf)"*. The XTTS pilot, the RVC pilot, Tortoise and
+Week-4 generation are all permitted.
 
-**Plan escalation rule:** if this has not happened by **end of Wednesday**,
-escalate to the mentor in person. Every downstream week slips otherwise.
+> The signed PDF is **gitignored** (`.gitignore` line 15 — it carries real
+> signatures), so it does not appear in `git status` and a fresh clone will not
+> have it. **Run the gate, do not read this checklist**, when you need to know
+> whether generation is permitted — and copy the PDF into `docs/ethics/` by hand
+> on any new machine (Colab included; the notebook's step 3 does this from Drive).
+
+**Generation is now gated on compute, not ethics** — see section 8.
 
 ## 2. Review + merge the open PRs (W3-T1)
 
