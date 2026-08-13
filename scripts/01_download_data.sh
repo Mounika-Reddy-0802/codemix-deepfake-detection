@@ -40,7 +40,12 @@ HIACC_EXCLUDED="${HIACC_DIR}/_EXCLUDED_children"
 # ASVspoof 2019 LA partition (handle 10283/3336). The LA.zip bitstream:
 ASV_LA_URL="https://datashare.ed.ac.uk/bitstream/handle/10283/3336/LA.zip?sequence=3&isAllowed=y"
 ASV_LA_ZIP="${ASV_DIR}/LA.zip"
-ASV_LA_APPROX_BYTES=$((23 * 1024 * 1024 * 1024))   # ~23-24 GB, sanity check only
+# MEASURED from the server's Content-Length on 13 Aug 2026: 7,635,735,168 bytes
+# (~7.11 GB). The earlier "~23 GB" figure was wrong, and because check_min_size
+# warns below HALF the expected size, a perfectly complete 7.11 GB download was
+# reported as "far below the expected ~23 GB" -- an alarm that invites someone to
+# delete a good archive and spend three hours re-fetching it.
+ASV_LA_APPROX_BYTES=7635735168                     # ~7.11 GB
 
 # MUCS 2021 subtask-2 code-switching, Hindi-English only (skip Bengali-English):
 MUCS_TRAIN_URL="https://www.openslr.org/resources/104/Hindi-English_train.tar.gz"
@@ -298,7 +303,7 @@ print_plan() {
   cat <<EOF
 DRY RUN -- nothing downloaded. This script would fetch, into data/raw/:
 
-  ASVspoof 2019 LA   ~23-24 GB   ${ASV_LA_URL%%\?*}
+  ASVspoof 2019 LA   ~7.1 GB    ${ASV_LA_URL%%\?*}
   MUCS train         ~7.3 GB     ${MUCS_TRAIN_URL}
   MUCS test          ~443 MB     ${MUCS_TEST_URL}
   HiACC              ~532 MB     (URL + md5 resolved from ${HIACC_ZENODO_API})
@@ -343,10 +348,10 @@ main() {
   warn_if_cloud_synced
   # Archives + extracted copies roughly double the download size.
   case "$only" in
-    asvspoof) check_disk_space 50 ;;
+    asvspoof) check_disk_space 17 ;;
     mucs)     check_disk_space 17 ;;
     hiacc)    check_disk_space 2  ;;
-    *)        check_disk_space 68 ;;
+    *)        check_disk_space 35 ;;
   esac
 
   log "RUN mode: downloads starting. Logs in ${LOG_DIR}"
