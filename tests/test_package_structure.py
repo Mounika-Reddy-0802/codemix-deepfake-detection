@@ -42,6 +42,8 @@ EXPECTED_MODULES = [
     "src/utils/audio_utils.py",
     "src/utils/seed.py",
     "src/utils/logging_utils.py",
+    "src/utils/device.py",
+    "src/utils/paths.py",
 ]
 
 
