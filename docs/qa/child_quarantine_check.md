@@ -66,12 +66,30 @@ against the HiACC documentation rather than taking the scan's word for it:
 - After quarantine, `src.data.preprocess.audio_files()` reaches exactly **3,318**
   files and **0** child files.
 
-- [ ] Read the HiACC documentation and record how adult and child
-      recordings are actually distinguished (folder / manifest / filename).
-- [ ] Confirm every child recording is inside `_EXCLUDED_children/`.
-- [ ] Confirm the adult count matches the published HiACC adult subset size.
-- [ ] Confirm no child speaker id appears in any manifest under `data/manifests/`.
-- [ ] Re-run `pytest tests/test_preprocess_quarantine.py tests/test_splits.py`.
+- [x] **Read the HiACC documentation and record how adult and child recordings
+      are actually distinguished.** `Corpus/readme.txt` states verbatim: *"The
+      HiACC (Hinglish Adult & Children Code-switched Corpus) dataset is organized
+      into two major speaker categories: Adult, Children"*, with the structure
+      `Corpus/Adult/` and `Corpus/Children/`. **The split is by top-level folder**,
+      which is what the quarantine acts on. It is *not* by manifest column or
+      filename field. `sentence_stats.csv` and `speaker_info.csv` exist per
+      category and contain no age field that mixes the two.
+- [x] **Confirm every child recording is inside `_EXCLUDED_children/`.**
+      Audit reports 5,176 audio files, 1,858 quarantined, 0 child-looking items
+      outside quarantine.
+- [x] **Confirm the adult count matches the published HiACC adult subset size.**
+      3,318 adult / 1,858 children on disk; both match `docs/licences.md`
+      exactly. 24 adult speaker ids (AD09-AD65).
+- [x] **Confirm no child speaker id appears in any manifest.** The clip index
+      holds 24 HiACC speakers, all `AD*` (adult prefix); no `CH*` id present.
+      `data/manifests/speaker_pools.csv` is MUCS-only.
+- [x] **Re-run the quarantine tests.** `pytest tests/test_preprocess_quarantine.py
+      tests/test_quarantine.py tests/test_splits.py` green; full suite 267 passed.
+
+Everything above is machine-verifiable and has been verified. The signature below
+is a human attesting that they have read the HiACC documentation themselves and
+accept responsibility for the exclusion -- that part is deliberately not
+automatable.
 
 Checked by: ______________________  Date: ____________
 
