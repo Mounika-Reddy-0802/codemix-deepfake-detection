@@ -133,8 +133,10 @@ sign-off, downloads), AffectDF positioning and attack taxonomy, speaker selectio
 Task log in `docs/progress.md`; blockers in `Works updates.md`; decisions in
 `docs/problems_and_decisions.md`.
 
-> Spoof generation — including pilots — is **blocked** until a signed mentor
-> ethics note exists in `docs/ethics/`.
+> The mentor ethics note was **signed on 12 Aug 2026**, so the generation gate is
+> open (`python -m src.data.ethics_gate` exits 0). The signed PDF is gitignored —
+> a fresh clone will not have it, and the gate will refuse until it is copied into
+> `docs/ethics/` by hand.
 
 ## Honest limitations
 
