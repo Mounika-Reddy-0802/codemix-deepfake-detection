@@ -29,3 +29,4 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-13 | W3-T4 | SK | dev | speaker pools FROZEN: 25 train / 10 adaptation / 15 eval, sha256 f57e0d85dbd3c8f5b96ad6af59edae7218104b0167807eae6433314947063e7b |
 | 2026-08-13 | W3-T2 | L | dev | channel sim verified objectively: 20/20 band-limited (hf energy 0.6% clean -> 0.0001% channel), snr 17.6 db, corr 0.99 |
 | 2026-08-13 | W3-T2 | ALL | dev | listening test passed: all three rated 20 pairs, telephony 4.0/5, intelligible 4.0/5; channel protocol verified for g711 at 20 db |
+| 2026-08-13 | W3-T5 | SK | dev | xtts pilot pack ready: 20 jobs, 4 script/tag cells x 5 train-pool speakers, refs cut; generation needs a kaggle gpu (no coqui tts on py3.13, no cuda here) |
