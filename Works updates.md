@@ -202,9 +202,21 @@ close this gate** — it pattern-matches; a human confirms the real layout.
       telephony, fully intelligible in both languages. Telephony 4.0/5,
       intelligibility 4.0/5, 60/60 rows rated. Written up in
       `docs/qa/channel_sim_verdict.md`; objective measurement passed 20/20.
-- [ ] **AMR-NB still unverified** — `ffmpeg` is not installed, so `channel_sim`
-      silently falls back to G.711. Install ffmpeg and re-run both halves of the
-      check before any AMR-NB condition is reported.
+- [x] **AMR-NB objective half done (13 Aug 2026).** ffmpeg 9.0 installed
+      (`winget install Gyan.FFmpeg`), so `channel_sim` runs real AMR-NB instead of
+      falling back. 20/20 pass. AMR-NB is materially harsher than G.711: 5.57 dB
+      SNR vs 17.62, correlation 0.885 vs 0.991. Numbers in
+      `docs/qa/channel_sim_verdict.md` §3.
+- [ ] **AMR-NB listening pass outstanding** — L, M, SK rate the 20 pairs at
+      `<DATA_ROOT>/processed/listening_test_amr/` into
+      `docs/qa/channel_sim_listening_sheet_amr.csv`. Until then an AMR-NB column
+      is verified by measurement only and must not be reported as ear-checked.
+
+> **ffmpeg note for the other two machines.** `winget install Gyan.FFmpeg` gives
+> the CLI (enough for AMR-NB). If you also generate spoofs locally you need
+> `winget install Gyan.FFmpeg.Shared` too — `torchcodec`, which the TTS stack
+> requires from torch 2.9, loads FFmpeg's shared DLLs and the default build is
+> statically linked. Put its `bin/` on PATH.
 
 ## 6. Speaker selection + pool freeze (W3-T4)
 
