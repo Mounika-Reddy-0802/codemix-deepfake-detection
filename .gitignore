@@ -17,6 +17,14 @@ docs/ethics/*.png
 docs/ethics/*.jpg
 docs/ethics/*.jpeg
 
+# The transfer bundle carries a COPY of that signed PDF, plus reference and
+# generated audio, so it is exactly what must never be committed -- and unlike
+# docs/ethics/ it is not covered by any rule above. It sits in the repo root
+# while a machine is being set up, one `git add -A` away from putting real
+# signatures into git history.
+gpu-laptop-bundle/
+gpu-laptop-bundle.zip
+
 # --- Large corpora & model artifacts: local / Kaggle only ---
 # Track the directory skeleton (.gitkeep) but ignore all real data files.
 data/**
