@@ -169,6 +169,137 @@ def test_short_references_are_excluded() -> None:
     assert pj.choose_references(index, _pools()).empty
 
 
+# --------------------------------------------------------------------------- #
+# Reproducibility across machines
+# --------------------------------------------------------------------------- #
+# The CPU laptop and the GPU laptop built the same pilot with speakers 4 and 5
+# swapped in every cell: MUCS durations are whole seconds, 177570 and 850754 were
+# both exactly 20.0 s, and the tie fell through to clip_index.csv row order, which
+# follows the filesystem walk. `deva_hi_04` was therefore a different person on
+# each machine and the rating sheet would have mis-attributed every score.
+def _shuffled(frame: pd.DataFrame, seed: int) -> pd.DataFrame:
+    """The same rows a different filesystem walk would have produced."""
+    return frame.sample(frac=1.0, random_state=seed).reset_index(drop=True)
+
+
+def _tied_index() -> pd.DataFrame:
+    """Train-pool speakers whose references are all exactly the same length."""
+    index = _index()
+    index["duration_seconds"] = 12.0  # every candidate ties
+    index["end_seconds"] = 12.0
+    return index
+
+
+def test_reference_choice_survives_a_reordered_index() -> None:
+    pools = _pools()
+    index = _tied_index()
+    baseline = pj.choose_references(index, pools)["speaker"].tolist()
+    for seed in (0, 1, 2, 17, 99):
+        assert pj.choose_references(_shuffled(index, seed), pools)["speaker"].tolist() == baseline
+
+
+def test_transcript_choice_survives_a_reordered_index() -> None:
+    index = _tied_index()
+    baseline = pj.choose_transcripts(index, "mostly_latin", 5)["utt_id"].tolist()
+    for seed in (0, 1, 2, 17, 99):
+        got = pj.choose_transcripts(_shuffled(index, seed), "mostly_latin", 5)["utt_id"].tolist()
+        assert got == baseline
+
+
+def test_the_whole_job_table_is_reproducible_across_index_orderings() -> None:
+    # The end-to-end guarantee: two machines that index the same corpus into the
+    # same rows in a different order must generate a byte-identical pilot.
+    pools = _pools()
+    index = _tied_index()
+    baseline = pj.build_pilot_jobs(index, pools)
+    for seed in (0, 1, 2, 17, 99):
+        got = pj.build_pilot_jobs(_shuffled(index, seed), pools)
+        pd.testing.assert_frame_equal(got, baseline)
+
+
+# --------------------------------------------------------------------------- #
+# Romanised packs (team decision, 17 Aug 2026: one script, and it is Latin)
+# --------------------------------------------------------------------------- #
+ROMANISE = pj.PilotConfig(romanise=True)
+
+
+def test_romanised_jobs_carry_no_devanagari() -> None:
+    from src.data.transliteration import has_devanagari
+
+    jobs = pj.build_pilot_jobs(_index(), _pools(), config=ROMANISE)
+    assert not any(has_devanagari(t) for t in jobs["transcript"])
+
+
+def test_romanised_jobs_keep_the_source_text_for_provenance() -> None:
+    # The datasheet has to be able to show what the corpus actually said.
+    jobs = pj.build_pilot_jobs(_index(), _pools(), config=ROMANISE)
+    assert (jobs["transcript_source"] != jobs["transcript"]).any()
+    assert set(jobs["transcript_source"]) <= set(_index()["transcript"])
+
+
+def test_the_default_pack_is_untouched_devanagari() -> None:
+    # Romanisation is opt-in; the default path must not change silently.
+    jobs = pj.build_pilot_jobs(_index(), _pools())
+    assert (jobs["transcript_source"] == jobs["transcript"]).all()
+
+
+def test_cells_are_still_chosen_by_the_SOURCE_script() -> None:
+    # After transliteration every transcript is Latin. Classifying the *output*
+    # would put all 20 jobs in one cell and the pilot would compare nothing.
+    jobs = pj.build_pilot_jobs(_index(), _pools(), config=ROMANISE)
+    assert set(jobs["cell"]) == {"deva_hi", "latn_hi", "latn_en", "mixed_hi"}
+    for cell, expected in (
+        ("deva_hi", "mostly_devanagari"),
+        ("latn_hi", "mostly_latin"),
+        ("mixed_hi", "mixed"),
+    ):
+        source = jobs.loc[jobs["cell"] == cell, "transcript_source"].map(pj.script_class)
+        assert set(source) == {expected}, cell
+
+
+def test_the_character_limit_is_applied_to_the_romanised_text() -> None:
+    # Romanisation inflates length ~13% (up to 58%): on the real corpus 14 of the
+    # 20 pilot transcripts cross the 150-char Hindi limit once transliterated.
+    # Measuring the Devanagari would hand XTTS text it silently truncates -- the
+    # P-010 failure, re-introduced through the back door.
+    jobs = pj.build_pilot_jobs(_index(), _pools(), config=ROMANISE)
+    over = [
+        (row.language, len(row.transcript))
+        for row in jobs.itertuples(index=False)
+        if len(row.transcript) > pj.char_limit(row.language)
+    ]
+    assert over == []
+
+
+def test_a_transcript_that_only_fits_before_romanising_is_rejected() -> None:
+    # 60 Devanagari chars -> ~100 romanised. Under a 70-char cap it passes on the
+    # source and fails on what XTTS receives; only the latter is correct.
+    index = _index_of_lengths([60])
+    assert len(pj.choose_transcripts(index, "mostly_devanagari", 1, language="hi")) == 1
+    romanised = pj.choose_transcripts(
+        index, "mostly_devanagari", 1, language="hi", max_chars=70, romanise=True
+    )
+    assert len(romanised) == 0
+
+
+def test_spoken_text_matches_what_the_job_table_stores() -> None:
+    # One helper decides what the model is handed, so filters and assembly cannot
+    # disagree about it.
+    jobs = pj.build_pilot_jobs(_index(), _pools(), config=ROMANISE)
+    for row in jobs.itertuples(index=False):
+        assert row.transcript == pj.spoken_text(row.transcript_source, romanise=True)
+
+
+def test_romanised_pack_is_reproducible_across_index_orderings() -> None:
+    pools = _pools()
+    index = _tied_index()
+    baseline = pj.build_pilot_jobs(index, pools, config=ROMANISE)
+    for seed in (0, 3, 42):
+        pd.testing.assert_frame_equal(
+            pj.build_pilot_jobs(_shuffled(index, seed), pools, config=ROMANISE), baseline
+        )
+
+
 def test_summary_reports_the_design() -> None:
     summary = pj.pilot_summary(pj.build_pilot_jobs(_index(), _pools()))
     assert summary["jobs"] == 20
