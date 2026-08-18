@@ -141,3 +141,31 @@ def test_report_lists_items_outside_quarantine(tmp_path: Path) -> None:
 def test_report_tells_you_to_download_when_root_is_missing(tmp_path: Path) -> None:
     report = q.render_report(q.audit(str(tmp_path / "absent")))
     assert "not on disk yet" in report
+
+
+# --------------------------------------------------------------------------- #
+# The report is generated, but people write into it
+# --------------------------------------------------------------------------- #
+# Re-running the audit on the GPU laptop overwrote docs/qa/child_quarantine_check.md
+# and silently destroyed the 12 Aug incident narrative AND an already-completed
+# manual verification. Both are ethics-gate evidence and neither can be
+# regenerated; the run prints "wrote ..." either way, so nothing signalled the loss.
+def test_a_fresh_report_over_a_signed_one_is_refused() -> None:
+    existing = "# report\n\n> ## ⚠️ Incident, 12 August 2026\n\n- [x] read the docs\n"
+    assert q.would_lose_handwritten(existing, "# report\n\nfresh\n")
+
+
+def test_regenerating_over_an_untouched_report_is_allowed() -> None:
+    # No hand-written markers: overwriting loses nothing.
+    assert q.would_lose_handwritten("# report\n\n- [ ] todo\n", "# report\n\nfresh\n") == []
+
+
+def test_each_kind_of_handwritten_content_is_detected() -> None:
+    for marker in q.HANDWRITTEN_MARKERS:
+        assert q.would_lose_handwritten(f"x {marker} y", "fresh") == [marker]
+
+
+def test_content_the_new_report_still_carries_is_not_flagged() -> None:
+    # The generated template itself contains "Checked by: "; keeping it is not a loss.
+    existing = report_with = "Checked by: ______"
+    assert q.would_lose_handwritten(existing, report_with) == []
