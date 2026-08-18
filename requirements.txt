@@ -21,7 +21,9 @@ torchvision>=0.21,<0.24   # not used directly; transformers imports it
 # an ImportError at `from TTS.api import TTS`. Keep the upper bound.
 transformers>=4.57,<5
 peft==0.13.2
-librosa==0.10.2.post1
+# 0.11.0 is the floor coqui-tts 0.27.5 requires; pinning 0.10.2.post1 here makes
+# the file unsatisfiable (pip: ResolutionImpossible against the coqui-tts pin).
+librosa==0.11.0
 soundfile==0.12.1
 silero-vad==5.1.2
 
@@ -42,7 +44,8 @@ pandas==2.2.3
 # --- Serving / live-call system ---
 fastapi==0.115.5
 uvicorn==0.32.1
-websockets==13.1
+# gradio 5.7.1 pins gradio-client==1.5.0, which requires websockets<13.0.
+websockets==12.0
 aiortc==1.9.0
 
 # --- Inference optimisation ---
@@ -60,7 +63,8 @@ pytest==8.3.4
 
 # --- Supporting (needed by the code above but not called out by name) ---
 datasets==3.1.0            # HF streaming for eval-only Indic corpora
-huggingface-hub==0.26.2
+# transformers 4.57.x requires huggingface-hub>=0.34.0,<1.0; 0.26.2 is too old.
+huggingface-hub==0.36.2
 pyyaml==6.0.2              # config loading
 tqdm==4.67.1
 ruff==0.8.4               # linter (also used in CI)
