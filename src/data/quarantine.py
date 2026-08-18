@@ -286,6 +286,24 @@ def render_report(result: AuditResult) -> str:
     return "\n".join(lines) + "\n"
 
 
+#: Markers of content a human wrote into the generated report. The audit cannot
+#: reproduce any of them: an incident narrative, a ticked verification box, or a
+#: signature line.
+HANDWRITTEN_MARKERS = ("⚠️ Incident", "- [x]", "Checked by: ")
+
+
+def would_lose_handwritten(existing: str, report: str) -> list[str]:
+    """Markers present in ``existing`` that a fresh ``report`` would destroy.
+
+    The report is generated, but people write *into* it -- the 12 Aug incident
+    narrative and the completed manual verification both live there, and neither
+    can be regenerated. Re-running the audit on a second machine overwrote the
+    file wholesale and silently lost them; the run prints "wrote ..." either way,
+    so the damage only shows up in a git diff someone happens to read.
+    """
+    return [m for m in HANDWRITTEN_MARKERS if m in existing and m not in report]
+
+
 def main() -> None:
     """CLI: ``python -m src.data.quarantine [--root DIR] [--out FILE]``."""
     import argparse
@@ -293,12 +311,28 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Audit the HiACC child quarantine")
     parser.add_argument("--root", default="data/raw/hiacc")
     parser.add_argument("--out", default="docs/qa/child_quarantine_check.md")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite the report even if it carries hand-written sections",
+    )
     args = parser.parse_args()
 
     result = audit(args.root)
     report = render_report(result)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
+
+    if out.exists() and not args.force:
+        handwritten = would_lose_handwritten(out.read_text(encoding="utf-8"), report)
+        if handwritten:
+            print(f"REFUSING to overwrite {out}")
+            print(f"  it carries hand-written content the audit cannot regenerate: {handwritten}")
+            print("  write the fresh audit elsewhere:")
+            print(f"    python -m src.data.quarantine --root {args.root} --out <new-file>.md")
+            print("  or pass --force if you have preserved what matters.")
+            raise SystemExit(2)
+
     out.write_text(report, encoding="utf-8")
 
     print(f"wrote {out}")

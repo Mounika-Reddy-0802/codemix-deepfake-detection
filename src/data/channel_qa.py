@@ -40,6 +40,14 @@ ENERGY_QUANTILE = 0.99
 #: Above this fraction of energy over 4 kHz, the narrowband stage did not happen.
 MAX_HF_ENERGY_RATIO = 0.001
 
+#: How far the channel copy may be time-shifted before we stop looking for it.
+#: Real codecs delay their output: G.711 is sample-synchronous, but AMR-NB runs a
+#: 20 ms frame plus a lookahead, so its decoded audio arrives tens of milliseconds
+#: late. Measured at offset 0 that shift reads as near-zero correlation and a
+#: negative SNR -- the chain looks broken when it is merely delayed. 100 ms covers
+#: every narrowband codec we use with room to spare.
+MAX_ALIGNMENT_LAG_SECONDS = 0.1
+
 
 @dataclass(frozen=True)
 class PairMeasurement:
@@ -54,6 +62,7 @@ class PairMeasurement:
     correlation: float
     clipping_ratio: float
     duration_ratio: float
+    lag_samples: int
     band_limited: bool
     intact: bool
 
@@ -103,6 +112,45 @@ def spectral_bandwidth_hz(
     index = int(np.searchsorted(cumulative, quantile))
     freqs = np.fft.rfftfreq(signal.size, d=1.0 / sample_rate)
     return float(freqs[min(index, freqs.size - 1)])
+
+
+def estimate_lag(clean: np.ndarray, processed: np.ndarray, max_lag: int) -> int:
+    """Samples by which ``processed`` is delayed relative to ``clean``.
+
+    Found by picking the peak of the cross-correlation within ``+/- max_lag``,
+    computed via FFT so a 10-second clip costs milliseconds. A positive result
+    means the channel copy arrives late, which is what a framed codec does.
+    """
+    a = np.asarray(clean, dtype=np.float64)
+    b = np.asarray(processed, dtype=np.float64)
+    n = min(a.size, b.size)
+    max_lag = int(min(max_lag, max(n - 1, 0)))
+    if n < 2 or max_lag < 1:
+        return 0
+    a, b = a[:n] - a[:n].mean(), b[:n] - b[:n].mean()
+
+    size = 1 << (2 * n - 1).bit_length()
+    # irfft(conj(A) * B)[k] == sum_i a[i] * b[i + k]; a positive peak index means
+    # b must be advanced by k to line up, i.e. b lags a by k.
+    xcorr = np.fft.irfft(np.conj(np.fft.rfft(a, size)) * np.fft.rfft(b, size), size)
+    forward = xcorr[: max_lag + 1]  # b lags a
+    backward = xcorr[size - max_lag :]  # b leads a
+    values = np.concatenate([forward, backward])
+    lags = np.concatenate([np.arange(max_lag + 1), np.arange(-max_lag, 0)])
+    return int(lags[int(np.argmax(values))])
+
+
+def align(clean: np.ndarray, processed: np.ndarray, max_lag: int) -> tuple[np.ndarray, np.ndarray]:
+    """Trim both signals to their best-matching overlap. Returns the aligned pair."""
+    lag = estimate_lag(clean, processed, max_lag)
+    a = np.asarray(clean, dtype=np.float64)
+    b = np.asarray(processed, dtype=np.float64)
+    if lag > 0:
+        b = b[lag:]
+    elif lag < 0:
+        a = a[-lag:]
+    n = min(a.size, b.size)
+    return a[:n], b[:n]
 
 
 def measured_snr_db(clean: np.ndarray, processed: np.ndarray) -> float:
@@ -157,13 +205,24 @@ def measure_pair(
     pair_id: int = 0,
     min_correlation: float = 0.3,
 ) -> PairMeasurement:
-    """Measure one clean/channel pair against the protocol's claims."""
+    """Measure one clean/channel pair against the protocol's claims.
+
+    Spectral and level measures use the raw signals; the two that compare the pair
+    sample by sample (SNR and correlation) use the codec-delay-aligned overlap, so
+    a framed codec is judged on what it did to the audio rather than on when it
+    delivered it.
+    """
     bw_clean = spectral_bandwidth_hz(clean, sample_rate)
     bw_channel = spectral_bandwidth_hz(channel, sample_rate)
     hf_clean = high_frequency_energy_ratio(clean, sample_rate)
     hf_channel = high_frequency_energy_ratio(channel, sample_rate)
-    snr = measured_snr_db(clean, channel)
-    corr = correlation(clean, channel)
+
+    max_lag = int(MAX_ALIGNMENT_LAG_SECONDS * sample_rate)
+    lag = estimate_lag(clean, channel, max_lag)
+    aligned_clean, aligned_channel = align(clean, channel, max_lag)
+    snr = measured_snr_db(aligned_clean, aligned_channel)
+    corr = correlation(aligned_clean, aligned_channel)
+
     clip = clipping_ratio(channel)
     ratio = (len(channel) / len(clean)) if len(clean) else 0.0
 
@@ -185,6 +244,7 @@ def measure_pair(
         correlation=round(corr, 4),
         clipping_ratio=round(clip, 6),
         duration_ratio=round(ratio, 4),
+        lag_samples=int(lag),
         band_limited=bool(band_limited),
         intact=bool(intact),
     )

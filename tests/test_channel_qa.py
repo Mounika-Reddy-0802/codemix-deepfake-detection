@@ -141,3 +141,78 @@ def test_summary_of_nothing_is_not_a_pass() -> None:
     summary = qa.summarise([])
     assert summary["all_band_limited"] is False
     assert summary["all_intact"] is False
+
+
+# --------------------------------------------------------------------------- #
+# Codec delay alignment
+# --------------------------------------------------------------------------- #
+# G.711 hands back sample-synchronous audio; AMR-NB does not -- it runs a 20 ms
+# frame plus a lookahead, so on the real corpus its output arrives ~4.8 ms (76-80
+# samples at 16 kHz) late. Compared at offset 0 that reads as correlation ~0 and a
+# negative SNR, and 15 of 20 pairs "failed" a chain that was working correctly.
+def _delayed(signal: np.ndarray, samples: int) -> np.ndarray:
+    """Shift ``signal`` later by ``samples``, keeping its length."""
+    if samples >= 0:
+        return np.concatenate([np.zeros(samples, dtype=signal.dtype), signal])[: signal.size]
+    return np.concatenate([signal[-samples:], np.zeros(-samples, dtype=signal.dtype)])
+
+
+def test_lag_of_an_unshifted_pair_is_zero() -> None:
+    signal = _tone(400)
+    assert qa.estimate_lag(signal, signal, 1600) == 0
+
+
+def test_lag_recovers_a_known_delay() -> None:
+    rng = np.random.default_rng(0)
+    signal = rng.standard_normal(SR).astype(np.float64)
+    for delay in (37, 80, 160):
+        assert qa.estimate_lag(signal, _delayed(signal, delay), 1600) == delay
+
+
+def test_lag_recovers_a_negative_delay() -> None:
+    rng = np.random.default_rng(1)
+    signal = rng.standard_normal(SR).astype(np.float64)
+    assert qa.estimate_lag(signal, _delayed(signal, -80), 1600) == -80
+
+
+def test_alignment_restores_correlation_destroyed_by_delay() -> None:
+    rng = np.random.default_rng(2)
+    signal = rng.standard_normal(SR).astype(np.float64)
+    delayed = _delayed(signal, 80)
+    assert abs(qa.correlation(signal, delayed)) < 0.1  # the failure being fixed
+    assert qa.correlation(*qa.align(signal, delayed, 1600)) > 0.99
+
+
+def _narrowband_noise(seconds: float = 1.0, sr: int = SR, seed: int = 4) -> np.ndarray:
+    """Noise low-passed below 4 kHz: band-limited like the channel output, and
+    aperiodic, so a delay is unambiguous.
+
+    A pure tone cannot stand in here. At 400 Hz its period is 40 samples, so a
+    delay of 80 is exactly two periods and is genuinely indistinguishable from no
+    delay at all -- the estimator is right to call it 0. Speech is not periodic
+    like that, and neither is this.
+    """
+    rng = np.random.default_rng(seed)
+    n = int(seconds * sr)
+    spectrum = np.fft.rfft(rng.standard_normal(n))
+    spectrum[np.fft.rfftfreq(n, 1.0 / sr) > 3500.0] = 0.0
+    signal = np.fft.irfft(spectrum, n)
+    return (0.3 * signal / np.max(np.abs(signal))).astype(np.float32)
+
+
+def test_a_delayed_band_limited_copy_still_measures_as_intact() -> None:
+    clean = _narrowband_noise()
+    result = qa.measure_pair(clean, _delayed(clean, 80), SR, pair_id=5)
+    assert result.lag_samples == 80
+    assert result.band_limited is True
+    assert result.intact is True
+    assert result.correlation > 0.9  # would be ~0 without alignment
+
+
+def test_alignment_never_rescues_genuinely_unrelated_audio() -> None:
+    # A shift is forgiven; a different signal is not. Otherwise the metric would
+    # pass anything by sliding it until something lined up.
+    rng = np.random.default_rng(3)
+    clean = rng.standard_normal(SR).astype(np.float64)
+    unrelated = rng.standard_normal(SR).astype(np.float64)
+    assert qa.correlation(*qa.align(clean, unrelated, 1600)) < 0.3
