@@ -43,6 +43,14 @@ data/**
 # The derived speaker_ranking.csv and the frozen speaker_pools.csv ARE committed.
 data/manifests/clip_index.csv
 
+# Same reason: the train/dev/eval manifests carry an absolute `filepath` per row,
+# so a committed copy would point at one machine's disk and silently resolve to
+# nothing on another. They are rebuilt from clip_index.csv + speaker_pools.csv,
+# and speaker_pools.csv (the part that must not drift) IS committed and hashed.
+data/manifests/train.csv
+data/manifests/dev.csv
+data/manifests/eval.csv
+
 checkpoints/**
 !checkpoints/**/
 !checkpoints/**/.gitkeep
