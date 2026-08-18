@@ -31,3 +31,4 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-13 | W3-T2 | ALL | dev | listening test passed: all three rated 20 pairs, telephony 4.0/5, intelligible 4.0/5; channel protocol verified for g711 at 20 db |
 | 2026-08-13 | W3-T5 | SK | dev | xtts pilot pack ready: 20 jobs, 4 script/tag cells x 5 train-pool speakers, refs cut; generation needs a kaggle gpu (no coqui tts on py3.13, no cuda here) |
 | 2026-08-13 | W3-T5 | SK | dev | colab notebook for the xtts pilot; platform moved kaggle -> colab, week-5 compute plan flagged for revision |
+| 2026-08-17 | W3-T2 | L | week3-lahari-preprocess-mucs-hiacc | quarantine re-verified on the gpu laptop: same 3318/1858/24 as dev, 0 outside quarantine, no CH* id in any manifest; audit now refuses to overwrite the hand-written report; AD63 undocumented, not usable as a reference |
