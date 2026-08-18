@@ -31,3 +31,8 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-13 | W3-T2 | ALL | dev | listening test passed: all three rated 20 pairs, telephony 4.0/5, intelligible 4.0/5; channel protocol verified for g711 at 20 db |
 | 2026-08-13 | W3-T5 | SK | dev | xtts pilot pack ready: 20 jobs, 4 script/tag cells x 5 train-pool speakers, refs cut; generation needs a kaggle gpu (no coqui tts on py3.13, no cuda here) |
 | 2026-08-13 | W3-T5 | SK | dev | colab notebook for the xtts pilot; platform moved kaggle -> colab, week-5 compute plan flagged for revision |
+| 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | devanagari -> latin transliteration (P-014): mucs is 98.2% devanagari-bearing so hinglish had to be produced, not filtered; 0 unmapped chars across 56143 transcripts |
+| 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | pilot packs reproducible across machines (P-016): whole-second durations made the old tie-break filesystem-dependent, so the two laptops swapped speakers 4 and 5 in every cell |
+| 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | xtts char limit now applied to the romanised text (P-015): romanisation inflates length ~13%, which put 14 of 20 pilot transcripts over the 150-char hindi cap |
+| 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | script a/b generated on gpu (rtx 3050): 20 romanised + 20 devanagari, matched speaker/sentence/tag, 0 failures; blind sheet + answer key for 3 raters |
+| 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | a/b pre-screen: median 13.9 vs 14.4 chars/sec (devanagari vs romanised), so romanisation does not slow or truncate speech; 1 clip of 40 silently produced 0.83 s from 150 chars -- week-4 needs a duration auto-filter |
