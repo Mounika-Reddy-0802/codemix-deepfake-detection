@@ -44,21 +44,43 @@ python -m src.utils.env_check --encoders   # + load the three SSL encoders
 ## Numbers
 
 - **17 tests** in `test_env_check.py`, all green; `ruff` clean.
-- Current environment on this machine: **ok=3, missing=7, error=0, manual=8** —
-  i.e. 7 blocking issues before Week-4 generation and 8 items only a human can
-  confirm. `WANDB_API_KEY` and `HF_TOKEN` are unset; `torch`/`pandas`/`numpy`
-  import, `transformers`/`librosa`/`soundfile`/`torchaudio` do not.
+- Environment on the **GPU laptop** (17 Aug): **ok=8, missing=2, error=0, manual=8**
+  — up from `ok=3, missing=7` on the dev laptop. The full ML stack now imports
+  (`torch 2.8.0+cu128`, `transformers 4.57.6`, `librosa 0.11.0`, `soundfile`,
+  `pandas`, `numpy`) and CUDA resolves to an RTX 3050 6 GB. The 2 remaining
+  blockers are `WANDB_API_KEY` and `HF_TOKEN`, both unset.
+- Getting from 3 to 8 needed three dependency pins corrected — `librosa` 0.11.0
+  (coqui-tts floors it), `huggingface-hub` 0.36.2 (transformers 4.57 needs ≥0.34)
+  and `websockets` 12.0 (gradio-client caps it below 13). Before that,
+  `pip install -r requirements.txt` failed outright with `ResolutionImpossible`.
 - AffectDF figures cited above are read from the PDF's Tables 2, 13 and 14.
 - Appendix-G target for W5-T4: their low-level logistic regression reaches
   **53.16% EER** on AffectDF test (near chance). Ours must land near chance too,
   or the pipeline is leaking a shortcut.
 
+## The compute plan changed under us
+
+The v2 plan sizes Weeks 5–9 around *3 Kaggle accounts × 30 GPU-hours/week*, with S1
+and S3 training in parallel on separate accounts (W5-T3). Two things broke that:
+
+- The pilot platform moved Kaggle → Colab → **the team's own GPU laptop**. Colab has
+  no comparable weekly quota and disconnects idle sessions; the laptop has one
+  RTX 3050, so there is no parallelism at all.
+- **6 GB of VRAM is tight for training.** Generation fits comfortably; wav2vec2 /
+  WavLM fine-tuning at a useful batch size may not.
+
+**Revisit the Week-5 training plan before launching S1/S3** — buy Colab Pro, keep
+Kaggle purely for the long runs, or serialise S1 then S3. This is a decision, not a
+detail: it sets how long Weeks 5–9 actually take.
+
 ## What's next (blocked on humans)
 
+- **`WANDB_API_KEY` and `HF_TOKEN` unset** — the 2 machine-checkable blockers.
 - **Kaggle GPU on all three accounts unverified** — needs a login per account.
-- **W&B project and HF token not created/set**; IndicVoices and IndicTTS-Deepfake
-  terms not accepted (both gated, browser-only).
-- **ASVspoof 2019 LA not downloaded** — the S1 anchor. Blocked on "run downloads
-  now".
+- **IndicVoices / IndicTTS-Deepfake terms not accepted** (gated, browser-only).
+- **ASVspoof 2019 LA still not downloaded** — the S1 anchor, and Stage-1's *only*
+  training corpus. The local pull stalled at 25 % (1.75 GB of 7.11 GB) because
+  `datashare.ed.ac.uk` resets on sustained transfers. **Nothing trains until this
+  lands**, which makes it the single highest-value item on this list.
 - Sample counts in the taxonomy are **targets**; real counts land at the Week-5
   freeze after Week-4 generation.
