@@ -40,7 +40,12 @@ HIACC_EXCLUDED="${HIACC_DIR}/_EXCLUDED_children"
 # ASVspoof 2019 LA partition (handle 10283/3336). The LA.zip bitstream:
 ASV_LA_URL="https://datashare.ed.ac.uk/bitstream/handle/10283/3336/LA.zip?sequence=3&isAllowed=y"
 ASV_LA_ZIP="${ASV_DIR}/LA.zip"
-ASV_LA_APPROX_BYTES=$((23 * 1024 * 1024 * 1024))   # ~23-24 GB, sanity check only
+# MEASURED from the server's Content-Length on 13 Aug 2026: 7,635,735,168 bytes
+# (~7.11 GB). The earlier "~23 GB" figure was wrong, and because check_min_size
+# warns below HALF the expected size, a perfectly complete 7.11 GB download was
+# reported as "far below the expected ~23 GB" -- an alarm that invites someone to
+# delete a good archive and spend three hours re-fetching it.
+ASV_LA_APPROX_BYTES=7635735168                     # ~7.11 GB
 
 # MUCS 2021 subtask-2 code-switching, Hindi-English only (skip Bengali-English):
 MUCS_TRAIN_URL="https://www.openslr.org/resources/104/Hindi-English_train.tar.gz"
@@ -292,13 +297,119 @@ EOF
 }
 
 # =============================================================================
+# EXTRACT-ONLY -- the archives are already on disk
+#
+# The second laptop (and any machine the corpora are copied to rather than
+# downloaded on) starts with the archives already present. Re-downloading 25 GB
+# to get an identical extract is wasteful, and extracting by hand is how the
+# child quarantine gets skipped. This path runs the *same* extraction and the
+# *same* quarantine sweep as --run, with no network.
+#
+#   DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only
+#   DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only --archives /e/archives
+# =============================================================================
+ARCHIVE_DIR="${ARCHIVE_DIR:-}"
+
+# Print the first archive matching any pattern, looked up in the corpus directory
+# and then in --archives. Returns 1 when nothing matches, so a missing corpus is
+# reported rather than silently producing an empty extract.
+find_archive() {
+  local dir="$1"; shift
+  local pattern candidate
+  for pattern in "$@"; do
+    for candidate in "${dir}"/$pattern; do
+      [ -f "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+    done
+    if [ -n "$ARCHIVE_DIR" ]; then
+      for candidate in "${ARCHIVE_DIR}"/$pattern; do
+        [ -f "$candidate" ] && { printf '%s\n' "$candidate"; return 0; }
+      done
+    fi
+  done
+  return 1
+}
+
+extract_asvspoof() {
+  log "=== ASVspoof 2019 LA -- extract only ==="
+  local archive
+  if ! archive="$(find_archive "$ASV_DIR" 'LA.zip')"; then
+    warn "no LA.zip found in ${ASV_DIR}${ARCHIVE_DIR:+ or ${ARCHIVE_DIR}} -- skipping ASVspoof"
+    return 0
+  fi
+  check_min_size "$archive" "$ASV_LA_APPROX_BYTES"
+  mkdir -p "$ASV_DIR"
+  log "extracting $(basename "$archive") ..."
+  ( cd "$ASV_DIR" && unzip -n -q "$archive" ) || warn "unzip reported issues; inspect $ASV_DIR"
+  log "ASVspoof 2019 LA ready under ${ASV_DIR}/LA"
+}
+
+extract_mucs() {
+  log "=== MUCS 2021 Hindi-English -- extract only ==="
+  mkdir -p "$MUCS_DIR"
+  local found=0 archive
+  if archive="$(find_archive "$MUCS_DIR" 'Hindi-English_train.tar.gz')"; then
+    log "extracting $(basename "$archive") ..."
+    tar -xzf "$archive" -C "$MUCS_DIR"; found=1
+  fi
+  if archive="$(find_archive "$MUCS_DIR" 'Hindi-English_test.tar.gz')"; then
+    log "extracting $(basename "$archive") ..."
+    tar -xzf "$archive" -C "$MUCS_DIR"; found=1
+  fi
+  [ "$found" -eq 1 ] || warn "no MUCS archives found -- skipping MUCS"
+  log "MUCS ready under ${MUCS_DIR}"
+}
+
+extract_hiacc() {
+  log "=== HiACC -- extract only (ADULT subset kept, CHILD quarantined) ==="
+  mkdir -p "$HIACC_DIR"
+  local archive
+  if ! archive="$(find_archive "$HIACC_DIR" '*.zip' '*.tar.gz')"; then
+    warn "no HiACC archive found in ${HIACC_DIR}${ARCHIVE_DIR:+ or ${ARCHIVE_DIR}} -- skipping HiACC"
+    return 0
+  fi
+  log "extracting $(basename "$archive") ..."
+  case "$archive" in
+    *.zip)    ( cd "$HIACC_DIR" && unzip -n -q "$archive" ) ;;
+    *.tar.gz) tar -xzf "$archive" -C "$HIACC_DIR" ;;
+    *)        die "unknown HiACC archive type: ${archive}" ;;
+  esac
+  # Non-negotiable: the same sweep the download path runs, on the same patterns,
+  # and it still dies if a child-looking folder survives it.
+  quarantine_hiacc_children
+}
+
+run_extract_only() {
+  local only="$1"
+  mkdir -p "$LOG_DIR"
+  log "EXTRACT-ONLY mode: no network. data root: ${DATA_ROOT}"
+  [ -n "$ARCHIVE_DIR" ] && log "also looking for archives in: ${ARCHIVE_DIR}"
+  case "$only" in
+    all)      extract_asvspoof; extract_mucs; extract_hiacc ;;
+    asvspoof) extract_asvspoof ;;
+    mucs)     extract_mucs ;;
+    hiacc)    extract_hiacc ;;
+    *)        die "unknown --only target: ${only} (asvspoof|mucs|hiacc|all)" ;;
+  esac
+  cat <<EOF
+
+Extraction done. Next, to reach the same state as the other machine:
+
+  python -m src.data.quarantine --root "${HIACC_DIR}"     # audit the child exclusion
+  python -m src.data.corpora --data-root "${DATA_ROOT}"   # rebuild clip_index.csv
+
+speaker_pools.csv is FROZEN and committed -- do not regenerate it. The pools must
+be byte-identical across machines or the gap matrix is not comparable.
+EOF
+}
+
+# =============================================================================
 # dry-run plan (default) vs real run (--run)
 # =============================================================================
 print_plan() {
   cat <<EOF
 DRY RUN -- nothing downloaded. This script would fetch, into data/raw/:
 
-  ASVspoof 2019 LA   ~23-24 GB   ${ASV_LA_URL%%\?*}
+  ASVspoof 2019 LA   ~7.1 GB    ${ASV_LA_URL%%\?*}
   MUCS train         ~7.3 GB     ${MUCS_TRAIN_URL}
   MUCS test          ~443 MB     ${MUCS_TEST_URL}
   HiACC              ~532 MB     (URL + md5 resolved from ${HIACC_ZENODO_API})
@@ -315,20 +426,33 @@ To actually download (only when the team says "run downloads now"):
   nohup bash scripts/01_download_data.sh --run > data/raw/logs/download_main.log 2>&1 &
 
 Or one corpus at a time:  bash scripts/01_download_data.sh --run --only hiacc
+
+ALREADY HAVE THE ARCHIVES (second laptop, copied drive)? Extract them in place,
+with the same child quarantine and no network:
+
+  DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only
+  DATA_ROOT=/d/dfdata bash scripts/01_download_data.sh --extract-only --archives /e/archives
 EOF
 }
 
 main() {
-  local do_run=0 only="all"
+  local do_run=0 extract_only=0 only="all"
   while [ $# -gt 0 ]; do
     case "$1" in
       --run) do_run=1 ;;
+      --extract-only) extract_only=1 ;;
+      --archives) shift; ARCHIVE_DIR="${1:-}" ;;
       --only) shift; only="${1:-all}" ;;
       -h|--help) print_plan; exit 0 ;;
-      *) die "unknown argument: $1 (use --run, --only <name>, or --help)" ;;
+      *) die "unknown argument: $1 (use --run, --extract-only, --archives <dir>, --only <name>, or --help)" ;;
     esac
     shift
   done
+
+  if [ "$extract_only" -eq 1 ]; then
+    run_extract_only "$only"
+    exit 0
+  fi
 
   if [ "$do_run" -eq 0 ]; then
     print_plan
@@ -343,10 +467,10 @@ main() {
   warn_if_cloud_synced
   # Archives + extracted copies roughly double the download size.
   case "$only" in
-    asvspoof) check_disk_space 50 ;;
+    asvspoof) check_disk_space 17 ;;
     mucs)     check_disk_space 17 ;;
     hiacc)    check_disk_space 2  ;;
-    *)        check_disk_space 68 ;;
+    *)        check_disk_space 35 ;;
   esac
 
   log "RUN mode: downloads starting. Logs in ${LOG_DIR}"

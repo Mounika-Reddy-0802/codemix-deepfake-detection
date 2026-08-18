@@ -139,20 +139,25 @@ signature. **Ordered by what unblocks the most.**
       `Mounika-Reddy-0802/codemix-deepfake-detection`.
 - [ ] Then push, each branch under its own account (commands in the session report).
 
-## 1. BLOCKING ALL GENERATION — mentor ethics sign-off (W3-T1)
+## 1. ~~BLOCKING ALL GENERATION~~ — mentor ethics sign-off (W3-T1) — **CLEARED**
 
-- [ ] Mentor reviews `docs/licences.md` + `docs/ethics/README.md` and **signs the
+- [x] Mentor reviewed `docs/licences.md` + `docs/ethics/README.md` and **signed the
       ethics note on the REVISED v2 scope**: larger spoof volume (~4,000+ XTTS
       utterances), **RVC added** as a second attack family, and **AffectDF
       cross-evaluation** (CC BY-NC 4.0, research use).
-- [ ] Scan to `docs/ethics/mentor_signoff_<date>.pdf`.
+- [x] Scanned to `docs/ethics/mentor_signoff_2026-08-12.pdf` (12 Aug 2026).
 
-Verify the gate opens: `python -m src.data.ethics_gate` must exit 0. Until then
-the XTTS pilot, the RVC pilot, Tortoise, and all Week-4 generation refuse to run —
-there is no override flag.
+`python -m src.data.ethics_gate` exits 0: *"ethics gate OPEN: signed note found
+(mentor_signoff_2026-08-12.pdf)"*. The XTTS pilot, the RVC pilot, Tortoise and
+Week-4 generation are all permitted.
 
-**Plan escalation rule:** if this has not happened by **end of Wednesday**,
-escalate to the mentor in person. Every downstream week slips otherwise.
+> The signed PDF is **gitignored** (`.gitignore` line 15 — it carries real
+> signatures), so it does not appear in `git status` and a fresh clone will not
+> have it. **Run the gate, do not read this checklist**, when you need to know
+> whether generation is permitted — and copy the PDF into `docs/ethics/` by hand
+> on any new machine (Colab included; the notebook's step 3 does this from Drive).
+
+**Generation is now gated on compute, not ethics** — see section 8.
 
 ## 2. Review + merge the open PRs (W3-T1)
 
@@ -197,9 +202,21 @@ close this gate** — it pattern-matches; a human confirms the real layout.
       telephony, fully intelligible in both languages. Telephony 4.0/5,
       intelligibility 4.0/5, 60/60 rows rated. Written up in
       `docs/qa/channel_sim_verdict.md`; objective measurement passed 20/20.
-- [ ] **AMR-NB still unverified** — `ffmpeg` is not installed, so `channel_sim`
-      silently falls back to G.711. Install ffmpeg and re-run both halves of the
-      check before any AMR-NB condition is reported.
+- [x] **AMR-NB objective half done (13 Aug 2026).** ffmpeg 9.0 installed
+      (`winget install Gyan.FFmpeg`), so `channel_sim` runs real AMR-NB instead of
+      falling back. 20/20 pass. AMR-NB is materially harsher than G.711: 5.57 dB
+      SNR vs 17.62, correlation 0.885 vs 0.991. Numbers in
+      `docs/qa/channel_sim_verdict.md` §3.
+- [ ] **AMR-NB listening pass outstanding** — L, M, SK rate the 20 pairs at
+      `<DATA_ROOT>/processed/listening_test_amr/` into
+      `docs/qa/channel_sim_listening_sheet_amr.csv`. Until then an AMR-NB column
+      is verified by measurement only and must not be reported as ear-checked.
+
+> **ffmpeg note for the other two machines.** `winget install Gyan.FFmpeg` gives
+> the CLI (enough for AMR-NB). If you also generate spoofs locally you need
+> `winget install Gyan.FFmpeg.Shared` too — `torchcodec`, which the TTS stack
+> requires from torch 2.9, loads FFmpeg's shared DLLs and the default build is
+> statically linked. Put its `bin/` on PATH.
 
 ## 6. Speaker selection + pool freeze (W3-T4)
 
@@ -225,13 +242,33 @@ Run `python -m src.utils.env_check` — it reports what it can and labels the re
 - [ ] Colab GPU runtime confirmed.
 - [ ] Paste every link into the resource table in `README.md`.
 
-## 8. Pilots — AFTER the sign-off only (W3-T5)
+## 8. Pilots — sign-off obtained, ready to run (W3-T5)
 
-- [ ] XTTS-v2 pilot: 20 clips (Devanagari vs romanised script, `hi` vs `en` tag).
+**Platform: Google Colab** (team decision, 13 Aug 2026 — replaces Kaggle).
+Run `notebooks/pilot_xtts_colab.ipynb` on a T4 runtime.
+
+- [ ] Upload to Drive: `C:\dfdata\generated\pilot\` → `MyDrive/capstone/pilot/`
+      and the signed PDF → `MyDrive/capstone/ethics/`. The signed note is
+      gitignored, so cloning the repo will NOT bring it — without it the ethics
+      gate refuses and nothing generates.
+- [ ] Run the notebook: 20 clips, 4 script/tag cells × the same 5 train-pool
+      speakers (constant speakers so the cells are comparable).
 - [ ] RVC pilot: 1 speaker model, 10 conversions.
 - [ ] **All three rate all 30** and agree the quality bar; record the four
       decisions in `docs/problems_and_decisions.md`
       (script, language tag, quality bar, RVC viability).
+
+> **Compute-plan consequence of moving to Colab.** The v2 plan sizes Weeks 5–9
+> around *3 Kaggle accounts × 30 GPU-hours/week*, with S1 and S3 training in
+> parallel on separate accounts (W5-T3). Colab has no comparable weekly quota and
+> disconnects idle sessions, so that parallelism no longer holds. **Revisit the
+> Week-5 training plan before launching S1/S3** — decide whether to buy Colab Pro,
+> keep Kaggle purely for the long training runs, or serialise S1 then S3.
+
+> **ASVspoof via Colab too.** The local download stalled at 25% (1.75 GB of
+> 7.11 GB) — `datashare.ed.ac.uk` resets the connection after sustained
+> transfers. Since S1 trains on Colab anyway, fetch it there or from a Drive
+> mirror instead of fighting the throttle.
 
 ## 9. Log book
 
