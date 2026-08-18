@@ -38,3 +38,8 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | xtts char limit now applied to the romanised text (P-015): romanisation inflates length ~13%, which put 14 of 20 pilot transcripts over the 150-char hindi cap |
 | 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | script a/b generated on gpu (rtx 3050): 20 romanised + 20 devanagari, matched speaker/sentence/tag, 0 failures; blind sheet + answer key for 3 raters |
 | 2026-08-17 | W3-T5 | SK | week3-krishna-xtts-rvc-pilot | a/b pre-screen: median 13.9 vs 14.4 chars/sec (devanagari vs romanised), so romanisation does not slow or truncate speech; 1 clip of 40 silently produced 0.83 s from 150 chars -- week-4 needs a duration auto-filter |
+| 2026-08-19 | W4-T1 | L | week3-krishna-xtts-rvc-pilot | xtts generation at scale complete: 4,000 clips over 25 train-pool speakers (160 each), 1,404 transcripts cross-paired, 6.91 h of audio, 0 generator exceptions |
+| 2026-08-19 | W4-T6 | L | week3-krishna-xtts-rvc-pilot | quality screen caught 116 clips (2.9%) that raised nothing: stalled 3-6 c/s, truncated 31-92 c/s, or under 1 s |
+| 2026-08-19 | W4-T6 | L | week3-krishna-xtts-rvc-pilot | 95 of those 116 came from speaker 987461 alone, whose reference was 25 s at 89% silence (2.65 s of voice) |
+| 2026-08-19 | W4-T6 | L | week3-krishna-xtts-rvc-pilot | references now ranked by effective speech seconds, not duration; 987461 re-cut 2.65 s -> 12.34 s, 5 of 25 refs were under threshold |
+| 2026-08-19 | W4-T1 | L | week3-krishna-xtts-rvc-pilot | after re-cut + regeneration: 3,998 of 4,000 usable (99.95%, was 97.1%); the 2 rejects are borderline slow, both speakers keep 159 |
