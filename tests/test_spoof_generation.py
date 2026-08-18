@@ -96,3 +96,72 @@ def test_generation_is_blocked_before_the_tool_check_when_unsigned(closed_ethics
     )
     with pytest.raises(EthicsGateError):
         sg.generate_batch([job], model=None, metadata_path="unused.jsonl")
+
+
+# --------------------------------------------------------------------------- #
+# Metadata reconciliation
+# --------------------------------------------------------------------------- #
+# The log is append-only, so regenerating a clip (delete the wav, run again)
+# leaves the superseded record beside the new one. The real pilot ended up with
+# 25 records for 20 files, five describing transcripts no longer on disk. This
+# file is the provenance the datasheet is built from, so a stale record is worse
+# than a missing one -- it misreports what the corpus contains.
+def _record(path: str, transcript: str) -> dict:
+    return {
+        "output_path": path,
+        "tool": "xtts_v2",
+        "speaker": "trn0",
+        "reference_wav": "refs/trn0.wav",
+        "transcript": transcript,
+        "language": "hi",
+        "pool": "train",
+        "seed": 1,
+        "settings": {},
+    }
+
+
+def test_last_record_wins_for_a_regenerated_clip(tmp_path) -> None:
+    clip = tmp_path / "a.wav"
+    clip.write_bytes(b"RIFF")
+    records = [_record(str(clip), "old 250-char text"), _record(str(clip), "new 150-char text")]
+    kept = sg.reconcile_metadata(records)
+    assert len(kept) == 1
+    assert kept[0]["transcript"] == "new 150-char text"
+
+
+def test_records_without_a_file_are_dropped(tmp_path) -> None:
+    present = tmp_path / "present.wav"
+    present.write_bytes(b"RIFF")
+    records = [_record(str(present), "kept"), _record(str(tmp_path / "gone.wav"), "deleted")]
+    kept = sg.reconcile_metadata(records)
+    assert [r["transcript"] for r in kept] == ["kept"]
+
+
+def test_require_file_false_keeps_orphans(tmp_path) -> None:
+    records = [_record(str(tmp_path / "gone.wav"), "deleted")]
+    assert len(sg.reconcile_metadata(records, require_file=False)) == 1
+
+
+def test_rewrite_metadata_makes_the_log_match_disk(tmp_path) -> None:
+    clip = tmp_path / "a.wav"
+    clip.write_bytes(b"RIFF")
+    log = tmp_path / "metadata.jsonl"
+    for record in (
+        _record(str(clip), "old"),
+        _record(str(clip), "new"),
+        _record(str(tmp_path / "gone.wav"), "orphan"),
+    ):
+        sg.append_metadata(sg.GenerationRecord(**record), str(log))
+
+    assert len(sg.read_metadata(str(log))) == 3
+    assert sg.rewrite_metadata(str(log)) == 1
+    remaining = sg.read_metadata(str(log))
+    assert [r["transcript"] for r in remaining] == ["new"]
+
+
+def test_stats_over_a_reconciled_log_count_each_file_once(tmp_path) -> None:
+    clip = tmp_path / "a.wav"
+    clip.write_bytes(b"RIFF")
+    records = [_record(str(clip), "old"), _record(str(clip), "new")]
+    assert sg.generation_stats(records)["total"] == 2  # raw log double-counts
+    assert sg.generation_stats(sg.reconcile_metadata(records))["total"] == 1
