@@ -103,6 +103,26 @@ python -m src.utils.device        # MUST print a GPU name, not "cpu"
 python -m pytest -q               # 337 tests
 ```
 
+### Pre-fetch the XTTS-v2 model (saves an hour of grief)
+
+The first generation run downloads ~1.9 GB of model weights through Coqui's own
+downloader, which has **no resume**. On a domestic connection that is 20+ minutes,
+and if the run is interrupted the next one starts again from zero.
+
+Pull the same files from Hugging Face instead — it resumes, and it is faster:
+
+```powershell
+python -c "from huggingface_hub import hf_hub_download as d; [d('coqui/XTTS-v2', f, local_dir=r'$env:LOCALAPPDATA\tts\tts_models--multilingual--multi-dataset--xtts_v2') for f in ('config.json','vocab.json','speakers_xtts.pth','hash.md5','model.pth')]"
+```
+
+> **`hash.md5` is not optional.** Coqui decides a model is already present by
+> comparing that file's contents to the checksum in its `models.json`; if the file
+> is missing it logs *"has been updated, clearing model cache..."* and re-downloads
+> everything — **deleting the model.pth you just fetched**. Downloading the four
+> obvious files and skipping the 32-byte one costs the whole 1.9 GB again. It is a
+> version marker, not a checksum of `model.pth`, so its contents will not match
+> that file's actual md5.
+
 ---
 
 ## 3. Get the three things git will NOT bring
