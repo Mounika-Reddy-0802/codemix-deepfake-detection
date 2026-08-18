@@ -34,6 +34,8 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from src.data.transliteration import to_roman
+
 #: Devanagari code block, used to classify a transcript's script.
 DEVANAGARI_START, DEVANAGARI_END = "\u0900", "\u097f"
 
@@ -104,7 +106,8 @@ JOB_COLUMNS = [
     "speaker",
     "pool",
     "reference_wav",
-    "transcript",
+    "transcript",  # what XTTS is handed -- romanised when the pack is romanised
+    "transcript_source",  # what MUCS/HiACC actually wrote, kept for provenance
     "script_class",
     "language",
     "tool",
@@ -126,6 +129,10 @@ class PilotConfig:
     min_transcript_chars: int = MIN_TRANSCRIPT_CHARS
     seed: int = 1234
     tool: str = "xtts_v2"
+    #: Transliterate Devanagari to Latin before handing text to XTTS (team
+    #: decision, 17 Aug 2026: the corpus is written in one script, and it is
+    #: Latin). The source text is preserved in ``transcript_source``.
+    romanise: bool = False
 
 
 # --------------------------------------------------------------------------- #
@@ -187,8 +194,21 @@ def choose_references(
     ]
     if candidates.empty:
         return candidates
+    # Duration alone does not order these uniquely: MUCS segment durations are
+    # whole seconds, so ties are the rule rather than the exception (177570 and
+    # 850754 are both exactly 20.0 s). With only `duration_seconds` as the key the
+    # winner fell out of `clip_index.csv` row order, which follows the filesystem
+    # walk and therefore differs per machine -- the CPU laptop and the GPU laptop
+    # built the same pilot with speakers 4 and 5 swapped in every cell, so
+    # `deva_hi_04` was a different person on each and the rating sheet would have
+    # mis-attributed every score. `utt_id` is unique, so appending it makes both
+    # the speaker ordering AND the chosen clip per speaker reproducible anywhere.
     return (
-        candidates.sort_values("duration_seconds", ascending=False)
+        candidates.sort_values(
+            ["duration_seconds", "speaker", "utt_id"],
+            ascending=[False, True, True],
+            kind="stable",
+        )
         .drop_duplicates("speaker")
         .reset_index(drop=True)
     )
@@ -206,6 +226,15 @@ def pilot_char_limit() -> int:
     return min(char_limit(language) for _, _, language, _ in PILOT_CELLS)
 
 
+def spoken_text(text: str, romanise: bool) -> str:
+    """The string XTTS is actually handed for a transcript.
+
+    One function so that job assembly and the length/sayability filters can never
+    disagree about what the model receives -- the bug class P-010 documents.
+    """
+    return to_roman(text) if romanise else str(text)
+
+
 def choose_transcripts(
     index: pd.DataFrame,
     wanted: str,
@@ -213,6 +242,7 @@ def choose_transcripts(
     config: PilotConfig | None = None,
     language: str = "hi",
     max_chars: int | None = None,
+    romanise: bool = False,
 ) -> pd.DataFrame:
     """Pick ``n`` transcripts of a given script class: the longest XTTS can say.
 
@@ -221,19 +251,43 @@ def choose_transcripts(
     what :func:`is_synthesisable` allows: past the character limit XTTS truncates
     and synthesises only the opening fragment, and a digit under a ``hi`` tag
     crashes it outright. Unfiltered, "longest" quietly becomes "most truncated".
+
+    Two different strings are in play once ``romanise`` is on, and they are
+    measured for different things:
+
+    - **cell membership** uses the SOURCE script, because that is what makes a
+      sentence Hindi-heavy or English-heavy. After transliteration every
+      transcript is Latin, so classifying the output would collapse all cells
+      into one and the pilot would compare nothing.
+    - **length and sayability** use the TRANSLITERATED text, because that is what
+      XTTS receives. Romanisation inflates length by ~13% on average and up to
+      58%: measured on this corpus, 14 of the 20 pilot transcripts cross the
+      150-character Hindi limit once romanised. Filtering on the Devanagari
+      length would hand XTTS text it silently truncates -- exactly the failure
+      P-010 records, re-introduced through the back door.
     """
     cfg = config or PilotConfig()
     cap = char_limit(language) if max_chars is None else min(max_chars, char_limit(language))
     frame = index.dropna(subset=["transcript"]).copy()
     frame["transcript"] = frame["transcript"].astype(str)
-    lengths = frame["transcript"].str.len()
+    frame["script_class"] = frame["transcript"].map(script_class)  # source script
+    frame["spoken_text"] = frame["transcript"].map(lambda t: spoken_text(t, romanise))
+    lengths = frame["spoken_text"].str.len()
     frame = frame[(lengths >= cfg.min_transcript_chars) & (lengths <= cap)]
-    frame = frame[frame["transcript"].map(lambda t: is_synthesisable(t, language))]
+    frame = frame[frame["spoken_text"].map(lambda t: is_synthesisable(t, language))]
     if frame.empty:
         return frame
-    frame["script_class"] = frame["transcript"].map(script_class)
-    matching = frame[frame["script_class"] == wanted]
-    return matching.sort_values("transcript", key=lambda s: s.str.len(), ascending=False).head(n)
+    matching = frame[frame["script_class"] == wanted].copy()
+    # Same reproducibility trap as choose_references: thousands of MUCS
+    # transcripts share a character count, so ordering on length alone let the
+    # filesystem walk decide which ones the pilot used. `utt_id` is unique, so it
+    # settles every tie identically on any machine.
+    matching["_length"] = matching["spoken_text"].str.len()
+    return (
+        matching.sort_values(["_length", "utt_id"], ascending=[False, True], kind="stable")
+        .drop(columns="_length")
+        .head(n)
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -266,7 +320,13 @@ def build_pilot_jobs(
     shared_limit = pilot_char_limit()  # same utterance length in every cell
     for cell, wanted_script, language, _ in PILOT_CELLS:
         transcripts = choose_transcripts(
-            index, wanted_script, cfg.clips_per_cell, cfg, language, max_chars=shared_limit
+            index,
+            wanted_script,
+            cfg.clips_per_cell,
+            cfg,
+            language,
+            max_chars=shared_limit,
+            romanise=cfg.romanise,
         )
         for position in range(cfg.clips_per_cell):
             if position >= len(transcripts):
@@ -284,7 +344,8 @@ def build_pilot_jobs(
                     "speaker": speaker,
                     "pool": pool_of.get(speaker, "unknown"),
                     "reference_wav": f"refs/{speaker}.wav",
-                    "transcript": str(transcript_row["transcript"]),
+                    "transcript": str(transcript_row["spoken_text"]),
+                    "transcript_source": str(transcript_row["transcript"]),
                     "script_class": wanted_script,
                     "language": language,
                     "tool": cfg.tool,
@@ -359,13 +420,19 @@ def main() -> None:
     parser.add_argument(
         "--no-refs", action="store_true", help="write the job table without cutting reference wavs"
     )
+    parser.add_argument(
+        "--romanise",
+        action="store_true",
+        help="transliterate Devanagari to Latin before synthesis (Hinglish transcripts)",
+    )
     args = parser.parse_args()
 
     pack_dir = Path(args.pack_dir or (Path(args.data_root) / "generated" / "pilot"))
     index = pd.read_csv(args.index)
     pools = pd.read_csv(args.pools)
 
-    jobs = build_pilot_jobs(index, pools, out_dir="outputs")
+    config = PilotConfig(romanise=args.romanise)
+    jobs = build_pilot_jobs(index, pools, out_dir="outputs", config=config)
     Path(args.jobs_out).parent.mkdir(parents=True, exist_ok=True)
     jobs.to_csv(args.jobs_out, index=False)
     print(json.dumps(pilot_summary(jobs), indent=2))
