@@ -58,23 +58,72 @@ python -m src.data.listening_test --sheet-only
 python -m src.data.listening_test
 ```
 
-## Numbers
+## Numbers — measured on the real corpora
 
-- **56 tests** added/passing across `test_preprocess_quarantine.py` (7),
-  `test_quarantine.py` (15), `test_speaker_selection.py` (20),
-  `test_listening_test.py` (14). Full suite green, `ruff` clean.
-- **1 ethics-critical defect found and fixed** (quarantine bypass in the
-  preprocessing walk), **1 regex defect fixed** (`\b` vs `_` in the child pattern).
-- **0 corpus numbers.** MUCS and HiACC are not downloaded — no speaker counts, no
-  SNR distribution, no hours. Everything above is verified on synthetic trees.
+Downloads ran on 12 Aug; everything below is from the corpora on disk, not from
+synthetic trees.
 
-## What's next (blocked on humans)
+| | |
+|---|---|
+| MUCS utterances / speakers | **52,825 / 520** (89.55 h) |
+| HiACC adult clips / speakers | **3,318 / 24** (3.22 h) |
+| Total indexed | **56,143** clips across 544 speakers |
+| HiACC child files quarantined | **1,858** (of 5,176 total audio) |
+| Child ids reachable from any manifest | **0** |
+| Channel, G.711 @ 20 dB | 17.62 dB SNR, correlation 0.991, **20/20** |
+| Channel, AMR-NB | 5.57 dB SNR, correlation 0.885, **20/20** |
+| Listening test | telephony **4.0/5**, intelligibility **4.0/5**, 60/60 rows |
+| Tests | 56 added in Week 3; suite now **410 passed**, ruff clean |
 
-- **Downloads have not run** — waiting on the explicit "run downloads now". Until
-  then the quarantine audit reports `Root exists: True, Audio files: 0` and proves
-  nothing about HiACC.
-- **`docs/qa/child_quarantine_check.md` is unsigned.** The regex-vs-real-layout
-  question can only be closed by reading the HiACC documentation.
-- **Listening test unrated** — needs L, M, SK to actually listen to 20 pairs.
-- **Speaker pools not frozen** — the ranking is ready; the selection needs the team
-  listening pass, and the carve/freeze half is SK's (`week3-krishna-xtts-rvc-pilot`).
+Both machines index to identical counts, which is the point — the eval box and the
+generation box must agree or nothing transfers between them.
+
+**Defects found and fixed this week:** the quarantine bypass in the preprocessing
+walk (ethics-critical); the `\b`-vs-`_` child-pattern regex; the `grep -P` +
+`(?i)`-under-`-E` double failure that made the download sweep report "moved 0
+folder(s)" on a corpus with 1,858 live child files; the AMR-NB codec-delay
+misalignment that failed 15/20 pairs on a working chain (**P-013**); and the audit
+overwriting its own signed report.
+
+## Verify
+
+```bash
+python -m src.data.corpora --data-root $DATA_ROOT     # 52,825/520 and 3,318/24
+python -m src.data.quarantine --root $DATA_ROOT/raw/hiacc
+python -m src.data.channel_qa                         # 20/20
+```
+
+## What the corpus turned out to be
+
+Two findings that changed downstream work:
+
+- **MUCS is a Kaldi corpus**, not a folder of clips — 521 long recordings with
+  speakers in `utt2spk` and spans in `segments`. The original blind chunking
+  destroyed speaker identity entirely, so `02_preprocess_all.sh` was superseded by
+  corpus-aware indexing (`src.data.corpora`).
+- **HiACC splits adult from child by top-level folder**, confirmed from
+  `Corpus/readme.txt` — which is what the quarantine sweep keys on, so it acts on
+  the documented layout rather than a guess. Corroborated by metadata: `AD*` ages
+  19–42, `CH*` ages 10–14, disjoint id sets.
+
+## Honest limitations
+
+- **AMR-NB is ear-unchecked.** Verified by measurement only (20/20); the listening
+  pass at `<DATA_ROOT>/processed/listening_test_amr/` is outstanding, so that column
+  must not be reported as listened-to.
+- **The speaker shortlist rests on a proxy.** Ranking used a dynamic-range measure
+  (24.5–92.4 dB spread), *not* calibrated SNR, and the eligibility gate passed all
+  520 speakers — so the ordering is a hint, not a quality guarantee. Spot-check the
+  top of `speaker_shortlist.csv` by ear before Week-4 scale.
+- **`AD63` is undocumented** — audio but no metadata row (and `AD65` the reverse).
+  Adult-prefixed, so no child audio enters the pipeline, but its age is unverified:
+  it must not be a cloning reference until HiACC confirms it.
+- **`processed/` is not used downstream.** Nothing after `corpora.py` reads it; it
+  is regenerable and deliberately not copied between machines.
+
+## What's next
+
+- **AMR-NB listening pass** (L, M, SK) — the last open item on W3-T2.
+- **Confirm the top of the shortlist by ear** before generation at scale.
+- **Email HiACC** about the `AD63`/`AD65` metadata mismatch.
+- **Generation at scale** (W4-T1) once the pilot rating lands.
