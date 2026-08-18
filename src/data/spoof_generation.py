@@ -112,18 +112,23 @@ class CloneJob:
     seed: int = 0
 
 
-def load_xtts(model_name: str = XTTS_MODEL, use_gpu: bool = True):
+def load_xtts(model_name: str = XTTS_MODEL, use_gpu: bool | None = None):
     """Load a Coqui XTTS-v2 model (lazy ``TTS`` import).
+
+    ``use_gpu=None`` detects the device, so the same call works in a Colab GPU
+    session and in a CPU debugging run; pass ``True``/``False`` to force it.
 
     Gated: the ethics check runs before the model is fetched, so a blocked run
     costs nothing and fails with a readable reason instead of a CUDA trace.
     """
     from src.data.ethics_gate import require_signoff
+    from src.utils.device import is_cuda, resolve_device
 
     require_signoff(action="loading the XTTS-v2 model")
+    gpu = is_cuda(resolve_device()) if use_gpu is None else bool(use_gpu)
     from TTS.api import TTS
 
-    return TTS(model_name, gpu=use_gpu)
+    return TTS(model_name, gpu=gpu)
 
 
 def generate_clone(model, job: CloneJob) -> str:
