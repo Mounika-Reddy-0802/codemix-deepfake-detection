@@ -138,12 +138,51 @@ Task log in `docs/progress.md`; blockers in `Works updates.md`; decisions in
 > a fresh clone will not have it, and the gate will refuse until it is copied into
 > `docs/ethics/` by hand.
 
+### Where the data and the GPU are (17 Aug 2026)
+
+Generation and training have moved to the **GPU laptop** (RTX 3050 6 GB, CUDA
+torch 2.8.0). Both corpora are extracted there and match the dev laptop exactly:
+**MUCS 52,825 utterances / 520 speakers**, **HiACC 3,318 adult clips / 24
+speakers**, **1,858 child files quarantined**. Setup runbook:
+`docs/gpu_laptop_setup.md`.
+
+**ASVspoof 2019 LA is still missing on that machine**, and it is Stage-1's only
+training corpus — nothing trains until it is fetched.
+
+### The corpus is written in one script, and it is Latin
+
+Transcripts are transliterated from Devanagari to romanised Hinglish
+(`src/data/transliteration.py`) before they reach XTTS; the source text is kept
+in a `transcript_source` column. Nobody on the team reads Devanagari, and a rater
+who cannot read the target sentence can only judge whether a clip sounds
+pleasant — not whether it said the right words. Filtering could not deliver this:
+MUCS is 98.2 % Devanagari-bearing, and only **17** usable Devanagari-free
+transcripts exist inside the frozen train pool. See **P-014/P-015** in
+`docs/problems_and_decisions.md`.
+
+**Open, and blocking Week 4:** 40 clips (20 romanised + 20 Devanagari, matched
+speaker/sentence/tag) are generated and waiting on ears. The blind sheet is
+`docs/qa/pilot_script_rating_sheet.csv`; all three members rate it, then
+`src.data.pilot_rating.summarise_ab` scores it against the withheld key.
+An objective pre-screen puts the two scripts at 13.9 vs 14.4 median chars/sec —
+romanisation does not appear to slow or truncate speech — but that is a
+measurement, not a verdict.
+
 ## Honest limitations
 
 - **No paper numbers yet.** Through Week 3 the repo is pipeline + scaffolding.
-  Heavy paths (XTTS/Tortoise generation, wav2vec2 training) are validated by lint,
-  compile, and pure-logic unit tests; end-to-end runs need the downloaded corpora,
-  a GPU, and the mentor ethics sign-off (human steps in `Works updates.md`).
+  XTTS generation is now validated end to end on real data (40 clips on the GPU
+  laptop, 0 failures); Tortoise and wav2vec2 training are still validated only by
+  lint, compile and pure-logic unit tests, and need ASVspoof plus a GPU.
+- **Generation can fail silently.** One clip of the 40 produced 0.83 s of audio
+  from a 150-character transcript and raised no exception — `generate_batch`
+  catches crashes, not clips that come out empty. At Week-4 scale that is ~200
+  dead files nobody would notice, so the duration/chars-per-second auto-filter in
+  W4-T6 has to land **before** the 4,000-clip run, not after.
+- **Romanisation is a judgement call in two places.** `फ` → `ph` gives `sirph`
+  where a Hindi speaker would type `sirf`, and `ड़` → `r` gives `thoraa` for
+  `thoda`. Both are defensible and both are one-line changes — worth listening
+  for while rating, because 4,000 clips will bake them in.
 - **CI is intentionally light** (ruff + pytest + numpy/pandas). Tests needing
   torch/torchaudio/librosa skip in CI and run in the full environment.
 - **AMR-NB needs ffmpeg**; without it the channel sim falls back to G.711 μ-law.
