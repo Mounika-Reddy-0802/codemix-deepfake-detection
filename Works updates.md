@@ -167,6 +167,19 @@ Week-4 generation are all permitted.
 - [ ] `docs/progress.md` will have an append conflict between branches —
       **keep all lines** when resolving.
 
+## 2b. Machine state (17 Aug 2026)
+
+| | dev laptop | GPU laptop |
+|---|---|---|
+| MUCS / HiACC | extracted | **extracted, counts identical** |
+| ASVspoof 2019 LA | 25 % partial | **absent — Stage-1 cannot train** |
+| CUDA | none | torch 2.8.0+cu128, RTX 3050 6 GB |
+| Tests | green | **green (410 passed, 2 skipped)** |
+| Ethics gate | open | **open** |
+
+`.env.git` exists on the GPU laptop but **all three `*_GH_PAT` values are still
+`REPLACE_WITH_*` placeholders**, so per-owner pushes still cannot run — see §0.
+
 ## 3. Downloads (W3-T2) — only on "run downloads now"
 
 - [ ] Say the word, then:
@@ -230,21 +243,37 @@ Run `python -m src.utils.env_check` — it reports what it can and labels the re
 - [ ] Colab GPU runtime confirmed.
 - [ ] Paste every link into the resource table in `README.md`.
 
-## 8. Pilots — sign-off obtained, ready to run (W3-T5)
+## 8. Pilots — XTTS DONE on the GPU laptop, waiting on ears (W3-T5)
 
-**Platform: Google Colab** (team decision, 13 Aug 2026 — replaces Kaggle).
-Run `notebooks/pilot_xtts_colab.ipynb` on a T4 runtime.
+**Platform: the team's own GPU laptop** (RTX 3050 6 GB), 17 Aug 2026 — replaces
+Colab, which replaced Kaggle. No quota, no idle disconnect, and the corpora are
+already there. `notebooks/pilot_xtts_colab.ipynb` still works if Colab is wanted.
 
-- [ ] Upload to Drive: `C:\dfdata\generated\pilot\` → `MyDrive/capstone/pilot/`
-      and the signed PDF → `MyDrive/capstone/ethics/`. The signed note is
-      gitignored, so cloning the repo will NOT bring it — without it the ethics
-      gate refuses and nothing generates.
-- [ ] Run the notebook: 20 clips, 4 script/tag cells × the same 5 train-pool
-      speakers (constant speakers so the cells are comparable).
-- [ ] RVC pilot: 1 speaker model, 10 conversions.
-- [ ] **All three rate all 30** and agree the quality bar; record the four
-      decisions in `docs/problems_and_decisions.md`
-      (script, language tag, quality bar, RVC viability).
+- [x] Corpora extracted with the child quarantine; counts match the dev laptop
+      exactly (MUCS 52,825/520, HiACC 3,318/24, 1,858 quarantined).
+- [x] **40 clips generated, 0 failures.** Not the original 4-cell matrix: the
+      team fixed the script to Latin (P-014), so the pilot became a matched A/B —
+      the same speaker saying the same sentence under the same language tag,
+      once from romanised Hinglish and once from Devanagari. That isolates the
+      one variable still in question.
+- [ ] **All three rate all 40.** Blind sheet at
+      `docs/qa/pilot_script_rating_sheet.csv` (40 clips × 3 raters = 120 rows),
+      audio staged under neutral names in `<DATA_ROOT>/generated/pilot_ab/clips`.
+      Score with `src.data.pilot_rating.summarise_ab` against the withheld key —
+      **do not open `pilot_script_answer_key.csv` before rating.**
+- [ ] Record the remaining decisions in `docs/problems_and_decisions.md`
+      (language tag, quality bar, RVC viability). Script is settled by P-014.
+- [ ] RVC pilot: 1 speaker model, 10 conversions. **Not started.**
+
+> **What the pre-screen already says.** Median speech rate is 13.9 chars/sec for
+> Devanagari against 14.4 for romanised, and paired durations track the ~13 %
+> text expansion — so romanisation does not appear to rush or truncate speech.
+> That is a measurement, not a verdict; it tells you the A/B is worth listening
+> to rather than which side wins.
+>
+> **One clip of 40 came out at 0.83 s from a 150-character transcript** and
+> raised nothing. Generation catches crashes, not empty output. Week 4 needs the
+> W4-T6 duration filter *before* the 4,000-clip run.
 
 > **Compute-plan consequence of moving to Colab.** The v2 plan sizes Weeks 5–9
 > around *3 Kaggle accounts × 30 GPU-hours/week*, with S1 and S3 training in
