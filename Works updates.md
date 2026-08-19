@@ -184,7 +184,7 @@ Week-4 generation are all permitted.
 
 - [ ] Say the word, then:
       `nohup bash scripts/01_download_data.sh --run > data/raw/logs/download_main.log 2>&1 &`
-      (ASVspoof 2019 LA ~23 GB, MUCS ~7.7 GB, HiACC ~532 MB.)
+      (ASVspoof 2019 LA 7.12 GB, MUCS ~7.7 GB, HiACC ~532 MB.)
 - [ ] Confirm the pinned versions in `requirements.txt` install on the Kaggle/Colab
       base image; adjust `torch`/`torchaudio` to the image's CUDA build if needed.
 - [ ] Install **ffmpeg** on the training box — without it channel sim silently

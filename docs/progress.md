@@ -43,3 +43,6 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-19 | W4-T6 | L | week3-krishna-xtts-rvc-pilot | 95 of those 116 came from speaker 987461 alone, whose reference was 25 s at 89% silence (2.65 s of voice) |
 | 2026-08-19 | W4-T6 | L | week3-krishna-xtts-rvc-pilot | references now ranked by effective speech seconds, not duration; 987461 re-cut 2.65 s -> 12.34 s, 5 of 25 refs were under threshold |
 | 2026-08-19 | W4-T1 | L | week3-krishna-xtts-rvc-pilot | after re-cut + regeneration: 3,998 of 4,000 usable (99.95%, was 97.1%); the 2 rejects are borderline slow, both speakers keep 159 |
+| 2026-08-19 | W3-T6 | L | week3-krishna-xtts-rvc-pilot | asvspoof 2019 la downloaded and extracted: 7.12 GB zip (exact byte match), 122,299 flac, sha256 208a7e4e recorded then zip deleted |
+| 2026-08-19 | W3-T6 | L | week3-krishna-xtts-rvc-pilot | cm protocols verified against published figures: train 25380/20spk, dev 24844/20spk, eval 71237/67spk, zero speaker overlap between splits |
+| 2026-08-19 | W3-T6 | L | week3-krishna-xtts-rvc-pilot | corrected the asvspoof size in 3 docs: it is 7.12 GB, not the ~23-24 GB recorded (that is the full LA+PA release); extraction is 1.00x since flac is already compressed |

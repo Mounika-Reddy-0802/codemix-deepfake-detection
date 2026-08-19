@@ -245,7 +245,7 @@ The golden rule the whole project stands on: **the Stage-1 detector is trained o
 
 | # | Dataset | Link | Size / subset used | Licence | ROLE |
 |---|---------|------|--------------------|---------|------|
-| 1 | ASVspoof 2019 LA | https://datashare.ed.ac.uk/handle/10283/3336 | ~24 GB (LA partition only) | Research | **TRAIN (Stage 1)** + English eval column (its own held-out eval split) |
+| 1 | ASVspoof 2019 LA | https://datashare.ed.ac.uk/handle/10283/3336 | **7.12 GB** (LA partition only) | Research | **TRAIN (Stage 1)** + English eval column (its own held-out eval split) |
 | 2 | ASVspoof 2021 DF eval | https://zenodo.org/records/4835108 | **34.5 GB in 4 parts** + separate keys from asvspoof.org | ODC-ODbL | **EVAL ONLY — OPTIONAL.** At 34.5 GB this busts free-tier storage; download only if college storage arrives, else drop it (proposal already marks it optional) |
 | 3 | IndicSynth | https://huggingface.co/datasets/vdivyasharma/IndicSynth | Stream Hindi (206k rows) + Tamil (282k rows) subsets only — never the full 4,000 hrs | CC-BY-NC-4.0 | **EVAL ONLY** — monolingual Indic spoof column. NC licence = fine for research, note it in the ethics table |
 | 4 | IndicTTS Deepfake Challenge | https://huggingface.co/datasets/SherryT997/IndicTTS-Deepfake-Challenge-Data | Stream Hindi + Tamil + English subsets | Research | **EVAL ONLY** — monolingual Indic real+fake column; its public wav2vec2 baselines double as a sanity comparison |
