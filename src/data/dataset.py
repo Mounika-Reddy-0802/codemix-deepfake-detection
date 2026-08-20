@@ -59,12 +59,28 @@ class AudioManifestDataset:
         target_sr: int = 16_000,
         split: str | None = None,
         data_root: str | os.PathLike[str] | None = None,
+        max_seconds: float | None = None,
+        random_crop: bool = False,
+        seed: int = 1234,
     ) -> None:
         df = pd.read_csv(manifest) if isinstance(manifest, str) else manifest.copy()
         if split is not None:
             df = df[df["split"] == split].reset_index(drop=True)
         self.df = df.reset_index(drop=True)
         self.target_sr = target_sr
+        #: Cap on clip length. ``collate_fn`` pads every clip in a batch up to the
+        #: LONGEST one, so peak memory is set by the unluckiest batch rather than
+        #: the average: ASVspoof clips run to 8.5 s, so a batch of 8 can carry 68
+        #: seconds of audio in one forward pass. On a 6 GB card that reached 97% of
+        #: VRAM and left nothing for a spike. Capping makes the cost per batch
+        #: deterministic, and ~4 s is the length anti-spoofing models are normally
+        #: trained on anyway.
+        self.max_seconds = max_seconds
+        #: Random crop for training (a free augmentation, and it sees the whole
+        #: clip across epochs); deterministic head crop for dev/eval, so a
+        #: validation number never moves because the crop moved.
+        self.random_crop = random_crop
+        self.seed = seed
         #: Resolved lazily per item so ``$DATA_ROOT`` set after construction (or in
         #: a DataLoader worker process) is still honoured.
         self.data_root = data_root
@@ -78,6 +94,7 @@ class AudioManifestDataset:
         row = self.df.iloc[index]
         filepath = resolve_path(row["filepath"], self.data_root)
         waveform, _ = load_wav(filepath, target_sr=self.target_sr)
+        waveform = self._crop(waveform, index)
         return AudioSample(
             waveform=waveform,
             label=LABEL_TO_INT[str(row["label"]).lower()],
@@ -85,6 +102,21 @@ class AudioManifestDataset:
             speaker=str(row.get("speaker", "")),
             condition=str(row.get("condition", "")),
         )
+
+    def _crop(self, waveform: np.ndarray, index: int) -> np.ndarray:
+        """Limit one clip to ``max_seconds``. Shorter clips are returned as-is."""
+        if self.max_seconds is None:
+            return waveform
+        limit = int(self.max_seconds * self.target_sr)
+        if limit <= 0 or waveform.shape[0] <= limit:
+            return waveform
+        if not self.random_crop:
+            return waveform[:limit]
+        # Seeded per index so a given clip crops identically for a given epoch
+        # ordering -- reproducible, unlike a global RNG shared across workers.
+        rng = np.random.default_rng(self.seed + index)
+        start = int(rng.integers(0, waveform.shape[0] - limit + 1))
+        return waveform[start : start + limit]
 
 
 def collate_fn(batch: list[AudioSample]) -> dict[str, Any]:
