@@ -59,6 +59,19 @@ class TrainConfig:
     #: machine usually stays up for.
     resume: bool = False
     subset_frac: float = 1.0  # fraction of the train manifest to use
+    #: Stage-3: start from this checkpoint instead of the pretrained SSL weights.
+    #: Adaptation is only meaningful relative to a fixed starting point, so this
+    #: is the Stage-1 ``best.pt`` whose numbers the gap matrix reports.
+    init_from: str | None = None
+    #: Stage-3: attach LoRA adapters and freeze the base encoder.
+    lora: bool = False
+    lora_r: int = 8
+    lora_alpha: float = 16.0
+    lora_dropout: float = 0.0
+    #: Encoder submodule names to adapt (see src/models/lora.DEFAULT_TARGETS).
+    lora_targets: list[str] | None = None
+    #: Submodules trained alongside the adapters (pooling + head by default).
+    lora_train: list[str] | None = None
     device: str | None = None  # None/"auto" -> detect; "cpu"/"cuda" -> force
     data_root: str | None = None  # None -> $DATA_ROOT, else this machine's data dir
     wandb_project: str = "codemix-deepfake-detection"
@@ -178,7 +191,36 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         cfg.encoder,
         freeze_feature_extractor=cfg.freeze_feature_extractor,
         freeze_encoder=cfg.freeze_encoder,
-    ).to(device)
+    )
+    if cfg.init_from:
+        # Load BEFORE the adapters go on, so the checkpoint's keys match the
+        # unwrapped module names and a rename never has to be guessed at.
+        state = torch.load(cfg.init_from, map_location="cpu", weights_only=False)
+        model.load_state_dict(state["model"] if "model" in state else state)
+        print(f"initialised from {cfg.init_from}", flush=True)
+    if cfg.lora:
+        from src.models.lora import (
+            DEFAULT_TARGETS,
+            DEFAULT_TRAINABLE,
+            apply_lora,
+            mark_only_lora_trainable,
+            trainable_parameter_summary,
+        )
+
+        targets = tuple(cfg.lora_targets) if cfg.lora_targets else DEFAULT_TARGETS
+        trainable = tuple(cfg.lora_train) if cfg.lora_train else DEFAULT_TRAINABLE
+        wrapped = apply_lora(
+            model, targets, r=cfg.lora_r, alpha=cfg.lora_alpha, dropout=cfg.lora_dropout
+        )
+        mark_only_lora_trainable(model, trainable)
+        summary = trainable_parameter_summary(model)
+        print(
+            f"lora: r={cfg.lora_r} alpha={cfg.lora_alpha} on {wrapped} layers "
+            f"{targets}; trainable {summary['trainable']:,.0f}/{summary['total']:,.0f} "
+            f"({summary['trainable_pct']:.2f}%)",
+            flush=True,
+        )
+    model = model.to(device)
     optimizer = torch.optim.AdamW(
         (p for p in model.parameters() if p.requires_grad),
         lr=cfg.lr,

@@ -1,2 +1,36 @@
-# Stage-3 LoRA adaptation on the speaker-disjoint code-mixed slice. Week 7, owner M.
-# TODO: LoRA rank/alpha/targets, lr, steps.
+# Stage-3 LoRA adaptation on the speaker-disjoint code-mixed slice. Owner M.
+#
+# Starts from the Stage-1 checkpoint whose numbers the gap matrix reports, so the
+# before/after delta is attributable to the adaptation and nothing else.
+encoder: wav2vec2-base
+init_from: checkpoints/baseline/best.pt
+
+lora: true
+lora_r: 8
+lora_alpha: 16.0
+lora_dropout: 0.05
+# targets/train default to src/models/lora.DEFAULT_TARGETS + DEFAULT_TRAINABLE
+# (q/k/v/out_proj on all 12 encoder layers -> 48 adapters, 1.13% trainable).
+
+# The adaptation pool ONLY. Eval-pool speakers must never appear here: adapting
+# and evaluating on the same voices measures memorisation, not gap closure.
+train_manifest: data/manifests/codemix_adapt_train.csv
+dev_manifest: data/manifests/codemix_adapt_dev.csv
+out_dir: checkpoints/lora_codemix
+
+# Stage-1 needed 1e-5 because a larger step destroyed wav2vec2's pretrained
+# weights outright. That risk is gone here: the base is frozen and the adapters
+# start at zero, so they need a step large enough to actually move.
+lr: 1.0e-4
+weight_decay: 1.0e-5
+batch_size: 8
+max_seconds: 4.0
+epochs: 5
+num_workers: 0
+seed: 1234
+
+device: cuda
+amp: true
+class_weighted: true
+log_every: 25
+wandb_mode: offline
