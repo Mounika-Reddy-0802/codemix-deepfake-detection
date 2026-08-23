@@ -111,4 +111,4 @@ human decide.
 
 Creating or activating the trial early burns the 30-day window before the demo
 phase. Until Week 6, **all** streaming-inference and alert work happens on the
-free `webrtc_harness/`. This is a hard project rule (see `CLAUDE.md` §8).
+free `webrtc_harness/`. This is a hard project rule (see the team rules doc §8).

@@ -7,7 +7,7 @@ free live-call harness, and the ethics/literature scaffolding.
 
 | Owner | Deliverable |
 |-------|-------------|
-| M | repo bootstrap: folder structure, `.gitignore`, pinned `requirements.txt`, CI (ruff + pytest), commit-msg hook, `CLAUDE.md`; `env_check` notebook (loads wav2vec2-base / XLSR-53 / WavLM-base) |
+| M | repo bootstrap: folder structure, `.gitignore`, pinned `requirements.txt`, CI (ruff + pytest), commit-msg hook, the team rules doc; `env_check` notebook (loads wav2vec2-base / XLSR-53 / WavLM-base) |
 | L | `01_download_data.sh` (ASVspoof 2019 LA, MUCS Hi-En, HiACC) with HiACC child-folder quarantine; HF streaming loaders for the eval-only Indic corpora; licence register |
 | SK | free aiortc WebRTC harness with a 16 kHz PCM tap + the shared `PcmFrameSource` contract (reused by Twilio in Week 6); Twilio design note |
 | ALL | related-work template (17 refs, 4 strands) + ethics sign-off requirements |

@@ -14,7 +14,7 @@ prefix class, never as a value, so the output of this module is safe to paste
 into a PR or a log book.
 
 ``notebooks/env_check.ipynb`` calls into here rather than duplicating the logic --
-notebooks hold no pipeline logic (CLAUDE.md section 9).
+notebooks hold no pipeline logic (team rules doc, section 9).
 """
 
 from __future__ import annotations

@@ -277,8 +277,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 ## Progress — Weeks 1–3
 
 Only completed work is listed. This table is extended at the end of each week; the
-full 12-week plan lives in
-[`PROJECT_PLAN_V2_AFFECTDF.md`](PROJECT_PLAN_V2_AFFECTDF.md).
+full 12-week plan lives in the team drive, outside this repo.
 
 | Week | L — Data | M — Model | SK — Systems/Demo |
 |---|---|---|---|
@@ -300,7 +299,7 @@ the AMR-NB listening pass, three PR reviews, and the Week-3 log-book entries. Th
 | **SK** | K. Sai Krishna Reddy (D034) | **Systems/Demo** — live-call pipeline, streaming inference, ONNX, dashboard, spoof pilots |
 
 One branch per member per week, PRs into `dev`, reviewed and merged by a teammate —
-never your own. Full rules in [`GIT_RULES.md`](GIT_RULES.md).
+never your own. Full rules in the team git rules doc (kept in the team drive, outside this repo).
 
 ## Documentation index
 
@@ -315,7 +314,6 @@ never your own. Full rules in [`GIT_RULES.md`](GIT_RULES.md).
 | [`docs/gpu_laptop_setup.md`](docs/gpu_laptop_setup.md) | Bringing a second machine to an identical state |
 | [`docs/licences.md`](docs/licences.md) | Per-corpus licence table and usage restrictions |
 | [`docs/attack_taxonomy.md`](docs/attack_taxonomy.md) | Attack IDs, tool, pool, split — AffectDF Table-1 format |
-| [`PROJECT_PLAN_V2_AFFECTDF.md`](PROJECT_PLAN_V2_AFFECTDF.md) | The active 12-week plan (v1 kept for history only) |
 
 ## Licences
 

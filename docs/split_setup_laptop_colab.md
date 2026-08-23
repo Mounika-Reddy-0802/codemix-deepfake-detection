@@ -54,7 +54,7 @@ The repo is already set up for exactly this: `.gitignore` line 22 excludes
 (`!data/manifests/*.csv`) because a frozen split has to be reviewable. So `git
 pull` on Colab brings the code *and* the frozen speaker pools, and brings no audio.
 
-Push from here (owner identity per `CLAUDE.md` §1):
+Push from here (owner identity per the team rules doc §1):
 
 ```bash
 set -a; . ./.env.git; set +a
