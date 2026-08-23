@@ -46,3 +46,5 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-19 | W3-T6 | L | week3-krishna-xtts-rvc-pilot | asvspoof 2019 la downloaded and extracted: 7.12 GB zip (exact byte match), 122,299 flac, sha256 208a7e4e recorded then zip deleted |
 | 2026-08-19 | W3-T6 | L | week3-krishna-xtts-rvc-pilot | cm protocols verified against published figures: train 25380/20spk, dev 24844/20spk, eval 71237/67spk, zero speaker overlap between splits |
 | 2026-08-19 | W3-T6 | L | week3-krishna-xtts-rvc-pilot | corrected the asvspoof size in 3 docs: it is 7.12 GB, not the ~23-24 GB recorded (that is the full LA+PA release); extraction is 1.00x since flac is already compressed |
+| 2026-08-17 | W3-T6 | M | week3-krishna-xtts-rvc-pilot | gpu laptop environment: dependency pins made installable (librosa/hub/websockets), xtts weights pre-fetched from hf with the hash.md5 trap documented, transfer bundle gitignored so the signed note cannot be committed |
+| 2026-08-23 | W3-T6 | M | week3-krishna-xtts-rvc-pilot | commit-msg hook hardened and actually installed via core.hooksPath: strips trailers, rejects attribution words, verified on 3 live messages |
