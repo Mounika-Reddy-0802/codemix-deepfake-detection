@@ -32,7 +32,7 @@ XTTS's 150-char Hindi limit, or contain digits XTTS cannot say in Hindi):
 | **adaptation** | 10 | **748** | Stage-3 / LoRA code-mixed training slice |
 | **eval** | 15 | **1,014** | Tortoise — the *unseen* held-out attack, never trained on |
 
-Plan targets (`PROJECT_PLAN_V2_AFFECTDF.md` W4-T1…T3):
+Plan targets (v2 plan, W4-T1…T3):
 
 | Track | Tool | Pool | Target | Notes |
 |---|---|---|---|---|

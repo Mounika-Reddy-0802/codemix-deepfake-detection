@@ -50,6 +50,9 @@ data/manifests/clip_index.csv
 data/manifests/train.csv
 data/manifests/dev.csv
 data/manifests/eval.csv
+data/manifests/asvspoof_train.csv
+data/manifests/asvspoof_dev.csv
+data/manifests/asvspoof_eval.csv
 
 checkpoints/**
 !checkpoints/**/

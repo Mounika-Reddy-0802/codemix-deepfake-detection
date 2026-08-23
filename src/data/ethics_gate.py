@@ -3,7 +3,7 @@
 Week 3 (W3-T5, owner SK). Voice cloning is the ethically sensitive step of this
 project, so the rule is absolute and predates any code: **no spoof generation of
 any kind, including pilots, until a signed mentor note exists in
-``docs/ethics/``** (project plan W3-T1, ``GIT_RULES.md`` section 10).
+``docs/ethics/``** (project plan W3-T1, the team git rules, section 10).
 
 Until now that rule lived only in documentation, which means it was enforced by
 whoever happened to remember it at 2am on a Kaggle session. This module makes it

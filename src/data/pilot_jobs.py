@@ -363,7 +363,7 @@ def load_pilot_jobs(jobs_csv: str, pack_dir: str, out_dir: str = "outputs") -> l
     """Turn the pilot job table into :class:`CloneJob` objects for the generator.
 
     Kept here rather than in the Colab notebook so the notebook holds no pipeline
-    logic (CLAUDE.md section 9) and the path rewriting is unit-tested. Reference
+    logic (team rules doc, section 9) and the path rewriting is unit-tested. Reference
     paths in the CSV are relative to the pack (``refs/<speaker>.wav``) so the pack
     can be moved between machines without editing anything.
     """

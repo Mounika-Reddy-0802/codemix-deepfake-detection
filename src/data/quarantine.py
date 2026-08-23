@@ -281,7 +281,7 @@ def render_report(result: AuditResult) -> str:
         "Checked by: ______________________  Date: ____________",
         "",
         "> Until this is signed, spoof generation and preprocessing of HiACC stay",
-        "> blocked (see `GIT_RULES.md` §10 and `Works updates.md`).",
+        "> blocked (see the team git rules §10 and `Works updates.md`).",
     ]
     return "\n".join(lines) + "\n"
 

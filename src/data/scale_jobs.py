@@ -42,7 +42,7 @@ from src.data.pilot_jobs import (
     train_pool_speakers,
 )
 
-#: The Week-4 target from PROJECT_PLAN_V2_AFFECTDF.md (W4-T1).
+#: The Week-4 target from the v2 plan (W4-T1).
 DEFAULT_TARGET = 4000
 
 

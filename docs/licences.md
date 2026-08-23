@@ -5,7 +5,7 @@ This table feeds the ethics/licence note (`docs/ethics/`) that the mentor signs
 off **before** any spoof generation. All links verified 21 Jul 2026.
 
 > **Golden rule reminder:** Stage-1 trains on ASVspoof 2019 LA (English) only.
-> Everything Indic/code-mixed is evaluation-only. See `CLAUDE.md` §6.
+> Everything Indic/code-mixed is evaluation-only. See the team rules doc §6.
 
 ## Corpora
 

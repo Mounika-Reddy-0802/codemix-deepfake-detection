@@ -3,7 +3,7 @@
 A manifest is a CSV with one row per audio clip. Speaker leakage between training
 and evaluation is the single bug that could invalidate the whole paper, so the
 checks below are enforced by ``tests/test_splits.py`` and are meant to be run
-before every training launch (see the golden rule in ``CLAUDE.md``).
+before every training launch (see the golden rule in the team rules doc).
 
 Key convention: a **cloned** voice of speaker X carries speaker id ``X`` (not the
 tool's id), so speaker-disjointness holds across bonafide *and* spoof.
