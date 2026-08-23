@@ -82,3 +82,15 @@ Thumbs.db
 .idea/
 .vscode/
 .claude/
+
+# --- Planning documents and review decks: shared privately, not through git ---
+# These are working documents for the team and the mentor (task IDs, owners,
+# review slides, the standing workflow contract). They live on team machines and
+# in the shared drive; the repo carries the code and the results, not the plan.
+Project_Plan_12_Weeks.docx
+PROJECT_PLAN_12_WEEKS.md
+PROJECT_PLAN_V2_AFFECTDF.md
+Updated_Project_Plan_v2_AffectDF.docx
+Review1_Presentation_v3.pptx
+GIT_RULES.md
+CLAUDE.md
