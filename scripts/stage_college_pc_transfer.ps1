@@ -63,7 +63,9 @@ sub = idx[idx['speaker'].isin(need)]
 for p in sorted(sub['wav_path'].dropna().unique()):
     print(p)
 "@
-$files = $py | python -
+$venvPy = Join-Path $RepoDir ".venv\Scripts\python.exe"
+$pythonExe = if (Test-Path $venvPy) { $venvPy } else { "python" }
+$files = $py | & $pythonExe -
 Pop-Location
 $mucsOut = Join-Path $OutDir "raw\mucs2021\train"
 New-Item -ItemType Directory -Force -Path $mucsOut | Out-Null
