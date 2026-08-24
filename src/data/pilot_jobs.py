@@ -159,35 +159,54 @@ def script_class(text: str) -> str:
 # --------------------------------------------------------------------------- #
 # Pool firewall
 # --------------------------------------------------------------------------- #
+def pool_speakers(pools: pd.DataFrame, pool: str = "train") -> set[str]:
+    """Speakers assigned to ``pool`` (``"train"`` | ``"adaptation"`` | ``"eval"``).
+
+    One primitive underneath all three firewalls: which speakers a run is
+    permitted to clone. Week 3/4 only needed the train pool, so that stayed the
+    default; Stage-3 (Week 7) needs the same firewall for the adaptation and
+    eval pools, which is what this generalises for.
+    """
+    return set(pools.loc[pools["pool"] == pool, "speaker"].astype(str))
+
+
 def train_pool_speakers(pools: pd.DataFrame) -> set[str]:
     """Speakers permitted as cloning references for the seen-attack track."""
-    return set(pools.loc[pools["pool"] == "train", "speaker"].astype(str))
+    return pool_speakers(pools, "train")
 
 
-def assert_train_pool_only(jobs: pd.DataFrame, pools: pd.DataFrame) -> None:
-    """Raise :class:`PilotError` if any job clones a non-train-pool speaker."""
-    allowed = train_pool_speakers(pools)
+def assert_pool_only(jobs: pd.DataFrame, pools: pd.DataFrame, pool: str = "train") -> None:
+    """Raise :class:`PilotError` if any job clones a speaker outside ``pool``."""
+    allowed = pool_speakers(pools, pool)
     used = set(jobs["speaker"].astype(str))
     intruders = used - allowed
     if intruders:
         lookup = pools.set_index(pools["speaker"].astype(str))["pool"].to_dict()
         detail = ", ".join(f"{s} (pool={lookup.get(s, 'unknown')})" for s in sorted(intruders))
-        raise PilotError(f"pilot would clone speakers outside the train pool: {detail}")
+        raise PilotError(f"run would clone speakers outside the {pool} pool: {detail}")
+
+
+def assert_train_pool_only(jobs: pd.DataFrame, pools: pd.DataFrame) -> None:
+    """Raise :class:`PilotError` if any job clones a non-train-pool speaker."""
+    assert_pool_only(jobs, pools, "train")
 
 
 # --------------------------------------------------------------------------- #
 # Reference selection
 # --------------------------------------------------------------------------- #
 def choose_references(
-    index: pd.DataFrame, pools: pd.DataFrame, config: PilotConfig | None = None
+    index: pd.DataFrame,
+    pools: pd.DataFrame,
+    config: PilotConfig | None = None,
+    pool: str = "train",
 ) -> pd.DataFrame:
-    """Longest qualifying clip per train-pool speaker, best speakers first.
+    """Longest qualifying clip per speaker in ``pool``, best speakers first.
 
     One reference per speaker keeps the pilot's variable the *script*, not the
     reference audio.
     """
     cfg = config or PilotConfig()
-    allowed = train_pool_speakers(pools)
+    allowed = pool_speakers(pools, pool)
     candidates = index[
         index["speaker"].astype(str).isin(allowed)
         & (index["duration_seconds"] >= cfg.min_reference_seconds)
