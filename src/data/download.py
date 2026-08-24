@@ -1,7 +1,7 @@
 """Hugging Face streaming setup for the eval-only Indic corpora.
 
 IndicSynth, IndicTTS-Deepfake and IndicVoices are **evaluation-only** corpora. Per
-the golden dataset rule (see ``CLAUDE.md``) they are:
+the golden dataset rule (see the team rules doc) they are:
 
 - never bulk-downloaded (we only ever *stream* them), and
 - never placed in a training manifest.

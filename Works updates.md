@@ -119,7 +119,7 @@ human (data, a GPU, or ears):
 
 ---
 
-# WEEK 3 — HUMAN_TODO (v2 plan, `PROJECT_PLAN_V2_AFFECTDF.md`)
+# WEEK 3 — HUMAN_TODO (v2 plan)
 
 Week 3 code is on `week3-lahari-preprocess-mucs-hiacc`,
 `week3-mounika-affectdf-taxonomy` and `week3-krishna-xtts-rvc-pilot`, all branched
@@ -163,7 +163,7 @@ Week-4 generation are all permitted.
 
 - [ ] Each member reviews and merges one teammate's PR. Never your own.
       Krishna ↔ Lahari review each other; Mounika reviewed by whoever is free.
-- [ ] PRs target **`dev`**, not `main` (`GIT_RULES.md` section 4).
+- [ ] PRs target **`dev`**, not `main` (team git rules, section 4).
 - [ ] `docs/progress.md` will have an append conflict between branches —
       **keep all lines** when resolving.
 
@@ -184,7 +184,7 @@ Week-4 generation are all permitted.
 
 - [ ] Say the word, then:
       `nohup bash scripts/01_download_data.sh --run > data/raw/logs/download_main.log 2>&1 &`
-      (ASVspoof 2019 LA ~23 GB, MUCS ~7.7 GB, HiACC ~532 MB.)
+      (ASVspoof 2019 LA 7.12 GB, MUCS ~7.7 GB, HiACC ~532 MB.)
 - [ ] Confirm the pinned versions in `requirements.txt` install on the Kaggle/Colab
       base image; adjust `torch`/`torchaudio` to the image's CUDA build if needed.
 - [ ] Install **ffmpeg** on the training box — without it channel sim silently

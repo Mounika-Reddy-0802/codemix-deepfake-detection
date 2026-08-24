@@ -2,6 +2,13 @@
   "note": "SHA-256 of the ORIGINAL corpus archives. Data is gitignored; this file is how the project records what was actually used. Verify a copy with `python -m src.data.checksums --verify`.",
   "archives": [
     {
+      "relpath": "raw/asvspoof2019_LA/LA.zip",
+      "bytes": 7640952520,
+      "sha256": "208a7e4e3913f8c75ae1afd19bf32a5b29ae68435e9e30e23e5e98b6a155e4ec",
+      "source_url": "https://datashare.ed.ac.uk/handle/10283/3336",
+      "mirror_url": ""
+    },
+    {
       "relpath": "raw/hiacc/Corpus.zip",
       "bytes": 531628684,
       "sha256": "fd83414b3aba28a4ae86c110f4aab0981621f9f3a1b105c161bf2dfd14737ccf",

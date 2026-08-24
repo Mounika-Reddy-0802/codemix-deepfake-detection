@@ -97,10 +97,16 @@ cannot fit on the drive.
 
 | Corpus | Archive | Extracted | Total |
 |---|---|---|---|
-| ASVspoof 2019 LA | ~23 GB | ~23 GB | ~46 GB |
+| ASVspoof 2019 LA | **7.12 GB** | **7.13 GB** | **14.3 GB** |
 | MUCS Hindi-English | ~7.7 GB | ~7.7 GB | ~15 GB |
 | HiACC | ~0.5 GB | ~0.5 GB | ~1 GB |
-| **All three** | | | **~62 GB** |
+| **All three** | | | **~30 GB** |
+
+> Measured on 19 Aug 2026, not estimated. ASVspoof LA was long recorded here as
+> ~23 GB, which is roughly the FULL 2019 release (LA + PA); the **LA partition
+> alone** is 7.12 GB. Extraction is 1.00x, not 2x, because the archive holds FLAC
+> that is already compressed — so an archive and its extraction coexist happily.
+> Planning storage on the old figure over-reserved by ~30 GB.
 
 Archives can be deleted after extraction *once their hash is recorded here* —
 the record is what preserves provenance, not the file.

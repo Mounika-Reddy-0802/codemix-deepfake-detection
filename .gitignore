@@ -43,6 +43,17 @@ data/**
 # The derived speaker_ranking.csv and the frozen speaker_pools.csv ARE committed.
 data/manifests/clip_index.csv
 
+# Same reason: the train/dev/eval manifests carry an absolute `filepath` per row,
+# so a committed copy would point at one machine's disk and silently resolve to
+# nothing on another. They are rebuilt from clip_index.csv + speaker_pools.csv,
+# and speaker_pools.csv (the part that must not drift) IS committed and hashed.
+data/manifests/train.csv
+data/manifests/dev.csv
+data/manifests/eval.csv
+data/manifests/asvspoof_train.csv
+data/manifests/asvspoof_dev.csv
+data/manifests/asvspoof_eval.csv
+
 checkpoints/**
 !checkpoints/**/
 !checkpoints/**/.gitkeep
@@ -74,3 +85,15 @@ Thumbs.db
 .idea/
 .vscode/
 .claude/
+
+# --- Planning documents and review decks: shared privately, not through git ---
+# These are working documents for the team and the mentor (task IDs, owners,
+# review slides, the standing workflow contract). They live on team machines and
+# in the shared drive; the repo carries the code and the results, not the plan.
+Project_Plan_12_Weeks.docx
+PROJECT_PLAN_12_WEEKS.md
+PROJECT_PLAN_V2_AFFECTDF.md
+Updated_Project_Plan_v2_AffectDF.docx
+Review1_Presentation_v3.pptx
+GIT_RULES.md
+CLAUDE.md

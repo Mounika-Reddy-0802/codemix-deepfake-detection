@@ -6,15 +6,9 @@ encoder: wav2vec2-base        # wav2vec2-base | wavlm-base | xlsr-53
 
 train_manifest: data/manifests/asvspoof_train.csv
 dev_manifest: data/manifests/asvspoof_dev.csv
-out_dir: checkpoints/baseline
+out_dir: checkpoints/lr_check
 
 # optimisation
-# 1e-5, not 1e-4. A pretrained wav2vec2 transformer is being fine-tuned, and
-# 1e-4 destroys its representations within a few hundred steps: the first 3-epoch
-# run collapsed to a CONSTANT output (score std 0.0000, zero class separation),
-# loss pinned at 0.329 -- exactly the always-predict-spoof value -- and dev EER
-# wandered 0.52/0.48/0.49 for 210 minutes. At 1e-5 the same pipeline reached
-# EER 0.047 in 300 steps on 6% of the data.
 lr: 1.0e-5
 weight_decay: 1.0e-5
 batch_size: 4
@@ -24,7 +18,7 @@ batch_size: 4
 # 5,973 of 6,144 MiB -- 97% of this card, with nothing left for a spike. 4 s is
 # also the length anti-spoofing models are conventionally trained on.
 max_seconds: 4.0
-epochs: 15
+epochs: 1
 # 0, not 2, and this is a stability fix rather than a tuning choice. On Windows
 # every DataLoader worker is a SPAWNED process that re-imports torch and commits
 # ~2-3 GB of CUDA DLLs of its own. On this 16 GB / 6 GB-VRAM laptop that exhausted
@@ -43,18 +37,21 @@ freeze_encoder: false
 
 # smoke test: set subset_frac=0.01 + max_steps=20 (or pass --smoke) to verify the
 # loop learns on a 1% subset before spending GPU hours.
-subset_frac: 1.0
+subset_frac: 0.06
 max_steps: null
 
 # --- portability: same file on the CPU laptop and on a Colab/Kaggle GPU --------
 # device: null/"auto" detects (cuda -> mps -> cpu). "cpu" forces a laptop smoke
 #   run; "cuda" makes the run FAIL LOUDLY if no GPU is attached, which is what you
 #   want on Colab. $DFD_DEVICE and --device override this.
-device: null
+device: cuda
 # data_root: where this machine keeps data/ (C:/dfdata here, /content/data on
 #   Colab). Manifest clip paths are rebased onto it, so a frozen manifest is never
 #   edited to move machines. $DATA_ROOT and --data-root override this.
 data_root: null
 
 wandb_project: codemix-deepfake-detection
-wandb_mode: online
+wandb_mode: offline
+max_steps: 300
+dev_subset: 400
+log_every: 50

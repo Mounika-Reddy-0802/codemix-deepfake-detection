@@ -13,6 +13,7 @@ against ``$DATA_ROOT`` so the manifest itself never has to be edited.
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 
 
@@ -27,6 +28,9 @@ class TrainConfig:
     lr: float = 1e-4
     weight_decay: float = 1e-5
     batch_size: int = 8
+    #: Cap on clip length in seconds (None = whole clip). Batches pad to their
+    #: longest member, so this is what makes peak VRAM predictable.
+    max_seconds: float | None = None
     epochs: int = 10
     num_workers: int = 2
     seed: int = 1234
@@ -34,7 +38,40 @@ class TrainConfig:
     freeze_feature_extractor: bool = True
     freeze_encoder: bool = False
     max_steps: int | None = None  # smoke-test cap
+    #: Print a progress line every N optimiser steps. The loop used to print only
+    #: at start and at the very end, so a run that was working looked identical to
+    #: one that had hung -- on this laptop that was 7 minutes of silence.
+    log_every: int = 25
+    #: Cap the dev pass to N clips (None = the whole set). Used by --smoke so a
+    #: quick check does not spend its whole runtime evaluating 24,844 clips.
+    dev_subset: int | None = None
+    #: Weight the loss by inverse class frequency. ASVspoof LA train is 89.8%
+    #: spoof (22,800 vs 2,580), and with a plain cross-entropy the cheapest
+    #: solution is to ignore the audio and always answer "spoof": that scores a
+    #: loss of ~0.329, which is precisely where the first 3-epoch run sat while
+    #: its dev EER wandered around 0.49 -- chance. The model emitted a CONSTANT
+    #: P(bonafide)=0.128 for every clip, matching the 0.102 class prior, with
+    #: zero separation between the classes. Weighting makes the rare class
+    #: expensive enough to be worth learning.
+    class_weighted: bool = True
+    #: Continue from ``<out_dir>/last.pt`` when it exists. Epoch-level rather than
+    #: step-level: an epoch here is ~45 minutes, which is inside the window this
+    #: machine usually stays up for.
+    resume: bool = False
     subset_frac: float = 1.0  # fraction of the train manifest to use
+    #: Stage-3: start from this checkpoint instead of the pretrained SSL weights.
+    #: Adaptation is only meaningful relative to a fixed starting point, so this
+    #: is the Stage-1 ``best.pt`` whose numbers the gap matrix reports.
+    init_from: str | None = None
+    #: Stage-3: attach LoRA adapters and freeze the base encoder.
+    lora: bool = False
+    lora_r: int = 8
+    lora_alpha: float = 16.0
+    lora_dropout: float = 0.0
+    #: Encoder submodule names to adapt (see src/models/lora.DEFAULT_TARGETS).
+    lora_targets: list[str] | None = None
+    #: Submodules trained alongside the adapters (pooling + head by default).
+    lora_train: list[str] | None = None
     device: str | None = None  # None/"auto" -> detect; "cpu"/"cuda" -> force
     data_root: str | None = None  # None -> $DATA_ROOT, else this machine's data dir
     wandb_project: str = "codemix-deepfake-detection"
@@ -51,6 +88,11 @@ def load_config(path: str) -> TrainConfig:
     return TrainConfig(**known)
 
 
+#: Dev-score spread below which the model is considered collapsed. Real runs sit
+#: orders of magnitude above this; a collapsed one sits at exactly 0.
+COLLAPSE_STD = 1e-4
+
+
 def _evaluate(model, loader, device) -> dict[str, float]:
     """Run the dev set and return EER/AUC (higher score = bonafide)."""
     import numpy as np
@@ -61,6 +103,8 @@ def _evaluate(model, loader, device) -> dict[str, float]:
     model.eval()
     scores: list[float] = []
     labels: list[int] = []
+    # Populated below; a near-zero spread means the model is emitting one number
+    # for every clip and has stopped depending on its input at all.
     with torch.no_grad():
         for batch in loader:
             wav = batch["waveforms"].to(device)
@@ -68,7 +112,10 @@ def _evaluate(model, loader, device) -> dict[str, float]:
             prob = torch.softmax(logits, dim=1)[:, 1]  # P(bonafide)
             scores.extend(prob.detach().cpu().numpy().tolist())
             labels.extend(batch["labels"].numpy().tolist())
-    return eval_metrics(np.array(scores), np.array(labels), n_boot=200)
+    score_array = np.array(scores)
+    metrics = eval_metrics(score_array, np.array(labels), n_boot=200)
+    metrics["score_std"] = float(score_array.std()) if score_array.size else 0.0
+    return metrics
 
 
 def train(cfg: TrainConfig) -> dict[str, float]:
@@ -95,11 +142,35 @@ def train(cfg: TrainConfig) -> dict[str, float]:
     print(describe(device))
     loader_opts = dataloader_kwargs(device, cfg.num_workers)
 
-    train_ds = AudioManifestDataset(cfg.train_manifest, data_root=cfg.data_root)
+    train_ds = AudioManifestDataset(
+        cfg.train_manifest,
+        data_root=cfg.data_root,
+        max_seconds=cfg.max_seconds,
+        random_crop=True,
+        seed=cfg.seed,
+    )
     if cfg.subset_frac < 1.0:
         n = max(1, int(len(train_ds) * cfg.subset_frac))
         train_ds.df = train_ds.df.sample(n=n, random_state=cfg.seed).reset_index(drop=True)
-    dev_ds = AudioManifestDataset(cfg.dev_manifest, data_root=cfg.data_root)
+    dev_ds = AudioManifestDataset(
+        cfg.dev_manifest,
+        data_root=cfg.data_root,
+        max_seconds=cfg.max_seconds,
+        random_crop=False,
+        seed=cfg.seed,
+    )
+    if cfg.dev_subset is not None and cfg.dev_subset < len(dev_ds):
+        # Stratified by label so a capped dev set keeps both classes; an
+        # all-bonafide sample would make EER meaningless.
+        dev_ds.df = (
+            dev_ds.df.groupby("label", group_keys=False)
+            .apply(
+                lambda g: g.sample(
+                    n=max(1, int(cfg.dev_subset * len(g) / len(dev_ds.df))), random_state=cfg.seed
+                )
+            )
+            .reset_index(drop=True)
+        )
 
     train_loader = DataLoader(
         train_ds,
@@ -120,13 +191,60 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         cfg.encoder,
         freeze_feature_extractor=cfg.freeze_feature_extractor,
         freeze_encoder=cfg.freeze_encoder,
-    ).to(device)
+    )
+    if cfg.init_from:
+        # Load BEFORE the adapters go on, so the checkpoint's keys match the
+        # unwrapped module names and a rename never has to be guessed at.
+        state = torch.load(cfg.init_from, map_location="cpu", weights_only=False)
+        model.load_state_dict(state["model"] if "model" in state else state)
+        print(f"initialised from {cfg.init_from}", flush=True)
+    if cfg.lora:
+        from src.models.lora import (
+            DEFAULT_TARGETS,
+            DEFAULT_TRAINABLE,
+            apply_lora,
+            mark_only_lora_trainable,
+            trainable_parameter_summary,
+        )
+
+        targets = tuple(cfg.lora_targets) if cfg.lora_targets else DEFAULT_TARGETS
+        trainable = tuple(cfg.lora_train) if cfg.lora_train else DEFAULT_TRAINABLE
+        wrapped = apply_lora(
+            model, targets, r=cfg.lora_r, alpha=cfg.lora_alpha, dropout=cfg.lora_dropout
+        )
+        mark_only_lora_trainable(model, trainable)
+        summary = trainable_parameter_summary(model)
+        print(
+            f"lora: r={cfg.lora_r} alpha={cfg.lora_alpha} on {wrapped} layers "
+            f"{targets}; trainable {summary['trainable']:,.0f}/{summary['total']:,.0f} "
+            f"({summary['trainable_pct']:.2f}%)",
+            flush=True,
+        )
+    model = model.to(device)
     optimizer = torch.optim.AdamW(
         (p for p in model.parameters() if p.requires_grad),
         lr=cfg.lr,
         weight_decay=cfg.weight_decay,
     )
-    criterion = torch.nn.CrossEntropyLoss()
+    if cfg.class_weighted:
+        counts = train_ds.df["label"].str.lower().value_counts()
+        n_spoof = float(counts.get("spoof", 0))
+        n_bona = float(counts.get("bonafide", 0))
+        total = n_spoof + n_bona
+        # Index order follows LABEL_TO_INT: 0 = spoof, 1 = bonafide.
+        weights = torch.tensor(
+            [total / (2.0 * max(n_spoof, 1.0)), total / (2.0 * max(n_bona, 1.0))],
+            dtype=torch.float32,
+            device=device,
+        )
+        print(
+            f"class weights: spoof {weights[0]:.3f}, bonafide {weights[1]:.3f} "
+            f"(from {int(n_spoof)} spoof / {int(n_bona)} bonafide)",
+            flush=True,
+        )
+        criterion = torch.nn.CrossEntropyLoss(weight=weights)
+    else:
+        criterion = torch.nn.CrossEntropyLoss()
     use_amp = amp_enabled(device, cfg.amp)
     autocast_type = device_family(device)
     scaler = make_grad_scaler(device, enabled=use_amp)
@@ -135,7 +253,30 @@ def train(cfg: TrainConfig) -> dict[str, float]:
     Path(cfg.out_dir).mkdir(parents=True, exist_ok=True)
     best_eer = 1.0
     step = 0
-    for epoch in range(cfg.epochs):
+    start_epoch = 0
+    snapshot = Path(cfg.out_dir) / "last.pt"
+    if cfg.resume and snapshot.is_file():
+        state = torch.load(snapshot, map_location=device, weights_only=False)
+        model.load_state_dict(state["model"])
+        optimizer.load_state_dict(state["optimizer"])
+        scaler.load_state_dict(state["scaler"])
+        start_epoch = int(state.get("epoch", 0))
+        step = int(state.get("step", 0))
+        best_eer = float(state.get("best_eer", 1.0))
+        print(
+            f"resumed from {snapshot}: epoch {start_epoch}, step {step}, "
+            f"best EER so far {best_eer:.4f}",
+            flush=True,
+        )
+    running = 0.0
+    t0 = time.time()
+    total_steps = len(train_loader) * cfg.epochs
+    print(
+        f"training: {len(train_ds)} train / {len(dev_ds)} dev clips, "
+        f"batch {cfg.batch_size}, {len(train_loader)} steps/epoch x {cfg.epochs} epochs",
+        flush=True,
+    )
+    for epoch in range(start_epoch, cfg.epochs):
         model.train()
         for batch in train_loader:
             wav = batch["waveforms"].to(device)
@@ -149,12 +290,49 @@ def train(cfg: TrainConfig) -> dict[str, float]:
             scaler.step(optimizer)
             scaler.update()
             step += 1
+            running += float(loss.item())
             if run is not None:
                 run.log({"train/loss": float(loss.item()), "epoch": epoch}, step=step)
+            if cfg.log_every and step % cfg.log_every == 0:
+                rate = step / max(time.time() - t0, 1e-9)
+                done = f"{step}/{cfg.max_steps}" if cfg.max_steps else f"{step}/{total_steps}"
+                eta = (
+                    (total_steps - step) / rate / 60
+                    if cfg.max_steps is None and total_steps
+                    else 0.0
+                )
+                print(
+                    f"  epoch {epoch + 1}/{cfg.epochs} step {done}  "
+                    f"loss {running / cfg.log_every:.4f}  {rate:.2f} steps/s"
+                    + (f"  eta {eta:.0f} min" if eta else ""),
+                    flush=True,
+                )
+                running = 0.0
             if cfg.max_steps is not None and step >= cfg.max_steps:
                 break
 
+        print(f"  evaluating on {len(dev_ds)} dev clips ...", flush=True)
         metrics = _evaluate(model, dev_loader, device)
+        print(
+            f"  epoch {epoch + 1}: dev EER {metrics['eer']:.4f}  "
+            f"score std {metrics.get('score_std', float('nan')):.4f}  "
+            f"({(time.time() - t0) / 60:.1f} min elapsed)",
+            flush=True,
+        )
+        # Abort on a collapsed model rather than spending the remaining epochs on
+        # it. A healthy detector spreads its scores; one that has stopped reading
+        # its input returns the same number for every clip, which shows up as a
+        # standard deviation of essentially zero long before the EER looks odd.
+        # The first Stage-1 run sat at std 0.0000 for 210 minutes and finished at
+        # EER 0.485 -- chance -- because nothing was watching for this.
+        if metrics.get("score_std", 1.0) < COLLAPSE_STD:
+            raise RuntimeError(
+                f"model collapsed: dev score std {metrics['score_std']:.6f} < {COLLAPSE_STD} "
+                f"after epoch {epoch + 1} -- it is emitting a constant regardless of input. "
+                "Usually the learning rate is too high for a pretrained encoder "
+                "(1e-4 does this to wav2vec2; 1e-5 works). Stopping instead of "
+                "spending the remaining epochs."
+            )
         if run is not None:
             run.log({f"dev/{k}": v for k, v in metrics.items()}, step=step)
         if metrics["eer"] < best_eer:
@@ -163,6 +341,28 @@ def train(cfg: TrainConfig) -> dict[str, float]:
                 {"model": model.state_dict(), "config": cfg.__dict__, "metrics": metrics},
                 Path(cfg.out_dir) / "best.pt",
             )
+        # A resumable snapshot, separate from best.pt. best.pt holds the model
+        # worth keeping; this holds everything needed to CONTINUE -- optimizer
+        # moments, AMP scaler state, the epoch reached and the best EER so far.
+        # Without it a crash in epoch 10 of 15 discards nine epochs of GPU time,
+        # which on this machine (0x133 bugchecks roughly every 30-40 min) is not a
+        # hypothetical. Written to a temp file and renamed so a crash mid-write
+        # cannot leave a truncated checkpoint that fails to load.
+        snapshot = Path(cfg.out_dir) / "last.pt"
+        staging = snapshot.with_suffix(".tmp")
+        torch.save(
+            {
+                "model": model.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                "scaler": scaler.state_dict(),
+                "epoch": epoch + 1,
+                "step": step,
+                "best_eer": best_eer,
+                "config": cfg.__dict__,
+            },
+            staging,
+        )
+        staging.replace(snapshot)
         if cfg.max_steps is not None and step >= cfg.max_steps:
             break
 
@@ -190,6 +390,9 @@ def main() -> None:
     parser.add_argument("--config", required=True)
     parser.add_argument("--smoke", action="store_true", help="1%% subset, few steps")
     parser.add_argument(
+        "--resume", action="store_true", help="continue from <out_dir>/last.pt if present"
+    )
+    parser.add_argument(
         "--device",
         default=None,
         help="auto | cpu | cuda[:N] | mps; overrides the config and $DFD_DEVICE",
@@ -206,11 +409,18 @@ def main() -> None:
         cfg.device = args.device
     if args.data_root is not None:
         cfg.data_root = args.data_root
+    if args.resume:
+        cfg.resume = True
     if args.smoke:
         cfg.subset_frac = 0.01
         cfg.max_steps = 20
         cfg.epochs = 1
         cfg.wandb_mode = "offline"
+        # Cap the dev pass too. Without this the "quick" check trains 20 steps and
+        # then evaluates all 24,844 dev clips, which is most of its runtime and
+        # makes a smoke test useless as a smoke test.
+        cfg.dev_subset = 200
+        cfg.log_every = 5
     result = train(cfg)
     print(f"done: best dev EER = {result['best_eer']:.4f}")
 

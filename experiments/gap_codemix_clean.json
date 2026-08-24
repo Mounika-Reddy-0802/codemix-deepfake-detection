@@ -1,0 +1,27 @@
+{
+  "checkpoint": "checkpoints/baseline/best.pt",
+  "manifest": "data/manifests/gap_codemix_clean.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.4465493910690122,
+    "eer_ci_low": 0.4266633555850664,
+    "eer_ci_high": 0.45783745085258076,
+    "auc": 0.5327716344505664,
+    "auc_ci_low": 0.5175011590278635,
+    "auc_ci_high": 0.5487237376488613,
+    "f1": 0.5534506089309879,
+    "threshold": 0.0012681721709668636,
+    "clips": 4434,
+    "bonafide": 2217,
+    "spoof": 2217,
+    "score_std": 0.24639
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2217,
+      "eer": 0.446549
+    }
+  ]
+}

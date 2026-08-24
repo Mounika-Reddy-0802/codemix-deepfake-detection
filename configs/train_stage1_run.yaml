@@ -24,7 +24,7 @@ batch_size: 4
 # 5,973 of 6,144 MiB -- 97% of this card, with nothing left for a spike. 4 s is
 # also the length anti-spoofing models are conventionally trained on.
 max_seconds: 4.0
-epochs: 15
+epochs: 3
 # 0, not 2, and this is a stability fix rather than a tuning choice. On Windows
 # every DataLoader worker is a SPAWNED process that re-imports torch and commits
 # ~2-3 GB of CUDA DLLs of its own. On this 16 GB / 6 GB-VRAM laptop that exhausted
@@ -50,11 +50,11 @@ max_steps: null
 # device: null/"auto" detects (cuda -> mps -> cpu). "cpu" forces a laptop smoke
 #   run; "cuda" makes the run FAIL LOUDLY if no GPU is attached, which is what you
 #   want on Colab. $DFD_DEVICE and --device override this.
-device: null
+device: cuda
 # data_root: where this machine keeps data/ (C:/dfdata here, /content/data on
 #   Colab). Manifest clip paths are rebased onto it, so a frozen manifest is never
 #   edited to move machines. $DATA_ROOT and --data-root override this.
 data_root: null
 
 wandb_project: codemix-deepfake-detection
-wandb_mode: online
+wandb_mode: offline
