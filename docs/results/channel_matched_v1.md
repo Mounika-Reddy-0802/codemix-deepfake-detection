@@ -82,6 +82,15 @@ narrowband cue is genuinely weaker rather than merely unlearned.
 
 ## What this does NOT establish
 
+**The corpus fails the low-level-cue gate, though this column survives it best.**
+Eight signal statistics reach 9.25% EER on the channel-matched set — against the
+adapter's 3.89%, so the model does beat the shortcut by 2.4× here, unlike on clean
+audio where it has no margin at all (1.34% model vs 1.39% shortcut). That is an
+argument for making channel-matched the primary protocol rather than a secondary
+column, but the corpus still fails the gate.
+[lowlevel_cue_check_v1.md](lowlevel_cue_check_v1.md).
+
+
 **One channel condition.** G.711 at 20 dB SNR only. `configs/data/channel_sim.yaml`
 defines a sweep — `amr_nb` and SNR 5/10/15 — none of which was run. 20 dB is a good
 line; a real call is often worse, and the trend across SNR is unmeasured.

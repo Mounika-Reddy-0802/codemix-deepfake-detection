@@ -93,6 +93,16 @@ speech sounds like, which is precisely what Stage-1 never saw.
 
 ## What this does NOT establish
 
+**The 1.34% does not survive the shortcut check, and this is the most serious
+caveat on the page.** A logistic regression on eight low-level signal statistics
+scores **1.39% EER** on this same eval set — the model has no margin over it at all,
+so nothing in the clean number requires it to have learned anything about speech.
+The plan (W5-T4) makes that check a precondition for trusting any result; it was run
+late and it FAILS. Do not quote the clean number until the bundles are rebuilt with
+the level normalisation `portable_bundle.build` is missing. Detail and root cause:
+[lowlevel_cue_check_v1.md](lowlevel_cue_check_v1.md).
+
+
 **It does not survive a phone line as trained.** Measured under G.711 at 20 dB, this
 adapter goes from 1.34% to **38.58% EER** — it calls 98.9% of spoofs genuine once the
 codec removes the band its spoof cue lived in. Retraining channel-matched recovers it
