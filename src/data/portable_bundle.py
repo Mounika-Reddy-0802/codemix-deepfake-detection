@@ -35,8 +35,11 @@ DATA_ROOT_TOKEN = "${DATA_ROOT}"
 
 def clip_name(row: dict) -> str:
     """A stable filename for one clip."""
-    utt = str(row.get("utt_id") or "").strip()
-    if utt:
+    # NaN is truthy, so `row.get("utt_id") or ""` would name every span-less row
+    # "nan.wav" and collapse them onto one file. Test for missing explicitly.
+    raw = row.get("utt_id")
+    utt = "" if raw is None or pd.isna(raw) else str(raw).strip()
+    if utt and utt.lower() != "nan":
         return f"{utt}.wav"
     key = f"{row.get('filepath', '')}|{row.get('start_seconds', '')}|{row.get('end_seconds', '')}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()[:20] + ".wav"

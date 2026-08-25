@@ -41,9 +41,15 @@ class ManifestError(AssertionError):
 def bonafide_rows(index: pd.DataFrame, pools: pd.DataFrame, pool: str) -> pd.DataFrame:
     """Real MUCS rows for every speaker in ``pool``.
 
-    ``wav_path`` is carried as-is (the whole recording); the crop happens later
+    ``wav_path`` is carried as-is (the whole recording) and the crop happens later
     in ``portable_bundle.attach_spans``, which needs ``clip_index.csv`` for
-    exactly this reason.
+    exactly this reason. The span columns are carried through so that step reads
+    each row's own utterance instead of re-deriving it positionally.
+
+    One row per *utterance*, not per recording. MUCS packs every utterance of a
+    speaker into a single wav, so de-duplicating on ``filepath`` would collapse a
+    speaker's whole contribution to one clip and leave the manifest ~99% spoof --
+    the gap matrix's balanced 2,217/2,217 construction is what this must match.
     """
     allowed = pool_speakers(pools, pool)
     frame = index[index["speaker"].astype(str).isin(allowed)].copy()
@@ -57,9 +63,12 @@ def bonafide_rows(index: pd.DataFrame, pools: pd.DataFrame, pool: str) -> pd.Dat
             "source": frame.get("source", "mucs2021"),
             "tool": "none",
             "condition": "clean",
+            "utt_id": frame["utt_id"],
+            "start_seconds": frame["start_seconds"],
+            "end_seconds": frame["end_seconds"],
         }
     )
-    return out.drop_duplicates("filepath").reset_index(drop=True)
+    return out.drop_duplicates("utt_id").reset_index(drop=True)
 
 
 def spoof_rows(jobs: pd.DataFrame, pack_dir: str, pool: str, pools: pd.DataFrame) -> pd.DataFrame:

@@ -26,7 +26,11 @@ weight_decay: 1.0e-5
 batch_size: 8
 max_seconds: 4.0
 epochs: 5
-num_workers: 0
+# Raised 0 -> 4 purely to keep the GPU fed: wav decode/resample on the main
+# process was the bottleneck, not the forward/backward. Numerically neutral --
+# the train crop RNG is seeded per-index (dataset._crop) and the shuffle sampler
+# runs in the parent, so workers see exactly the same batches as num_workers: 0.
+num_workers: 4
 seed: 1234
 
 device: cuda

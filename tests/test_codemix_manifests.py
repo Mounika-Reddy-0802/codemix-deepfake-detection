@@ -69,10 +69,17 @@ def test_bonafide_rows_only_the_requested_pool():
     assert (rows["tool"] == "none").all()
 
 
-def test_bonafide_rows_deduplicate_by_filepath():
+def test_bonafide_rows_keep_one_row_per_utterance():
     rows = cm.bonafide_rows(_index(), _pools(), "adaptation")
-    # 5 speakers x 3 utterances share a wav_path per speaker (whole-recording path)
-    assert len(rows) == 5
+    # 5 speakers x 3 utterances share a wav_path per speaker (whole-recording
+    # path). De-duplicating on filepath would collapse these 15 utterances to 5
+    # whole recordings -- the "2,217 rows to 25 files" collapse this module's
+    # docstring exists to prevent -- and leave the manifest almost all spoof.
+    assert len(rows) == 15
+    assert rows["utt_id"].is_unique
+    # The span travels with the row so portable_bundle cuts the right utterance.
+    assert rows["start_seconds"].notna().all()
+    assert rows["end_seconds"].notna().all()
 
 
 # --------------------------------------------------------------------------- #
