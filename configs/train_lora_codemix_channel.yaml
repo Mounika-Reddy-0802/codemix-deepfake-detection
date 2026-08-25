@@ -14,9 +14,9 @@ lora_dropout: 0.05
 
 # The adaptation pool ONLY. Eval-pool speakers must never appear here: adapting
 # and evaluating on the same voices measures memorisation, not gap closure.
-train_manifest: data/manifests/codemix_adapt_train.csv
-dev_manifest: data/manifests/codemix_adapt_dev.csv
-out_dir: checkpoints/lora_codemix
+train_manifest: data/manifests/codemix_adapt_train_channel20.csv
+dev_manifest: data/manifests/codemix_adapt_dev_channel20.csv
+out_dir: checkpoints/lora_codemix_channel
 
 # Stage-1 needed 1e-5 because a larger step destroyed wav2vec2's pretrained
 # weights outright. That risk is gone here: the base is frozen and the adapters

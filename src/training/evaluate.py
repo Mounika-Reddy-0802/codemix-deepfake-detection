@@ -35,6 +35,7 @@ def score_manifest(
     limit: int | None = None,
     partial_path: str | None = None,
     flush_every: int = 50,
+    num_workers: int = 0,
 ) -> pd.DataFrame:
     """Run the model over a manifest and return it with a ``score`` column added.
 
@@ -55,8 +56,12 @@ def score_manifest(
     if limit is not None:
         dataset.df = dataset.df.head(limit).reset_index(drop=True)
 
-    model = Detector(_encoder_id(encoder)).to(resolved)
+    model = Detector(_encoder_id(encoder))
     state = torch.load(checkpoint, map_location=resolved, weights_only=False)
+    note = _restore_lora(model, state)
+    if note:
+        print(f"  {note}", flush=True)
+    model = model.to(resolved)
     model.load_state_dict(state["model"] if "model" in state else state)
     model.eval()
 
@@ -81,7 +86,12 @@ def score_manifest(
         todo, data_root=data_root, max_seconds=max_seconds, random_crop=False
     )
     loader = DataLoader(
-        pending, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=0
+        pending,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_fn,
+        num_workers=max(0, int(num_workers)),
+        pin_memory=resolved.startswith("cuda"),
     )
     scores: list[float] = []
     paths = todo["filepath"].astype(str).tolist()
@@ -113,6 +123,42 @@ def score_manifest(
             f"from {partial_path}"
         )
     return out
+
+
+def _restore_lora(model, state) -> str | None:
+    """Re-attach LoRA adapters so a Stage-3 checkpoint loads into a plain Detector.
+
+    ``apply_lora`` renames ``...q_proj.weight`` to ``...q_proj.base.weight`` and adds
+    ``lora_A``/``lora_B``, so a Stage-3 ``best.pt`` does not fit the unadapted module
+    tree that :func:`score_manifest` builds -- ``load_state_dict`` fails on every
+    adapted key. Rebuilding the same wrapping first is what makes the gap-closure
+    number scoreable at all. Returns a log line, or ``None`` for a Stage-1 checkpoint.
+
+    The *targets* are read back from the checkpoint's own key names and the rank from
+    ``lora_A``'s shape, so a run that adapted a non-default set of projections still
+    reloads. ``alpha`` alone cannot be recovered from shapes -- it only ever appears
+    as a scaling factor -- so the saved config is authoritative there, and a
+    checkpoint without one falls back to the default the module documents.
+    """
+    from src.models.lora import DEFAULT_TARGETS, apply_lora
+
+    weights = state["model"] if isinstance(state, dict) and "model" in state else state
+    suffix = ".lora_A"
+    adapted = [k for k in weights if k.endswith(suffix)]
+    if not adapted:
+        return None
+
+    targets = sorted({k[: -len(suffix)].rsplit(".", 1)[-1] for k in adapted})
+    rank = int(weights[adapted[0]].shape[0])
+    cfg = state.get("config", {}) if isinstance(state, dict) else {}
+    alpha = float(cfg.get("lora_alpha", 16.0) or 16.0)
+    wrapped = apply_lora(model, tuple(targets) or DEFAULT_TARGETS, r=rank, alpha=alpha, dropout=0.0)
+    if wrapped != len(adapted):
+        raise RuntimeError(
+            f"checkpoint holds {len(adapted)} adapted layer(s) but rebuilding matched "
+            f"{wrapped} -- the encoder does not match the one this adapter was trained on"
+        )
+    return f"lora checkpoint: r={rank} alpha={alpha} restored on {wrapped} layers {tuple(targets)}"
 
 
 def _flush(partial_path: str, done: dict, paths: list, scores: list) -> None:
@@ -195,6 +241,12 @@ def main() -> None:
         default=None,
         help="incremental score cache; rerunning with the same path resumes",
     )
+    parser.add_argument(
+        "--num-workers",
+        type=int,
+        default=0,
+        help="DataLoader workers for wav decode; >0 keeps the GPU fed on a fast card",
+    )
     args = parser.parse_args()
 
     scored = score_manifest(
@@ -207,6 +259,7 @@ def main() -> None:
         data_root=args.data_root,
         limit=args.limit,
         partial_path=args.partial,
+        num_workers=args.num_workers,
     )
     pooled = summarise(scored)
     attacks = per_attack_eer(scored)

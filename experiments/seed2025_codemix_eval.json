@@ -1,0 +1,27 @@
+{
+  "checkpoint": "checkpoints/lora_codemix_seed2025/best.pt",
+  "manifest": "data/manifests/codemix_eval.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.014635217113665389,
+    "eer_ci_low": 0.01083078570000456,
+    "eer_ci_high": 0.020190705827990003,
+    "auc": 0.9994927362707535,
+    "auc_ci_low": 0.9992671970507284,
+    "auc_ci_high": 0.9996915771343137,
+    "f1": 0.9815521628498728,
+    "threshold": 0.996798574924469,
+    "clips": 3966,
+    "bonafide": 1566,
+    "spoof": 2400,
+    "score_std": 0.490513
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2400,
+      "eer": 0.014635
+    }
+  ]
+}

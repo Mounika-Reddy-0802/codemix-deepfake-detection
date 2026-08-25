@@ -178,3 +178,66 @@ def test_wrapped_layer_reports_the_base_shape():
     assert layer.in_features == 12
     assert layer.out_features == 5
     assert layer(torch.randn(3, 12)).shape == (3, 5)
+
+
+# --------------------------------------------------------------------------- #
+# Reloading an adapted checkpoint for evaluation
+# --------------------------------------------------------------------------- #
+
+
+def test_restore_lora_makes_an_adapted_checkpoint_loadable():
+    """A Stage-3 checkpoint must load into a freshly built, unadapted model.
+
+    ``apply_lora`` renames ``q_proj.weight`` to ``q_proj.base.weight``, so without
+    this the eval entry point raises on every adapted key and the gap-closure
+    number cannot be produced at all.
+    """
+    from src.training.evaluate import _restore_lora
+
+    torch.manual_seed(0)
+    trained = _Tiny()
+    apply_lora(trained, DEFAULT_TARGETS, r=4, alpha=8.0)
+    with torch.no_grad():  # move B off zero so the adapter actually changes the output
+        for module in trained.modules():
+            if isinstance(module, LoRALinear):
+                module.lora_B.add_(torch.randn_like(module.lora_B))
+    x = torch.randn(4, 16)
+    expected = trained(x)
+    state = {"model": trained.state_dict(), "config": {"lora_alpha": 8.0}}
+
+    fresh = _Tiny()
+    note = _restore_lora(fresh, state)
+    fresh.load_state_dict(state["model"])  # strict: every key must line up
+
+    assert "r=4" in note and "alpha=8.0" in note
+    assert torch.allclose(fresh(x), expected, atol=1e-6)
+
+
+def test_restore_lora_leaves_a_stage1_checkpoint_alone():
+    """A checkpoint with no adapters must load unchanged, not grow any."""
+    from src.training.evaluate import _restore_lora
+
+    plain = _Tiny()
+    state = {"model": plain.state_dict()}
+    fresh = _Tiny()
+
+    assert _restore_lora(fresh, state) is None
+    fresh.load_state_dict(state["model"])
+    assert not any(isinstance(m, LoRALinear) for m in fresh.modules())
+
+
+def test_restore_lora_recovers_a_non_default_target_set():
+    """Targets come from the checkpoint's own keys, not from DEFAULT_TARGETS."""
+    from src.training.evaluate import _restore_lora
+
+    trained = _Tiny()
+    apply_lora(trained, ("q_proj",), r=2, alpha=4.0)
+    state = {"model": trained.state_dict(), "config": {"lora_alpha": 4.0}}
+
+    fresh = _Tiny()
+    note = _restore_lora(fresh, state)
+    fresh.load_state_dict(state["model"])
+
+    assert "('q_proj',)" in note
+    assert isinstance(fresh.encoder.q_proj, LoRALinear)
+    assert not isinstance(fresh.encoder.k_proj, LoRALinear)

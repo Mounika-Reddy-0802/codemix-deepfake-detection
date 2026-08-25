@@ -1,0 +1,34 @@
+{
+  "eer": 0.0138992656449553,
+  "auc": 0.9989625904640272,
+  "metrics": {
+    "eer": 0.0138992656449553,
+    "eer_ci_low": 0.010592781625275556,
+    "eer_ci_high": 0.017706710196616314,
+    "auc": 0.9989625904640272,
+    "auc_ci_low": 0.9984502857468831,
+    "auc_ci_high": 0.9994325301106444,
+    "f1": 0.9825007954183902,
+    "threshold": 0.42082384210147966,
+    "score_std": 0.45303832290737317
+  },
+  "train_clips": 2154,
+  "test_clips": 3966,
+  "test_bonafide": 1566,
+  "test_spoof": 2400,
+  "coefficients": {
+    "rms_mean": 1.3518,
+    "rms_std": 1.8347,
+    "peak_amplitude": -4.4831,
+    "clipping_ratio": -0.509,
+    "dc_offset": -0.841,
+    "zero_crossing_rate": 3.8423,
+    "spectral_rolloff_hz": -0.0795,
+    "hf_energy_ratio": -1.805
+  },
+  "intercept": 1.1146,
+  "seed": 1234,
+  "train_manifest": "data/manifests/codemix_adapt_train.csv",
+  "test_manifest": "data/manifests/codemix_eval.csv",
+  "verdict": "FAIL: 1.39% EER is 48.61% from chance -- eight low-level statistics separate the classes, so model results on this data are not safe to trust until the imbalance is explained"
+}
