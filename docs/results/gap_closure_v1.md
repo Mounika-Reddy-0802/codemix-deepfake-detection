@@ -93,6 +93,14 @@ speech sounds like, which is precisely what Stage-1 never saw.
 
 ## What this does NOT establish
 
+**It does not survive a phone line as trained.** Measured under G.711 at 20 dB, this
+adapter goes from 1.34% to **38.58% EER** — it calls 98.9% of spoofs genuine once the
+codec removes the band its spoof cue lived in. Retraining channel-matched recovers it
+(3.89%), so the gap *is* closable under telephony, but the number on this page is a
+clean-audio number and must not be quoted as a deployment result. Full 2×2 and the
+mechanism: [channel_matched_v1.md](channel_matched_v1.md).
+
+
 **The spoof side is still weak, and that caps how much this proves.** Per
 `gap_matrix_v1.md`, the XTTS corpus rated 1.5/5 sounds-human with a compressed
 pitch range — these are easy fakes, and the eval spoof set is one attack family

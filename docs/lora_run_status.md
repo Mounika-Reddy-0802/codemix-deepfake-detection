@@ -20,6 +20,11 @@ gap-closure result is written up in [results/gap_closure_v1.md](results/gap_clos
 
 Repeated over seeds 1234 / 2025 / 7: **1.45% ± 0.10pp** and **1.47% ± 0.26pp**.
 
+**Read [results/channel_matched_v1.md](results/channel_matched_v1.md) before quoting
+the 1.34%.** Under G.711 telephony the clean-trained adapter falls to 38.58% EER; a
+channel-matched adapter reaches 3.89%. The gap closes over a phone line only if the
+adapter is trained for one.
+
 **Still open — W7-T2, blocked on data.** Whether the adapter costs English
 performance is unmeasured: ASVspoof 2019 LA is not on this machine. See
 [results/gap_closure_v1.md](results/gap_closure_v1.md#the-open-question-this-does-not-answer-what-did-english-cost).
