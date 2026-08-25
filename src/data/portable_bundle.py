@@ -85,16 +85,38 @@ def attach_spans(manifest: pd.DataFrame, index: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+#: Loudness every bundled clip is normalised to, matching ``preprocess.PreprocessConfig``
+#: and ``configs/data/channel_sim.yaml``.
+TARGET_DBFS = -23.0
+
+
 def build(
     manifest: pd.DataFrame,
     out_dir: str | Path,
     clips_subdir: str = "clips",
     target_sr: int = 16_000,
     data_root: str | None = None,
+    normalise: bool = True,
+    target_dbfs: float = TARGET_DBFS,
 ) -> pd.DataFrame:
-    """Write every referenced clip into ``out_dir`` and return a portable manifest."""
+    """Write every referenced clip into ``out_dir`` and return a portable manifest.
+
+    Clips are RMS-normalised to ``target_dbfs`` unless ``normalise=False``.
+
+    **This was missing and it cost a result.** ``preprocess.py`` normalises to
+    -23 dBFS and ``configs/data/channel_sim.yaml`` specifies it, but this function
+    went from ``load_wav`` straight to ``save_wav``. XTTS output arrives effectively
+    peak-normalised (mean peak 0.997, tightly clustered); raw MUCS spans do not
+    (0.940). Level alone was therefore a label, and the W5-T4 low-level-cue check
+    scored 1.39% EER on eight signal statistics -- matching the adapted model's
+    1.34% and leaving it no margin at all. See ``docs/results/lowlevel_cue_check_v1.md``.
+
+    Normalising is necessary, not sufficient: it moves that check to 5.17%. The
+    remainder is lecture audio against a vocoder, which no gain change fixes.
+    """
     from src.data.corpora import load_clip
-    from src.utils.audio_utils import load_wav, save_wav
+    from src.utils.audio_utils import load_wav, rms_normalize, save_wav
+    from src.utils.paths import resolve as resolve_path
 
     root = Path(out_dir)
     clips = root / clips_subdir
@@ -107,17 +129,24 @@ def build(
         target = clips / name
         if not target.is_file():
             try:
+                # ``data_root`` was accepted and then ignored here, so a portable
+                # manifest -- the output of a previous build, carrying
+                # ``${DATA_ROOT}/clips/x.wav`` -- could not be fed back in: every
+                # row was handed the literal token and failed to open.
+                source_path = str(resolve_path(row["filepath"], data_root))
                 start, end = row.get("start_seconds"), row.get("end_seconds")
                 if pd.notna(start) and pd.notna(end):
                     # A span inside a longer recording (MUCS): cut it out.
                     source = dict(row)
-                    source["wav_path"] = row["filepath"]
+                    source["wav_path"] = source_path
                     audio, sample_rate = load_clip(source, target_sr=target_sr)
                 else:
                     # Already a standalone clip (generated audio, HiACC): copy it
                     # through. Requiring a span here is what made the first run
                     # drop every spoof row.
-                    audio, sample_rate = load_wav(str(row["filepath"]), target_sr=target_sr)
+                    audio, sample_rate = load_wav(source_path, target_sr=target_sr)
+                if normalise:
+                    audio = rms_normalize(audio, target_dbfs)
                 save_wav(str(target), audio, sample_rate)
                 written += 1
             except Exception as exc:  # noqa: BLE001 - one bad clip must not stop the bundle
@@ -144,6 +173,15 @@ def main() -> None:
     parser.add_argument("--index", default="data/manifests/clip_index.csv")
     parser.add_argument("--manifest-out", required=True, help="where to write the portable copy")
     parser.add_argument("--target-sr", type=int, default=16_000)
+    parser.add_argument(
+        "--data-root", default=None, help="root the INPUT manifest resolves against"
+    )
+    parser.add_argument(
+        "--no-normalise",
+        action="store_true",
+        help="skip RMS normalisation (reproduces the pre-fix bundles; see W5-T4)",
+    )
+    parser.add_argument("--target-dbfs", type=float, default=TARGET_DBFS)
     args = parser.parse_args()
 
     manifest = pd.read_csv(args.manifest)
@@ -153,7 +191,14 @@ def main() -> None:
     spanned = int(prepared["start_seconds"].notna().sum())
     print(f"manifest {len(prepared)} rows; {spanned} recovered a span from the corpus index")
 
-    portable = build(prepared, args.out_dir, target_sr=args.target_sr)
+    portable = build(
+        prepared,
+        args.out_dir,
+        target_sr=args.target_sr,
+        data_root=args.data_root,
+        normalise=not args.no_normalise,
+        target_dbfs=args.target_dbfs,
+    )
     Path(args.manifest_out).parent.mkdir(parents=True, exist_ok=True)
     portable.to_csv(args.manifest_out, index=False)
 

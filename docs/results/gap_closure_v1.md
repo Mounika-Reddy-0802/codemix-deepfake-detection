@@ -93,13 +93,15 @@ speech sounds like, which is precisely what Stage-1 never saw.
 
 ## What this does NOT establish
 
-**The 1.34% does not survive the shortcut check, and this is the most serious
-caveat on the page.** A logistic regression on eight low-level signal statistics
-scores **1.39% EER** on this same eval set — the model has no margin over it at all,
-so nothing in the clean number requires it to have learned anything about speech.
-The plan (W5-T4) makes that check a precondition for trusting any result; it was run
-late and it FAILS. Do not quote the clean number until the bundles are rebuilt with
-the level normalisation `portable_bundle.build` is missing. Detail and root cause:
+**The corpus fails the W5-T4 shortcut check, though this number survives it.**
+A logistic regression on eight low-level signal statistics reaches **5.17% EER** on
+this eval set, against the model's 1.34% — a 3.9× margin. That margin only exists
+after a fix: `portable_bundle.build` was not level-normalising, so the two classes
+arrived 3.06 dB apart, the shortcut scored 1.39%, and the model had *no* margin at
+all. Retrained on normalised audio S2 still scores 1.34%, so it was never using
+level — but the corpus is still separable by trivial means (zero-crossing rate,
+MUCS 1.8× higher than XTTS: lecture audio against a vocoder). Quote this number
+with that caveat attached, never bare.
 [lowlevel_cue_check_v1.md](lowlevel_cue_check_v1.md).
 
 

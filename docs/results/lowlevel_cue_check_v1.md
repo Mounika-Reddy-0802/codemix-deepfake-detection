@@ -89,11 +89,41 @@ construction. Channel simulation compresses it (1.39% → 9.25%) because band-li
 and noise destroy much of the evidence, which is precisely the argument for the
 channel-matched protocol being the primary one.
 
+## After the fix
+
+`portable_bundle.build` now RMS-normalises to −23 dBFS, matching `preprocess.py`
+and `channel_sim.yaml`. Bundles rebuilt, gate re-run, S2 retrained from scratch on
+the normalised audio. Level separation collapsed from **3.06 dB to 0.08 dB**.
+
+| | Shortcut EER | S2 EER | S2's margin |
+|---|---|---|---|
+| Clean, before the fix | 1.39% | 1.34% | **none** |
+| **Clean, after the fix** | **5.17%** | **1.34%** | **3.9×** |
+| Channel-matched | 9.25% | 3.89% | 2.4× |
+
+Two things follow, and they point in opposite directions.
+
+**S2 was not using the loudness artifact.** Retrained on normalised audio it scores
+**1.34%** — identical. The *original* checkpoint, trained on unnormalised audio,
+scores **1.16%** on the normalised eval set, slightly better than on the data it was
+trained for. Removing the cue the regression leaned on hardest (peak amplitude was
+its largest coefficient at −4.48) costs the model nothing. Whatever S2 learned, it
+was not level.
+
+**The gate still fails.** 5.17% is not chance. The dominant coefficient is now
+zero-crossing rate (+4.66), and MUCS runs 1.8× higher on it than XTTS. That is
+lecture audio against a vocoder — corpus construction, not a bug, and no gain change
+touches it.
+
+So the clean number is no longer indistinguishable from a shortcut: it went from a
+0× margin to 3.9×. It is defensible with the caveat stated, rather than
+indefensible. It is still measured on a corpus that a trivial classifier can beat
+50/50 odds on by a wide margin.
+
 ## What has to happen
 
-1. **Normalise in `portable_bundle.build`**, matching what `preprocess.py` already
-   does. Rebuild the bundles, re-run this gate, then re-run S2. Necessary, not
-   sufficient.
+1. ~~Normalise in `portable_bundle.build`.~~ **Done** — see "After the fix".
+   Necessary, and confirmed not sufficient.
 2. **Make channel-matched the primary protocol**, not a secondary column. It is the
    condition where the model demonstrably beats the shortcut, and it is the
    deployment condition.
