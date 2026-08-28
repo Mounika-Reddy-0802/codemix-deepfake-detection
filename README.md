@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%203%20of%2012-yellow)
+![Phase](https://img.shields.io/badge/phase-week%204%20of%2012-yellow)
 ![Tests](https://img.shields.io/badge/tests-410%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
@@ -11,12 +11,15 @@ project **measures that gap under a channel-matched telephony protocol**, closes
 part of it with LoRA, and demonstrates it live — a cloned voice on a phone call
 triggers a beep in the receiver's ear, a dashboard alert, and an SMS.
 
-> **Status: Week 3 of 12 — pipeline complete, no detection numbers yet.**
+> **Status: Week 4 of 12 — Stage-1 baseline trained and evaluated.**
 > Both corpora are indexed and ethics-gated, the telephony channel is verified by
 > measurement *and* by ear, the speaker pools are frozen, and spoof generation is
-> validated end-to-end on a real GPU (40 clips, 0 failures). Stage-1 training has
-> **not** started — it needs ASVspoof 2019 LA, which is not yet on the GPU machine.
-> Nothing below is a detection result; see [Honest limitations](#honest-limitations).
+> validated end-to-end on a real GPU (40 clips, 0 failures). The Stage-1
+> English-only detector has now been trained on ASVspoof 2019 LA and evaluated on
+> its official eval split: **0.58% EER, AUC 0.9998** over 71,237 clips — see
+> [Stage-1 results](#stage-1-asvspoof-baseline-trained-and-evaluated) below. The
+> code-mixed gap measurement and LoRA adaptation are separate, later stages and are
+> not part of this number; see [Honest limitations](#honest-limitations).
 
 ---
 
@@ -128,6 +131,24 @@ Speech rate is statistically indistinguishable and durations track the ~13 % tex
 expansion, so **romanisation does not rush or truncate speech**. That is a
 pre-screen, not a verdict — the blind rating decides.
 → [`docs/qa/pilot_script_rating_sheet.csv`](docs/qa/pilot_script_rating_sheet.csv)
+
+### Stage-1 ASVspoof baseline trained and evaluated
+
+The English-only Stage-1 detector (`wav2vec2-base`) has been trained on
+ASVspoof 2019 LA and evaluated on its official, speaker-disjoint evaluation
+split — the first real detection numbers in this repository.
+
+| Metric | Result |
+|---|---:|
+| **EER** | **0.5843%** |
+| AUC | **0.9998** |
+| F1 | **0.9723** |
+| Evaluation clips | **71,237** (7,355 bonafide / 63,882 spoof) |
+
+This is an English-only, same-benchmark-family result and says nothing yet about
+code-mixed or telephony generalisation — that is the gap this project exists to
+measure, not something this number closes. Full per-attack breakdown, CIs, and
+reproduction command: [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md).
 
 ### The corpus is written in one script, and it is Latin
 
@@ -256,8 +277,14 @@ python -m src.data.spoof_generation --jobs <pack>/generation_jobs.csv \
 python -m src.data.pilot_rating --roman-pack <roman> --deva-pack <deva> \
     --stage-dir $DATA_ROOT/generated/pilot_ab/clips
 
-# --- 6. Training (blocked: needs ASVspoof 2019 LA) ---
-python -m src.training.train --config configs/train_baseline.yaml --smoke
+# --- 6. Stage-1 training (needs ASVspoof 2019 LA staged under $DATA_ROOT) ---
+python -m src.training.train --config configs/train_stage1_run.yaml --smoke   # sanity check first
+python -m src.training.train --config configs/train_stage1_run.yaml --device cuda --resume
+
+# --- 7. Evaluate ---
+python -m src.training.evaluate --checkpoint checkpoints/baseline/best.pt \
+    --manifest data/manifests/asvspoof_eval.csv --device cuda \
+    --out experiments/stage1_eval_results.json
 ```
 
 Second-machine runbook, including the XTTS weight pre-fetch that avoids a
@@ -274,7 +301,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–3
+## Progress — Weeks 1–4
 
 Only completed work is listed. This table is extended at the end of each week; the
 full 12-week plan lives in the team drive, outside this repo.
@@ -284,10 +311,11 @@ full 12-week plan lives in the team drive, outside this repo.
 | **1** | ✅ Download scripts + child quarantine, streaming loaders, licence register | ✅ Repo bootstrap, env check notebook, CI | ✅ WebRTC harness with 16 kHz PCM tap, live-call design |
 | **2** | ✅ Preprocessing, G.711 + AMR-NB channel simulation | ✅ Dataset + collate, speaker-disjoint splits, metrics (EER/AUC/F1) | ✅ Adult-speaker selection, XTTS-v2 clone driver + tool firewall |
 | **3** | ✅ Corpus-aware indexing (56,143 clips), quarantine verified on both machines, channel listening test passed | ✅ AffectDF related-work anchor, attack taxonomy, env verification | ✅ Speaker pools frozen, XTTS pilot generated on GPU, Devanagari→Latin transliteration |
+| **4** | — | — | ✅ Stage-1 ASVspoof 2019 LA baseline trained and evaluated on Kaggle GPU: EER 0.58%, AUC 0.9998, F1 0.9723 over 71,237 eval clips |
 
 **Week 3 is not closed yet.** Outstanding: the 40-clip A/B needs three sets of ears,
-the AMR-NB listening pass, three PR reviews, and the Week-3 log-book entries. The
-40-clip rating and the missing ASVspoof download both block Week 4. Full list in
+the AMR-NB listening pass, and three PR reviews, plus the Week-3 log-book entries.
+The 40-clip rating still blocks a fully-rated Week 4. Full list in
 [`Works updates.md`](Works%20updates.md).
 
 ## Team
@@ -306,6 +334,7 @@ never your own. Full rules in the team git rules doc (kept in the team drive, ou
 | Document | What is in it |
 |---|---|
 | [`docs/RESULTS.md`](docs/RESULTS.md) | **What is actually measured** — the five milestones, and what is not measured yet |
+| [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 ASVspoof 2019 LA baseline: EER/AUC/F1, per-attack breakdown, reproduction |
 | [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-017** with the problem that forced it |
 | [`Works updates.md`](Works%20updates.md) | HUMAN_TODO — everything only a person can do, ordered by what unblocks most |
 | [`docs/progress.md`](docs/progress.md) | One line per finished task: date, task, owner, branch |
