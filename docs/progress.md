@@ -50,3 +50,4 @@ One line per finished task: `date | task | owner | branch | summary`.
 | 2026-08-23 | W3-T6 | M | week3-krishna-xtts-rvc-pilot | commit-msg hook hardened and actually installed via core.hooksPath: strips trailers, rejects attribution words, verified on 3 live messages |
 | 2026-08-24 | W7-T4-prep | SK | week3-krishna-xtts-rvc-pilot | lora adapters wired into the training loop, zero-init verified against the real wav2vec2 detector (1.13% trainable, bit-identical to stage-1 before any step) |
 | 2026-08-24 | W7-T4-prep | SK | week3-krishna-xtts-rvc-pilot | pool-firewalled generation + manifest pipeline for the adaptation/eval pools (train pool was the only one built so far); college-pc transfer guide for the rtx 4500 |
+| 2026-08-28 | W4-T1 | SK | week3-krishna-xtts-rvc-pilot | stage-1 baseline trained + evaluated on a kaggle gpu: pooled eval EER 0.5843%, AUC 0.9998, F1 0.9723 over 71,237 clips; readme and docs/STAGE1_ASVSPOOF_RESULTS.md updated to match |
