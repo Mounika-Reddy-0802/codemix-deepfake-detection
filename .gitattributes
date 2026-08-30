@@ -1,13 +1,10 @@
 # Normalise line endings across the Windows/Linux/Mac team.
 * text=auto eol=lf
-
 # Shell scripts and hooks must stay LF even on Windows checkouts.
 *.sh    text eol=lf
 githooks/commit-msg text eol=lf
-
 # Windows batch files stay CRLF.
 *.bat   text eol=crlf
-
 # Treat binary assets as binary (no EOL munging, no diff noise).
 *.wav   binary
 *.flac  binary
@@ -19,3 +16,4 @@ githooks/commit-msg text eol=lf
 *.onnx  binary
 *.pt    binary
 *.pth   binary
+checkpoints/baseline/best.pt filter=lfs diff=lfs merge=lfs -text
