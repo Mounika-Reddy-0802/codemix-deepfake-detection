@@ -67,7 +67,7 @@ the same `configs/train_lora_codemix_channel.yaml` and the same seed 1234.
 | Best dev EER during training | 6.51% | **5.34%** | -1.17 pp |
 
 **The render is deterministic across machines.** `channel_bundle` was re-run on the
-Kaggle GPU and `git diff -- data/manifests` came back em0ty: the committed
+Kaggle GPU and `git diff -- data/manifests` came back empty: the committed
 `codemix_*_channel20.csv` are bit-identical to the ones written on the college PC,
 so the per-clip noise seed does what the module docstring claims. The render also
 re-verified in band -- energy above 4 kHz 0.199% -> 0.0001%, measured SNR 18.6 dB.
