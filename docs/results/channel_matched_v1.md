@@ -54,6 +54,43 @@ performance (1.34% → 13.92%), which is the expected trade and an argument for
 matching the training condition to the deployment rather than for one universal
 adapter.
 
+## Reproduced on a Kaggle T4 — the channel column holds, the clean column moves
+
+The rows above were measured once, on the college PC. They were re-measured on
+2026-09-01 on a Kaggle T4 x2, from a clean clone, with the adapter retrained from
+the same `configs/train_lora_codemix_channel.yaml` and the same seed 1234.
+
+| Column | College PC (RTX 4500) | Kaggle T4 | Delta |
+|---|---|---|---|
+| Channel eval (g711 @ 20 dB) | 3.89% EER | **4.16%** EER (AUC 0.9946) | +0.27 pp |
+| Clean eval | 13.92% EER | **10.36%** EER (AUC 0.9447) | **-3.56 pp** |
+| Best dev EER during training | 6.51% | **5.34%** | -1.17 pp |
+
+**The render is deterministic across machines.** `channel_bundle` was re-run on the
+Kaggle GPU and `git diff -- data/manifests` came back em0ty: the committed
+`codemix_*_channel20.csv` are bit-identical to the ones written on the college PC,
+so the per-clip noise seed does what the module docstring claims. The render also
+re-verified in band -- energy above 4 kHz 0.199% -> 0.0001%, measured SNR 18.6 dB.
+
+**The channel number replicates; the clean number does not.** +0.27 pp is inside the
+channel row's own bootstrap CI (3.61-4.66%). -3.56 pp is not: the two clean
+measurements do not overlap (9.53-11.34% here against 13.92% there). The Kaggle
+adapter converged further on identical config and seed -- best dev EER 5.34% against
+6.51% -- so the difference is the environment (torch 2.10.0+cu128 against
+2.8.0+cu128, and dataloader scheduling on a different card), not the recipe.
+
+What this changes: the *cost* of channel matching is run-to-run variable, and 13.92%
+should not be quoted as a fixed price. The direction is unaffected -- the adapter is
+strong under telephony and weaker on clean audio either way. The seed repeats this
+document already lists as unrun for the channel-trained row are what would settle the
+size of that trade; until they exist, quote the clean cost as a range, not a point.
+
+Artefacts: `experiments/lora_channel_on_channel_kaggle.json`,
+`experiments/lora_channel_on_clean_kaggle.json`, their `*_scores.csv`, and
+`experiments/lora_channel_kaggle_summary.json`, which carries the college-PC numbers
+in a `reference_eer` block for direct comparison. The adapter itself is
+`checkpoints/lora_codemix_channel/best.pt`.
+
 ## Why it collapses: the spoof cue lives above 4 kHz
 
 The pooled EER hides the mechanism, exactly as it did in `gap_matrix_v1.md`. The
