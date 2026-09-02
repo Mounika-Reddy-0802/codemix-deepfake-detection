@@ -2,49 +2,74 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%204%20of%2012-yellow)
-![Tests](https://img.shields.io/badge/tests-410%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-week%208%20of%2012-yellow)
+![Tests](https://img.shields.io/badge/tests-506%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
 project **measures that gap under a channel-matched telephony protocol**, closes
-part of it with LoRA, and demonstrates it live — a cloned voice on a phone call
+most of it with LoRA, and demonstrates it live — a cloned voice on a phone call
 triggers a beep in the receiver's ear, a dashboard alert, and an SMS.
 
-> **Status: Week 4 of 12 — Stage-1 baseline trained and evaluated.**
-> Both corpora are indexed and ethics-gated, the telephony channel is verified by
-> measurement *and* by ear, the speaker pools are frozen, and spoof generation is
-> validated end-to-end on a real GPU (40 clips, 0 failures). The Stage-1
-> English-only detector has now been trained on ASVspoof 2019 LA and evaluated on
-> its official eval split: **0.58% EER, AUC 0.9998** over 71,237 clips — see
-> [Stage-1 results](#stage-1-asvspoof-baseline-trained-and-evaluated) below. The
-> code-mixed gap measurement and LoRA adaptation are separate, later stages and are
-> not part of this number; see [Honest limitations](#honest-limitations).
+> **Status: Week 8 of 12 — the gap is measured, closed, and stress-tested.**
+>
+> An English-trained detector scoring **0.87% EER** on ASVspoof collapses to
+> **44.65%** on code-mixed Hinglish. A LoRA adapter training **1.13% of the
+> parameters for 2.2 minutes** brings a held-out code-mixed set from 53.71% to
+> **1.34% EER**. But that clean result **does not survive a phone line** — it
+> degrades to 38.58% under G.711, and only a channel-matched adapter holds at
+> **3.89%**.
+>
+> ⚠️ **The clean 1.34% is not yet quotable.** It fails this project's own
+> shortcut-detection gate (see [The number we are not
+> reporting](#-the-number-we-are-not-reporting)). The channel-matched result is
+> the defensible one.
 
 ---
 
 ## Architecture
 
+The pipeline is a single vertical chain: every stage below consumes only what the
+stage above produced, and two firewalls (described under the diagram) cut across
+all of them.
+
 ```mermaid
-flowchart LR
-    subgraph data["Data — L"]
-        raw[ASVspoof19 LA / MUCS / HiACC-adult] --> idx[corpus index:<br/>real speaker ids, 56,143 clips]
-        idx --> chan[channel sim:<br/>8k, G.711/AMR-NB, SNR]
-        gen[XTTS-v2 clones + held-out Tortoise] --> chan
-    end
-    subgraph model["Model — M"]
-        chan --> ds[manifest + dataset<br/>speaker-disjoint pools] --> det[wav2vec2/WavLM<br/>+ attentive pooling + MLP]
-        det --> gap[gap matrix:<br/>EN → HI/TA → code-mixed]
-        gap --> lora[LoRA adaptation]
-    end
-    subgraph demo["Live demo — SK"]
-        det --> stream[streaming inference] --> call[WebRTC now / Twilio Wk7:<br/>beep + dashboard + SMS]
-    end
+flowchart TD
+    A["1 · CORPORA — L<br/>ASVspoof 2019 LA (English)<br/>MUCS Hindi-English · HiACC-adult"]
+    A --> B["2 · CORPUS INDEX — L<br/>56,143 clips · real Kaldi speaker ids<br/>HiACC child audio quarantined on extract"]
+    B --> C["3 · SPEAKER POOLS — FROZEN — SK<br/>25 train · 10 adaptation · 15 eval<br/>sha256 f57e0d85… · carved before any audio existed"]
+    C --> D["4 · SPOOF GENERATION — SK<br/>XTTS-v2 clones = seen attack<br/>Tortoise = held-out, eval only, never trained on"]
+    D --> E["5 · TELEPHONY CHANNEL — L<br/>8 kHz · G.711 μ-law / AMR-NB · SNR mixing<br/>verified by measurement and by ear"]
+    E --> F["6 · DETECTOR — M<br/>wav2vec2-base + attentive stats pooling + MLP"]
+    F --> G["7 · STAGE 1 — ENGLISH ONLY — M<br/>ASVspoof 2019 LA eval<br/>0.87% EER"]
+    G --> H["8 · GAP MATRIX — M<br/>same detector on code-mixed Hinglish<br/>44.65% EER — 51× worse"]
+    H --> I["9 · STAGE 2 — LoRA ADAPTATION — M<br/>1.13% of parameters, 2.2 min on one GPU<br/>clean 1.34% · channel-matched 3.89%"]
+    I --> J["10 · LIVE CALL DEMO — SK<br/>streaming inference over WebRTC now<br/>Twilio from Week 6 · beep + dashboard + SMS"]
+
+    style A fill:#1f3a5f,stroke:#4a90d9,color:#fff
+    style B fill:#1f3a5f,stroke:#4a90d9,color:#fff
+    style C fill:#1f3a5f,stroke:#4a90d9,color:#fff
+    style D fill:#2d4a2b,stroke:#6aa84f,color:#fff
+    style E fill:#2d4a2b,stroke:#6aa84f,color:#fff
+    style F fill:#4a3a1f,stroke:#d9a441,color:#fff
+    style G fill:#4a3a1f,stroke:#d9a441,color:#fff
+    style H fill:#5f1f1f,stroke:#d94a4a,color:#fff
+    style I fill:#4a3a1f,stroke:#d9a441,color:#fff
+    style J fill:#3f1f5f,stroke:#9a4ad9,color:#fff
 ```
 
-Two firewalls run through every stage and are enforced by tests rather than by
-discipline: **Stage-1 trains on English only**, and **speaker pools never overlap** —
-including the voices that get cloned.
+**Two firewalls run through every stage, enforced by tests rather than by discipline:**
+
+1. **Stage-1 trains on English only.** That is what makes the gap a measurement of
+   real generalisation rather than an artefact of mixed training data.
+2. **Speaker pools never overlap** — including the voices that get cloned. A clone
+   of speaker X counts as speaker X, so disjointness holds across bonafide *and*
+   spoof.
+
+`tests/test_splits.py` runs before every training launch and fails the build if
+either is broken.
+
+---
 
 ## The problem
 
@@ -57,6 +82,118 @@ Two shifts stack: **language** and **channel**. Published EERs are measured with
 neither. This project measures both, in the condition a detector would actually be
 deployed in.
 
+---
+
+## Results — what is actually measured
+
+Every number below comes from a real run on real data and is reproducible from
+[Reproduce](#reproduce). Read them in order; each one changes how you should read
+the last.
+
+### 1. The gap is real, and it is enormous
+
+Same detector, same checkpoint, two evaluation sets.
+
+| Column | Clips | EER | AUC |
+|---|---:|---:|---:|
+| **English**, unseen attacks (ASVspoof eval, A07–A19) | 71,237 | **0.87%** | 0.9990 |
+| **Code-mixed Hinglish** (MUCS real + XTTS spoof) | 4,434 | **44.65%** | 0.533 |
+
+A **51× degradation**, from near-perfect to approximately chance. The 95% CI on the
+code-mixed EER is [42.7%, 45.8%], so this is far larger than sampling noise.
+
+**The failure mode is not what the EER implies.** The detector does not merely miss
+fakes — it **calls 87.9% of genuine human Hinglish speech "spoof"**, at a median
+confidence of P(bonafide) = 0.0014. Both classes collapse toward the spoof end,
+which is exactly why AUC sits at 0.533.
+
+→ [`docs/results/gap_matrix_v1.md`](docs/results/gap_matrix_v1.md)
+
+### 2. LoRA closes most of it, cheaply
+
+Both rows below are the **same 3,966 clips** over the **15 held-out eval-pool
+speakers**. The only difference is the adapter.
+
+| Model | EER | 95% CI | AUC |
+|---|---:|---|---:|
+| Stage-1 baseline, unadapted | 53.71% | [52.1%, 55.5%] | 0.459 |
+| **+ LoRA code-mix adapter** | **1.34%** | [0.80%, 1.66%] | 0.9997 |
+
+A **40× reduction**, from worse-than-chance to near-solved, by training **1.13% of
+the parameters for 2.2 minutes** on one RTX 4500 Ada. Repeated over seeds
+1234 / 2025 / 7: **1.45% ± 0.10pp** — the seed is not carrying the result.
+
+→ [`docs/results/gap_closure_v1.md`](docs/results/gap_closure_v1.md)
+
+### 3. …but the clean adapter dies on a phone line
+
+This is the finding that matters most for deployment. Same clips, same speakers;
+only the audio condition and the adapter's *training* condition change.
+
+| Adapter trained on | Clean eval | Channel eval (G.711 @ 20 dB) |
+|---|---:|---:|
+| *(none — Stage-1 baseline)* | 53.71% | 54.92% |
+| **Clean audio** | **1.34%** | **38.58%** ❌ |
+| **Channel-matched audio** | 13.92% | **3.89%** ✅ |
+
+The clean-trained adapter collapses over a codec, calling **98.9% of spoofs
+genuine** — its cue was a vocoder signature above 4 kHz, and the phone line throws
+that band away. Channel-matched adaptation recovers it, at a real cost to clean
+performance.
+
+**Train for the condition you deploy in.** That single sentence is this project's
+main practical contribution.
+
+→ [`docs/results/channel_matched_v1.md`](docs/results/channel_matched_v1.md)
+
+### 4. Adapting to Hinglish costs some English — but not catastrophically
+
+The question a reviewer asks first: did the adapter buy Hinglish by forgetting
+English? All three rows scored on the same 71,237-clip ASVspoof eval partition, in
+the same session.
+
+| Checkpoint | ASVspoof EER | AUC | Retention cost |
+|---|---:|---:|---:|
+| Stage-1 baseline | 0.85% | 0.9944 | — |
+| LoRA, clean-trained | 8.38% | 0.9297 | **+7.52 pp** |
+| LoRA, channel-matched | 4.83% | 0.9562 | **+3.98 pp** |
+
+For scale, AffectDF's Table 13 reports AASIST going **0.83% → 44.52% EER
+(+43.69 pp)** after domain adaptation. At +7.52 pp this is a manageable trade, not
+catastrophic forgetting — the frozen-encoder argument for LoRA now has a
+measurement behind it. Note that the channel-matched adapter **retains English
+better *and* survives telephony**, which is a second independent reason to prefer it.
+
+### ⚠️ The number we are not reporting
+
+Before trusting any clean-condition figure above, we ran AffectDF's Appendix-G
+gate: fit a logistic regression on **eight cheap signal statistics** (RMS, peak,
+clipping, DC offset, zero-crossing rate, spectral rolloff, HF energy) and check that
+they *cannot* separate the classes.
+
+| Condition | Low-level-cue EER | Verdict |
+|---|---:|---|
+| **Clean** | **1.39%** | ❌ FAIL |
+| Clean + RMS-normalised | 5.17% | ❌ FAIL |
+| **Channel-matched** | **9.25%** | ❌ FAIL, but 2.4× margin |
+| *AffectDF's own corpus* | *53.16%* | *pass (chance)* |
+
+**Eight numbers per clip separate our classes at 1.39% EER. The model gets 1.34%.**
+There is no margin — nothing in the clean number requires the model to have learned
+anything about synthetic speech, so **it must not be quoted** until the corpus is
+fixed.
+
+The channel-matched 3.89% beats its shortcut baseline by 2.4× and partially
+survives. Root cause is identified: `portable_bundle.build` never level-normalises,
+though `preprocess.py` and `channel_sim.yaml` both specify −23 dBFS, so XTTS output
+arrives at peak 0.9968 against MUCS at 0.9397. Normalisation is necessary but not
+sufficient; the residual is genuine recording-domain difference (lecture audio vs
+vocoder).
+
+→ [`docs/results/lowlevel_cue_check_v1.md`](docs/results/lowlevel_cue_check_v1.md)
+
+---
+
 ## How it works
 
 | Stage | What it does | Owner |
@@ -64,110 +201,49 @@ deployed in.
 | **1. Corpora + ethics** | MUCS (Kaldi tables, real speaker ids) and HiACC-adult indexed to 56,143 clips. HiACC **child audio quarantined before anything can read it** — a hard project rule, not a filter. | L |
 | **2. Channel protocol** | Every eval clip through 8 kHz G.711 μ-law or AMR-NB plus SNR mixing, so the detector is tested on telephony rather than studio audio. | L |
 | **3. Spoof generation** | XTTS-v2 clones train-pool voices; Tortoise is held out as the *unseen* attack and never enters a training manifest. | SK |
-| **4. Detection** | wav2vec2 / WavLM + attentive stats pooling + MLP head; LoRA for Stage-3 code-mixed adaptation. | M |
-| **5. Live demo** | Streaming inference on a real call — WebRTC now, Twilio from Week 7. | SK |
+| **4. Detection** | wav2vec2-base + attentive stats pooling + MLP head; LoRA for Stage-2 code-mixed adaptation. | M |
+| **5. Live demo** | Streaming inference on a real call — WebRTC now, Twilio from Week 6. | SK |
 
 Generation and training are **decoupled by a job table**: `pilot_jobs` assembles a
 self-contained, path-portable pack and `spoof_generation` synthesises from it. The
-same pack runs on a CPU laptop, a Colab GPU, or the team's RTX 3050 without editing
-a single path.
+same pack runs on a CPU laptop, a Colab GPU, a Kaggle T4, or the team's RTX 4500
+without editing a single path.
 
 ---
 
-## What is validated so far
-
-Every number below is measured on real data on a real machine and is reproducible
-from [Reproduce everything else](#reproduce-everything-else).
+## Infrastructure that the numbers rest on
 
 ### Corpora indexed, and the child-audio exclusion holds
 
-| | Count |
-|---|---|
-| MUCS utterances / speakers | **52,825 / 520** |
-| HiACC adult clips / speakers | **3,318 / 24** |
-| HiACC child files quarantined | **1,858** |
-| Total indexed clips | **56,143** |
-| Child ids reachable from any manifest | **0** |
-
-Identical on both machines — which is the point: the dev laptop and the GPU laptop
-index the same corpus to the same numbers, so results are comparable across them.
-HiACC's own `readme.txt` confirms the adult/child split is **by folder**, which is
-what the quarantine sweep keys on, so the exclusion acts on the documented layout
-rather than on a guess.
+MUCS **52,825 utterances / 520 speakers** and HiACC **3,318 adult clips /
+24 speakers**, with **1,858 child files quarantined** into
+`data/raw/hiacc/_EXCLUDED_children/` at extraction time — verified independently on
+two machines.
 → [`docs/qa/child_quarantine_evidence.md`](docs/qa/child_quarantine_evidence.md)
 
 ### The telephony channel is real, by measurement and by ear
 
-| Condition | SNR | Correlation | Objective pass |
-|---|---|---|---|
-| G.711 μ-law @ 20 dB | 17.62 dB | 0.991 | 20/20 |
-| AMR-NB | 5.57 dB | 0.885 | 20/20 |
-
-All three members rated 20 clean/channel pairs (60/60 rows filled): **telephony
-4.0/5, intelligibility 4.0/5**. AMR-NB is materially harsher than G.711 — which is
-precisely why both conditions exist.
+All 20 test pairs measure as telephony (0.185% → 0.0001% HF energy, 18.8 dB SNR),
+and a blind listening pass rated the result 4.0/5 for both telephony realism and
+intelligibility.
 → [`docs/qa/channel_sim_verdict.md`](docs/qa/channel_sim_verdict.md)
 
 ### Speaker pools frozen before a single clip was generated
 
-25 train / 10 adaptation / 15 eval, **zero speakers in more than one pool**,
-SHA-256 `f57e0d85…` committed. Frozen *first*, so the pool firewall is auditable
-after the fact rather than trusted at generation time.
-
-### Spoof generation validated end-to-end on GPU
-
-**40 clips, 0 failures** on an RTX 3050 (6 GB), CUDA torch 2.8.0 — a matched A/B:
-the same speaker, the same sentence, the same language tag, rendered once from
-romanised Hinglish and once from Devanagari.
-
-| | Devanagari | Romanised |
-|---|---|---|
-| Clips generated | 20 | 20 |
-| Failures | 0 | 0 |
-| Median speech rate | 13.9 chars/sec | **14.4 chars/sec** |
-| Median clip duration | 9.42 s | 10.44 s |
-
-Speech rate is statistically indistinguishable and durations track the ~13 % text
-expansion, so **romanisation does not rush or truncate speech**. That is a
-pre-screen, not a verdict — the blind rating decides.
-→ [`docs/qa/pilot_script_rating_sheet.csv`](docs/qa/pilot_script_rating_sheet.csv)
-
-### Stage-1 ASVspoof baseline trained and evaluated
-
-The English-only Stage-1 detector (`wav2vec2-base`) has been trained on
-ASVspoof 2019 LA and evaluated on its official, speaker-disjoint evaluation
-split — the first real detection numbers in this repository.
-
-| Metric | Result |
-|---|---:|
-| **EER** | **0.5843%** |
-| AUC | **0.9998** |
-| F1 | **0.9723** |
-| Evaluation clips | **71,237** (7,355 bonafide / 63,882 spoof) |
-
-This is an English-only, same-benchmark-family result and says nothing yet about
-code-mixed or telephony generalisation — that is the gap this project exists to
-measure, not something this number closes. Full per-attack breakdown, CIs, and
-reproduction command: [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md).
+**25 train / 10 adaptation / 15 eval**, committed with SHA-256
+`f57e0d85…` and re-verified on every run. If a pool assignment moved after
+generation, every disjointness guarantee in the paper would be void.
 
 ### The corpus is written in one script, and it is Latin
 
 Nobody on the team reads Devanagari, and a rater who cannot read the target
 sentence can only judge whether a clip *sounds* fluent — not whether it said the
-right words, which is the one thing the pilot exists to measure.
-
-Filtering could not produce a Latin-only corpus:
-
-| | Count |
-|---|---|
-| MUCS transcripts | 52,825 |
-| …containing **no** Devanagari | 957 (1.8 %) |
-| …usable, inside the frozen train pool | **17** |
-
-So the Hinglish is **produced, not selected** — by a hand-rolled transliterator with
-no third-party dependency, so it runs in CI and its spellings stay frozen across
-the whole corpus. Verified over all 56,143 transcripts: **0 unmapped characters,
-0 rows leaking Devanagari**.
+right words. Filtering could not produce a Latin-only corpus (only **17** of 52,825
+transcripts were Devanagari-free *and* inside the frozen train pool), so the
+Hinglish is **produced, not selected**, by a hand-rolled transliterator with no
+third-party dependency — it runs in CI and its spellings stay frozen corpus-wide.
+Verified over all 56,143 transcripts: **0 unmapped characters, 0 rows leaking
+Devanagari**.
 
 ```text
 मुझे कल बैंक जाना है  →  mujhe kal baink jaanaa hai
@@ -184,28 +260,29 @@ the whole corpus. Verified over all 56,143 transcripts: **0 unmapped characters,
 
 Owning these is the point.
 
-- **No detection numbers exist yet.** Through Week 3 this repo is pipeline and
-  scaffolding. There is no EER, no gap matrix, no LoRA result. Any cross-lingual gap
-  figure quoted before the Week-5 baseline checkpoint is not trustworthy.
-- **Stage-1 cannot train.** ASVspoof 2019 LA — its *only* training corpus — is not on
-  the GPU machine. The earlier download stalled at 25 % because Edinburgh DataShare
-  resets on sustained transfers.
-- **Generation can fail silently.** One clip of 40 produced **0.83 s of audio from a
-  150-character transcript** and raised no exception — the batch runner catches
-  crashes, not clips that come out empty. At Week-4 scale that is ~200 dead files
-  nobody would notice, so the duration filter (W4-T6) must land *before* the
-  4,000-clip run.
-- **The script A/B is generated but unrated.** The pre-screen says romanisation looks
-  safe; three people still have to listen. Week 4 is blocked on it.
-- **Two romanisation choices are judgement calls.** `फ` → `ph` gives `sirph` where a
-  Hindi speaker would type `sirf`; `ड़` → `r` gives `thoraa` for `thoda`. Both are
-  one-line changes — worth an ear before 4,000 clips bake them in.
+- **The clean-condition results fail the shortcut gate.** Detailed above. Bundles
+  must be rebuilt with level normalisation, the gate re-run, and Stage-2 retrained
+  before any clean number is reported. The channel-matched column is the one that
+  currently holds.
+- **Stage-1's published 0.58% is not reproducible from this repo.** The checkpoint
+  behind that figure lives only in a Kaggle run's output; the `best.pt` committed via
+  LFS re-measures at **0.85–0.87%** with a visibly different AUC. Either recover the
+  original checkpoint or restate the headline before the results freeze.
+- **One attack family carries everything.** Every result uses XTTS-v2 — the same tool
+  the adapter trained against. The held-out **Tortoise** set that would test a genuinely
+  unseen attack has been firewalled and planned since Week 1 but **has never been
+  generated or scored**.
 - **RVC is toolchain-blocked**, not GPU-blocked: `rvc-python` → `fairseq` → a numpy
   build calling `pkgutil.ImpImporter`, removed in Python 3.12. The second attack
   family is unavailable until that is resolved (**P-017**).
-- **The shortlist rests on a proxy.** Speakers were ranked on a dynamic-range proxy,
-  not calibrated SNR, and the eligibility gate passed all 520 — so the ordering is a
-  hint, not a quality guarantee.
+- **The channel-trained adapter has a single seed.** The clean adapter has three.
+  Since the channel column is becoming the primary result, it needs the same treatment.
+- **The gap matrix's 44.65% needs re-deriving.** It was measured on `colab_bundle`,
+  built by the same un-normalised path as the rest.
+- **The script A/B is generated but unrated.** The pre-screen says romanisation looks
+  safe; three people still have to listen.
+- **Two romanisation choices are judgement calls.** `फ` → `ph` gives `sirph` where a
+  Hindi speaker would type `sirf`; `ड़` → `r` gives `thoraa` for `thoda`.
 - **AMR-NB needs ffmpeg**; without it the channel sim silently falls back to G.711,
   and the harsher condition is never actually tested.
 - **CI is intentionally light** (ruff + pytest + numpy/pandas). Tests needing
@@ -219,37 +296,43 @@ Owning these is the point.
 codemix-deepfake-detection/
 ├── src/
 │   ├── data/            # corpora index, quarantine, channel sim, pilot jobs,
-│   │                    #   transliteration, spoof generation, ethics gate
+│   │                    #   transliteration, spoof generation, ethics gate,
+│   │                    #   portable bundles, low-level cue gate
 │   ├── models/          # SSL encoder wrapper, attentive pooling, MLP head, LoRA
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
 │   ├── inference/       # streaming inference, ONNX export, predict
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 410 tests — pool firewall, anti-leakage, quarantine
+├── tests/               # 506 tests — pool firewall, anti-leakage, quarantine
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs (notebooks hold no logic)
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
-├── docs/                # decisions log, QA evidence, phase notes, licences
-├── live_call/           # WebRTC harness now, Twilio from Week 7
+├── docs/results/        # the four measurement write-ups
+├── experiments/         # eval JSONs + per-clip score CSVs behind every table
+├── checkpoints/         # Stage-1 and LoRA adapters (Git LFS)
+├── live_call/           # WebRTC harness now, Twilio from Week 6
 └── notebooks/           # env check, pilot, quality audit — no pipeline logic
 ```
 
+> **Checkpoints are Git LFS pointers.** After cloning, run `git lfs pull` or
+> `torch.load` will fail on a 134-byte pointer file.
+
+---
+
 ## Quick start
 
-**No GPU, no corpora, no credentials** — see the core of the work in under a minute:
-
 ```bash
-pip install pandas pytest ruff numpy pyyaml
+pip install -r requirements.txt
 
 # The transliteration that makes the corpus readable (P-014)
-python -c "from src.data.transliteration import to_roman; \
-print(to_roman('मुझे कल बैंक जाना है पैसे निकालने के लिए'))"
+python -c "from src.data.transliteration import to_latin; \
+           print(to_latin('मुझे कल बैंक जाना है पैसे निकालने के लिए'))"
 # -> mujhe kal baink jaanaa hai paise nikaalne ke lie
 
 # The firewalls that protect every number in the paper
-python -m pytest tests/test_splits.py tests/test_pilot_jobs.py -q
+python -m pytest tests/test_splits.py tests/test_speaker_pools.py tests/test_lora.py -q
 ```
 
-## Reproduce everything else
+## Reproduce
 
 ```bash
 # --- 1. Corpora (only on "run downloads now"; ~15 GB) ---
@@ -273,23 +356,33 @@ python -m src.data.pilot_jobs --data-root $DATA_ROOT \
 python -m src.data.spoof_generation --jobs <pack>/generation_jobs.csv \
     --pack-dir <pack> --out-dir <pack>/outputs
 
-# --- 5. The script A/B rating sheet ---
-python -m src.data.pilot_rating --roman-pack <roman> --deva-pack <deva> \
-    --stage-dir $DATA_ROOT/generated/pilot_ab/clips
-
-# --- 6. Stage-1 training (needs ASVspoof 2019 LA staged under $DATA_ROOT) ---
-python -m src.training.train --config configs/train_stage1_run.yaml --smoke   # sanity check first
+# --- 5. Stage-1 training (needs ASVspoof 2019 LA staged under $DATA_ROOT) ---
+python -m src.training.train --config configs/train_stage1_run.yaml --smoke  # sanity first
 python -m src.training.train --config configs/train_stage1_run.yaml --device cuda --resume
 
-# --- 7. Evaluate ---
-python -m src.training.evaluate --checkpoint checkpoints/baseline/best.pt \
-    --manifest data/manifests/asvspoof_eval.csv --device cuda \
-    --out experiments/stage1_eval_results.json
+# --- 6. Stage-2 LoRA adaptation ---
+python -m src.training.train --config configs/train_lora_codemix.yaml \
+    --device cuda --data-root "$DATA_ROOT/lora_bundle"
+
+# --- 7. Evaluate (works on Stage-1 and adapted checkpoints alike) ---
+python -m src.training.evaluate \
+    --checkpoint checkpoints/lora_codemix/best.pt \
+    --manifest data/manifests/codemix_eval.csv \
+    --data-root "$DATA_ROOT/lora_bundle" \
+    --device cuda --out experiments/lora_codemix_eval.json
+
+# --- 8. The shortcut gate — run this BEFORE trusting any result ---
+python -m src.data.lowlevel_cue \
+    --train data/manifests/codemix_adapt_train.csv --train-root "$DATA_ROOT/lora_bundle" \
+    --test  data/manifests/codemix_eval.csv        --test-root  "$DATA_ROOT/lora_bundle" \
+    --out experiments/results/lowlevel_cue_check.json
 ```
 
-Second-machine runbook, including the XTTS weight pre-fetch that avoids a
-20-minute non-resumable download:
-[`docs/gpu_laptop_setup.md`](docs/gpu_laptop_setup.md).
+> `--data-root` is **required** for bundle-based manifests. Portable manifests store
+> paths as `${DATA_ROOT}/clips/<name>.wav`, and the bundle root *is* `$DATA_ROOT` at
+> train time. Omit it and every file resolves to the wrong place.
+
+---
 
 ## The golden rule (do not break)
 
@@ -301,22 +394,25 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–4
+## Progress — Weeks 1–8
 
-Only completed work is listed. This table is extended at the end of each week; the
-full 12-week plan lives in the team drive, outside this repo.
+Only completed work is listed. The full 12-week plan lives in the team drive,
+outside this repo.
 
 | Week | L — Data | M — Model | SK — Systems/Demo |
 |---|---|---|---|
 | **1** | ✅ Download scripts + child quarantine, streaming loaders, licence register | ✅ Repo bootstrap, env check notebook, CI | ✅ WebRTC harness with 16 kHz PCM tap, live-call design |
 | **2** | ✅ Preprocessing, G.711 + AMR-NB channel simulation | ✅ Dataset + collate, speaker-disjoint splits, metrics (EER/AUC/F1) | ✅ Adult-speaker selection, XTTS-v2 clone driver + tool firewall |
-| **3** | ✅ Corpus-aware indexing (56,143 clips), quarantine verified on both machines, channel listening test passed | ✅ AffectDF related-work anchor, attack taxonomy, env verification | ✅ Speaker pools frozen, XTTS pilot generated on GPU, Devanagari→Latin transliteration |
-| **4** | — | — | ✅ Stage-1 ASVspoof 2019 LA baseline trained and evaluated on Kaggle GPU: EER 0.58%, AUC 0.9998, F1 0.9723 over 71,237 eval clips |
+| **3** | ✅ Corpus indexing (56,143 clips), quarantine verified on both machines, channel listening test passed | ✅ AffectDF related-work anchor, attack taxonomy | ✅ Speaker pools frozen, XTTS pilot on GPU, Devanagari→Latin transliteration |
+| **4** | ✅ ASVspoof 2019 LA downloaded + verified, CM protocols checked against published figures | ✅ Stage-1 scaffolding: SSL encoder, attentive pooling, AMP loop | ✅ Stage-1 baseline trained + evaluated on Kaggle GPU (71,237 clips) |
+| **5** | ✅ Channel bundle renderer through the verified G.711 chain | ✅ **Low-level cue gate run — and it FAILS**; root cause traced to bundle normalisation | — |
+| **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4 |
 
-**Week 3 is not closed yet.** Outstanding: the 40-clip A/B needs three sets of ears,
-the AMR-NB listening pass, and three PR reviews, plus the Week-3 log-book entries.
-The 40-clip rating still blocks a fully-rated Week 4. Full list in
-[`Works updates.md`](Works%20updates.md).
+**Open before the Week-9 results freeze:** rebuild bundles with level normalisation
+and re-run the gate; generate and score the held-out Tortoise set; seed-repeat the
+channel-trained adapter; reconcile the Stage-1 checkpoint discrepancy.
+
+---
 
 ## Team
 
@@ -327,14 +423,21 @@ The 40-clip rating still blocks a fully-rated Week 4. Full list in
 | **SK** | K. Sai Krishna Reddy (D034) | **Systems/Demo** — live-call pipeline, streaming inference, ONNX, dashboard, spoof pilots |
 
 One branch per member per week, PRs into `dev`, reviewed and merged by a teammate —
-never your own. Full rules in the team git rules doc (kept in the team drive, outside this repo).
+never your own. Full rules in the team git rules doc (kept in the team drive).
+
+---
 
 ## Documentation index
 
 | Document | What is in it |
 |---|---|
-| [`docs/RESULTS.md`](docs/RESULTS.md) | **What is actually measured** — the five milestones, and what is not measured yet |
-| [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 ASVspoof 2019 LA baseline: EER/AUC/F1, per-attack breakdown, reproduction |
+| [`docs/RESULTS.md`](docs/RESULTS.md) | **What is actually measured** — the milestone list, and what is not measured yet |
+| [`docs/results/gap_matrix_v1.md`](docs/results/gap_matrix_v1.md) | **The gap** — English 0.87% vs code-mixed 44.65%, and the failure mode behind it |
+| [`docs/results/gap_closure_v1.md`](docs/results/gap_closure_v1.md) | **Closing it** — LoRA 53.71% → 1.34%, seed variance, what it does not answer |
+| [`docs/results/channel_matched_v1.md`](docs/results/channel_matched_v1.md) | **The telephony finding** — why the clean adapter dies on a phone line |
+| [`docs/results/lowlevel_cue_check_v1.md`](docs/results/lowlevel_cue_check_v1.md) | **The shortcut gate** — why the clean number is not yet quotable |
+| [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 baseline: EER/AUC/F1, per-attack breakdown, reproduction |
+| [`docs/lora_run_status.md`](docs/lora_run_status.md) | Step-by-step record of the Stage-2 run, including every trap hit |
 | [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-017** with the problem that forced it |
 | [`Works updates.md`](Works%20updates.md) | HUMAN_TODO — everything only a person can do, ordered by what unblocks most |
 | [`docs/progress.md`](docs/progress.md) | One line per finished task: date, task, owner, branch |
@@ -343,6 +446,8 @@ never your own. Full rules in the team git rules doc (kept in the team drive, ou
 | [`docs/gpu_laptop_setup.md`](docs/gpu_laptop_setup.md) | Bringing a second machine to an identical state |
 | [`docs/licences.md`](docs/licences.md) | Per-corpus licence table and usage restrictions |
 | [`docs/attack_taxonomy.md`](docs/attack_taxonomy.md) | Attack IDs, tool, pool, split — AffectDF Table-1 format |
+
+---
 
 ## Licences
 
