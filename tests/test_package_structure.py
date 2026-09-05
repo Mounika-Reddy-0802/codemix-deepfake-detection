@@ -26,6 +26,7 @@ EXPECTED_MODULES = [
     "src/data/preprocess.py",
     "src/data/channel_sim.py",
     "src/data/spoof_generation.py",
+    "src/data/rvc_generation.py",
     "src/data/build_manifests.py",
     "src/data/dataset.py",
     "src/models/encoder.py",
