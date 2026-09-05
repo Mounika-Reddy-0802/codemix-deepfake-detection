@@ -21,6 +21,7 @@ Pure pandas and tmp_path -- no audio, no torch, no RVC checkout.
 """
 
 import json
+import os
 
 import pandas as pd
 import pytest
@@ -368,3 +369,29 @@ def test_metadata_reconciliation_is_shared_with_the_cm01_log(tmp_path) -> None:
     )
     assert rvc.rewrite_metadata(str(log)) == 1
     assert [r["output_path"] for r in rvc.read_metadata(str(log))] == [str(kept)]
+
+
+# --------------------------------------------------------------------------- #
+# Stage subprocess environment
+# --------------------------------------------------------------------------- #
+def test_stage_env_puts_the_checkout_root_on_the_path(tmp_path) -> None:
+    """Without this the first stage dies on ``No module named 'infer'``."""
+    env = rvc._stage_env(str(tmp_path))
+    assert env["PYTHONPATH"].split(os.pathsep)[0] == str(tmp_path.resolve())
+
+
+def test_stage_env_disables_the_script_directory_prepend(tmp_path) -> None:
+    """``<repo>/train/train.py`` shadows the ``train`` package if it is on the path.
+
+    The symptom is a circular import of a partially initialised ``train``, three
+    stages in and after the wavs have been staged.
+    """
+    assert rvc._stage_env(str(tmp_path))["PYTHONSAFEPATH"] == "1"
+
+
+def test_stage_env_keeps_an_existing_pythonpath_without_duplicating_the_root(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("PYTHONPATH", os.pathsep.join([str(tmp_path.resolve()), "/some/where"]))
+    entries = rvc._stage_env(str(tmp_path))["PYTHONPATH"].split(os.pathsep)
+    assert entries == [str(tmp_path.resolve()), "/some/where"]

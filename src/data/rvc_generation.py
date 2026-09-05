@@ -399,6 +399,36 @@ def rvc_job_summary(jobs: pd.DataFrame) -> str:
 # --------------------------------------------------------------------------- #
 # Toolchain: assets + subprocess plumbing
 # --------------------------------------------------------------------------- #
+def _stage_env(cwd: str) -> dict[str, str]:
+    """Environment for one RVC stage subprocess: repo root on the path, script dir off it.
+
+    RVC's stage scripts live in subpackages (``train/``, ``infer/``) but import
+    each other as top-level packages -- ``train/preprocess.py`` opens with
+    ``from infer.audio import load_audio`` and ``from train.dataset.slicer2 import
+    Slicer``. Launched as ``python train/preprocess.py``, CPython puts the
+    *script's* directory first on ``sys.path``, which breaks that twice:
+
+    1. the checkout root is not on the path at all, so ``infer`` is not importable
+       (``ModuleNotFoundError: No module named 'infer'``);
+    2. ``<repo>/train`` **is** first on the path, so the name ``train`` resolves to
+       the module ``train/train.py`` rather than the package ``train/`` -- and
+       ``from train import utils`` then dies as a circular import of a partially
+       initialised ``train``.
+
+    Both surface only after the training wavs have been staged, which is the worst
+    possible time. ``PYTHONPATH`` supplies the checkout root; ``PYTHONSAFEPATH``
+    (3.11+) stops the script directory being prepended, so the subpackages resolve
+    as the packages they are. Upstream's ``webui.py`` never hits this because its
+    packaged runtime already carries the checkout root on the path.
+    """
+    env = dict(os.environ)
+    repo = str(Path(cwd).resolve())
+    existing = [p for p in env.get("PYTHONPATH", "").split(os.pathsep) if p and p != repo]
+    env["PYTHONPATH"] = os.pathsep.join([repo, *existing])
+    env["PYTHONSAFEPATH"] = "1"
+    return env
+
+
 def _run(cmd: list[str], cwd: str, tail: int = 40) -> None:
     """Run one RVC stage, streaming its log. Raises :class:`RVCError` on failure.
 
@@ -410,7 +440,13 @@ def _run(cmd: list[str], cwd: str, tail: int = 40) -> None:
     print("$", " ".join(cmd))
     lines: list[str] = []
     process = subprocess.Popen(
-        cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+        cmd,
+        cwd=cwd,
+        env=_stage_env(cwd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
     )
     for line in process.stdout or ():
         line = line.rstrip()
