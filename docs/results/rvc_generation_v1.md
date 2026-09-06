@@ -88,6 +88,7 @@ measurements.
 | Real MUCS source clips | **21.8 Hz** | 110 Hz | 1493 |
 | RVC converted clips | **21.1 Hz** | 109 Hz | 1493 |
 | XTTS-v2 pilot clips (re-measured) | **27.8 Hz** | 109 Hz | 23 |
+| XTTS-v2 **full scale run** (P-023) | **18.99 Hz** | 106 Hz | 3,991 |
 
 Pitch-range retention: **96.4%** of the real speech it started from.
 
@@ -99,6 +100,12 @@ Pitch-range retention: **96.4%** of the real speech it started from.
 **The CM01 half of P-019 does not survive re-measurement, and the error is in its
 real-speech baseline.** P-019 reported 41.1 Hz for MUCS against 25–29 Hz for
 XTTS-v2 and concluded XTTS compresses pitch range by ~35%. Re-measuring the same
+> **Superseded in part by P-023.** The 27.8 Hz row below is 23 pilot clips. The
+> full 4,000-clip CM01 run measures **18.99 Hz** — 13% *narrower* than real speech,
+> not wider — so the "opposite directions" reading in this section does not hold.
+> Both generators undershoot; RVC retains 96.4% of the source range and XTTS 86.9%.
+> The rest of this section is left as written, because the log is append-only.
+
 XTTS pilot clips with `src.data.f0_stats` returns **27.8 Hz**, which reproduces
 P-019's XTTS figure exactly — but the same estimator puts real MUCS at **21.8 Hz**,
 not 41.1 Hz. On one consistent estimator XTTS-v2 is **27% wider** than the speech

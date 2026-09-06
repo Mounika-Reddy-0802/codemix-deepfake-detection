@@ -119,9 +119,21 @@ class ArchiveReport:
         }
 
 
-def expected_models(manifest_path: str = MODEL_MANIFEST_PATH) -> list[dict]:
-    """The model records git says this run produced."""
-    payload = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+def expected_models(manifest_path: str | None = MODEL_MANIFEST_PATH) -> list[dict]:
+    """The model records git says this run produced.
+
+    ``None``, or a path that does not exist, means **this run trained no models** --
+    which is the normal case for a clips-only archive. CM01 is zero-shot TTS: there
+    are 4,000 clips and nothing to hash a checkpoint against. That is a different
+    thing from "the manifest is missing", so it returns an empty list rather than
+    raising, and :func:`verify_archive` records ``models_checked: 0``.
+    """
+    if manifest_path is None:
+        return []
+    path = Path(manifest_path)
+    if not path.is_file():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
     return list(payload.get("models", []))
 
 
@@ -196,7 +208,7 @@ def _check_one(
 
 def verify_models(
     root: str,
-    manifest_path: str = MODEL_MANIFEST_PATH,
+    manifest_path: str | None = MODEL_MANIFEST_PATH,
     verify_hash: bool = True,
     present: dict[str, Path] | None = None,
 ) -> list[ModelCheck]:
@@ -228,7 +240,7 @@ def verify_clips(
 
 def verify_archive(
     root: str,
-    manifest_path: str = MODEL_MANIFEST_PATH,
+    manifest_path: str | None = MODEL_MANIFEST_PATH,
     metadata_path: str = METADATA_PATH,
     verify_hash: bool = True,
 ) -> ArchiveReport:
@@ -247,14 +259,18 @@ def verify_archive(
 
 def describe(report: ArchiveReport, max_listed: int = 10) -> str:
     """A human-readable verdict, ready to paste into a run log or a PR comment."""
-    lines = [f"CM02 archive check: {report.root}", ""]
+    kind = "archive check" if report.models else "clips-only archive check"
+    lines = [f"{kind}: {report.root}", ""]
 
-    ok = sum(1 for c in report.models if c.ok)
-    lines.append(f"Models and indexes: {ok}/{len(report.models)} verified")
-    problems = [c for c in report.models if not c.ok]
-    lines.extend(c.describe() for c in (problems or report.models)[:max_listed])
-    if len(problems or report.models) > max_listed:
-        lines.append(f"  ... and {len(problems or report.models) - max_listed} more")
+    if report.models:
+        ok = sum(1 for c in report.models if c.ok)
+        lines.append(f"Models and indexes: {ok}/{len(report.models)} verified")
+        problems = [c for c in report.models if not c.ok]
+        lines.extend(c.describe() for c in (problems or report.models)[:max_listed])
+        if len(problems or report.models) > max_listed:
+            lines.append(f"  ... and {len(problems or report.models) - max_listed} more")
+    else:
+        lines.append("Models and indexes: none expected (zero-shot run, nothing to hash)")
 
     lines.append("")
     lines.append(f"Converted clips: {report.clips_found}/{report.clips_expected} present")
@@ -265,7 +281,10 @@ def describe(report: ArchiveReport, max_listed: int = 10) -> str:
 
     lines.append("")
     if report.complete:
-        lines.append("COMPLETE -- every model hashes correctly and every clip is present.")
+        lines.append(
+            "COMPLETE -- every clip is present"
+            + (" and every model hashes correctly." if report.models else ".")
+        )
     else:
         lines.append("INCOMPLETE -- see the entries above before relying on this archive.")
     return "\n".join(lines)
@@ -281,6 +300,11 @@ def main() -> None:
     )
     parser.add_argument("--root", required=True, help="archive root (mounted dataset or extract)")
     parser.add_argument("--manifest", default=MODEL_MANIFEST_PATH)
+    parser.add_argument(
+        "--no-models",
+        action="store_true",
+        help="clips-only archive (CM01): no per-speaker models exist to verify",
+    )
     parser.add_argument("--metadata", default=METADATA_PATH)
     parser.add_argument(
         "--no-hash", action="store_true", help="check name and size only (faster, weaker)"
@@ -288,7 +312,8 @@ def main() -> None:
     parser.add_argument("--json", action="store_true", help="print the summary as JSON")
     args = parser.parse_args()
 
-    report = verify_archive(args.root, args.manifest, args.metadata, verify_hash=not args.no_hash)
+    manifest = None if args.no_models else args.manifest
+    report = verify_archive(args.root, manifest, args.metadata, verify_hash=not args.no_hash)
     print(json.dumps(report.as_dict(), indent=2) if args.json else describe(report))
     sys.exit(0 if report.complete else 1)
 

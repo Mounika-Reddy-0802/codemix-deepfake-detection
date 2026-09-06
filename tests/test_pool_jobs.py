@@ -107,3 +107,25 @@ def test_summary_reports_the_pool():
     summary = pj.pool_job_summary(jobs)
     assert summary["pools_used"] == ["adaptation"]
     assert summary["jobs"] == 30
+
+
+# --------------------------------------------------------------------------- #
+# CM04: the held-out tool rides the same builder, pointed at the eval pool
+# --------------------------------------------------------------------------- #
+def test_heldout_tool_is_recorded_on_every_row():
+    """Tortoise (CM04) reuses this builder; the tool tag is what firewalls it."""
+    jobs = pj.build_pool_jobs(
+        _index(), _pools(), config=_cfg(pool="eval", n_target=20, tool="tortoise")
+    )
+    assert set(jobs["tool"]) == {"tortoise"}
+    assert set(jobs["pool"]) == {"eval"}
+
+
+def test_heldout_tool_never_touches_the_train_pool():
+    """A Tortoise clip in a training manifest voids the unseen-attack claim."""
+    pools = _pools()
+    jobs = pj.build_pool_jobs(
+        _index(), pools, config=_cfg(pool="eval", n_target=20, tool="tortoise")
+    )
+    train = set(pools.loc[pools["pool"] == "train", "speaker"].astype(str))
+    assert not (set(jobs["speaker"].astype(str)) & train)

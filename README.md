@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%208%20of%2012-yellow)
+![Phase](https://img.shields.io/badge/phase-week%209%20of%2012-yellow)
 ![Tests](https://img.shields.io/badge/tests-594%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
@@ -11,7 +11,7 @@ project **measures that gap under a channel-matched telephony protocol**, closes
 most of it with LoRA, and demonstrates it live — a cloned voice on a phone call
 triggers a beep in the receiver's ear, a dashboard alert, and an SMS.
 
-> **Status: Week 8 of 12 — the gap is measured, closed, and stress-tested.**
+> **Status: Week 9 of 12 — the gap is measured, closed, stress-tested, and the corpus audited.**
 >
 > An English-trained detector scoring **0.87% EER** on ASVspoof collapses to
 > **44.65%** on code-mixed Hinglish. A LoRA adapter training **1.13% of the
@@ -179,13 +179,20 @@ the source's pitch contour where XTTS invents one:
 |---|---:|
 | Real MUCS source clips (1,493) | 21.8 Hz |
 | RVC conversions of those same clips (1,493) | **21.1 Hz** — 96.4% retained |
-| XTTS-v2 pilot clips (23) | **27.8 Hz** |
+| XTTS-v2, full run (3,991) | **18.99 Hz** — 86.9% retained |
+| XTTS-v2 pilot clips (23) | *27.8 Hz — superseded, P-023* |
 
-RVC tracks its source. But XTTS-v2 does **not** compress pitch range as P-019
-claimed — it *widens* it by ~27%. P-019's 41.1 Hz real-speech baseline did not
-reproduce; its XTTS figure did (**P-021**). The two families deviate from real
-speech in opposite directions, which is a cleaner case for a second family than the
-original claim was. **No detector has been scored on CM02 yet.**
+RVC tracks its source, retaining 96.4% of its pitch range. XTTS-v2 retains 86.9% —
+it flattens prosody, though by ~13% rather than the ~35% P-019 claimed against a
+baseline that did not reproduce.
+
+**This number took three attempts** and the log keeps all of them (P-019 → P-021 →
+**P-023**). The middle one measured 27.8 Hz on 23 pilot clips and concluded XTTS
+*widens* pitch range; the full 4,000-clip run says otherwise. So the earlier
+"opposite directions" reading is retired: **both generators undershoot real speech**,
+XTTS about 3.7x further than RVC (13.1 pp of range lost against 3.6 pp). Pitch range still separates the two attack
+families, as a magnitude difference in the same direction. **No detector has been
+scored on CM02 yet.**
 
 → [`docs/results/rvc_generation_v1.md`](docs/results/rvc_generation_v1.md)
 
@@ -442,7 +449,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–8
+## Progress — Weeks 1–9
 
 Only completed work is listed. The full 12-week plan lives in the team drive,
 outside this repo.
@@ -456,10 +463,13 @@ outside this repo.
 | **5** | ✅ Channel bundle renderer through the verified G.711 chain | ✅ **Low-level cue gate run — and it FAILS**; root cause traced to bundle normalisation | — |
 | **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4; ✅ **CM02 RVC generation** — 12 voice models, 1,500 conversions, archived + hash-verified; pitch measured, **P-019 corrected (P-021)** |
 
-**Open before the Week-9 results freeze:** rebuild bundles with level normalisation
-and re-run the gate; score a checkpoint on CM02; generate and score the held-out
-Tortoise set; archive CM01 and re-measure its pitch on all 4,000 clips; seed-repeat
-the channel-trained adapter; reconcile the Stage-1 checkpoint discrepancy.
+| **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ⏳ CM04 job table + notebook staged, needs a GPU |
+
+**Open before the results freeze:** generate and score the held-out Tortoise set
+(CM04 — everything but the GPU session is ready); score a checkpoint on CM02;
+rebuild bundles with level normalisation and re-run the CM01 gate; run the shortcut
+gate on the channel-matched condition; seed-repeat the channel-trained adapter;
+reconcile the Stage-1 checkpoint discrepancy.
 
 ---
 
@@ -486,10 +496,13 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/results/channel_matched_v1.md`](docs/results/channel_matched_v1.md) | **The telephony finding** — why the clean adapter dies on a phone line |
 | [`docs/results/lowlevel_cue_check_v1.md`](docs/results/lowlevel_cue_check_v1.md) | **The shortcut gate** — why the clean number is not yet quotable |
 | [`docs/results/rvc_generation_v1.md`](docs/results/rvc_generation_v1.md) | **CM02** — 12 RVC voice models, 1,500 conversions, the pitch measurement, where the archive lives |
+| [`docs/results/lowlevel_cue_check_cm02_v1.md`](docs/results/lowlevel_cue_check_cm02_v1.md) | **CM02 shortcut gate** — 22.3% EER, and why the tell is spectral rather than level |
+| [`docs/results/cm01_recovery_v1.md`](docs/results/cm01_recovery_v1.md) | **CM01 recovered** — the 4,000-clip run described in git, archived, and its pitch corrected |
+| [`docs/datasheet.md`](docs/datasheet.md) | **Dataset datasheet** — composition, attacks with usable counts, exclusions, licensing, limitations |
 | [`docs/qa/rvc_generation_qa.md`](docs/qa/rvc_generation_qa.md) | CM02 mechanical quality screen: 1,404 / 1,500 pass, failure reasons |
 | [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 baseline: EER/AUC/F1, per-attack breakdown, reproduction |
 | [`docs/lora_run_status.md`](docs/lora_run_status.md) | Step-by-step record of the Stage-2 run, including every trap hit |
-| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-021** with the problem that forced it |
+| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-023** with the problem that forced it |
 | [`Works updates.md`](Works%20updates.md) | HUMAN_TODO — everything only a person can do, ordered by what unblocks most |
 | [`docs/progress.md`](docs/progress.md) | One line per finished task: date, task, owner, branch |
 | [`docs/qa/child_quarantine_evidence.md`](docs/qa/child_quarantine_evidence.md) | The child-audio exclusion, verified on both machines |
@@ -497,6 +510,7 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/gpu_laptop_setup.md`](docs/gpu_laptop_setup.md) | Bringing a second machine to an identical state |
 | [`docs/licences.md`](docs/licences.md) | Per-corpus licence table and usage restrictions |
 | [`docs/attack_taxonomy.md`](docs/attack_taxonomy.md) | Attack IDs, tool, pool, split — AffectDF Table-1 format |
+| `docs/W<week>_<member>_<work>.md` | **Per-member weekly records** — what each of us did that week, the numbers we got, and the limitations we know about. One per person per week, e.g. [`docs/W9_krishna_cm02_gate_cm01_recovery.md`](docs/W9_krishna_cm02_gate_cm01_recovery.md) |
 
 ---
 
