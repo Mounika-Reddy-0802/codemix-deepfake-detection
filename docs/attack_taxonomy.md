@@ -33,7 +33,7 @@ our dataset can be read the same way.
 |---|---|---|---|---|---|---|---|
 | **TRAIN POOL** ||||||||
 | CM01 | TTS (zero-shot clone) | XTTS-v2 | MUCS train pool | ~4,000 | 20–25 | Train | S3 |
-| CM02 | VC | RVC (per-speaker models) | MUCS train pool | ~1,500 | 10–15 | Train | S3 |
+| CM02 | VC | RVC (per-speaker models) | MUCS train pool | **1,500** *(measured)* | 12 | Train | S3 |
 | **ADAPTATION POOL** ||||||||
 | CM03 | TTS (zero-shot clone) | XTTS-v2 | MUCS adaptation pool | ~800 | 8–10 | Adaptation | S2 (LoRA) |
 | **TEST — HELD-OUT TOOLS** ||||||||

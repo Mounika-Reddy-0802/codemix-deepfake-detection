@@ -1,0 +1,94 @@
+{
+  "config": {
+    "conversions_per_target": 125,
+    "f0_method": "rmvpe",
+    "sample_rate": "40k",
+    "seed": 4200,
+    "train_epochs": 100,
+    "version": "v2"
+  },
+  "models": {
+    "106718": "106718: rvc_106718.pth (100 epochs on 140 clips / 632s, 40k v2, added_IVF572_Flat_nprobe_1_rvc_106718_v2.index)",
+    "177570": "177570: rvc_177570.pth (100 epochs on 133 clips / 631s, 40k v2, added_IVF560_Flat_nprobe_1_rvc_177570_v2.index)",
+    "322882": "322882: rvc_322882.pth (100 epochs on 102 clips / 644s, 40k v2, added_IVF420_Flat_nprobe_1_rvc_322882_v2.index)",
+    "445718": "445718: rvc_445718.pth (100 epochs on 127 clips / 771s, 40k v2, added_IVF592_Flat_nprobe_1_rvc_445718_v2.index)",
+    "457295": "457295: rvc_457295.pth (100 epochs on 156 clips / 735s, 40k v2, added_IVF594_Flat_nprobe_1_rvc_457295_v2.index)",
+    "539354": "539354: rvc_539354.pth (100 epochs on 96 clips / 574s, 40k v2, added_IVF634_Flat_nprobe_1_rvc_539354_v2.index)",
+    "541304": "541304: rvc_541304.pth (100 epochs on 82 clips / 611s, 40k v2, added_IVF327_Flat_nprobe_1_rvc_541304_v2.index)",
+    "584991": "584991: rvc_584991.pth (100 epochs on 114 clips / 630s, 40k v2, added_IVF593_Flat_nprobe_1_rvc_584991_v2.index)",
+    "850754": "850754: rvc_850754.pth (100 epochs on 92 clips / 749s, 40k v2, added_IVF452_Flat_nprobe_1_rvc_850754_v2.index)",
+    "876898": "876898: rvc_876898.pth (100 epochs on 96 clips / 574s, 40k v2, added_IVF435_Flat_nprobe_1_rvc_876898_v2.index)",
+    "903756": "903756: rvc_903756.pth (100 epochs on 101 clips / 733s, 40k v2, added_IVF394_Flat_nprobe_1_rvc_903756_v2.index)",
+    "996368": "996368: rvc_996368.pth (100 epochs on 86 clips / 633s, 40k v2, added_IVF712_Flat_nprobe_1_rvc_996368_v2.index)"
+  },
+  "n_targets": 12,
+  "pitch": {
+    "converted": {
+      "clips": 1500,
+      "mean_f0_iqr_hz": 25.64,
+      "median_f0_hz": 109.44,
+      "median_f0_iqr_hz": 21.06,
+      "p25_f0_iqr_hz": 17.1,
+      "p75_f0_iqr_hz": 26.72,
+      "usable": 1493
+    },
+    "p019_reference": {
+      "hiacc_real_f0_iqr_hz": 42.2,
+      "mucs_real_f0_iqr_hz": 41.1,
+      "note": "measured ad hoc, tooling unknown -- the real column above is re-measured here",
+      "xtts_f0_iqr_hz": [
+        25.0,
+        29.0
+      ]
+    },
+    "real_source": {
+      "clips": 1500,
+      "mean_f0_iqr_hz": 26.41,
+      "median_f0_hz": 109.61,
+      "median_f0_iqr_hz": 21.84,
+      "p25_f0_iqr_hz": 17.51,
+      "p75_f0_iqr_hz": 27.72,
+      "usable": 1493
+    },
+    "retention_pct": 96.4,
+    "verdict": "P-019's prediction HOLDS: converted clips keep 96.4% of the real pitch range (21.1 Hz vs 21.8 Hz), where XTTS-v2 kept only 25-29 Hz. RVC starts from real speech, so the contour is human and the CM01 compression does not occur."
+  },
+  "qa": {
+    "clips": 1500,
+    "failed": 96,
+    "failures": {
+      "near-silent (rms 0.0001)": 2,
+      "near-silent (rms 0.0002)": 2,
+      "near-silent (rms 0.0003)": 2,
+      "near-silent (rms 0.0004)": 1,
+      "speech too fast / truncated (40 chars/s)": 2,
+      "speech too slow / stalled (1 chars/s)": 2,
+      "speech too slow / stalled (2 chars/s)": 2,
+      "speech too slow / stalled (3 chars/s)": 7,
+      "speech too slow / stalled (4 chars/s)": 25,
+      "speech too slow / stalled (5 chars/s)": 31,
+      "speech too slow / stalled (6 chars/s)": 20
+    },
+    "median_chars_per_sec": 11.1,
+    "pass_rate": 93.6,
+    "passed": 1404
+  },
+  "stats": {
+    "by_language": {
+      "hi": 1500
+    },
+    "by_pool": {
+      "train": 1500
+    },
+    "by_tool": {
+      "rvc": 1500
+    },
+    "n_source_speakers": 25,
+    "n_targets": 12,
+    "per_target_max": 125,
+    "per_target_min": 125,
+    "total": 1500,
+    "unique_source_clips": 1345
+  },
+  "task": "W4-T2 RVC generation (CM02)"
+}
