@@ -1,9 +1,10 @@
 """Intra-utterance pitch range (f0 IQR) -- the measurement P-019 turns on.
 
 P-019 recorded that XTTS-v2 compresses pitch range: a median intra-utterance f0
-IQR of 25-29 Hz against 41.1 Hz for the MUCS lecture speech it clones from, and
-that no generation parameter closed the gap. XTTS invents prosody from text and
-regresses to a flat contour.
+IQR of 25-29 Hz against 41.1 Hz for the MUCS lecture speech it clones from. This
+module was written to test the matching prediction for CM02 -- and, run over the
+same clips, retired P-019's 41.1 Hz baseline instead (P-021). That is the case for
+committing the estimator rather than the number.
 
 The plan's justification for the *second* attack family (CM02, RVC) is a
 prediction that this cannot happen to voice conversion: RVC starts from a real

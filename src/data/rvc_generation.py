@@ -4,12 +4,14 @@ Week 4 (W4-T2). The second attack family in ``docs/attack_taxonomy.md``: ~12
 per-speaker RVC models trained on train-pool voices, then real speech from *other*
 train-pool speakers converted into each target's voice.
 
-**Why a second family at all.** P-019 measured that XTTS-v2 (CM01) compresses
-intra-utterance pitch range by ~35% against real speech -- it invents prosody from
-text and regresses to a flat contour, and no generation parameter fixed it. That
-makes CM01 a legitimate but *easy* attack, and a detector scoring near 0% EER on it
-has not been tested hard. RVC starts from real speech and keeps the source pitch
-contour, so that particular tell cannot appear.
+**Why a second family at all.** CM01 (XTTS-v2) invents prosody from text, so its
+pitch contour is the model's rather than any human's. CM02 starts from a real
+recording and swaps timbre only, so the contour that survives is the source
+speaker's own -- a different artefact, and one a detector trained on CM01 has not
+seen. Measured: the converted clips keep 96.4% of their source's f0 IQR, where
+XTTS-v2 sits ~27% above the speech it clones (``docs/results/rvc_generation_v1.md``).
+P-019 originally framed this as XTTS *compressing* pitch range by ~35%; P-021
+records why that framing did not survive re-measurement.
 
 **Why this module is subprocess-driven.** RVC training is not a library call. The
 upstream WebUI exposes it as five scripts driven by its Gradio callbacks, and the

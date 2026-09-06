@@ -85,13 +85,49 @@ measurements.
 
 | | Median f0 IQR | Median f0 | Clips |
 |---|---|---|---|
-| Real MUCS source clips (measured here) | **21.8 Hz** | 110 Hz | 1493 |
-| RVC converted clips (measured here) | **21.1 Hz** | 109 Hz | 1493 |
-| XTTS-v2, P-019 (ad hoc, tooling unknown) | 25–29 Hz | — | — |
+| Real MUCS source clips | **21.8 Hz** | 110 Hz | 1493 |
+| RVC converted clips | **21.1 Hz** | 109 Hz | 1493 |
+| XTTS-v2 pilot clips (re-measured) | **27.8 Hz** | 109 Hz | 23 |
 
 Pitch-range retention: **96.4%** of the real speech it started from.
 
-> P-019's prediction HOLDS: converted clips keep 96.4% of the real pitch range (21.1 Hz vs 21.8 Hz), where XTTS-v2 kept only 25-29 Hz. RVC starts from real speech, so the contour is human and the CM01 compression does not occur.
+> **The CM02 half of P-019's prediction holds.** Converted clips keep 96.4% of the
+> source's pitch range (21.1 Hz vs 21.8 Hz), measured in one pass with one
+> estimator, so this is a single difference rather than two measurements compared.
+> RVC starts from real speech and the contour survives.
+
+**The CM01 half of P-019 does not survive re-measurement, and the error is in its
+real-speech baseline.** P-019 reported 41.1 Hz for MUCS against 25–29 Hz for
+XTTS-v2 and concluded XTTS compresses pitch range by ~35%. Re-measuring the same
+XTTS pilot clips with `src.data.f0_stats` returns **27.8 Hz**, which reproduces
+P-019's XTTS figure exactly — but the same estimator puts real MUCS at **21.8 Hz**,
+not 41.1 Hz. On one consistent estimator XTTS-v2 is **27% wider** than the speech
+it clones, not 35% narrower. P-019's conclusion was an artefact of comparing two
+different measurement methods; see **P-021**.
+
+What this does *not* undo: CM02 is still a distinct attack family, and arguably a
+cleaner story than the original. The two generators deviate from real speech in
+**opposite directions** — RVC tracks it (96.4%), XTTS overshoots it (+27%) — so
+pitch range still separates them, and a detector that has only seen CM01 has not
+seen CM02's behaviour.
+
+Caveat on the numbers above: the XTTS row is 23 usable clips from the W3-T5 pilot,
+against 1493 for the other two rows. It is enough to show P-019's baseline is
+wrong; it is not yet the number for the paper. The CM01 scale clips
+(`data/generated/xtts_v2`, ~4,000) should be re-measured with the same call once
+they are recovered from their own archive.
+
+Reproduce the XTTS row:
+
+```bash
+python - <<'PY'
+import glob
+from src.data.f0_stats import clip_f0_stats, summarise
+from src.utils.audio_utils import load_wav
+rows = [clip_f0_stats(*load_wav(p)) for p in sorted(glob.glob("<xtts clips>/**/*.wav", recursive=True))]
+print(summarise(rows))
+PY
+```
 
 ## What this repository keeps, and what it does not
 
@@ -110,6 +146,37 @@ What is committed is enough to audit and rebuild the run:
 | Model checksums (SHA-256, size, epochs) | `outputs/rvc_model_checksums.json` |
 | QA report | `docs/qa/rvc_generation_qa.csv` |
 | QA verdict | `docs/qa/rvc_generation_qa.md` |
+
+### Where the run itself lives
+
+The audio and the weights are in a **private** Kaggle dataset,
+`saikrishnareddy9/rvc-cm02-generation-archive` (2.19 GB): the 1500 converted
+clips as `rvc_converted_wavs.zip`, the 12 `rvc_*.pth` weights, and the 12
+`added_*.index` files. It is private and stays private — these are cloned voices
+of identifiable speakers and the mentor sign-off covers generating them for
+research, not publishing them.
+
+Only the twelve **final** weights are archived. `assets/weights/` accumulates 36
+`.pth` because training snapshots at `_e50` and `_e100` alongside the final, so
+the archive is built from the twelve `weight_file` names in the manifest rather
+than from a glob — a glob would add 1.3 GB and make "which weights produced these
+clips?" ambiguous. The pretrained assets (`hubert_base`, `rmvpe`,
+`pretrained_v2`) and the per-target `logs/<exp>/` extraction intermediates are
+excluded: both regenerate, and together they were 5 GB of the 7.28 GB session
+output.
+
+Verify a copy of the archive against this repository:
+
+```bash
+python -m src.data.rvc_archive --root /kaggle/input/rvc-cm02-generation-archive
+```
+
+`src.data.rvc_archive` re-hashes every weight and index against
+`outputs/rvc_model_checksums.json` and checks every clip named in the metadata is
+present. It exits non-zero if anything is missing, truncated, or has a different
+hash — the last of which is the only way to notice that a *re-run's* weights have
+quietly replaced this run's. First verification: **24/24 models and indexes
+matched, 0 mismatches** (2026-09-06).
 
 `generation_metadata.jsonl` is written by the generator full of absolute
 `/kaggle/working/...` paths. It is passed through `src.utils.paths.portable`
