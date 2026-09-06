@@ -262,7 +262,9 @@ def test_clips_only_archive_is_complete_without_models(tmp_path):
     for name in names:
         (archive / name).write_bytes(b"audio")
 
-    report = rvc_archive.verify_archive(str(archive), manifest_path=None, metadata_path=str(metadata))
+    report = rvc_archive.verify_archive(
+        str(archive), manifest_path=None, metadata_path=str(metadata)
+    )
     assert report.models == []
     assert report.clips_expected == 2 and report.clips_found == 2
     assert report.complete is True
@@ -277,6 +279,8 @@ def test_clips_only_archive_is_incomplete_when_a_clip_is_missing(tmp_path):
         json.dumps({"output_path": "${DATA_ROOT}/generated/xtts_v2/outputs/gone.wav"}) + "\n",
         encoding="utf-8",
     )
-    report = rvc_archive.verify_archive(str(archive), manifest_path=None, metadata_path=str(metadata))
+    report = rvc_archive.verify_archive(
+        str(archive), manifest_path=None, metadata_path=str(metadata)
+    )
     assert report.complete is False
     assert report.clips_missing == ["gone.wav"]
