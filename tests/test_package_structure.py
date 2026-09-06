@@ -29,6 +29,7 @@ EXPECTED_MODULES = [
     "src/data/rvc_generation.py",
     "src/data/rvc_report.py",
     "src/data/rvc_archive.py",
+    "src/data/rvc_gate.py",
     "src/data/f0_stats.py",
     "src/data/build_manifests.py",
     "src/data/dataset.py",
