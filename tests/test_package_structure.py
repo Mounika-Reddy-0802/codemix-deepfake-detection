@@ -20,6 +20,7 @@ PACKAGES = [
     "src.training",
     "src.inference",
     "src.utils",
+    "src.reporting",
 ]
 
 EXPECTED_MODULES = [
@@ -28,6 +29,7 @@ EXPECTED_MODULES = [
     "src/data/spoof_generation.py",
     "src/data/rvc_generation.py",
     "src/data/rvc_report.py",
+    "src/reporting/figures.py",
     "src/data/rvc_archive.py",
     "src/data/rvc_gate.py",
     "src/data/f0_stats.py",
