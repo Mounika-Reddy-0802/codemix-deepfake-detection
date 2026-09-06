@@ -164,6 +164,31 @@ catastrophic forgetting — the frozen-encoder argument for LoRA now has a
 measurement behind it. Note that the channel-matched adapter **retains English
 better *and* survives telephony**, which is a second independent reason to prefer it.
 
+### 5. A second attack family exists — and it does not behave like the first
+
+CM02 (RVC voice conversion) ran on a Kaggle T4 pair on 2026-09-05: **12 per-speaker
+voice models**, **1,500 conversions** of real train-pool speech into other train-pool
+voices, 0 failures, 93.6% through the mechanical quality screen. The audio and
+weights live in a private archive, hash-verified against the manifests in git
+(24/24 models, 1,500/1,500 clips).
+
+The measurement it was built to make — P-019 predicted that voice conversion keeps
+the source's pitch contour where XTTS invents one:
+
+| Measured with one estimator (`src.data.f0_stats`) | Median f0 IQR |
+|---|---:|
+| Real MUCS source clips (1,493) | 21.8 Hz |
+| RVC conversions of those same clips (1,493) | **21.1 Hz** — 96.4% retained |
+| XTTS-v2 pilot clips (23) | **27.8 Hz** |
+
+RVC tracks its source. But XTTS-v2 does **not** compress pitch range as P-019
+claimed — it *widens* it by ~27%. P-019's 41.1 Hz real-speech baseline did not
+reproduce; its XTTS figure did (**P-021**). The two families deviate from real
+speech in opposite directions, which is a cleaner case for a second family than the
+original claim was. **No detector has been scored on CM02 yet.**
+
+→ [`docs/results/rvc_generation_v1.md`](docs/results/rvc_generation_v1.md)
+
 ### ⚠️ The number we are not reporting
 
 Before trusting any clean-condition figure above, we ran AffectDF's Appendix-G
@@ -268,13 +293,16 @@ Owning these is the point.
   behind that figure lives only in a Kaggle run's output; the `best.pt` committed via
   LFS re-measures at **0.85–0.87%** with a visibly different AUC. Either recover the
   original checkpoint or restate the headline before the results freeze.
-- **One attack family carries everything.** Every result uses XTTS-v2 — the same tool
-  the adapter trained against. The held-out **Tortoise** set that would test a genuinely
-  unseen attack has been firewalled and planned since Week 1 but **has never been
-  generated or scored**.
-- **RVC is toolchain-blocked**, not GPU-blocked: `rvc-python` → `fairseq` → a numpy
-  build calling `pkgutil.ImpImporter`, removed in Python 3.12. The second attack
-  family is unavailable until that is resolved (**P-017**).
+- **Only one attack family has been scored.** Every detector result uses XTTS-v2 —
+  the same tool the adapter trained against. CM02 (RVC) now exists, 1,500 clips
+  verified, but no checkpoint has been evaluated on it. The held-out **Tortoise** set
+  that would test a genuinely unseen attack **has never been generated**.
+- **P-019's pitch-compression claim was wrong** — its real-speech baseline did not
+  reproduce with committed code (**P-021**). The XTTS row in the pitch table is 23
+  pilot clips; the 4,000 CM01 scale clips must be re-measured with the same estimator.
+- **CM01's audio exists on one machine and in no archive.** Its generation metadata
+  log — the only record of what was actually produced — is not in git. CM02 has both;
+  CM01 needs the same treatment before it can be trusted or rebuilt.
 - **The channel-trained adapter has a single seed.** The clean adapter has three.
   Since the channel column is becoming the primary result, it needs the same treatment.
 - **The gap matrix's 44.65% needs re-deriving.** It was measured on `colab_bundle`,
@@ -302,11 +330,11 @@ codemix-deepfake-detection/
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
 │   ├── inference/       # streaming inference, ONNX export, predict
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 506 tests — pool firewall, anti-leakage, quarantine
+├── tests/               # 596 tests — pool firewall, anti-leakage, quarantine, archives
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs (notebooks hold no logic)
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
-├── docs/results/        # the four measurement write-ups
+├── docs/results/        # the five measurement write-ups
 ├── experiments/         # eval JSONs + per-clip score CSVs behind every table
 ├── checkpoints/         # Stage-1 and LoRA adapters (Git LFS)
 ├── live_call/           # WebRTC harness now, Twilio from Week 6
@@ -355,6 +383,10 @@ python -m src.data.pilot_jobs --data-root $DATA_ROOT \
     --pack-dir $DATA_ROOT/generated/pilot --romanise
 python -m src.data.spoof_generation --jobs <pack>/generation_jobs.csv \
     --pack-dir <pack> --out-dir <pack>/outputs
+#     CM02 (RVC) trains on a GPU: notebooks/kaggle_w4t2_rvc_generation.ipynb, top to
+#     bottom. The job table + firewall check alone is laptop-safe:
+python -m src.data.rvc_generation --jobs-only --data-root $DATA_ROOT
+python -m src.data.rvc_archive --root <copy of the private archive>   # 24 hashes + 1,500 clips
 
 # --- 5. Stage-1 training (needs ASVspoof 2019 LA staged under $DATA_ROOT) ---
 python -m src.training.train --config configs/train_stage1_run.yaml --smoke  # sanity first
@@ -376,6 +408,9 @@ python -m src.data.lowlevel_cue \
     --train data/manifests/codemix_adapt_train.csv --train-root "$DATA_ROOT/lora_bundle" \
     --test  data/manifests/codemix_eval.csv        --test-root  "$DATA_ROOT/lora_bundle" \
     --out experiments/results/lowlevel_cue_check.json
+#     The same gate asked of CM02 -- RVC conversions against the very source clips they
+#     were converted from, fit/score disjoint by source speaker, raw + normalised:
+python -m src.data.rvc_gate --clips <dir with the 1,500 rvc_*.wav> --data-root $DATA_ROOT
 ```
 
 > `--data-root` is **required** for bundle-based manifests. Portable manifests store
@@ -406,11 +441,12 @@ outside this repo.
 | **3** | ✅ Corpus indexing (56,143 clips), quarantine verified on both machines, channel listening test passed | ✅ AffectDF related-work anchor, attack taxonomy | ✅ Speaker pools frozen, XTTS pilot on GPU, Devanagari→Latin transliteration |
 | **4** | ✅ ASVspoof 2019 LA downloaded + verified, CM protocols checked against published figures | ✅ Stage-1 scaffolding: SSL encoder, attentive pooling, AMP loop | ✅ Stage-1 baseline trained + evaluated on Kaggle GPU (71,237 clips) |
 | **5** | ✅ Channel bundle renderer through the verified G.711 chain | ✅ **Low-level cue gate run — and it FAILS**; root cause traced to bundle normalisation | — |
-| **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4 |
+| **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4; ✅ **CM02 RVC generation** — 12 voice models, 1,500 conversions, archived + hash-verified; pitch measured, **P-019 corrected (P-021)** |
 
 **Open before the Week-9 results freeze:** rebuild bundles with level normalisation
-and re-run the gate; generate and score the held-out Tortoise set; seed-repeat the
-channel-trained adapter; reconcile the Stage-1 checkpoint discrepancy.
+and re-run the gate; score a checkpoint on CM02; generate and score the held-out
+Tortoise set; archive CM01 and re-measure its pitch on all 4,000 clips; seed-repeat
+the channel-trained adapter; reconcile the Stage-1 checkpoint discrepancy.
 
 ---
 
@@ -422,8 +458,8 @@ channel-trained adapter; reconcile the Stage-1 checkpoint discrepancy.
 | **M** | S. Mounika Reddy (D032) | **Model** — training pipeline, baseline, gap matrix, LoRA, ablations, experiment tracking |
 | **SK** | K. Sai Krishna Reddy (D034) | **Systems/Demo** — live-call pipeline, streaming inference, ONNX, dashboard, spoof pilots |
 
-One branch per member per week, PRs into `dev`, reviewed and merged by a teammate —
-never your own. Full rules in the team git rules doc (kept in the team drive).
+One branch per member per week off `main`, PRs into `main`, reviewed and merged by a
+teammate — never your own. (`dev` is kept as a mirror of `main` and is not the trunk.) Full rules in the team git rules doc (kept in the team drive).
 
 ---
 
@@ -436,9 +472,11 @@ never your own. Full rules in the team git rules doc (kept in the team drive).
 | [`docs/results/gap_closure_v1.md`](docs/results/gap_closure_v1.md) | **Closing it** — LoRA 53.71% → 1.34%, seed variance, what it does not answer |
 | [`docs/results/channel_matched_v1.md`](docs/results/channel_matched_v1.md) | **The telephony finding** — why the clean adapter dies on a phone line |
 | [`docs/results/lowlevel_cue_check_v1.md`](docs/results/lowlevel_cue_check_v1.md) | **The shortcut gate** — why the clean number is not yet quotable |
+| [`docs/results/rvc_generation_v1.md`](docs/results/rvc_generation_v1.md) | **CM02** — 12 RVC voice models, 1,500 conversions, the pitch measurement, where the archive lives |
+| [`docs/qa/rvc_generation_qa.md`](docs/qa/rvc_generation_qa.md) | CM02 mechanical quality screen: 1,404 / 1,500 pass, failure reasons |
 | [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 baseline: EER/AUC/F1, per-attack breakdown, reproduction |
 | [`docs/lora_run_status.md`](docs/lora_run_status.md) | Step-by-step record of the Stage-2 run, including every trap hit |
-| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-017** with the problem that forced it |
+| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-021** with the problem that forced it |
 | [`Works updates.md`](Works%20updates.md) | HUMAN_TODO — everything only a person can do, ordered by what unblocks most |
 | [`docs/progress.md`](docs/progress.md) | One line per finished task: date, task, owner, branch |
 | [`docs/qa/child_quarantine_evidence.md`](docs/qa/child_quarantine_evidence.md) | The child-audio exclusion, verified on both machines |
