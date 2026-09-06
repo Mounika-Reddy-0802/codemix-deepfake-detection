@@ -108,12 +108,20 @@ below threshold), that speaker was re-cut to 12.34 s, and the affected clips wer
 regenerated. After the re-cut: **3,998 of 4,000 usable (99.95%, up from 97.1%)**. The
 two remaining rejects are borderline-slow and both speakers still keep 159 clips.
 
-**Known property, not a defect (P-019 / P-021):** measured with `src.data.f0_stats`
-(Praat autocorrelation, 60–400 Hz), XTTS-v2 clips have a median intra-utterance f0
-IQR of 27.8 Hz against 21.8 Hz for the real MUCS speech they clone — the generator
-*overshoots* prosodic variation. P-019 originally reported this as a 35% compression;
-that comparison used two different estimators and P-021 retired it. The corrected
-figure is based on 23 pilot clips and needs re-measuring across all ~4,000.
+**Known property, not a defect (P-019 / P-021 / P-023):** measured with
+`src.data.f0_stats` (Praat autocorrelation, 60–400 Hz) over **all 4,000 clips**
+(3,991 usable), XTTS-v2 has a median intra-utterance f0 IQR of **18.99 Hz** against
+**21.84 Hz** for real MUCS speech from the same train pool — the generator retains
+**86.9%** of the source pitch range, i.e. it flattens prosody by ~13%.
+
+This number took three attempts to get right, which is worth stating plainly: P-019
+reported 25–29 Hz against a 41.1 Hz baseline (35% compression) measured with unknown
+tooling; P-021 re-measured with committed code and got 27.8 Hz against 21.84 Hz
+(27% *wider*) but on only **23 pilot clips**; this figure is the full scale run and
+lands between them in magnitude while restoring P-019's direction. The comparison is
+like-for-like in corpus and speaker pool but is **not paired** — CM01 clips are
+synthesised from different transcripts than the CM02 source segments the baseline
+comes from.
 
 ### 2.2 CM02 — RVC, the seen VC attack
 

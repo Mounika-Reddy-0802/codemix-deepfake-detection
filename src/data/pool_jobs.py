@@ -205,17 +205,30 @@ def main() -> None:
     parser.add_argument("--jobs-out", default=None)
     parser.add_argument("--n", type=int, default=None, help="default: speakers x 160")
     parser.add_argument("--language", default="hi")
+    parser.add_argument(
+        "--tool",
+        default="xtts_v2",
+        help="generator id recorded on every row; 'tortoise' builds the CM04 held-out set",
+    )
     parser.add_argument("--no-romanise", action="store_true")
     parser.add_argument("--no-refs", action="store_true", help="job table only, no wav cutting")
     args = parser.parse_args()
 
     pack_dir = Path(args.pack_dir or (Path(args.data_root) / "generated" / f"xtts_v2_{args.pool}"))
-    jobs_out = args.jobs_out or f"data/manifests/{args.pool}_generation_jobs.csv"
+    jobs_out = args.jobs_out or (
+        "data/manifests/heldout_generation_jobs.csv"
+        if args.tool == "tortoise"
+        else f"data/manifests/{args.pool}_generation_jobs.csv"
+    )
     index = pd.read_csv(args.index)
     pools = pd.read_csv(args.pools)
 
     config = PoolJobConfig(
-        pool=args.pool, n_target=args.n, language=args.language, romanise=not args.no_romanise
+        pool=args.pool,
+        n_target=args.n,
+        language=args.language,
+        romanise=not args.no_romanise,
+        tool=args.tool,
     )
     jobs = build_pool_jobs(index, pools, out_dir="outputs", config=config)
     Path(jobs_out).parent.mkdir(parents=True, exist_ok=True)

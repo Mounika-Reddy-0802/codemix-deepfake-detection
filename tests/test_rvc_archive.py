@@ -232,3 +232,51 @@ def test_cli_exits_nonzero_on_an_incomplete_archive(tmp_path, monkeypatch, capsy
         rvc_archive.main()
     assert excinfo.value.code == 1
     assert "INCOMPLETE" in capsys.readouterr().out
+
+
+# --------------------------------------------------------------------------- #
+# Clips-only archives (CM01 is zero-shot: 4,000 clips, no per-speaker models)
+# --------------------------------------------------------------------------- #
+def test_expected_models_is_empty_when_no_manifest_is_given():
+    assert rvc_archive.expected_models(None) == []
+
+
+def test_expected_models_is_empty_when_the_manifest_file_is_absent(tmp_path):
+    assert rvc_archive.expected_models(str(tmp_path / "nothing.json")) == []
+
+
+def test_clips_only_archive_is_complete_without_models(tmp_path):
+    """A zero-shot run has nothing to hash, so clip presence alone decides."""
+    archive = tmp_path / "archive"
+    archive.mkdir()
+    metadata = tmp_path / "meta.jsonl"
+    names = ["xtts_v2_106718_00001.wav", "xtts_v2_106718_00002.wav"]
+    metadata.write_text(
+        "\n".join(
+            json.dumps({"output_path": f"${{DATA_ROOT}}/generated/xtts_v2/outputs/{n}"})
+            for n in names
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    for name in names:
+        (archive / name).write_bytes(b"audio")
+
+    report = rvc_archive.verify_archive(str(archive), manifest_path=None, metadata_path=str(metadata))
+    assert report.models == []
+    assert report.clips_expected == 2 and report.clips_found == 2
+    assert report.complete is True
+    assert "none expected" in rvc_archive.describe(report)
+
+
+def test_clips_only_archive_is_incomplete_when_a_clip_is_missing(tmp_path):
+    archive = tmp_path / "archive"
+    archive.mkdir()
+    metadata = tmp_path / "meta.jsonl"
+    metadata.write_text(
+        json.dumps({"output_path": "${DATA_ROOT}/generated/xtts_v2/outputs/gone.wav"}) + "\n",
+        encoding="utf-8",
+    )
+    report = rvc_archive.verify_archive(str(archive), manifest_path=None, metadata_path=str(metadata))
+    assert report.complete is False
+    assert report.clips_missing == ["gone.wav"]

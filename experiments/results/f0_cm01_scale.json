@@ -1,0 +1,11 @@
+{
+  "clips": 4000,
+  "usable": 3991,
+  "median_f0_iqr_hz": 18.99,
+  "mean_f0_iqr_hz": 23.59,
+  "p25_f0_iqr_hz": 15.48,
+  "p75_f0_iqr_hz": 25.26,
+  "median_f0_hz": 105.87,
+  "clips_attempted": 4000,
+  "clips_failed": 0
+}
