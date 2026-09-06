@@ -175,8 +175,21 @@ python -m src.data.rvc_archive --root /kaggle/input/rvc-cm02-generation-archive
 `outputs/rvc_model_checksums.json` and checks every clip named in the metadata is
 present. It exits non-zero if anything is missing, truncated, or has a different
 hash — the last of which is the only way to notice that a *re-run's* weights have
-quietly replaced this run's. First verification: **24/24 models and indexes
-matched, 0 mismatches** (2026-09-06).
+quietly replaced this run's.
+
+First verification, 2026-09-06, against repo commit `f79619e`:
+
+| | Result | Checked how |
+|---|---|---|
+| Weights | **12/12** | name + size + SHA-256 |
+| Indexes | **12/12** | name + size + SHA-256 |
+| Converted clips | **1500/1500** | present by name |
+| **Total** | **1524/1524** | exit 0, `COMPLETE` |
+
+The clip row is presence, not content: the metadata log carries no per-clip hash,
+so a renamed or missing clip is caught and a corrupted one is not. Extracting the
+archive is itself a CRC check of every member, and `src.data.generation_qa` is
+what screens the audio — its report is in `docs/qa/`, 1404/1500 passing.
 
 `generation_metadata.jsonl` is written by the generator full of absolute
 `/kaggle/working/...` paths. It is passed through `src.utils.paths.portable`
