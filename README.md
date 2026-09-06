@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%208%20of%2012-yellow)
-![Tests](https://img.shields.io/badge/tests-506%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-594%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -38,7 +38,7 @@ flowchart TD
     A["1 · CORPORA — L<br/>ASVspoof 2019 LA (English)<br/>MUCS Hindi-English · HiACC-adult"]
     A --> B["2 · CORPUS INDEX — L<br/>56,143 clips · real Kaldi speaker ids<br/>HiACC child audio quarantined on extract"]
     B --> C["3 · SPEAKER POOLS — FROZEN — SK<br/>25 train · 10 adaptation · 15 eval<br/>sha256 f57e0d85… · carved before any audio existed"]
-    C --> D["4 · SPOOF GENERATION — SK<br/>XTTS-v2 clones = seen attack<br/>Tortoise = held-out, eval only, never trained on"]
+    C --> D["4 · SPOOF GENERATION — SK<br/>XTTS-v2 clones + RVC conversions = seen attacks<br/>Tortoise = held-out, eval only, never trained on"]
     D --> E["5 · TELEPHONY CHANNEL — L<br/>8 kHz · G.711 μ-law / AMR-NB · SNR mixing<br/>verified by measurement and by ear"]
     E --> F["6 · DETECTOR — M<br/>wav2vec2-base + attentive stats pooling + MLP"]
     F --> G["7 · STAGE 1 — ENGLISH ONLY — M<br/>ASVspoof 2019 LA eval<br/>0.87% EER"]
