@@ -198,9 +198,11 @@ they *cannot* separate the classes.
 
 | Condition | Low-level-cue EER | Verdict |
 |---|---:|---|
-| **Clean** | **1.39%** | ❌ FAIL |
-| Clean + RMS-normalised | 5.17% | ❌ FAIL |
-| **Channel-matched** | **9.25%** | ❌ FAIL, but 2.4× margin |
+| **CM01 clean** | **1.39%** | ❌ FAIL |
+| CM01 clean + RMS-normalised | 5.17% | ❌ FAIL |
+| **CM01 channel-matched** | **9.25%** | ❌ FAIL, but 2.4× margin |
+| **CM02 raw** (RVC vs its own source clips) | **22.42%** | ❌ FAIL, 16× better than CM01 |
+| **CM02 normalised** | **22.28%** | ❌ FAIL — normalising buys 0.14 pp |
 | *AffectDF's own corpus* | *53.16%* | *pass (chance)* |
 
 **Eight numbers per clip separate our classes at 1.39% EER. The model gets 1.34%.**
@@ -215,7 +217,18 @@ arrives at peak 0.9968 against MUCS at 0.9397. Normalisation is necessary but no
 sufficient; the residual is genuine recording-domain difference (lecture audio vs
 vocoder).
 
+**CM02 is asked a stricter question and answers it better.** Because every RVC job
+records the source segment it converted, the CM02 gate compares conversions against
+*the same recordings* — same words, same room — so anything it finds is the
+conversion and nothing else. It finds a **spectral** tell, not a level one:
+normalisation moves the gate 0.14 pp, and the separation is carried by zero-crossing
+rate (40% lower) and HF energy ratio (half), both scale-invariant. RVC's decoder
+does not reproduce the source's high-frequency detail. That is the mirror of P-021's
+finding on pitch — the two generators deviate from real speech in different ways, on
+different statistics.
+
 → [`docs/results/lowlevel_cue_check_v1.md`](docs/results/lowlevel_cue_check_v1.md)
+→ [`docs/results/lowlevel_cue_check_cm02_v1.md`](docs/results/lowlevel_cue_check_cm02_v1.md)
 
 ---
 
