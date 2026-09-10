@@ -37,7 +37,7 @@ our dataset can be read the same way.
 | **ADAPTATION POOL** ||||||||
 | CM03 | TTS (zero-shot clone) | XTTS-v2 | MUCS adaptation pool | ~800 | 8–10 | Adaptation | S2 (LoRA) |
 | **TEST — HELD-OUT TOOLS** ||||||||
-| CM04 | TTS | Tortoise-TTS | MUCS/HiACC eval pool | 400–600 | eval pool | Test | **nothing** |
+| CM04 | TTS | Tortoise-TTS | MUCS eval pool | **500** *(measured)* | **15** | Test | **nothing** |
 | CM05 | VC | kNN-VC *(optional)* | eval pool | ~300 | eval pool | Test | **nothing** |
 | **TEST — EXTERNAL, EVAL-ONLY** ||||||||
 | CM06 | TTS | IndicTTS-Deepfake | mono-Hindi | as released | — | Test | nothing |
@@ -54,6 +54,8 @@ our dataset can be read the same way.
 2. **Tool firewall.** CM04–CM09 never appear in any training manifest, in any
    stage. Tortoise is the headline unseen attack: if S3 scores near 0% EER on
    CM01/CM02 and collapses on CM04, that is shortcut learning, not detection.
+   CM04 now exists — 500 clips, 15 eval-pool speakers, 91.6% QA pass rate
+   ([W4-T3](W4T3_cm04_heldout_tortoise.md)) — so the test is finally runnable.
 3. **Split disjointness of attack systems** (AffectDF's move): no generation model
    appears in both a training split and a test split. CM01/CM03 share XTTS-v2 but
    sit in train and adaptation respectively, on disjoint speakers — S2's whole

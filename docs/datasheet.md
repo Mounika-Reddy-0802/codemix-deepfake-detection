@@ -81,16 +81,19 @@ would be void. `speaker_pools.verify_frozen()` re-checks the hash before use, an
 | **CM01** | TTS (zero-shot clone) | XTTS-v2 | MUCS train pool | 4,000 | **3,998** (99.95%) | 25 spk × 160 | train | S3 |
 | **CM02** | VC (per-speaker models) | RVC v2 | MUCS train pool | 1,500 | **1,404** (93.6%) | 12 spk × 125 | train | S3 |
 | **CM03** | TTS (zero-shot clone) | XTTS-v2 | MUCS adaptation pool | 1,600 | 1,600 \* | 10 spk | adaptation | S2 (LoRA) |
-| CM04 | TTS | Tortoise-TTS | MUCS/HiACC eval pool | **0 — not generated** | — | — | test | nothing |
+| **CM04** | TTS (zero-shot clone) | Tortoise-TTS | MUCS eval pool | 500 | **458** (91.6%) | 15 spk × 33–34 | test | **nothing** |
 | CM05 | VC | kNN-VC *(optional)* | eval pool | **0 — not generated** | — | — | test | nothing |
 | CM06–CM08 | TTS | IndicTTS-Deepfake / IndicSynth | mono-Hindi, mono-Tamil | **0 — not indexed yet** | — | — | test | nothing |
 | CM09 | mixed | AffectDF subset | ESD / MSP-Podcast | **0 — not fetched** | — | — | test (external) | nothing |
 
 \* CM03's usable count is the number that reached the adaptation manifests (1,280 train + 320 dev); it was not screened separately the way CM01 and CM02 were.
 
-**CM04 is the gap that matters most.** It is the only genuinely unseen attack, and
-until it exists the claim "these results are not shortcut artefacts" has no
-held-out-tool evidence behind it. It is W4-T3 and it is still open.
+**CM04 now exists.** It is the only genuinely unseen attack — the one tool no model
+is ever allowed to see — and the claim "these results are not shortcut artefacts"
+finally has held-out-tool evidence available to it. 500 clips over the 15 eval-pool
+speakers, 458 usable. It has **not been scored yet**: generating the attack and
+measuring against it are two different tasks, and only the first is done.
+See [W4-T3](W4T3_cm04_heldout_tortoise.md).
 
 ### 2.1 CM01 — XTTS-v2, the seen TTS attack
 
@@ -148,6 +151,30 @@ the **SHA-256 of the exact model weights** that produced it. All 24 model checks
 The same generator as CM01 pointed at the 10 adaptation-pool speakers, so S2's LoRA
 adaptation trains on a *seen tool* over *unseen speakers*. Disjointness from CM01 is
 by speaker pool, which the frozen pool file guarantees.
+
+### 2.4 CM04 — Tortoise-TTS, the held-out attack
+
+The only attack no model is ever allowed to see. 500 clips over the 15 eval-pool
+speakers, 33–34 each, generated from `data/manifests/heldout_generation_jobs.csv`
+— a job table committed *before* the run, so what was generated is decided in git
+rather than on a GPU. 500 distinct transcripts and 500 distinct seeds; no
+(speaker, transcript) pair repeats. 1.19 h of audio, 175 MB archived.
+
+Two firewalls, both mechanical and both re-verified against the committed metadata:
+`tool == tortoise` and `pool == eval` on all 500 rows, zero speaker overlap with the
+25 train-pool speakers CM01 and CM02 cloned. `tests/test_splits.py` fails the build
+if a Tortoise clip ever reaches a training manifest.
+
+QA pass rate **91.6%** (458/500) — the lowest of the three generators, against
+99.95% for CM01 and 93.6% for CM02. Failures are 24 stalled/too-slow and 18
+near-silent clips, and they are **not evenly spread**: speaker `136325` alone
+accounts for 19 of the 42, dropping from 34 clips to 15 usable while every other
+speaker keeps at least 30. That is a reference-quality problem for one speaker, not
+a Tortoise-wide one. Zero clips had clipped samples.
+
+Full write-up, including the two defects fixed during generation and the
+budget-and-resume design the 12-hour session limit forced:
+[W4-T3](W4T3_cm04_heldout_tortoise.md).
 
 ---
 
@@ -211,7 +238,7 @@ constrain what this project may release:
 | IndicVoices | AI4Bharat research | Gated: accept terms, use a token. |
 
 **The generated audio is not in this repository and will not be.** It is cloned
-speech of identifiable people; the repo is public. CM01 and CM02 audio live in
+speech of identifiable people; the repo is public. CM01, CM02 and CM04 audio live in
 private Kaggle datasets, with per-clip metadata, job tables and SHA-256 checksums
 committed here so the corpus is auditable without the audio being public.
 
@@ -265,8 +292,11 @@ different romanisation. 0 unmapped characters across all 56,143 rows.
    studio → Hinglish lecture*, not code-mixing alone. The channel-matched columns and
    a monolingual-Hindi column are the two ways to separate them; the mono-lingual
    columns are not built yet.
-3. **No held-out attack tool exists yet (CM04).** Every generated clip so far comes
-   from a tool the models are allowed to see.
+3. **The held-out attack exists but has not been scored (CM04).** 500 Tortoise
+   clips over eval-pool speakers are generated, screened and archived, and no
+   training manifest may contain them. No checkpoint has been evaluated against
+   them, so the shortcut question is answerable in principle and unanswered in
+   fact. Every *scored* number in this repo still comes from a seen tool.
 4. **Spoof quality is uneven.** CM01 rated 1.5/5 "sounds human" and 1/5
    "code-switch natural" by the team. These are easy fakes, and detector numbers
    against them are optimistic.

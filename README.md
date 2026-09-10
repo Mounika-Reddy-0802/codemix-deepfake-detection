@@ -314,9 +314,10 @@ Owning these is the point.
   LFS re-measures at **0.85–0.87%** with a visibly different AUC. Either recover the
   original checkpoint or restate the headline before the results freeze.
 - **Only one attack family has been scored.** Every detector result uses XTTS-v2 —
-  the same tool the adapter trained against. CM02 (RVC) now exists, 1,500 clips
-  verified, but no checkpoint has been evaluated on it. The held-out **Tortoise** set
-  that would test a genuinely unseen attack **has never been generated**.
+  the same tool the adapter trained against. CM02 (RVC) exists, 1,500 clips verified,
+  and the held-out **Tortoise** set (CM04) now exists too — 500 clips, 15 eval-pool
+  speakers, 91.6% QA pass rate. **Neither has been scored.** The unseen-attack test
+  is now runnable; it has not been run.
 - **P-019's pitch-compression claim was wrong** — its real-speech baseline did not
   reproduce with committed code (**P-021**). The XTTS row in the pitch table is 23
   pilot clips; the 4,000 CM01 scale clips must be re-measured with the same estimator.
@@ -463,10 +464,10 @@ outside this repo.
 | **5** | ✅ Channel bundle renderer through the verified G.711 chain | ✅ **Low-level cue gate run — and it FAILS**; root cause traced to bundle normalisation | — |
 | **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4; ✅ **CM02 RVC generation** — 12 voice models, 1,500 conversions, archived + hash-verified; pitch measured, **P-019 corrected (P-021)** |
 
-| **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ⏳ CM04 job table + notebook staged, needs a GPU |
+| **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ✅ **CM04 generated** — the held-out Tortoise attack, 500/500 clips over 15 eval-pool speakers, 91.6% QA pass, archived + metadata committed ([W4-T3](docs/W4T3_cm04_heldout_tortoise.md)) |
 
-**Open before the results freeze:** generate and score the held-out Tortoise set
-(CM04 — everything but the GPU session is ready); score a checkpoint on CM02;
+**Open before the results freeze:** score a checkpoint on the held-out Tortoise set
+(CM04 is generated — the measurement is what is missing); score a checkpoint on CM02;
 rebuild bundles with level normalisation and re-run the CM01 gate; run the shortcut
 gate on the channel-matched condition; seed-repeat the channel-trained adapter;
 reconcile the Stage-1 checkpoint discrepancy.
