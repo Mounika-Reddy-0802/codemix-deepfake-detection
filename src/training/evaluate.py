@@ -54,7 +54,7 @@ def score_manifest(
         manifest, data_root=data_root, max_seconds=max_seconds, random_crop=False
     )
     if limit is not None:
-        dataset.df = dataset.df.head(limit).reset_index(drop=True)
+        dataset.df = limit_rows(dataset.df, limit)
 
     model = Detector(_encoder_id(encoder))
     state = torch.load(checkpoint, map_location=resolved, weights_only=False)
@@ -123,6 +123,30 @@ def score_manifest(
             f"from {partial_path}"
         )
     return out
+
+
+def limit_rows(df: pd.DataFrame, limit: int, seed: int = 0) -> pd.DataFrame:
+    """A label-stratified, deterministic subset of ``limit`` rows.
+
+    ``head(limit)`` is not usable here: the scoring manifests are grouped by label
+    (``codemix_eval.csv`` opens with 1,566 bonafide rows, ``rvc_holdout_test.csv``
+    with 317 spoof rows), so the first 200 clips hold one class only and EER/AUC
+    raise ``need both positive and negative examples``. Each label keeps its share
+    of the manifest (at least one row), and the original row order is preserved.
+    """
+    if limit >= len(df):
+        return df.reset_index(drop=True)
+    labels = df["label"].str.lower()
+    counts = labels.value_counts()
+    quota = {lab: max(1, round(limit * n / len(df))) for lab, n in counts.items()}
+    # Rounding can overshoot by a row or two; trim from the largest class.
+    while sum(quota.values()) > limit and max(quota.values()) > 1:
+        quota[max(quota, key=quota.get)] -= 1
+    parts = [
+        df[labels == lab].sample(n=min(n, int(counts[lab])), random_state=seed)
+        for lab, n in quota.items()
+    ]
+    return pd.concat(parts).sort_index().reset_index(drop=True)
 
 
 def _restore_lora(model, state) -> str | None:
