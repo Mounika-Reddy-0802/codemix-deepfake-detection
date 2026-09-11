@@ -91,10 +91,19 @@ def build(
     clips_subdir: str = "clips",
     target_sr: int = 16_000,
     data_root: str | None = None,
+    target_dbfs: float | None = -23.0,
 ) -> pd.DataFrame:
-    """Write every referenced clip into ``out_dir`` and return a portable manifest."""
+    """Write every referenced clip into ``out_dir`` and return a portable manifest.
+
+    Every clip is level-normalised to ``target_dbfs`` (RMS), matching what
+    ``preprocess.py`` and ``configs/data/channel_sim.yaml`` already specify. The
+    first bundles skipped this and the shortcut gate found it: XTTS arrives
+    peak-normalised (0.9968) where MUCS spans do not (0.9397), so level alone was a
+    label (``lowlevel_cue_check_v1.md``). ``target_dbfs=None`` reproduces the old,
+    un-normalised bundle for comparison only.
+    """
     from src.data.corpora import load_clip
-    from src.utils.audio_utils import load_wav, save_wav
+    from src.utils.audio_utils import load_wav, rms_normalize, save_wav
 
     root = Path(out_dir)
     clips = root / clips_subdir
@@ -118,6 +127,8 @@ def build(
                     # through. Requiring a span here is what made the first run
                     # drop every spoof row.
                     audio, sample_rate = load_wav(str(row["filepath"]), target_sr=target_sr)
+                if target_dbfs is not None:
+                    audio = rms_normalize(audio, target_dbfs)
                 save_wav(str(target), audio, sample_rate)
                 written += 1
             except Exception as exc:  # noqa: BLE001 - one bad clip must not stop the bundle
