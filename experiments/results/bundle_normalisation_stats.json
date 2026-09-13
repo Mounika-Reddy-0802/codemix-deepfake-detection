@@ -1,0 +1,14 @@
+{
+  "bonafide": {
+    "clips": 2626,
+    "guard_trips": 8,
+    "written": 2626,
+    "guard_trip_rate": 0.003
+  },
+  "spoof": {
+    "clips": 4000,
+    "guard_trips": 91,
+    "written": 4000,
+    "guard_trip_rate": 0.0227
+  }
+}
