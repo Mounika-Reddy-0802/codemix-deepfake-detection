@@ -16,7 +16,10 @@ Three figures, and each one exists because a reviewer will ask for it:
   computed from **per-clip scores**, not from a summary. This is the evidence that
   the English-retention numbers are a real distribution and not three point
   estimates.
-- :func:`shortcut_gate_figure` — the low-level-cue gate for CM01 and CM02 against
+- :func:`ablation_figure` — the W9-T1 ablation: four adapters (XTTS only or
+  XTTS+RVC, clean or channel) on the seen tool, the unseen tool and RVC, each bar
+  beside the shortcut floor of its own set, from ``ablations.json``.
+- :func:`shortcut_gate_figure` — the low-level-cue gate per attack set against
   chance, because per `lowlevel_cue_check_v1.md` no model number on this corpus can
   be read without its shortcut baseline beside it.
 
@@ -38,6 +41,7 @@ import numpy as np
 import pandas as pd
 
 FIGURES_DIR = "experiments/figures"
+ABLATIONS = "experiments/results/ablations.json"
 DPI = 200
 
 #: EER (%) per system and condition, each cell with the document it was measured in.
@@ -65,11 +69,16 @@ SYSTEM_MATRIX: dict[str, dict[str, tuple[float, str]]] = {
 
 #: Low-level-cue gate results. Chance is 50%; lower means a stronger shortcut.
 SHORTCUT_GATE: tuple[tuple[str, float, str], ...] = (
-    ("CM01 clean", 1.39, "lowlevel_cue_check.json"),
-    ("CM01 clean\n+ normalised", 5.17, "lowlevel_cue_check.json"),
-    ("CM01\nchannel-matched", 9.25, "lowlevel_cue_check_channel20.json"),
-    ("CM02 raw", 22.42, "lowlevel_cue_check_cm02_raw.json"),
-    ("CM02\nnormalised", 22.28, "lowlevel_cue_check_cm02_normalised.json"),
+    ("CM01\nraw", 1.39, "lowlevel_cue_check.json"),
+    ("CM01\nnorm.", 5.17, "lowlevel_cue_check.json"),
+    ("CM01\nchannel", 9.25, "lowlevel_cue_check_channel20.json"),
+    ("CM01 norm.\nchannel", 10.01, "lowlevel_cue_check_normalised_channel20.json"),
+    ("CM02\nraw", 22.42, "lowlevel_cue_check_cm02_raw.json"),
+    ("CM02\nnorm.", 22.28, "lowlevel_cue_check_cm02_normalised.json"),
+    ("CM04\nnorm.", 31.21, "lowlevel_cue_check_cm04_normalised.json"),
+    ("CM04 norm.\nchannel", 25.79, "lowlevel_cue_check_cm04_normalised_channel20.json"),
+    ("RVC test\nnorm.", 28.76, "lowlevel_cue_check_rvc_holdout_normalised.json"),
+    ("RVC test\nchannel", 22.46, "lowlevel_cue_check_rvc_holdout_normalised_channel20.json"),
     ("AffectDF\n(reference)", 53.16, "AffectDF Appendix G"),
 )
 
@@ -84,7 +93,6 @@ DET_SOURCES: tuple[tuple[str, str], ...] = (
 PLANNED_BUT_UNMEASURED: tuple[tuple[str, str], ...] = (
     ("cross-eval column", "experiments/results/affectdf_crosseval.json"),
     ("reverse degradation (S3 on English)", "experiments/results/s3_reverse_degradation.json"),
-    ("ablations (XTTS-only vs XTTS+RVC)", "experiments/results/ablations.json"),
 )
 
 
@@ -288,7 +296,7 @@ def shortcut_gate_figure(out_dir: str = FIGURES_DIR) -> str:
     names = [n for n, _, _ in SHORTCUT_GATE]
     values = [v for _, v, _ in SHORTCUT_GATE]
 
-    fig, ax = plt.subplots(figsize=(7.0, 3.4))
+    fig, ax = plt.subplots(figsize=(10.0, 3.6))
     colours = ["#b2182b" if v < 10 else "#ef8a62" if v < 40 else "#4d9221" for v in values]
     bars = ax.bar(names, values, color=colours, width=0.62)
     for bar, value in zip(bars, values, strict=True):
@@ -319,12 +327,66 @@ def shortcut_gate_figure(out_dir: str = FIGURES_DIR) -> str:
     return str(out)
 
 
+def ablation_figure(out_dir: str = FIGURES_DIR, source: str = ABLATIONS) -> str:
+    """XTTS vs XTTS+RVC adapters per set, each bar against its own shortcut floor."""
+    if not Path(source).is_file():
+        raise FigureDataError(f"ablation results not built: {source}")
+    import json
+
+    plt = _style()
+    cells = pd.DataFrame(json.loads(Path(source).read_text())["cells"])
+    sets = [
+        ("eval_pool", "Seen tool\n(XTTS eval pool)"),
+        ("cm04", "Unseen tool\n(CM04 Tortoise)"),
+        ("rvc_test", "RVC\n(unseen speakers)"),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.4), sharey=True)
+    for ax, condition in zip(axes, ("clean", "channel"), strict=True):
+        part = cells[cells["condition"] == condition]
+        for j, (key, _label) in enumerate(sets):
+            for k, mix in enumerate(("xtts", "xtts+rvc")):
+                row = part[(part["set"] == key) & (part["mix"] == mix)].iloc[0]
+                x = j + (k - 0.5) * 0.36
+                ax.bar(
+                    x,
+                    row["eer"],
+                    width=0.34,
+                    color=("#4393c3", "#d6604d")[k],
+                    label=("XTTS only", "XTTS + RVC")[k] if j == 0 else None,
+                )
+                ax.text(x, row["eer"] + 0.8, f"{row['eer']:.1f}", ha="center", fontsize=7)
+            floor = part[part["set"] == key]["floor"].iloc[0]
+            ax.hlines(
+                floor,
+                j - 0.4,
+                j + 0.4,
+                colors="black",
+                linestyles="--",
+                lw=1.1,
+                label="shortcut floor" if j == 0 else None,
+            )
+        ax.set_xticks(range(len(sets)), [s for _, s in sets], fontsize=7.5)
+        ax.set_title(
+            "Clean" if condition == "clean" else "Channel-matched (G.711 @ 20 dB)", fontsize=9.5
+        )
+    axes[0].set_ylabel("EER (%) — lower is better")
+    axes[0].legend(fontsize=7, loc="upper left")
+    fig.suptitle("Adding RVC to adaptation: bars below the dashed floor are evidence", fontsize=10)
+
+    out = Path(out_dir) / "ablation_rvc.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out)
+    plt.close(fig)
+    return str(out)
+
+
 def build_all(out_dir: str = FIGURES_DIR) -> list[str]:
     """Every figure whose measured input exists. Returns the paths written."""
     return [
         system_matrix_figure(out_dir),
         det_curves_figure(out_dir),
         shortcut_gate_figure(out_dir),
+        ablation_figure(out_dir),
     ]
 
 

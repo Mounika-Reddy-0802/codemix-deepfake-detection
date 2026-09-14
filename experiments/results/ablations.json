@@ -1,0 +1,251 @@
+{
+  "question": "W9-T1: does attack diversity (XTTS+RVC) improve unseen-tool EER?",
+  "answer": "No. Adding RVC fixes the family it adds (RVC on unseen speakers improves in both conditions) but makes the unseen tool worse in both conditions: attack diversity trades unseen-tool EER for seen-family coverage.",
+  "source": "results/w10/w10_summary.json",
+  "floors_pct": {
+    "eval_pool/clean": 5.17,
+    "eval_pool/channel": 10.01,
+    "cm04/clean": 31.21,
+    "cm04/channel": 25.79,
+    "rvc_test/clean": 28.76,
+    "rvc_test/channel": 22.46
+  },
+  "rvc_effect_pct": [
+    {
+      "condition": "channel",
+      "set": "cm04",
+      "xtts": 28.16,
+      "xtts+rvc": 30.99,
+      "delta": 2.83
+    },
+    {
+      "condition": "channel",
+      "set": "eval_pool",
+      "xtts": 4.41,
+      "xtts+rvc": 2.75,
+      "delta": -1.66
+    },
+    {
+      "condition": "channel",
+      "set": "rvc_test",
+      "xtts": 29.56,
+      "xtts+rvc": 5.01,
+      "delta": -24.55
+    },
+    {
+      "condition": "clean",
+      "set": "cm04",
+      "xtts": 5.44,
+      "xtts+rvc": 12.01,
+      "delta": 6.57
+    },
+    {
+      "condition": "clean",
+      "set": "eval_pool",
+      "xtts": 1.46,
+      "xtts+rvc": 1.99,
+      "delta": 0.53
+    },
+    {
+      "condition": "clean",
+      "set": "rvc_test",
+      "xtts": 23.91,
+      "xtts+rvc": 5.01,
+      "delta": -18.9
+    }
+  ],
+  "cells": [
+    {
+      "adapter": "lora_norm_clean",
+      "mix": "xtts",
+      "condition": "clean",
+      "set": "eval_pool",
+      "eer": 1.46,
+      "eer_ci": [
+        1.01,
+        1.94
+      ],
+      "auc": 0.9968,
+      "clips": 3966,
+      "floor": 5.17,
+      "margin": 3.71,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_clean",
+      "mix": "xtts",
+      "condition": "clean",
+      "set": "cm04",
+      "eer": 5.44,
+      "eer_ci": [
+        4.05,
+        6.57
+      ],
+      "auc": 0.9825,
+      "clips": 2024,
+      "floor": 31.21,
+      "margin": 25.77,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_clean",
+      "mix": "xtts",
+      "condition": "clean",
+      "set": "rvc_test",
+      "eer": 23.91,
+      "eer_ci": [
+        20.33,
+        27.64
+      ],
+      "auc": 0.8378,
+      "clips": 619,
+      "floor": 28.76,
+      "margin": 4.85,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_rvc_clean",
+      "mix": "xtts+rvc",
+      "condition": "clean",
+      "set": "eval_pool",
+      "eer": 1.99,
+      "eer_ci": [
+        1.47,
+        2.45
+      ],
+      "auc": 0.998,
+      "clips": 3966,
+      "floor": 5.17,
+      "margin": 3.18,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_rvc_clean",
+      "mix": "xtts+rvc",
+      "condition": "clean",
+      "set": "cm04",
+      "eer": 12.01,
+      "eer_ci": [
+        10.42,
+        13.64
+      ],
+      "auc": 0.9431,
+      "clips": 2024,
+      "floor": 31.21,
+      "margin": 19.2,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_rvc_clean",
+      "mix": "xtts+rvc",
+      "condition": "clean",
+      "set": "rvc_test",
+      "eer": 5.01,
+      "eer_ci": [
+        3.55,
+        6.95
+      ],
+      "auc": 0.9859,
+      "clips": 619,
+      "floor": 28.76,
+      "margin": 23.75,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_channel",
+      "mix": "xtts",
+      "condition": "channel",
+      "set": "eval_pool",
+      "eer": 4.41,
+      "eer_ci": [
+        3.78,
+        5.19
+      ],
+      "auc": 0.9863,
+      "clips": 3966,
+      "floor": 10.01,
+      "margin": 5.6,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_channel",
+      "mix": "xtts",
+      "condition": "channel",
+      "set": "cm04",
+      "eer": 28.16,
+      "eer_ci": [
+        25.44,
+        30.2
+      ],
+      "auc": 0.7996,
+      "clips": 2024,
+      "floor": 25.79,
+      "margin": -2.37,
+      "clears_floor": false
+    },
+    {
+      "adapter": "lora_norm_channel",
+      "mix": "xtts",
+      "condition": "channel",
+      "set": "rvc_test",
+      "eer": 29.56,
+      "eer_ci": [
+        26.49,
+        32.79
+      ],
+      "auc": 0.7638,
+      "clips": 619,
+      "floor": 22.46,
+      "margin": -7.1,
+      "clears_floor": false
+    },
+    {
+      "adapter": "lora_norm_rvc_channel",
+      "mix": "xtts+rvc",
+      "condition": "channel",
+      "set": "eval_pool",
+      "eer": 2.75,
+      "eer_ci": [
+        2.22,
+        3.37
+      ],
+      "auc": 0.9971,
+      "clips": 3966,
+      "floor": 10.01,
+      "margin": 7.26,
+      "clears_floor": true
+    },
+    {
+      "adapter": "lora_norm_rvc_channel",
+      "mix": "xtts+rvc",
+      "condition": "channel",
+      "set": "cm04",
+      "eer": 30.99,
+      "eer_ci": [
+        28.72,
+        33.84
+      ],
+      "auc": 0.7535,
+      "clips": 2024,
+      "floor": 25.79,
+      "margin": -5.2,
+      "clears_floor": false
+    },
+    {
+      "adapter": "lora_norm_rvc_channel",
+      "mix": "xtts+rvc",
+      "condition": "channel",
+      "set": "rvc_test",
+      "eer": 5.01,
+      "eer_ci": [
+        3.39,
+        6.95
+      ],
+      "auc": 0.9752,
+      "clips": 619,
+      "floor": 22.46,
+      "margin": 17.45,
+      "clears_floor": true
+    }
+  ]
+}

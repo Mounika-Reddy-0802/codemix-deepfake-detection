@@ -1,0 +1,34 @@
+{
+  "eer": 0.22457016316042366,
+  "auc": 0.8648233647397998,
+  "metrics": {
+    "eer": 0.22457016316042366,
+    "eer_ci_low": 0.190554688658945,
+    "eer_ci_high": 0.255291292775373,
+    "auc": 0.8648233647397998,
+    "auc_ci_low": 0.8335562251436216,
+    "auc_ci_high": 0.894165152900369,
+    "f1": 0.7710049423393739,
+    "threshold": 0.5889142053164265,
+    "score_std": 0.29749440343092864
+  },
+  "train_clips": 700,
+  "test_clips": 619,
+  "test_bonafide": 302,
+  "test_spoof": 317,
+  "coefficients": {
+    "rms_mean": -1.8492,
+    "rms_std": 1.8677,
+    "peak_amplitude": -0.8165,
+    "clipping_ratio": 0.0,
+    "dc_offset": -1.1674,
+    "zero_crossing_rate": -3.1882,
+    "spectral_rolloff_hz": 0.2862,
+    "hf_energy_ratio": 0.068
+  },
+  "intercept": 0.1214,
+  "seed": 1234,
+  "train_manifest": "data/manifests/rvc_holdout_train_channel20.csv",
+  "test_manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "verdict": "FAIL: 22.46% EER is 27.54% from chance -- eight low-level statistics separate the classes, so model results on this data are not safe to trust until the imbalance is explained"
+}
