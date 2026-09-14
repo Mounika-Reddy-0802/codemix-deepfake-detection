@@ -12,7 +12,7 @@ from live_call.verdict_engine import (
     load_config,
 )
 
-CFG = EngineConfig(threshold=0.6, margin=0.05, min_windows=2, suspicious_after=2, fake_after=4)
+CFG = EngineConfig(threshold=0.6, margin=0.5, min_windows=2, suspicious_after=2, fake_after=4)
 
 
 def _feed(engine: VerdictEngine, scores):
@@ -54,7 +54,7 @@ def test_hysteresis_band_does_not_recover() -> None:
     engine = VerdictEngine(CFG)
     _feed(engine, [0.9, 0.9, 0.2, 0.2])
     assert engine.state == State.SUSPICIOUS
-    _feed(engine, [0.62, 0.62, 0.62, 0.62])  # above threshold, inside the margin
+    _feed(engine, [0.7, 0.7, 0.7, 0.7])  # above threshold, below the 0.8 recovery bound
     assert engine.state == State.SUSPICIOUS
 
 
@@ -103,3 +103,17 @@ def test_threshold_file_is_read(tmp_path) -> None:
     path.write_text("threshold: 0.97\nfake_after: 6\nsource: det curve\n")
     cfg = load_config(str(path))
     assert cfg.threshold == 0.97 and cfg.fake_after == 6
+
+
+def test_recovery_bound_stays_below_one_for_calibrated_thresholds() -> None:
+    cfg = EngineConfig(threshold=0.995)
+    assert cfg.threshold < cfg.recovery_bound < 1.0
+    engine = VerdictEngine(cfg)
+    for i, s in enumerate([0.9999, 0.9999, 0.2, 0.2, 0.9999, 0.9999, 0.9999]):
+        engine.update(4.0 + 2 * i, s)
+    assert engine.state == State.GENUINE  # a false alarm can clear
+
+
+def test_margin_out_of_range_is_rejected() -> None:
+    with pytest.raises(ValueError):
+        EngineConfig(threshold=0.9, margin=1.0)

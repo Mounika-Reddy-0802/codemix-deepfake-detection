@@ -107,3 +107,21 @@ def test_streaming_module_is_importable() -> None:
 
     mod = importlib.import_module("src.inference.streaming")
     assert mod.__doc__ is not None
+
+
+def test_run_with_an_executor_matches_inline_scoring() -> None:
+    from concurrent.futures import ThreadPoolExecutor
+
+    pcm = (_tone(8.0) * 32767).astype("<i2").tobytes()
+
+    class Source:
+        async def frames(self):
+            for start in range(0, len(pcm), 640):
+                yield PcmFrame(pcm=pcm[start : start + 640])
+
+    async def collect(executor):
+        scorer = st.StreamingScorer(lambda w: float(np.mean(np.abs(w))))
+        return [(r.end_seconds, r.score) async for r in scorer.run(Source(), executor)]
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        assert asyncio.run(collect(pool)) == asyncio.run(collect(None))

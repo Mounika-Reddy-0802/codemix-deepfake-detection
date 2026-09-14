@@ -10,8 +10,11 @@ that is **stable** and **escalates in steps**:
 - A window counts as *fake-leaning* when its smoothed score is below the operating
   threshold. ``suspicious_after`` consecutive fake-leaning windows move the call to
   ``SUSPICIOUS``; ``fake_after`` move it to ``LIKELY_FAKE``.
-- Recovery needs ``recover_after`` consecutive windows above ``threshold + margin``.
-  The margin is hysteresis: a score hovering at the threshold does not flap.
+- Recovery needs ``recover_after`` consecutive windows at or above the recovery
+  bound, ``threshold + margin * (1 - threshold)``. The margin is hysteresis, so a
+  score hovering at the threshold does not flap. It is a *fraction of the gap to 1*,
+  not an absolute step: calibrated thresholds sit near 0.995 (P-029), where a fixed
+  +0.05 would put the bound above 1 and no call could ever recover.
 - Silent windows neither advance nor reset the counters. A pause is not evidence.
 
 Each transition upward emits one escalation event, in plan order: a warning **beep**
@@ -51,15 +54,21 @@ class EngineConfig:
     """Operating point and ladder timing. Counts are in scored windows (one per hop)."""
 
     threshold: float
-    margin: float = 0.05
+    margin: float = 0.5  # fraction of the gap between threshold and 1
     min_windows: int = 2
     suspicious_after: int = 2
     fake_after: int = 4
     recover_after: int = 3
 
+    @property
+    def recovery_bound(self) -> float:
+        return self.threshold + self.margin * (1.0 - self.threshold)
+
     def __post_init__(self) -> None:
         if not 0.0 < self.threshold < 1.0:
             raise ValueError("threshold must be strictly between 0 and 1")
+        if not 0.0 <= self.margin < 1.0:
+            raise ValueError("margin is a fraction of the gap to 1, in [0, 1)")
         if not 1 <= self.suspicious_after <= self.fake_after:
             raise ValueError("need 1 <= suspicious_after <= fake_after")
 
@@ -121,10 +130,10 @@ class VerdictEngine:
             s.fake_leaning_windows += 1
             self._low_run += 1
             self._high_run = 0
-        elif smoothed >= cfg.threshold + cfg.margin:
+        elif smoothed >= cfg.recovery_bound:
             self._high_run += 1
             self._low_run = 0
-        # between threshold and threshold + margin: neither run advances
+        # between the threshold and the recovery bound: neither run advances
 
         new = self._next_state(s.scored_windows)
         return self._transition(new, end_seconds, smoothed) if new != self.state else []

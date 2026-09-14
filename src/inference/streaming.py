@@ -137,24 +137,48 @@ class StreamingScorer:
         self.min_rms_dbfs = min_rms_dbfs
         self.target_dbfs = target_dbfs
 
-    def push(self, samples: np.ndarray) -> Iterator[WindowResult]:
-        """Feed float32 16 kHz samples; yield a result per completed window."""
+    def _pending(self, samples: np.ndarray) -> Iterator[tuple[float, float, np.ndarray | None]]:
+        """Completed windows as ``(end, level, normalised window or None when silent)``."""
         for end, window in self.windower.push(samples):
             level = rms_dbfs(window)
             if level < self.min_rms_dbfs:
-                yield WindowResult(end, level, None, self.smoother.value)
-                continue
-            score = float(self.score_fn(normalise(window, self.target_dbfs)))
-            yield WindowResult(end, level, score, self.smoother.update(score))
+                yield end, level, None
+            else:
+                yield end, level, normalise(window, self.target_dbfs)
+
+    def _result(self, end: float, level: float, score: float | None) -> WindowResult:
+        if score is None:
+            return WindowResult(end, level, None, self.smoother.value)
+        return WindowResult(end, level, float(score), self.smoother.update(float(score)))
+
+    def push(self, samples: np.ndarray) -> Iterator[WindowResult]:
+        """Feed float32 16 kHz samples; yield a result per completed window."""
+        for end, level, window in self._pending(samples):
+            yield self._result(end, level, None if window is None else self.score_fn(window))
 
     def push_pcm(self, pcm: bytes) -> Iterator[WindowResult]:
         """Feed 16 kHz mono s16 PCM bytes."""
         yield from self.push(pcm16_to_float(pcm))
 
-    async def run(self, source) -> AsyncIterator[WindowResult]:
-        """Consume any ``PcmFrameSource`` (WebRTC harness, Twilio, replay)."""
+    async def run(self, source, executor=None) -> AsyncIterator[WindowResult]:
+        """Consume any ``PcmFrameSource`` (WebRTC harness, Twilio, replay).
+
+        With an ``executor``, each model call runs there instead of on the event
+        loop. A server handling several calls must pass one: a CPU forward pass
+        takes most of a second, and on the loop it would stall every other call's
+        audio intake for that long.
+        """
+        import asyncio
+
+        loop = asyncio.get_running_loop()
         async for frame in source.frames():
             if frame.sample_rate != SAMPLE_RATE:
                 raise ValueError(f"expected {SAMPLE_RATE} Hz frames, got {frame.sample_rate}")
-            for result in self.push_pcm(frame.pcm):
-                yield result
+            for end, level, window in self._pending(pcm16_to_float(frame.pcm)):
+                if window is None:
+                    score = None
+                elif executor is None:
+                    score = self.score_fn(window)
+                else:
+                    score = await loop.run_in_executor(executor, self.score_fn, window)
+                yield self._result(end, level, score)
