@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WebRTC call · monitored</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">WebRTC call<small>browser to browser, monitored by the detector</small></div>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/dashboard" target="_blank">Live dashboard</a>
+      <a href="/call" class="active">WebRTC call</a>
+    </nav>
+  </header>
+  <main style="max-width:760px">
+    <div class="card">
+      <h2>Join a call</h2>
+      <p class="small muted">Open this page in two tabs or on two devices on the same network, join the same
+        room, and connect. Each participant's voice is monitored separately; open the
+        <a href="/dashboard" target="_blank">dashboard</a> to see the verdicts.</p>
+      <div class="grid two">
+        <label>Room<br /><input type="text" id="room" value="demo" /></label>
+        <label>Your name<br /><input type="text" id="name" value="Caller" /></label>
+      </div>
+      <h3>What this participant sends</h3>
+      <div class="status-row small">
+        <label><input type="radio" name="src" value="mic" checked /> My microphone</label>
+        <label><input type="radio" name="src" value="file" /> An audio file (e.g. a cloned voice)</label>
+        <input type="file" id="clip" accept="audio/*" disabled />
+      </div>
+      <div class="status-row" style="margin-top:1rem">
+        <button id="connect">Connect</button>
+        <button id="hangup" class="danger" disabled>Hang up</button>
+        <span class="muted small" id="status">Idle.</span>
+      </div>
+      <div class="meter" style="margin-top:1rem" title="outgoing level"><div id="meterBar"></div></div>
+      <audio id="remote" autoplay></audio>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <h2>How to demonstrate</h2>
+      <ol class="small">
+        <li>Tab A: name "Receiver", microphone. Tab B: name "Caller".</li>
+        <li>To show a genuine call, Tab B speaks normally.</li>
+        <li>To show an attack, Tab B chooses <b>An audio file</b> and picks a cloned clip; the clip is played
+          into the call as if the caller were speaking it.</li>
+        <li>The dashboard shows the caller's verdict change and sounds the warning.</li>
+      </ol>
+      <p class="small muted">Browsers allow microphone access only on localhost or https. For a second device, expose the
+        server over https (for example with ngrok).</p>
+    </div>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script>
+    const statusEl = document.getElementById("status");
+    const connectBtn = document.getElementById("connect");
+    const hangupBtn = document.getElementById("hangup");
+    const meterBar = document.getElementById("meterBar");
+    const clipInput = document.getElementById("clip");
+    let pc = null, stream = null, audioCtx = null, rafId = null, fileEl = null;
+
+    document.querySelectorAll('input[name="src"]').forEach((r) =>
+      r.addEventListener("change", () => (clipInput.disabled = r.value !== "file" || !r.checked)));
+
+    function setStatus(msg) { statusEl.textContent = msg; }
+
+    function meter(src) {
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      (function tick() {
+        analyser.getByteTimeDomainData(data);
+        let sum = 0;
+        for (const v of data) { const x = (v - 128) / 128; sum += x * x; }
+        meterBar.style.width = Math.min(100, Math.sqrt(sum / data.length) * 300).toFixed(0) + "%";
+        rafId = requestAnimationFrame(tick);
+      })();
+    }
+
+    async function outgoingStream() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const mode = document.querySelector('input[name="src"]:checked').value;
+      if (mode === "mic") {
+        const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+        meter(audioCtx.createMediaStreamSource(mic));
+        return mic;
+      }
+      const file = clipInput.files[0];
+      if (!file) throw new Error("choose an audio file first");
+      fileEl = new Audio(URL.createObjectURL(file));
+      const src = audioCtx.createMediaElementSource(fileEl);
+      const dest = audioCtx.createMediaStreamDestination();
+      src.connect(dest);
+      src.connect(audioCtx.destination); // let this participant hear what they are sending
+      meter(src);
+      return dest.stream;
+    }
+
+    async function connect() {
+      connectBtn.disabled = true;
+      try {
+        stream = await outgoingStream();
+      } catch (err) {
+        setStatus("Cannot start audio: " + err.message);
+        connectBtn.disabled = false;
+        return;
+      }
+      pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+      stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+      pc.ontrack = (ev) => { document.getElementById("remote").srcObject = ev.streams[0]; };
+      pc.onconnectionstatechange = () => setStatus("Connection: " + pc.connectionState);
+      const offer = await pc.createOffer({ offerToReceiveAudio: true });
+      await pc.setLocalDescription(offer);
+      await new Promise((resolve) => {
+        if (pc.iceGatheringState === "complete") return resolve();
+        pc.addEventListener("icegatheringstatechange", () => pc.iceGatheringState === "complete" && resolve());
+        setTimeout(resolve, 2500);
+      });
+      const name = document.getElementById("name").value || "participant";
+      const answer = await getJSON("/offer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sdp: pc.localDescription.sdp, type: pc.localDescription.type,
+          room: document.getElementById("room").value || "demo", name, role: name.toLowerCase().includes("receiver") ? "receiver" : "caller" }),
+      });
+      await pc.setRemoteDescription(answer);
+      if (fileEl) { fileEl.play(); fileEl.onended = () => setStatus("Clip finished. Hang up to end the call."); }
+      hangupBtn.disabled = false;
+      setStatus("In the call. Your voice is being monitored.");
+    }
+
+    function hangup() {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (fileEl) fileEl.pause();
+      if (pc) pc.close();
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+      if (audioCtx) audioCtx.close();
+      pc = stream = audioCtx = fileEl = null;
+      meterBar.style.width = "0%";
+      hangupBtn.disabled = true;
+      connectBtn.disabled = false;
+      setStatus("Hung up.");
+    }
+    connectBtn.onclick = connect;
+    hangupBtn.onclick = hangup;
+  </script>
+</body>
+</html>

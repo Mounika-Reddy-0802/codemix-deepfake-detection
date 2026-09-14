@@ -1,0 +1,10 @@
+# Live-demo operating point (W8-T5, P-029). Chosen by src.inference.calibrate on
+# streaming-path smoothed window scores of the dev manifest only, for a low false-alarm
+# rate on genuine 60 s calls; validated on held-out sets in experiments/results/threshold_calibration.json.
+threshold: 0.49997557675233106
+checkpoint: lora_norm_rvc_channel
+margin: 0.5
+min_windows: 2
+suspicious_after: 2
+fake_after: 4
+recover_after: 3

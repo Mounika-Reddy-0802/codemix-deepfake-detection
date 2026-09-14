@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Code-mixed Voice Deepfake Detection</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Code-mixed Voice Deepfake Detection<small>Hinglish phone calls · WebRTC and Twilio</small></div>
+    <nav>
+      <a href="/" class="active">Overview</a>
+      <a href="#try">Try a clip</a>
+      <a href="#results">Results</a>
+      <a href="/dashboard">Live dashboard</a>
+      <a href="/call">WebRTC call</a>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h1>Is the voice on this call real or cloned?</h1>
+      <p class="lead">
+        Voice-cloning tools can imitate anyone from a few seconds of audio, and Indian phone scams
+        are spoken in code-mixed Hindi-English. Detectors trained on English datasets collapse on
+        this speech. This system listens to a call as it happens, scores every 4 seconds of the
+        caller's voice, and warns the person being called, never the caller, when the voice looks
+        synthetic.
+      </p>
+      <div class="status-row" id="health"></div>
+    </section>
+
+    <section class="grid three" style="margin-top:1.2rem">
+      <div class="card">
+        <h2>1 · Listen</h2>
+        <p class="small muted">Caller audio arrives from a browser call (WebRTC) or a real phone call
+          (Twilio, 8 kHz G.711 mu-law). It is cut into 4 s windows every 2 s, silence is skipped,
+          and each window is level-normalised to −23 dBFS exactly as the training clips were.</p>
+      </div>
+      <div class="card">
+        <h2>2 · Score</h2>
+        <p class="small muted">A wav2vec2 detector with LoRA adapters, trained on code-mixed speech
+          through a simulated phone line with XTTS and RVC clones, gives each window
+          P(genuine). Scores are smoothed so one odd window cannot flip the verdict.</p>
+      </div>
+      <div class="card">
+        <h2>3 · Warn</h2>
+        <p class="small muted">Two fake-leaning windows in a row: a warning tone and caution to the
+          receiver. Four: a spoken warning and an SMS. At hang-up: a call summary. The threshold was
+          chosen on held-out development calls for zero false alarms on genuine callers.</p>
+      </div>
+    </section>
+
+    <section class="grid two" style="margin-top:1.2rem">
+      <div class="card">
+        <h2>See it live</h2>
+        <p class="small">Open the <a href="/dashboard">receiver dashboard</a> in one window. Then either
+          play a prepared clip as a call below, or start a <a href="/call">WebRTC call</a> and speak,
+          or play a clip into the call. Every call appears on the dashboard with its verdict light,
+          score timeline and alerts.</p>
+        <div class="status-row"><a class="button" href="/dashboard" target="_blank">Open dashboard</a>
+          <a class="button secondary" href="/call" target="_blank">Start a WebRTC call</a></div>
+      </div>
+      <div class="card">
+        <h2>Play a prepared clip as a live call</h2>
+        <p class="small muted">Real and cloned clips from the held-out evaluation speakers, sent through
+          the live pipeline in real time. Watch the dashboard while it plays.</p>
+        <div class="clip-list" id="clips"><span class="muted small">Loading clips…</span></div>
+      </div>
+    </section>
+
+    <section class="card" id="try" style="margin-top:1.2rem">
+      <h2>Try a clip</h2>
+      <p class="small muted">Upload any recording (wav, mp3, m4a, ogg, webm) or record from your
+        microphone. The clip goes through the same windowing, scoring and threshold as a live call.</p>
+      <div class="status-row">
+        <input type="file" id="file" accept="audio/*" />
+        <button id="upload">Analyse file</button>
+        <button id="record" class="secondary">● Record 10 s</button>
+        <span id="tryStatus" class="small muted"></span>
+      </div>
+      <div id="tryResult" style="margin-top:1rem; display:none">
+        <div class="verdict" id="tryVerdict"><div class="light"></div><div><div class="big" id="tryVerdictText"></div>
+          <div class="small muted" id="tryVerdictDetail"></div></div></div>
+        <canvas class="timeline" id="tryTimeline" style="margin-top:0.8rem"></canvas>
+        <p class="small muted">Dots: each 4 s window. Line: smoothed score. Below the red line counts as fake-leaning.</p>
+      </div>
+    </section>
+
+    <section id="results" style="margin-top:1.6rem">
+      <h1>Measured results</h1>
+      <p class="lead">Every number below is read from committed result files. Equal error rate
+        (EER, lower is better) with its 95% bootstrap interval. Each code-mixed set has a
+        <b>shortcut floor</b>: the EER that eight simple signal statistics already reach on those
+        clips. A result counts only when it is below its floor.</p>
+
+      <div class="card">
+        <h2>The three systems</h2>
+        <p class="small muted">S1: trained on English only. S2: S1 plus LoRA adapters trained on
+          code-mixed audio. S3: the whole encoder trained natively on the same code-mixed audio.
+          S2 and S3 use identical training data.</p>
+        <div class="table-wrap" id="systemsTable"></div>
+      </div>
+
+      <div class="grid two" style="margin-top:1rem">
+        <div class="card">
+          <h2>What the demo model does on whole calls</h2>
+          <p class="small muted">Deployed model: S2, phone-line condition, trained with XTTS and RVC.
+            Threshold chosen on development calls only; these are held-out evaluation speakers,
+            clips joined into 60 s calls.</p>
+          <div class="table-wrap" id="callTable"></div>
+        </div>
+        <div class="card">
+          <h2>Reading these honestly</h2>
+          <div class="note" id="honest">Loading…</div>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:1rem">
+        <figure class="card"><img src="/figures/systems_s2_s3.png" alt="S2 vs S3 EER by set" />
+          <figcaption>S2 LoRA vs S3 native on the same data: seen tool, unseen tool, RVC, and English.</figcaption></figure>
+        <figure class="card"><img src="/figures/shortcut_gate.png" alt="Shortcut floors" />
+          <figcaption>Shortcut floors: how far eight cheap statistics get on each set. Higher is safer.</figcaption></figure>
+      </div>
+    </section>
+  </main>
+  <footer>Final-year project · code-mixed audio deepfake detection · results and code in the project repository</footer>
+
+  <script src="/static/common.js"></script>
+  <script>
+    renderHealth(document.getElementById("health"));
+    setInterval(() => renderHealth(document.getElementById("health")), 8000);
+
+    // ---------------------------------------------------------------- demo clips
+    async function loadClips() {
+      const box = document.getElementById("clips");
+      try {
+        const clips = await getJSON("/api/demo-clips");
+        if (!clips.length) {
+          box.replaceChildren(el("span", { class: "small muted", text: "No demo clips prepared on this machine (run scripts/prepare_demo_clips.py)." }));
+          return;
+        }
+        box.replaceChildren(...clips.map((c) => {
+          const play = el("button", { text: "Play as call" });
+          play.onclick = async () => {
+            play.disabled = true;
+            try {
+              await getJSON("/api/replay/" + c.id, { method: "POST" });
+              play.textContent = "Playing… see dashboard";
+            } catch (e) { play.textContent = "Failed"; }
+            setTimeout(() => { play.disabled = false; play.textContent = "Play as call"; }, 8000);
+          };
+          const listen = el("audio", { controls: "", preload: "none", src: "/api/demo-clips/" + c.id + "/audio", style: "height:30px;max-width:180px" });
+          return el("div", { class: "clip" }, [
+            el("div", {}, [el("div", { class: "title", text: c.title }),
+              el("div", { class: "small muted" }, [el("span", { class: "pill " + c.label, text: c.label === "spoof" ? "cloned" : "real" }), " ", c.description || ""])]),
+            el("div", { class: "status-row" }, [listen, play]),
+          ]);
+        }));
+      } catch (e) {
+        box.replaceChildren(el("span", { class: "small muted", text: "Could not load clips: " + e.message }));
+      }
+    }
+    loadClips();
+
+    // ---------------------------------------------------------------- try a clip
+    const statusEl = document.getElementById("tryStatus");
+    async function analyse(blob, name) {
+      statusEl.textContent = "Analysing " + name + "…";
+      const form = new FormData();
+      form.append("file", blob, name);
+      try {
+        const r = await getJSON("/api/predict", { method: "POST", body: form });
+        showResult(r);
+        statusEl.textContent = "";
+      } catch (e) {
+        statusEl.textContent = "Failed: " + e.message;
+      }
+    }
+    function showResult(r) {
+      document.getElementById("tryResult").style.display = "block";
+      const box = document.getElementById("tryVerdict");
+      const cls = r.verdict === "bonafide" ? "genuine" : r.verdict === "spoof" ? "likely_fake" : "listening";
+      box.className = "verdict " + cls;
+      document.getElementById("tryVerdictText").textContent =
+        r.verdict === "bonafide" ? "Genuine voice" : r.verdict === "spoof" ? "Likely cloned voice" : "No speech found";
+      const scored = r.window_scores.filter((w) => w.score !== null).length;
+      document.getElementById("tryVerdictDetail").textContent =
+        `Lowest window P(genuine) ${r.score === null ? "–" : r.score.toFixed(4)} · threshold ${r.threshold.toFixed(3)} · ` +
+        `${scored} scored window(s) of ${r.windows} · ${r.seconds} s`;
+      drawTimeline(document.getElementById("tryTimeline"), r.window_scores, r.threshold);
+    }
+    document.getElementById("upload").onclick = () => {
+      const f = document.getElementById("file").files[0];
+      if (f) analyse(f, f.name); else statusEl.textContent = "Choose a file first.";
+    };
+    document.getElementById("record").onclick = async (ev) => {
+      const btn = ev.target;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const rec = new MediaRecorder(stream);
+        const chunks = [];
+        rec.ondataavailable = (e) => chunks.push(e.data);
+        rec.onstop = () => { stream.getTracks().forEach((t) => t.stop()); btn.disabled = false; btn.textContent = "● Record 10 s";
+          analyse(new Blob(chunks, { type: rec.mimeType }), "recording.webm"); };
+        rec.start(); btn.disabled = true;
+        let left = 10; btn.textContent = "Recording… " + left;
+        const tick = setInterval(() => { left -= 1; btn.textContent = "Recording… " + left; if (left <= 0) { clearInterval(tick); rec.stop(); } }, 1000);
+      } catch (e) { statusEl.textContent = "Microphone not available: " + e.message; }
+    };
+
+    // ---------------------------------------------------------------- results
+    const SET_NAMES = { eval_pool: "Seen tool (XTTS)", cm04: "Unseen tool (Tortoise)", rvc_test: "RVC (unseen speakers)", english: "English (ASVspoof LA)" };
+    function cell(c) {
+      if (!c) return el("td", { class: "num muted", text: "not measured" });
+      const ci = c.eer_ci ? ` [${c.eer_ci[0].toFixed(2)}, ${c.eer_ci[1].toFixed(2)}]` : "";
+      const cls = c.clears_floor === true ? "num pass" : c.clears_floor === false ? "num fail" : "num";
+      const td = el("td", { class: cls }, [c.eer.toFixed(2) + "%", el("div", { class: "small muted", text: ci + (c.floor ? ` floor ${c.floor.toFixed(2)}` : "") })]);
+      return td;
+    }
+    async function loadResults() {
+      const res = await getJSON("/api/results");
+      const cells = (res.systems && res.systems.cells) || [];
+      const sets = ["eval_pool", "cm04", "rvc_test", "english"];
+      const rows = [];
+      const s1 = cells.find((c) => c.system === "S1 English-only");
+      rows.push(el("tr", {}, [el("td", {}, [el("b", { text: "S1" }), " English-only"]), el("td", { text: "ASVspoof 2019 LA" }),
+        el("td", { class: "num muted", text: "not measured" }), el("td", { class: "num muted", text: "not measured" }),
+        el("td", { class: "num muted", text: "not measured" }), el("td", { class: "num", text: s1 ? s1.eer.toFixed(2) + "%" : "–" })]));
+      const combos = [["xtts", "clean"], ["xtts", "channel"], ["xtts+rvc", "clean"], ["xtts+rvc", "channel"]];
+      for (const [variant, condition] of combos) {
+        for (const system of ["S2 LoRA", "S3 native"]) {
+          const find = (set) => cells.find((c) => c.system === system && c.variant === variant && c.condition === condition && c.set === set);
+          const data = (variant === "xtts" ? "XTTS" : "XTTS + RVC") + ", " + (condition === "clean" ? "clean" : "phone line");
+          rows.push(el("tr", {}, [el("td", {}, [el("b", { text: system.split(" ")[0] }), " " + system.split(" ").slice(1).join(" ")]),
+            el("td", { text: data }), ...sets.map((s) => cell(find(s)))]));
+        }
+      }
+      const head = el("tr", {}, [el("th", { text: "System" }), el("th", { text: "Training data" }), ...sets.map((s) => el("th", { class: "num", text: SET_NAMES[s] }))]);
+      document.getElementById("systemsTable").replaceChildren(el("table", {}, [el("thead", {}, head), el("tbody", {}, rows)]),
+        el("p", { class: "small muted", text: "Green: below its shortcut floor. Red: not below its floor, so not evidence of learning. English has no floor." }));
+
+      const cal = res.calibration;
+      if (cal) {
+        const names = { eval_pool_windows: "Seen tool (XTTS)", rvc_test_windows: "RVC, unseen speakers", cm04_windows: "Unseen tool (Tortoise)" };
+        const body = Object.entries(cal.validation).map(([k, v]) => {
+          const m = v.calls_60s;
+          return el("tr", {}, [el("td", { text: names[k] || k }), el("td", { class: "num", text: `${m.real_calls_alerted_pct.toFixed(1)}% of ${m.real_calls}` }),
+            el("td", { class: "num", text: `${m.fake_calls_alerted_pct.toFixed(1)}% of ${m.fake_calls}` }),
+            el("td", { class: "num", text: `${m.fake_calls_likely_fake_pct.toFixed(1)}%` })]);
+        });
+        document.getElementById("callTable").replaceChildren(el("table", {}, [
+          el("thead", {}, el("tr", {}, [el("th", { text: "Held-out set" }), el("th", { class: "num", text: "Genuine calls falsely alerted" }),
+            el("th", { class: "num", text: "Cloned calls alerted" }), el("th", { class: "num", text: "Reached 'likely cloned'" })])),
+          el("tbody", {}, body)]),
+          el("p", { class: "small muted", text: `Threshold ${cal.threshold.toFixed(4)}, alert after ${cal.engine.suspicious_after} fake-leaning windows, strong warning after ${cal.engine.fake_after}.` }));
+      }
+      const rev = res.reverse_degradation;
+      document.getElementById("honest").replaceChildren(
+        el("p", { style: "margin-top:0" }, ["The deployed phone-line model catches cloned voices from the tool family it was trained on and RVC voice conversion from unseen speakers. ",
+          el("b", { text: "It does not reliably catch a cloning tool it has never seen (Tortoise) over a phone line." }), " Clean-audio models generalise better to that tool."]),
+        el("p", {}, ["Native training (S3) is the best detector on code-mixed speech but ", el("b", { text: `scores English at chance (${rev ? rev.s3_english_range.map((x) => x.toFixed(1)).join("–") : "–"}% EER)` }),
+          "; LoRA adaptation keeps English. That is why the demo uses S2."]),
+        el("p", { style: "margin-bottom:0" }, ["Results on the evaluation sets are clip-level; the call-level table above was measured separately through the live pipeline."]));
+    }
+    loadResults().catch((e) => { document.getElementById("systemsTable").textContent = "Could not load results: " + e.message; });
+  </script>
+</body>
+</html>
