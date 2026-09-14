@@ -19,6 +19,9 @@ Three figures, and each one exists because a reviewer will ask for it:
 - :func:`ablation_figure` — the W9-T1 ablation: four adapters (XTTS only or
   XTTS+RVC, clean or channel) on the seen tool, the unseen tool and RVC, each bar
   beside the shortcut floor of its own set, from ``ablations.json``.
+- :func:`systems_figure` — S2 LoRA against S3 native on identical training data,
+  every code-mixed set against its floor and English against S1, from
+  ``systems_s1_s2_s3.json``. This is where the reverse-degradation finding shows.
 - :func:`shortcut_gate_figure` — the low-level-cue gate per attack set against
   chance, because per `lowlevel_cue_check_v1.md` no model number on this corpus can
   be read without its shortcut baseline beside it.
@@ -42,6 +45,7 @@ import pandas as pd
 
 FIGURES_DIR = "experiments/figures"
 ABLATIONS = "experiments/results/ablations.json"
+SYSTEMS = "experiments/results/systems_s1_s2_s3.json"
 DPI = 200
 
 #: EER (%) per system and condition, each cell with the document it was measured in.
@@ -92,7 +96,6 @@ DET_SOURCES: tuple[tuple[str, str], ...] = (
 #: Artefacts the plan's figure list needs that do not exist yet.
 PLANNED_BUT_UNMEASURED: tuple[tuple[str, str], ...] = (
     ("cross-eval column", "experiments/results/affectdf_crosseval.json"),
-    ("reverse degradation (S3 on English)", "experiments/results/s3_reverse_degradation.json"),
 )
 
 
@@ -380,6 +383,79 @@ def ablation_figure(out_dir: str = FIGURES_DIR, source: str = ABLATIONS) -> str:
     return str(out)
 
 
+def systems_figure(out_dir: str = FIGURES_DIR, source: str = SYSTEMS) -> str:
+    """S2 LoRA vs S3 native on every set, English included, floors marked."""
+    if not Path(source).is_file():
+        raise FigureDataError(f"systems comparison not built: {source}")
+    import json
+
+    plt = _style()
+    cells = pd.DataFrame(json.loads(Path(source).read_text())["cells"])
+    s1_english = float(cells.loc[cells["system"] == "S1 English-only", "eer"].iloc[0])
+    sets = [
+        ("eval_pool", "Seen tool@(XTTS)"),
+        ("cm04", "Unseen tool@(Tortoise)"),
+        ("rvc_test", "RVC@(unseen spk)"),
+        ("english", "English@(ASVspoof LA)"),
+    ]
+    fig, axes = plt.subplots(2, 2, figsize=(10.5, 6.4), sharey=True)
+    colours = {"S2 LoRA": "#4393c3", "S3 native": "#d6604d"}
+    for r, variant in enumerate(("xtts", "xtts+rvc")):
+        for c, condition in enumerate(("clean", "channel")):
+            ax = axes[r][c]
+            part = cells[(cells["variant"] == variant) & (cells["condition"] == condition)]
+            for j, (key, _label) in enumerate(sets):
+                for k, system in enumerate(("S2 LoRA", "S3 native")):
+                    row = part[(part["set"] == key) & (part["system"] == system)].iloc[0]
+                    x = j + (k - 0.5) * 0.36
+                    first = r == 0 and c == 0 and j == 0
+                    ax.bar(
+                        x,
+                        row["eer"],
+                        width=0.34,
+                        color=colours[system],
+                        label=system if first else None,
+                    )
+                    ax.text(x, row["eer"] + 1.0, f"{row['eer']:.1f}", ha="center", fontsize=6.5)
+                floor = part[part["set"] == key]["floor"].iloc[0]
+                if pd.notna(floor):
+                    ax.hlines(
+                        floor,
+                        j - 0.4,
+                        j + 0.4,
+                        colors="black",
+                        linestyles="--",
+                        lw=1.0,
+                        label="shortcut floor" if (r == 0 and c == 0 and j == 0) else None,
+                    )
+            ax.hlines(
+                s1_english,
+                2.6,
+                3.4,
+                colors="#4d9221",
+                lw=1.6,
+                label=f"S1 English-only ({s1_english:.2f}%)" if (r == 0 and c == 0) else None,
+            )
+            ax.set_xticks(range(len(sets)), [lab.replace("@", "\n") for _, lab in sets], fontsize=7)
+            data = "XTTS" if variant == "xtts" else "XTTS + RVC"
+            cond = "clean" if condition == "clean" else "G.711 @ 20 dB"
+            ax.set_title(f"Trained on {data}, {cond}", fontsize=9)
+            ax.set_ylim(0, 62)
+    axes[0][0].set_ylabel("EER (%)")
+    axes[1][0].set_ylabel("EER (%)")
+    axes[0][0].legend(fontsize=7, loc="upper left")
+    fig.suptitle(
+        "S2 LoRA vs S3 native: same training data, different training method", fontsize=10.5
+    )
+    fig.tight_layout()
+
+    out = Path(out_dir) / "systems_s2_s3.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out)
+    plt.close(fig)
+    return str(out)
+
+
 def build_all(out_dir: str = FIGURES_DIR) -> list[str]:
     """Every figure whose measured input exists. Returns the paths written."""
     return [
@@ -387,6 +463,7 @@ def build_all(out_dir: str = FIGURES_DIR) -> list[str]:
         det_curves_figure(out_dir),
         shortcut_gate_figure(out_dir),
         ablation_figure(out_dir),
+        systems_figure(out_dir),
     ]
 
 
