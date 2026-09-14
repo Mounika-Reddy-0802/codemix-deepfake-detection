@@ -1,0 +1,111 @@
+{
+  "question": "W7-T2: does native code-mixed training wreck English performance?",
+  "s1_english_eer": 0.85,
+  "s2_english_range": [
+    2.42,
+    15.83
+  ],
+  "s3_english_range": [
+    50.9,
+    56.42
+  ],
+  "answer": "Yes. Every S3 model scores English at or near chance (50.90-56.42% EER) while S2 adapters stay at 2.42-15.83%: starting from the English checkpoint and adapting a small set of weights keeps the conventional task, training the encoder natively does not.",
+  "models": [
+    {
+      "system": "S2 LoRA",
+      "run": "lora_norm_clean",
+      "variant": "xtts",
+      "condition": "clean",
+      "english_eer": 15.83,
+      "english_ci": [
+        15.54,
+        16.04
+      ],
+      "vs_s1_pp": 14.98
+    },
+    {
+      "system": "S3 native",
+      "run": "s3_native_clean",
+      "variant": "xtts",
+      "condition": "clean",
+      "english_eer": 56.42,
+      "english_ci": [
+        55.81,
+        56.93
+      ],
+      "vs_s1_pp": 55.57
+    },
+    {
+      "system": "S2 LoRA",
+      "run": "lora_norm_channel",
+      "variant": "xtts",
+      "condition": "channel",
+      "english_eer": 2.55,
+      "english_ci": [
+        2.43,
+        2.67
+      ],
+      "vs_s1_pp": 1.7
+    },
+    {
+      "system": "S3 native",
+      "run": "s3_native_channel",
+      "variant": "xtts",
+      "condition": "channel",
+      "english_eer": 55.83,
+      "english_ci": [
+        55.31,
+        56.41
+      ],
+      "vs_s1_pp": 54.98
+    },
+    {
+      "system": "S2 LoRA",
+      "run": "lora_norm_rvc_clean",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "english_eer": 3.75,
+      "english_ci": [
+        3.63,
+        3.91
+      ],
+      "vs_s1_pp": 2.9
+    },
+    {
+      "system": "S3 native",
+      "run": "s3_native_rvc_clean",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "english_eer": 50.9,
+      "english_ci": [
+        50.45,
+        51.35
+      ],
+      "vs_s1_pp": 50.05
+    },
+    {
+      "system": "S2 LoRA",
+      "run": "lora_norm_rvc_channel",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "english_eer": 2.42,
+      "english_ci": [
+        2.31,
+        2.54
+      ],
+      "vs_s1_pp": 1.57
+    },
+    {
+      "system": "S3 native",
+      "run": "s3_native_rvc_channel",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "english_eer": 52.25,
+      "english_ci": [
+        51.58,
+        52.86
+      ],
+      "vs_s1_pp": 51.4
+    }
+  ]
+}

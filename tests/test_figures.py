@@ -168,3 +168,25 @@ def test_det_figure_writes_a_png(tmp_path):
 
     out = fg.det_curves_figure(str(tmp_path), sources=tuple(sources))
     assert Path(out).is_file() and Path(out).stat().st_size > 5_000
+
+
+def test_ablation_figure_writes_a_png(tmp_path):
+    pytest.importorskip("matplotlib")
+    out = fg.ablation_figure(str(tmp_path))
+    assert Path(out).is_file() and Path(out).stat().st_size > 5_000
+
+
+def test_ablation_figure_refuses_a_missing_source(tmp_path):
+    with pytest.raises(fg.FigureDataError, match="not built"):
+        fg.ablation_figure(str(tmp_path), source=str(tmp_path / "absent.json"))
+
+
+def test_systems_figure_writes_a_png(tmp_path):
+    pytest.importorskip("matplotlib")
+    out = fg.systems_figure(str(tmp_path))
+    assert Path(out).is_file() and Path(out).stat().st_size > 5_000
+
+
+def test_systems_figure_refuses_a_missing_source(tmp_path):
+    with pytest.raises(fg.FigureDataError, match="not built"):
+        fg.systems_figure(str(tmp_path), source=str(tmp_path / "absent.json"))

@@ -1,0 +1,87 @@
+{
+  "checkpoint": "/kaggle/working/codemix-deepfake-detection/checkpoints/s3_native_rvc_clean/best.pt",
+  "manifest": "/kaggle/working/english/asvspoof_eval.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.5090447002568532,
+    "eer_ci_low": 0.5045404088136375,
+    "eer_ci_high": 0.513481604264223,
+    "auc": 0.5044311145053706,
+    "auc_ci_low": 0.49843738641243646,
+    "auc_ci_high": 0.5093142040530946,
+    "f1": 0.16608025756007821,
+    "threshold": 0.9579859972000122,
+    "clips": 71237,
+    "bonafide": 7355,
+    "spoof": 63882,
+    "score_std": 0.345902
+  },
+  "per_attack": [
+    {
+      "attack": "A18",
+      "spoof_clips": 4914,
+      "eer": 0.829417
+    },
+    {
+      "attack": "A10",
+      "spoof_clips": 4914,
+      "eer": 0.667866
+    },
+    {
+      "attack": "A11",
+      "spoof_clips": 4914,
+      "eer": 0.639413
+    },
+    {
+      "attack": "A12",
+      "spoof_clips": 4914,
+      "eer": 0.564681
+    },
+    {
+      "attack": "A16",
+      "spoof_clips": 4914,
+      "eer": 0.533784
+    },
+    {
+      "attack": "A19",
+      "spoof_clips": 4914,
+      "eer": 0.495314
+    },
+    {
+      "attack": "A08",
+      "spoof_clips": 4914,
+      "eer": 0.474773
+    },
+    {
+      "attack": "A07",
+      "spoof_clips": 4914,
+      "eer": 0.469476
+    },
+    {
+      "attack": "A17",
+      "spoof_clips": 4914,
+      "eer": 0.468253
+    },
+    {
+      "attack": "A13",
+      "spoof_clips": 4914,
+      "eer": 0.433689
+    },
+    {
+      "attack": "A14",
+      "spoof_clips": 4914,
+      "eer": 0.417968
+    },
+    {
+      "attack": "A15",
+      "spoof_clips": 4914,
+      "eer": 0.35529
+    },
+    {
+      "attack": "A09",
+      "spoof_clips": 4914,
+      "eer": 0.284123
+    }
+  ]
+}

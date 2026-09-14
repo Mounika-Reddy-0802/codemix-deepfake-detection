@@ -1,0 +1,37 @@
+# S3 native code-mixed training, owner M (P-028). Data: XTTS + the speaker-held-out RVC training half, G.711 @ 20 dB.
+#
+# The third system. S1 trains on English only; S2 starts from S1 and trains LoRA
+# adapters. S3 never sees English spoofing data: it fine-tunes the pretrained
+# wav2vec2 encoder directly on code-mixed audio. It reads exactly the manifests of
+# the matching S2 run (train_lora_norm_rvc_channel.yaml), so an S2 vs S3 difference is the
+# training method and nothing else.
+system: s3_native
+encoder: wav2vec2-base
+# No init_from: starts from the pretrained self-supervised weights, not from S1.
+
+train_manifest: data/manifests/codemix_adapt_train_rvc_channel20.csv
+dev_manifest: data/manifests/codemix_adapt_dev_channel20.csv
+out_dir: checkpoints/s3_native_rvc_channel
+
+# Full fine-tuning, so Stage-1's step size, not the adapters': 1e-4 destroyed the
+# pretrained transformer within a few hundred steps (train_baseline.yaml).
+lr: 1.0e-5
+weight_decay: 1.0e-5
+batch_size: 8
+max_seconds: 4.0
+# Ten epochs, not five: every weight moves from a start that knows nothing about
+# spoofing, on about 2,000 clips. best.pt is kept by dev EER, so extra epochs cannot
+# overwrite a better model.
+epochs: 10
+num_workers: 4
+seed: 1234
+
+freeze_feature_extractor: true
+freeze_encoder: false
+lora: false
+
+device: cuda
+amp: true
+class_weighted: true
+log_every: 25
+wandb_mode: offline

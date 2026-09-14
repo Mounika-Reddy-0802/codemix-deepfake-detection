@@ -1,0 +1,34 @@
+{
+  "eer": 0.25786022581457174,
+  "auc": 0.8287235152906794,
+  "metrics": {
+    "eer": 0.25786022581457174,
+    "eer_ci_low": 0.21918189537680707,
+    "eer_ci_high": 0.29028282500863944,
+    "auc": 0.8287235152906794,
+    "auc_ci_low": 0.797973666420245,
+    "auc_ci_high": 0.8621244584706239,
+    "f1": 0.8158090976882922,
+    "threshold": 0.6307409488448816,
+    "score_std": 0.26529041143459536
+  },
+  "train_clips": 1066,
+  "test_clips": 958,
+  "test_bonafide": 737,
+  "test_spoof": 221,
+  "coefficients": {
+    "rms_mean": 1.2946,
+    "rms_std": -0.4404,
+    "peak_amplitude": 0.7253,
+    "clipping_ratio": -0.593,
+    "dc_offset": -1.1418,
+    "zero_crossing_rate": 2.8501,
+    "spectral_rolloff_hz": -0.9851,
+    "hf_energy_ratio": 1.4768
+  },
+  "intercept": 0.7652,
+  "seed": 1234,
+  "train_manifest": "data/manifests/score_cm04_norm_channel20_fit.csv",
+  "test_manifest": "data/manifests/score_cm04_norm_channel20_score.csv",
+  "verdict": "FAIL: 25.79% EER is 24.21% from chance -- eight low-level statistics separate the classes, so model results on this data are not safe to trust until the imbalance is explained"
+}
