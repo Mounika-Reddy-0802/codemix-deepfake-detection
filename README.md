@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%209%20of%2012-yellow)
-![Tests](https://img.shields.io/badge/tests-594%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-week%2010%20of%2012-yellow)
+![Tests](https://img.shields.io/badge/tests-752%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -11,19 +11,20 @@ project **measures that gap under a channel-matched telephony protocol**, closes
 most of it with LoRA, and demonstrates it live — a cloned voice on a phone call
 triggers a beep in the receiver's ear, a dashboard alert, and an SMS.
 
-> **Status: Week 9 of 12 — the gap is measured, closed, stress-tested, and the corpus audited.**
+> **Status: Week 10 of 12 — all three systems measured against shortcut floors, and the live demo runs end to end over WebRTC and Twilio.**
 >
-> An English-trained detector scoring **0.87% EER** on ASVspoof collapses to
-> **44.65%** on code-mixed Hinglish. A LoRA adapter training **1.13% of the
-> parameters for 2.2 minutes** brings a held-out code-mixed set from 53.71% to
-> **1.34% EER**. But that clean result **does not survive a phone line** — it
-> degrades to 38.58% under G.711, and only a channel-matched adapter holds at
-> **3.89%**.
+> Every bundle is now level-normalised, and every evaluation set carries its own
+> **shortcut floor** (the EER eight cheap signal statistics reach on those clips).
+> On the phone-line condition the deployed adapter (S2 LoRA, trained with XTTS and
+> RVC) scores **2.75%** on the seen tool against a 10.01% floor, **5.01%** on RVC
+> from unseen speakers against 22.46%, and keeps English at **2.42%**. Native
+> training (S3) is the seen-tool ceiling (**0.83%**) but **scores English at
+> chance (50.9–56.4%)**. No model reliably catches the never-seen Tortoise tool
+> over a phone line — stated, not hidden.
 >
-> ⚠️ **The clean 1.34% is not yet quotable.** It fails this project's own
-> shortcut-detection gate (see [The number we are not
-> reporting](#-the-number-we-are-not-reporting)). The channel-matched result is
-> the defensible one.
+> The live system scores every 4 s of a call and warns the receiver. On held-out
+> 60 s calls at the frozen threshold: **0% of genuine calls alerted; 100% of XTTS
+> and RVC cloned calls alerted; 33% of Tortoise calls**.
 
 ---
 
@@ -87,8 +88,61 @@ deployed in.
 ## Results — what is actually measured
 
 Every number below comes from a real run on real data and is reproducible from
-[Reproduce](#reproduce). Read them in order; each one changes how you should read
-the last.
+[Reproduce](#reproduce). **Start with the week-10 summary**: it supersedes the
+pre-normalisation numbers in sections 1–5, which are kept as the record of how we
+got here.
+
+### Week 10 — the three systems, each number beside its own floor
+
+EER %, lower is better. **Bold** = the 95% CI upper bound is below that set's
+shortcut floor; ~~struck~~ = not below it, so not evidence of learning.
+
+| System (training data, condition) | Seen tool (XTTS) | Unseen tool (Tortoise) | RVC, unseen speakers | English (ASVspoof LA) |
+|---|---:|---:|---:|---:|
+| *Shortcut floor, clean / phone line* | *5.17 / 10.01* | *31.21 / 25.79* | *28.76 / 22.46* | *—* |
+| S1 English-only | not measured | not measured | not measured | 0.85 |
+| S2 LoRA — XTTS, clean | **1.46** | **5.44** | **23.91** | 15.83 |
+| S2 LoRA — XTTS, phone line | **4.41** | ~~28.16~~ | ~~29.56~~ | 2.55 |
+| S2 LoRA — XTTS + RVC, clean | **1.99** | **12.01** | **5.01** | 3.75 |
+| **S2 LoRA — XTTS + RVC, phone line (deployed)** | **2.75** | ~~30.99~~ | **5.01** | **2.42** |
+| S3 native — XTTS, clean | **1.46** | **27.72** | ~~45.07~~ | 56.42 |
+| S3 native — XTTS, phone line | **1.92** | **13.71** | ~~32.15~~ | 55.83 |
+| S3 native — XTTS + RVC, clean | **0.83** | **21.39** | **8.24** | 50.90 |
+| S3 native — XTTS + RVC, phone line | **1.79** | ~~31.67~~ | **5.98** | 52.25 |
+
+What it says:
+
+1. **Adding RVC to training fixes RVC and costs the unseen tool** (23.91 → 5.01 on
+   RVC, 5.44 → 12.01 on Tortoise, clean). Attack diversity is not a free route to
+   generalisation (P-027).
+2. **Native training is the ceiling, at a cost**: best seen-tool EER, English at
+   chance. LoRA adaptation keeps English (P-030).
+3. **Over a phone line, only S3 XTTS-only clears the Tortoise floor**; the deployed
+   model does not, and the demo says so.
+
+→ [`docs/results/w10_norm_rvc.md`](docs/results/w10_norm_rvc.md) ·
+[`docs/results/s3_native_v1.md`](docs/results/s3_native_v1.md) ·
+[`docs/results/bundle_normalisation_v1.md`](docs/results/bundle_normalisation_v1.md)
+
+### Week 10 — what the live system does on whole calls
+
+The demo threshold was chosen on **development** calls only, through the exact
+streaming path, for zero false alarms on genuine 60 s calls (P-029, P-031). A
+threshold copied from a batch result file calls every genuine caller fake.
+
+| Held-out set, 60 s calls | Genuine calls falsely alerted | Cloned calls alerted |
+|---|---:|---:|
+| Seen tool (XTTS) | **0%** (0 / 7) | **100%** (13 / 13) |
+| RVC, unseen speakers | **0%** (0 / 9) | **100%** (8 / 8) |
+| Unseen tool (Tortoise) | **0%** (0 / 15) | 33% (2 / 6) |
+
+The five demo calls, replayed through the live server: genuine 0/22 fake-leaning
+windows, XTTS clone 23/23, RVC conversion 24/24, RVC source speaker 0/23, Tortoise
+clone 0/22 (missed, the known limit).
+
+→ [`experiments/results/threshold_calibration.json`](experiments/results/threshold_calibration.json) ·
+[`live_call/README.md`](live_call/README.md)
+
 
 ### 1. The gap is real, and it is enormous
 
@@ -198,6 +252,11 @@ scored on CM02 yet.**
 
 ### ⚠️ The number we are not reporting
 
+> **Resolved in week 10.** Bundles are now level-normalised (clean gate 1.39% →
+> 5.17%, phone line 9.25% → 10.01%), every set has its own floor, and all results
+> in the week-10 tables above are read against them. The section below is the
+> record of the problem.
+
 Before trusting any clean-condition figure above, we ran AffectDF's Appendix-G
 gate: fit a logistic regression on **eight cheap signal statistics** (RMS, peak,
 clipping, DC offset, zero-crossing rate, spectral rolloff, HF energy) and check that
@@ -305,37 +364,30 @@ Devanagari**.
 
 Owning these is the point.
 
-- **The clean-condition results fail the shortcut gate.** Detailed above. Bundles
-  must be rebuilt with level normalisation, the gate re-run, and Stage-2 retrained
-  before any clean number is reported. The channel-matched column is the one that
-  currently holds.
-- **Stage-1's published 0.58% is not reproducible from this repo.** The checkpoint
-  behind that figure lives only in a Kaggle run's output; the `best.pt` committed via
-  LFS re-measures at **0.85–0.87%** with a visibly different AUC. Either recover the
-  original checkpoint or restate the headline before the results freeze.
-- **Only one attack family has been scored.** Every detector result uses XTTS-v2 —
-  the same tool the adapter trained against. CM02 (RVC) exists, 1,500 clips verified,
-  and the held-out **Tortoise** set (CM04) now exists too — 500 clips, 15 eval-pool
-  speakers, 91.6% QA pass rate. **Neither has been scored.** The unseen-attack test
-  is now runnable; it has not been run.
-- **P-019's pitch-compression claim was wrong** — its real-speech baseline did not
-  reproduce with committed code (**P-021**). The XTTS row in the pitch table is 23
-  pilot clips; the 4,000 CM01 scale clips must be re-measured with the same estimator.
-- **CM01's audio exists on one machine and in no archive.** Its generation metadata
-  log — the only record of what was actually produced — is not in git. CM02 has both;
-  CM01 needs the same treatment before it can be trusted or rebuilt.
-- **The channel-trained adapter has a single seed.** The clean adapter has three.
-  Since the channel column is becoming the primary result, it needs the same treatment.
-- **The gap matrix's 44.65% needs re-deriving.** It was measured on `colab_bundle`,
-  built by the same un-normalised path as the rest.
-- **The script A/B is generated but unrated.** The pre-screen says romanisation looks
-  safe; three people still have to listen.
-- **Two romanisation choices are judgement calls.** `फ` → `ph` gives `sirph` where a
-  Hindi speaker would type `sirf`; `ड़` → `r` gives `thoraa` for `thoda`.
-- **AMR-NB needs ffmpeg**; without it the channel sim silently falls back to G.711,
-  and the harsher condition is never actually tested.
-- **CI is intentionally light** (ruff + pytest + numpy/pandas). Tests needing
-  torch/torchaudio/librosa skip in CI and run in the full environment.
+- **No model reliably detects a never-seen cloning tool over a phone line.** The
+  deployed phone-line adapter scores 30.99% on Tortoise against a 25.79% floor, and
+  alerts on 2 of 6 held-out Tortoise calls. Clean-audio adapters generalise better
+  (5.44%), but phone audio is the deployment condition.
+- **Every shortcut floor still fails the near-chance gate** (5–31%). Level
+  normalisation removed the level cue; the residual is recording domain (lecture
+  audio against vocoder output). Results are therefore quoted against floors, not
+  against 50%.
+- **Native training (S3) destroys English performance** (50.9–56.4% EER). It is
+  reported as the ceiling-at-a-cost row, not deployed.
+- **S1 was never scored on the normalised code-mixed sets**; its code-mixed numbers
+  (53.71% / 54.92%) are pre-normalisation.
+- **The demo threshold rests on 506 dev clips from 2 speakers**, stitched into 18
+  genuine and 21 cloned 60 s calls. Held-out validation agrees, but the call counts
+  are small.
+- **Reported EERs are clip-level** (one 4 s crop per clip); the live system's
+  behaviour was measured separately through the streaming path.
+- **AffectDF cross-evaluation and mono-Hindi/Tamil columns are not measured.**
+- **Stage-1's published 0.58% is not reproducible from this repo**; the committed
+  checkpoint re-measures at 0.85–0.87%.
+- **The phone-line adapters have a single seed.**
+- **Two romanisation choices are judgement calls** (`फ` → `ph`, `ड़` → `r`).
+- **CI is intentionally light** (ruff + pytest + numpy/pandas); tests needing
+  torch, FastAPI or aiortc skip in CI and run in the full environment.
 
 ---
 
@@ -351,14 +403,14 @@ codemix-deepfake-detection/
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
 │   ├── inference/       # streaming inference, ONNX export, predict
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 596 tests — pool firewall, anti-leakage, quarantine, archives
+├── tests/               # 752 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs (notebooks hold no logic)
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
 ├── docs/results/        # the five measurement write-ups
 ├── experiments/         # eval JSONs + per-clip score CSVs behind every table
 ├── checkpoints/         # Stage-1 and LoRA adapters (Git LFS)
-├── live_call/           # WebRTC harness now, Twilio from Week 6
+├── live_call/           # live detection server: web demo, dashboard, WebRTC, Twilio
 └── notebooks/           # env check, pilot, quality audit — no pipeline logic
 ```
 
@@ -366,6 +418,21 @@ codemix-deepfake-detection/
 > `torch.load` will fail on a 134-byte pointer file.
 
 ---
+
+## Live demo
+
+```bash
+pip install -r requirements.txt
+# the deployed checkpoint: codemix-w10-results Kaggle dataset, lora_norm_rvc_channel_best.pt
+set DFD_CHECKPOINT=<data>/checkpoints/lora_norm_rvc_channel_best.pt
+set DEMO_CLIPS_DIR=<data>/demo_clips             # built by scripts/prepare_demo_clips.py
+uvicorn live_call.server:app --host 0.0.0.0 --port 8000
+```
+
+Open <http://localhost:8000>: overview and measured results, **try a clip** (upload
+or record), **play a prepared call**, the **receiver dashboard**, and a **WebRTC
+call** page where a participant can speak or play a clip into the call. Real phone
+calls through Twilio: [`live_call/README.md`](live_call/README.md).
 
 ## Quick start
 
@@ -450,7 +517,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–9
+## Progress — Weeks 1–10
 
 Only completed work is listed. The full 12-week plan lives in the team drive,
 outside this repo.
@@ -465,12 +532,12 @@ outside this repo.
 | **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4; ✅ **CM02 RVC generation** — 12 voice models, 1,500 conversions, archived + hash-verified; pitch measured, **P-019 corrected (P-021)** |
 
 | **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ✅ **CM04 generated** — the held-out Tortoise attack, 500/500 clips over 15 eval-pool speakers, 91.6% QA pass, archived + metadata committed ([W4-T3](docs/W4T3_cm04_heldout_tortoise.md)) |
+| **10** | — | ✅ **Normalised retrain**: 4 LoRA adapters with and without RVC, per-set shortcut floors, RVC ablation (P-026, P-027); ✅ **S3 native training** scored beside S2 and on English — seen-tool ceiling, English at chance (P-028, P-030) | ✅ **Live detection system**: streaming scorer, verdict ladder, alerts, web demo, receiver dashboard, WebRTC calls, Twilio Media Streams + receiver-only warning + SMS; ✅ **demo threshold calibrated** on dev calls through the live path, validated on held-out calls (P-029, P-031) |
 
-**Open before the results freeze:** score a checkpoint on the held-out Tortoise set
-(CM04 is generated — the measurement is what is missing); score a checkpoint on CM02;
-rebuild bundles with level normalisation and re-run the CM01 gate; run the shortcut
-gate on the channel-matched condition; seed-repeat the channel-trained adapter;
-reconcile the Stage-1 checkpoint discrepancy.
+**Open before the results freeze:** activate the Twilio trial and run the phone
+demo on real numbers; seed-repeat the phone-line adapter; score S1 on the normalised
+sets; reconcile the Stage-1 checkpoint discrepancy; the results freeze meeting
+(W9-T5), then the paper.
 
 ---
 
@@ -498,12 +565,16 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/results/lowlevel_cue_check_v1.md`](docs/results/lowlevel_cue_check_v1.md) | **The shortcut gate** — why the clean number is not yet quotable |
 | [`docs/results/rvc_generation_v1.md`](docs/results/rvc_generation_v1.md) | **CM02** — 12 RVC voice models, 1,500 conversions, the pitch measurement, where the archive lives |
 | [`docs/results/lowlevel_cue_check_cm02_v1.md`](docs/results/lowlevel_cue_check_cm02_v1.md) | **CM02 shortcut gate** — 22.3% EER, and why the tell is spectral rather than level |
+| [`docs/results/w10_norm_rvc.md`](docs/results/w10_norm_rvc.md) | **W10 adapters** — normalised retrain, with and without RVC, every EER against its floor |
+| [`docs/results/s3_native_v1.md`](docs/results/s3_native_v1.md) | **S1 / S2 / S3** — native training as the ceiling, and English at chance |
+| [`live_call/README.md`](live_call/README.md) | **Live demo** — running the server, WebRTC calls, Twilio setup, the demo threshold |
+| [`docs/viva/demo_script.md`](docs/viva/demo_script.md) | **Evaluator demo script** — what to open, what to play, what to say |
 | [`docs/results/cm01_recovery_v1.md`](docs/results/cm01_recovery_v1.md) | **CM01 recovered** — the 4,000-clip run described in git, archived, and its pitch corrected |
 | [`docs/datasheet.md`](docs/datasheet.md) | **Dataset datasheet** — composition, attacks with usable counts, exclusions, licensing, limitations |
 | [`docs/qa/rvc_generation_qa.md`](docs/qa/rvc_generation_qa.md) | CM02 mechanical quality screen: 1,404 / 1,500 pass, failure reasons |
 | [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 baseline: EER/AUC/F1, per-attack breakdown, reproduction |
 | [`docs/lora_run_status.md`](docs/lora_run_status.md) | Step-by-step record of the Stage-2 run, including every trap hit |
-| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-023** with the problem that forced it |
+| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-031** with the problem that forced it |
 | [`Works updates.md`](Works%20updates.md) | HUMAN_TODO — everything only a person can do, ordered by what unblocks most |
 | [`docs/progress.md`](docs/progress.md) | One line per finished task: date, task, owner, branch |
 | [`docs/qa/child_quarantine_evidence.md`](docs/qa/child_quarantine_evidence.md) | The child-audio exclusion, verified on both machines |
