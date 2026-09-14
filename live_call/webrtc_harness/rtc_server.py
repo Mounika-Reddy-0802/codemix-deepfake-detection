@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from contextlib import suppress
 from pathlib import Path
 
@@ -98,7 +98,32 @@ def get_room(name: str) -> Room:
     return room
 
 
-async def _tap_track(track: MediaStreamTrack, room: Room) -> None:
+class _TrackSource:
+    """One participant's own audio as a :class:`PcmFrameSource`, ending when they leave.
+
+    The room queue mixes every participant, which is fine for a level meter but
+    wrong for detection: two voices interleaved frame by frame are neither speaker.
+    The detector gets one of these per audio track instead.
+    """
+
+    def __init__(self) -> None:
+        self.queue: asyncio.Queue[PcmFrame | None] = asyncio.Queue(maxsize=_ROOM_QUEUE_MAXSIZE)
+
+    def put(self, item: PcmFrame | None) -> None:
+        if self.queue.full():
+            with suppress(asyncio.QueueEmpty):
+                self.queue.get_nowait()
+        self.queue.put_nowait(item)
+
+    async def frames(self) -> AsyncIterator[PcmFrame]:
+        while True:
+            item = await self.queue.get()
+            if item is None:
+                return
+            yield item
+
+
+async def _tap_track(track: MediaStreamTrack, room: Room, own: _TrackSource | None = None) -> None:
     """Read a participant's audio track, resample to 16 kHz mono, enqueue PCM."""
     resampler = AudioResampler(
         format="s16", layout="mono" if TARGET_CHANNELS == 1 else "stereo", rate=TARGET_SAMPLE_RATE
@@ -107,33 +132,32 @@ async def _tap_track(track: MediaStreamTrack, room: Room) -> None:
         while True:
             frame = await track.recv()
             for resampled in resampler.resample(frame):
-                pcm = bytes(resampled.planes[0])
+                pcm = bytes(resampled.planes[0])[: resampled.samples * 2]
                 item = PcmFrame(pcm=pcm)
                 if room.queue.full():
                     with suppress(asyncio.QueueEmpty):
                         room.queue.get_nowait()  # drop oldest, keep the stream live
                 await room.queue.put(item)
+                if own is not None:
+                    own.put(item)
     except Exception as exc:  # track ended / peer gone
         logger.info("tap for room %s ended: %s", room.name, exc)
+    finally:
+        if own is not None:
+            own.put(None)
 
 
-app = FastAPI(title="WebRTC dev harness")
+#: Called as ``on_track(room_name, participant_id, source)`` for every audio track.
+TrackHook = Callable[[str, str, PcmFrameSource], None]
 
 
-@app.get("/")
-async def index() -> HTMLResponse:
-    """Serve the minimal two-party call page."""
-    return HTMLResponse(CALL_HTML.read_text(encoding="utf-8"))
-
-
-@app.post("/offer")
-async def offer(request: Request) -> JSONResponse:
-    """WebRTC signaling: accept an SDP offer, tap audio, return the SDP answer."""
-    params = await request.json()
+async def handle_offer(params: dict, on_track: TrackHook | None = None) -> JSONResponse:
+    """WebRTC signalling shared by this harness and the detection server."""
     room = get_room(params.get("room", "default"))
 
     pc = RTCPeerConnection()
     room.pcs.add(pc)
+    participant = f"p{len(room.pcs)}"
 
     @pc.on("connectionstatechange")
     async def _on_state() -> None:
@@ -148,7 +172,10 @@ async def offer(request: Request) -> JSONResponse:
         logger.info("room %s received audio track", room.name)
         relayed = room.relay.subscribe(track)
         room.audio_tracks.append(relayed)
-        asyncio.ensure_future(_tap_track(room.relay.subscribe(track), room))
+        own = _TrackSource() if on_track is not None else None
+        asyncio.ensure_future(_tap_track(room.relay.subscribe(track), room, own))
+        if on_track is not None:
+            on_track(room.name, participant, own)
 
     # Best-effort: let this joiner hear a participant who is already in the room.
     for existing in room.audio_tracks:
@@ -159,6 +186,21 @@ async def offer(request: Request) -> JSONResponse:
     await pc.setLocalDescription(answer)
 
     return JSONResponse({"sdp": pc.localDescription.sdp, "type": pc.localDescription.type})
+
+
+app = FastAPI(title="WebRTC dev harness")
+
+
+@app.get("/")
+async def index() -> HTMLResponse:
+    """Serve the minimal two-party call page."""
+    return HTMLResponse(CALL_HTML.read_text(encoding="utf-8"))
+
+
+@app.post("/offer")
+async def offer(request: Request) -> JSONResponse:
+    """WebRTC signaling: accept an SDP offer, tap audio, return the SDP answer."""
+    return await handle_offer(await request.json())
 
 
 async def _close_pc(pc: RTCPeerConnection, room: Room) -> None:

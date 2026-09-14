@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Receiver dashboard · live calls</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <style>
+    .session { margin-bottom: 1rem; }
+    .session header { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+    .session header .name { font-weight: 700; }
+    .stats { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; color: var(--muted); margin-top: 0.5rem; }
+    .stats b { color: var(--ink); }
+    .ended { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Receiver dashboard<small>live verdict for every monitored call</small></div>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/dashboard" class="active">Live dashboard</a>
+      <a href="/call" target="_blank">WebRTC call</a>
+    </nav>
+  </header>
+  <main>
+    <div class="status-row" id="health"></div>
+    <div class="status-row small" style="margin:0.6rem 0 1rem">
+      <label><input type="checkbox" id="sound" checked /> warning tone</label>
+      <span class="muted" id="conn">connecting…</span>
+      <button class="secondary" id="clear">Clear ended calls</button>
+    </div>
+    <div class="banner" id="banner"></div>
+    <div id="empty" class="card muted">No calls yet. Play a demo clip from the <a href="/">overview</a>, start a
+      <a href="/call" target="_blank">WebRTC call</a>, or phone the Twilio number.</div>
+    <div id="sessions"></div>
+    <div class="card">
+      <h2>Alert log</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script>
+    const sessions = new Map();
+    const healthBox = document.getElementById("health");
+    renderHealth(healthBox);
+    setInterval(() => renderHealth(healthBox), 8000);
+    let threshold = null;
+
+    function log(text, cls = "") {
+      document.getElementById("log").prepend(el("div", { class: cls, text: new Date().toLocaleTimeString() + "  " + text }));
+    }
+
+    function banner(state, text) {
+      const b = document.getElementById("banner");
+      b.className = "banner show " + state;
+      b.textContent = text;
+    }
+
+    function card(id, info) {
+      if (sessions.has(id)) return sessions.get(id);
+      document.getElementById("empty").style.display = "none";
+      const meta = info.meta || {};
+      const truth = meta.truth ? el("span", { class: "pill " + meta.truth, text: "ground truth: " + (meta.truth === "spoof" ? "cloned" : "real") }) : null;
+      const verdict = el("div", { class: "verdict listening" }, [el("div", { class: "light" }),
+        el("div", {}, [el("div", { class: "big", text: stateText("listening") }), el("div", { class: "small muted", text: "waiting for speech" })])]);
+      const canvas = el("canvas", { class: "timeline", style: "margin-top:0.7rem" });
+      const stats = el("div", { class: "stats" });
+      const root = el("section", { class: "card session" }, [
+        el("header", {}, [el("span", { class: "name", text: info.label || id }), el("span", { class: "pill", text: info.kind || "call" }), truth]),
+        verdict, canvas, stats]);
+      document.getElementById("sessions").prepend(root);
+      const s = { root, verdict, canvas, stats, points: [], state: "listening", scored: 0, fake: 0, info };
+      sessions.set(id, s);
+      return s;
+    }
+
+    function setVerdict(s, state, detail) {
+      s.state = state;
+      s.verdict.className = "verdict " + state;
+      s.verdict.querySelector(".big").textContent = stateText(state);
+      if (detail !== undefined) s.verdict.querySelector(".small").textContent = detail;
+    }
+
+    function redraw(s) {
+      drawTimeline(s.canvas, s.points, threshold);
+      const last = s.points.filter((p) => p.score !== null).slice(-1)[0];
+      s.stats.replaceChildren(
+        el("span", {}, ["windows scored ", el("b", { text: s.scored })]),
+        el("span", {}, ["fake-leaning ", el("b", { text: s.fake })]),
+        el("span", {}, ["last P(genuine) ", el("b", { text: last ? last.score.toFixed(4) : "–" })]),
+        el("span", {}, ["call time ", el("b", { text: s.points.length ? Math.round(s.points[s.points.length - 1].t) + " s" : "0 s" })]),
+      );
+    }
+
+    function handle(m) {
+      if (m.type === "hello") {
+        try { threshold = JSON.parse(m.health).detector.threshold; } catch (e) { /* keep default */ }
+        return;
+      }
+      if (!m.session) {
+        if (m.type === "twilio_status") log(`Twilio call ${m.call_sid}: ${m.status}`);
+        return;
+      }
+      if (m.type === "session_start") {
+        const s = card(m.session, m);
+        if (m.threshold) threshold = m.threshold;
+        if (!m.replayed) log(`call started: ${m.label}`);
+        redraw(s);
+        return;
+      }
+      const s = card(m.session, { label: m.session });
+      const label = s.info.label || m.session;
+      if (m.type === "window") {
+        s.points.push({ t: m.t, score: m.score, smoothed: m.smoothed });
+        if (m.score !== null) {
+          s.scored += 1;
+          if (threshold !== null && m.smoothed < threshold) s.fake += 1;
+        }
+        setVerdict(s, m.state, m.score === null ? "silence" : `smoothed P(genuine) ${m.smoothed.toFixed(4)}`);
+        redraw(s);
+      } else if (m.type === "event") {
+        if (m.kind === "beep") {
+          setVerdict(s, "suspicious", m.message);
+          if (!m.replayed) {
+            banner("suspicious", `⚠ ${label}: ${m.message}`);
+            if (document.getElementById("sound").checked) warningTone("beep");
+          }
+          log(`BEEP     ${label}: ${m.message}`, "beep");
+        } else if (m.kind === "sms") {
+          setVerdict(s, "likely_fake", m.message);
+          if (!m.replayed) {
+            banner("likely_fake", `⛔ ${label}: ${m.message}`);
+            if (document.getElementById("sound").checked) warningTone("sms");
+          }
+          log(`WARNING  ${label}: ${m.message}`, "sms");
+        } else if (m.kind === "summary") {
+          log(`SUMMARY  ${label}: ${m.message}`, "summary");
+        }
+      } else if (m.type === "session_end") {
+        s.root.classList.add("ended");
+        s.verdict.querySelector(".small").textContent = "call ended · " + m.message;
+        if (!m.replayed) log(`call ended: ${label} · peak verdict ${stateText(m.peak_state)}`);
+      } else if (m.type === "alert_error") {
+        log(`alert channel error (${m.kind}): ${m.error}`, "sms");
+      }
+    }
+
+    function connect() {
+      const ws = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws/dashboard");
+      ws.onopen = () => (document.getElementById("conn").textContent = "connected");
+      ws.onmessage = (e) => handle(JSON.parse(e.data));
+      ws.onclose = () => {
+        document.getElementById("conn").textContent = "disconnected, retrying…";
+        setTimeout(connect, 2000);
+      };
+    }
+    connect();
+
+    document.getElementById("clear").onclick = () => {
+      for (const [id, s] of sessions) {
+        if (s.root.classList.contains("ended")) { s.root.remove(); sessions.delete(id); }
+      }
+      document.getElementById("banner").className = "banner";
+    };
+    window.addEventListener("resize", () => sessions.forEach(redraw));
+    // Browsers only allow sound after a click on the page.
+    document.body.addEventListener("click", () => { if (document.getElementById("sound").checked) warningTone("unlock"); }, { once: true });
+  </script>
+</body>
+</html>
