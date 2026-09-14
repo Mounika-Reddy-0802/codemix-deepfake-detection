@@ -1,0 +1,548 @@
+{
+  "sources": {
+    "s2": "results/w10/w10_summary.json",
+    "s3": "docs/results/s3_native/s3_summary.json",
+    "s1_english": "experiments/asvspoof_retention_summary.json"
+  },
+  "s1_codemix_normalised": "not measured",
+  "cells": [
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "eval_pool",
+      "run": "lora_norm_clean",
+      "eer": 1.46,
+      "eer_ci": [
+        1.01,
+        1.94
+      ],
+      "auc": 0.9968,
+      "clips": 3966,
+      "floor": 5.17,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "cm04",
+      "run": "lora_norm_clean",
+      "eer": 5.44,
+      "eer_ci": [
+        4.05,
+        6.57
+      ],
+      "auc": 0.9825,
+      "clips": 2024,
+      "floor": 31.21,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "rvc_test",
+      "run": "lora_norm_clean",
+      "eer": 23.91,
+      "eer_ci": [
+        20.33,
+        27.64
+      ],
+      "auc": 0.8378,
+      "clips": 619,
+      "floor": 28.76,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "english",
+      "run": "lora_norm_clean",
+      "eer": 15.83,
+      "eer_ci": [
+        15.54,
+        16.04
+      ],
+      "auc": 0.8584,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "eval_pool",
+      "run": "s3_native_clean",
+      "eer": 1.46,
+      "eer_ci": [
+        1.08,
+        1.82
+      ],
+      "auc": 0.9977,
+      "clips": 3966,
+      "floor": 5.17,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "cm04",
+      "run": "s3_native_clean",
+      "eer": 27.72,
+      "eer_ci": [
+        25.77,
+        30.14
+      ],
+      "auc": 0.8225,
+      "clips": 2024,
+      "floor": 31.21,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "rvc_test",
+      "run": "s3_native_clean",
+      "eer": 45.07,
+      "eer_ci": [
+        40.87,
+        50.24
+      ],
+      "auc": 0.5839,
+      "clips": 619,
+      "floor": 28.76,
+      "clears_floor": false
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "clean",
+      "set": "english",
+      "run": "s3_native_clean",
+      "eer": 56.42,
+      "eer_ci": [
+        55.81,
+        56.93
+      ],
+      "auc": 0.4043,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "eval_pool",
+      "run": "lora_norm_channel",
+      "eer": 4.41,
+      "eer_ci": [
+        3.78,
+        5.19
+      ],
+      "auc": 0.9863,
+      "clips": 3966,
+      "floor": 10.01,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "cm04",
+      "run": "lora_norm_channel",
+      "eer": 28.16,
+      "eer_ci": [
+        25.44,
+        30.2
+      ],
+      "auc": 0.7996,
+      "clips": 2024,
+      "floor": 25.79,
+      "clears_floor": false
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "rvc_test",
+      "run": "lora_norm_channel",
+      "eer": 29.56,
+      "eer_ci": [
+        26.49,
+        32.79
+      ],
+      "auc": 0.7638,
+      "clips": 619,
+      "floor": 22.46,
+      "clears_floor": false
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "english",
+      "run": "lora_norm_channel",
+      "eer": 2.55,
+      "eer_ci": [
+        2.43,
+        2.67
+      ],
+      "auc": 0.9773,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "eval_pool",
+      "run": "s3_native_channel",
+      "eer": 1.92,
+      "eer_ci": [
+        1.43,
+        2.4
+      ],
+      "auc": 0.9991,
+      "clips": 3966,
+      "floor": 10.01,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "cm04",
+      "run": "s3_native_channel",
+      "eer": 13.71,
+      "eer_ci": [
+        12.3,
+        15.23
+      ],
+      "auc": 0.9289,
+      "clips": 2024,
+      "floor": 25.79,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "rvc_test",
+      "run": "s3_native_channel",
+      "eer": 32.15,
+      "eer_ci": [
+        28.43,
+        35.55
+      ],
+      "auc": 0.7573,
+      "clips": 619,
+      "floor": 22.46,
+      "clears_floor": false
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts",
+      "condition": "channel",
+      "set": "english",
+      "run": "s3_native_channel",
+      "eer": 55.83,
+      "eer_ci": [
+        55.31,
+        56.41
+      ],
+      "auc": 0.4392,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "eval_pool",
+      "run": "lora_norm_rvc_clean",
+      "eer": 1.99,
+      "eer_ci": [
+        1.47,
+        2.45
+      ],
+      "auc": 0.998,
+      "clips": 3966,
+      "floor": 5.17,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "cm04",
+      "run": "lora_norm_rvc_clean",
+      "eer": 12.01,
+      "eer_ci": [
+        10.42,
+        13.64
+      ],
+      "auc": 0.9431,
+      "clips": 2024,
+      "floor": 31.21,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "rvc_test",
+      "run": "lora_norm_rvc_clean",
+      "eer": 5.01,
+      "eer_ci": [
+        3.55,
+        6.95
+      ],
+      "auc": 0.9859,
+      "clips": 619,
+      "floor": 28.76,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "english",
+      "run": "lora_norm_rvc_clean",
+      "eer": 3.75,
+      "eer_ci": [
+        3.63,
+        3.91
+      ],
+      "auc": 0.969,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "eval_pool",
+      "run": "s3_native_rvc_clean",
+      "eer": 0.83,
+      "eer_ci": [
+        0.53,
+        1.14
+      ],
+      "auc": 0.9997,
+      "clips": 3966,
+      "floor": 5.17,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "cm04",
+      "run": "s3_native_rvc_clean",
+      "eer": 21.39,
+      "eer_ci": [
+        18.39,
+        24.58
+      ],
+      "auc": 0.8317,
+      "clips": 2024,
+      "floor": 31.21,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "rvc_test",
+      "run": "s3_native_rvc_clean",
+      "eer": 8.24,
+      "eer_ci": [
+        5.66,
+        10.51
+      ],
+      "auc": 0.9376,
+      "clips": 619,
+      "floor": 28.76,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "clean",
+      "set": "english",
+      "run": "s3_native_rvc_clean",
+      "eer": 50.9,
+      "eer_ci": [
+        50.45,
+        51.35
+      ],
+      "auc": 0.5044,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "eval_pool",
+      "run": "lora_norm_rvc_channel",
+      "eer": 2.75,
+      "eer_ci": [
+        2.22,
+        3.37
+      ],
+      "auc": 0.9971,
+      "clips": 3966,
+      "floor": 10.01,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "cm04",
+      "run": "lora_norm_rvc_channel",
+      "eer": 30.99,
+      "eer_ci": [
+        28.72,
+        33.84
+      ],
+      "auc": 0.7535,
+      "clips": 2024,
+      "floor": 25.79,
+      "clears_floor": false
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "rvc_test",
+      "run": "lora_norm_rvc_channel",
+      "eer": 5.01,
+      "eer_ci": [
+        3.39,
+        6.95
+      ],
+      "auc": 0.9752,
+      "clips": 619,
+      "floor": 22.46,
+      "clears_floor": true
+    },
+    {
+      "system": "S2 LoRA",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "english",
+      "run": "lora_norm_rvc_channel",
+      "eer": 2.42,
+      "eer_ci": [
+        2.31,
+        2.54
+      ],
+      "auc": 0.9804,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "eval_pool",
+      "run": "s3_native_rvc_channel",
+      "eer": 1.79,
+      "eer_ci": [
+        1.44,
+        2.26
+      ],
+      "auc": 0.9992,
+      "clips": 3966,
+      "floor": 10.01,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "cm04",
+      "run": "s3_native_rvc_channel",
+      "eer": 31.67,
+      "eer_ci": [
+        28.2,
+        34.57
+      ],
+      "auc": 0.7583,
+      "clips": 2024,
+      "floor": 25.79,
+      "clears_floor": false
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "rvc_test",
+      "run": "s3_native_rvc_channel",
+      "eer": 5.98,
+      "eer_ci": [
+        4.19,
+        8.09
+      ],
+      "auc": 0.9548,
+      "clips": 619,
+      "floor": 22.46,
+      "clears_floor": true
+    },
+    {
+      "system": "S3 native",
+      "variant": "xtts+rvc",
+      "condition": "channel",
+      "set": "english",
+      "run": "s3_native_rvc_channel",
+      "eer": 52.25,
+      "eer_ci": [
+        51.58,
+        52.86
+      ],
+      "auc": 0.5098,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "clean",
+      "set": "english",
+      "run": "stage1_baseline",
+      "eer": 0.85,
+      "eer_ci": null,
+      "auc": null,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "channel",
+      "set": "english",
+      "run": "stage1_baseline",
+      "eer": 0.85,
+      "eer_ci": null,
+      "auc": null,
+      "clips": 71237,
+      "floor": null,
+      "clears_floor": null
+    }
+  ]
+}
