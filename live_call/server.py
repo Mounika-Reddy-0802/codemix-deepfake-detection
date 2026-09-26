@@ -57,6 +57,7 @@ from fastapi.staticfiles import StaticFiles
 from live_call.alerts import AlertDispatcher, announcement_twiml
 from live_call.detector import DetectorService, DetectorSettings
 from live_call.media_handler import TwilioStreamSource
+from live_call.phone import CALLER, RECEIVER, CallState, Exchange
 from live_call.replay import FileSource
 from live_call.session import CallSession, Hub, SessionInfo, SessionRegistry, new_session_id
 
@@ -64,7 +65,6 @@ log = logging.getLogger("live_call")
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = Path(__file__).resolve().parent / "static"
-DEMO_CLIPS_DIR = Path(os.environ.get("DEMO_CLIPS_DIR", "demo_assets"))
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
 RESULT_FILES = {
@@ -98,7 +98,13 @@ class App:
         self.dispatcher = dispatcher or AlertDispatcher()
         self.hub = Hub()
         self.sessions = SessionRegistry()
+        self.exchange = Exchange()
         self.tasks: set[asyncio.Task] = set()
+        #: room -> caller audio waiting for the call to be answered. A call is
+        #: monitored from the moment it is answered, not while it rings: the media
+        #: path is still settling then, and a glitch during renegotiation used to
+        #: score as two low windows and raise a caution on a genuine caller.
+        self.pending: dict[str, list[tuple[SessionInfo, object]]] = {}
         # Twilio call SID of the caller -> details needed to reach the receiver.
         self.twilio_calls: dict[str, dict] = {}
 
@@ -116,6 +122,17 @@ class App:
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
         return session
+
+    def start_pending(self, room: str) -> None:
+        """Begin monitoring the caller audio held for ``room``; called on answer."""
+        line = self.exchange.line(room)
+        for info, source in self.pending.pop(room, []):
+            session = self.start_session(info, source)
+            self.exchange.attach_session(line, session.info.session_id)
+
+    def drop_pending(self, room: str) -> None:
+        """Forget audio held for a call that was declined or never answered."""
+        self.pending.pop(room, None)
 
 
 # --------------------------------------------------------------------------- #
@@ -198,7 +215,13 @@ def warning_beep_wav(rate: int = 8000) -> bytes:
     return buffer.getvalue()
 
 
-def list_demo_clips(directory: Path = DEMO_CLIPS_DIR) -> list[dict]:
+def demo_clips_dir() -> Path:
+    """Read when used, so a value from ``.env`` (loaded when the app starts) applies."""
+    return Path(os.environ.get("DEMO_CLIPS_DIR", "demo_assets"))
+
+
+def list_demo_clips(directory: Path | None = None) -> list[dict]:
+    directory = directory or demo_clips_dir()
     index = directory / "demo_clips.json"
     if not index.is_file():
         return []
@@ -207,9 +230,52 @@ def list_demo_clips(directory: Path = DEMO_CLIPS_DIR) -> list[dict]:
 
 
 def create_app(state: App | None = None) -> FastAPI:
-    api = FastAPI(title="Code-mixed deepfake call detection")
-    api.state.app = state or App()
-    shared: App = api.state.app
+    shared: App = state or App()
+
+    @contextlib.asynccontextmanager
+    async def lifespan(_api: FastAPI):
+        """Warm the model, then forward every call's verdicts to its receiver handset."""
+
+        async def warm() -> None:
+            """Load the checkpoint before the first call instead of during it.
+
+            Loading takes tens of seconds, and it used to happen inside the first
+            ``/offer``, which blocked the event loop and timed the caller out. It
+            runs on the detector's own thread, so the server serves pages meanwhile.
+            """
+            try:
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(shared.detector.executor, shared.detector.score_fn)
+                log.info("detector ready")
+            except Exception as exc:  # no checkpoint on this machine: pages still work
+                log.warning("detector not loaded: %s", exc)
+
+        warming = asyncio.create_task(warm())
+        queue = shared.hub.subscribe()
+
+        async def relay() -> None:
+            while True:
+                message = await queue.get()
+                session_id = message.get("session")
+                if not session_id:
+                    continue
+                for line in shared.exchange.lines():
+                    if line.session_id == session_id:
+                        shared.exchange.verdict(line, message)
+
+        task = asyncio.create_task(relay())
+        try:
+            yield
+        finally:
+            task.cancel()
+            warming.cancel()
+            shared.hub.unsubscribe(queue)
+            for pending in (task, warming):
+                with contextlib.suppress(asyncio.CancelledError):
+                    await pending
+
+    api = FastAPI(title="Code-mixed deepfake call detection", lifespan=lifespan)
+    api.state.app = shared
 
     if STATIC.is_dir():
         api.mount("/static", StaticFiles(directory=STATIC), name="static")
@@ -231,6 +297,27 @@ def create_app(state: App | None = None) -> FastAPI:
     @api.get("/call")
     async def call_page() -> HTMLResponse:
         return page("call.html")
+
+    @api.get("/demo")
+    async def demo_console() -> HTMLResponse:
+        """One-screen console for a live evaluation: both handsets and the analysis."""
+        return page("console.html")
+
+    @api.get("/phone")
+    async def phone_home() -> HTMLResponse:
+        return page("phone.html")
+
+    @api.get("/phone/caller")
+    async def phone_caller() -> HTMLResponse:
+        return page("phone_caller.html")
+
+    @api.get("/phone/receiver")
+    async def phone_receiver() -> HTMLResponse:
+        return page("phone_receiver.html")
+
+    @api.get("/api/lines")
+    async def lines() -> JSONResponse:
+        return JSONResponse([line.snapshot() for line in shared.exchange.lines()])
 
     @api.get("/api/health")
     async def health() -> JSONResponse:
@@ -315,14 +402,14 @@ def create_app(state: App | None = None) -> FastAPI:
         clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
         if clip is None:
             raise HTTPException(404, "unknown clip")
-        return FileResponse(DEMO_CLIPS_DIR / clip["file"])
+        return FileResponse(demo_clips_dir() / clip["file"])
 
     @api.post("/api/replay/{clip_id}")
     async def replay_clip(clip_id: str) -> JSONResponse:
         clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
         if clip is None:
             raise HTTPException(404, "unknown clip")
-        audio = decode_audio((DEMO_CLIPS_DIR / clip["file"]).read_bytes(), clip["file"])
+        audio = decode_audio((demo_clips_dir() / clip["file"]).read_bytes(), clip["file"])
         info = SessionInfo(
             new_session_id("replay"),
             "replay",
@@ -364,9 +451,86 @@ def create_app(state: App | None = None) -> FastAPI:
                 f"{name} in room {room_name}",
                 meta={"room": room_name, "participant": participant, "role": role},
             )
-            shared.start_session(info, source)
+            # In the two-handset demo the caller's audio is the monitored one, and
+            # its verdicts belong to that line so the receiver handset can show them.
+            line = shared.exchange.line(room_name)
+            on_a_handset = role == CALLER and line.parties.get(CALLER) is not None
+            if on_a_handset and line.state is not CallState.CONNECTED:
+                shared.pending.setdefault(room_name, []).append((info, source))
+                return  # monitoring starts when the receiver answers
+            session = shared.start_session(info, source)
+            if on_a_handset:
+                shared.exchange.attach_session(line, session.info.session_id)
 
-        return await rtc_server.handle_offer(params, on_track=on_track)
+        def on_renegotiate(room_name: str, pc_id: str) -> None:
+            for party in shared.exchange.line(room_name).parties.values():
+                if party.pc_id == pc_id:
+                    party.send({"type": "renegotiate"})
+
+        return await rtc_server.handle_offer(
+            params, on_track=on_track, on_renegotiate=on_renegotiate
+        )
+
+    # ----------------------------------------------------------------- handsets
+    @api.websocket("/ws/phone")
+    async def phone_ws(
+        ws: WebSocket,
+        room: str = "demo",
+        role: str = CALLER,
+        name: str = "",
+        number: str = "",
+    ) -> None:
+        """Signalling for one handset: call control in, line state and verdicts out."""
+        if role not in (CALLER, RECEIVER):
+            await ws.close(code=4400)
+            return
+        await ws.accept()
+        outbox: asyncio.Queue = asyncio.Queue(maxsize=200)
+
+        def send(message: dict) -> None:  # never raises: a dead handset must not
+            with contextlib.suppress(asyncio.QueueFull):  # break the other side
+                outbox.put_nowait(message)
+
+        defaults = {
+            CALLER: ("Caller", "+91 98200 11234"),
+            RECEIVER: ("Receiver", "+91 98200 55678"),
+        }
+        party = shared.exchange.join(
+            room, role, name or defaults[role][0], number or defaults[role][1], send
+        )
+        line = shared.exchange.line(room)
+
+        async def pump() -> None:
+            while True:
+                await ws.send_json(await outbox.get())
+
+        sender = asyncio.create_task(pump())
+        try:
+            while True:
+                message = await ws.receive_json()
+                action = message.get("action")
+                if action == "dial":
+                    shared.exchange.dial(line)
+                elif action == "accept":
+                    shared.exchange.accept(line)
+                    shared.start_pending(room)
+                elif action == "decline":
+                    shared.exchange.decline(line)
+                    shared.drop_pending(room)
+                elif action == "hangup":
+                    shared.exchange.hangup(line, role)
+                    shared.drop_pending(room)
+                elif action == "pc":  # this handset's peer connection id
+                    party.pc_id = message.get("pc_id")
+                elif action == "ping":
+                    send({"type": "pong"})
+        except (WebSocketDisconnect, RuntimeError, ValueError):
+            pass
+        finally:
+            sender.cancel()
+            shared.exchange.leave(room, party)
+            with contextlib.suppress(Exception):
+                await ws.close()
 
     # ----------------------------------------------------------------- Twilio
     async def twilio_form(request: Request) -> dict:

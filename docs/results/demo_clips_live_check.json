@@ -1,0 +1,64 @@
+{
+  "what": "every demo clip replayed through the browser call path (/demo), not offline",
+  "why": "the call is carried by Opus; the detector is trained on G.711, so live and offline scores differ and the demo must default to a clip verified here",
+  "checked": "2026-09-26",
+  "checkpoint": "lora_norm_rvc_channel_best.pt",
+  "threshold": 0.49997557675233106,
+  "clips": [
+    {
+      "id": "genuine",
+      "title": "Genuine caller",
+      "truth": "bonafide",
+      "windows": 9,
+      "low_windows": 3,
+      "min_score": 0.0015,
+      "max_score": 0.9994,
+      "final_verdict": "Genuine voice",
+      "correct": true
+    },
+    {
+      "id": "xtts_clone",
+      "title": "XTTS-v2 cloned voice",
+      "truth": "spoof",
+      "windows": 9,
+      "low_windows": 9,
+      "min_score": 0.0002,
+      "max_score": 0.0002,
+      "final_verdict": "Likely cloned voice",
+      "correct": true
+    },
+    {
+      "id": "rvc_conversion",
+      "title": "RVC voice conversion",
+      "truth": "spoof",
+      "windows": 9,
+      "low_windows": 9,
+      "min_score": 0.0002,
+      "max_score": 0.0062,
+      "final_verdict": "Likely cloned voice",
+      "correct": true
+    },
+    {
+      "id": "rvc_genuine",
+      "title": "Genuine caller (RVC source)",
+      "truth": "bonafide",
+      "windows": 10,
+      "low_windows": 1,
+      "min_score": 0.127,
+      "max_score": 0.9993,
+      "final_verdict": "Genuine voice",
+      "correct": true
+    },
+    {
+      "id": "tortoise_clone",
+      "title": "Tortoise cloned voice (unseen tool)",
+      "truth": "spoof",
+      "windows": 9,
+      "low_windows": 1,
+      "min_score": 0.0005,
+      "max_score": 0.9995,
+      "final_verdict": "Genuine voice",
+      "correct": false
+    }
+  ]
+}
