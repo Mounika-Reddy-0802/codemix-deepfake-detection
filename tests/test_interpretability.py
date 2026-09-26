@@ -43,12 +43,14 @@ def test_shuffle_keeps_every_chunk_and_changes_the_order():
 
 
 def test_stft_roundtrip_is_near_identity():
+    pytest.importorskip("librosa")  # heavy wheel, not installed in CI
     audio = _voice(2.0)
     out = ip.stft_roundtrip(audio)
     assert np.max(np.abs(out - audio)) < 1e-4
 
 
 def test_phase_scramble_keeps_magnitude_and_changes_the_wave():
+    pytest.importorskip("librosa")  # heavy wheel, not installed in CI
     import librosa
 
     audio = _voice(2.0)
@@ -68,6 +70,7 @@ def test_white_noise_hits_the_target_snr():
 
 
 def test_band_filters_keep_and_remove_the_right_energy():
+    pytest.importorskip("scipy")  # heavy wheel, not installed in CI
     t = np.arange(2 * SR) / SR
     low = np.sin(2 * np.pi * 500 * t).astype(np.float32)
     high = np.sin(2 * np.pi * 3000 * t).astype(np.float32)
@@ -78,6 +81,7 @@ def test_band_filters_keep_and_remove_the_right_energy():
 
 
 def test_every_registered_perturbation_returns_finite_float32():
+    pytest.importorskip("librosa")  # heavy wheel, not installed in CI
     audio = _voice(5.0)
     for name, fn in ip.registry().items():
         out = fn(audio, np.random.default_rng(0))
@@ -124,6 +128,7 @@ def test_shuffle_does_not_mutate_its_input():
 
 
 def test_no_perturbation_mutates_its_input():
+    pytest.importorskip("librosa")  # heavy wheel, not installed in CI
     audio = _voice(3.0)
     before = audio.copy()
     for name, fn in ip.registry().items():
