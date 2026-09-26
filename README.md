@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2011%20of%2012-yellow)
-![Tests](https://img.shields.io/badge/tests-752%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-798%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -94,6 +94,15 @@ got here.
 
 ### Week 10 — the three systems, each number beside its own floor
 
+![EER by system and evaluation condition](experiments/figures/system_matrix.png)
+
+*Every cell is an equal error rate, lower is better, on a log colour scale because
+the cells span 0.85% to 58.42%. The top row is the English-trained baseline: near
+perfect on English, **worse than a coin toss on Hindi–English over a phone line**.
+S1's code-mixed cells are the normalised measurements from P-032; the earlier
+53.71% / 54.92% pair is retired.*
+
+
 EER %, lower is better. **Bold** = the 95% CI upper bound is below that set's
 shortcut floor; ~~struck~~ = not below it, so not evidence of learning.
 
@@ -124,6 +133,13 @@ What it says:
 [`docs/results/s3_native_v1.md`](docs/results/s3_native_v1.md) ·
 [`docs/results/bundle_normalisation_v1.md`](docs/results/bundle_normalisation_v1.md)
 
+![S2 LoRA against S3 native, each beside its shortcut floor](experiments/figures/systems_s2_s3.png)
+
+*The same training data, two training methods, four test sets each. The dashed line
+is the **shortcut floor** for that set — the EER eight cheap signal statistics
+reach, so anything above it is not evidence of detection. S3 native (red) wins on
+the seen tool and collapses to chance on English; S2 LoRA (blue) keeps both.*
+
 ### Week 10 — what the live system does on whole calls
 
 The demo threshold was chosen on **development** calls only, through the exact
@@ -145,6 +161,12 @@ clone 0/22 (missed, the known limit).
 
 
 ### 1. The gap is real, and it is enormous
+
+![DET curves on the ASVspoof evaluation partition](experiments/figures/det_asvspoof_eval.png)
+
+*Detection error trade-off on the 71,237-clip English evaluation partition, drawn
+from the per-clip scores rather than a summary table.*
+
 
 Same detector, same checkpoint, two evaluation sets.
 
@@ -220,6 +242,12 @@ better *and* survives telephony**, which is a second independent reason to prefe
 
 ### 5. A second attack family exists — and it does not behave like the first
 
+![Adding RVC to training: what it costs and what it buys](experiments/figures/ablation_rvc.png)
+
+*Adding RVC conversions to the adaptation set cuts RVC error sharply but raises
+error on the unseen Tortoise attack. The trade is measured, not assumed.*
+
+
 CM02 (RVC voice conversion) ran on a Kaggle T4 pair on 2026-09-05: **12 per-speaker
 voice models**, **1,500 conversions** of real train-pool speech into other train-pool
 voices, 0 failures, 93.6% through the mechanical quality screen. The audio and
@@ -249,6 +277,12 @@ families, as a magnitude difference in the same direction. **No detector has bee
 scored on CM02 yet.**
 
 → [`docs/results/rvc_generation_v1.md`](docs/results/rvc_generation_v1.md)
+
+![Shortcut gate: what eight cheap statistics reach on each set](experiments/figures/shortcut_gate.png)
+
+*The gate that decides whether a result counts. If eight hand-written signal
+statistics separate real from fake on a set, a neural number on that set is not
+evidence of anything, so every headline EER is reported beside its own floor.*
 
 ### ⚠️ The number we are not reporting
 

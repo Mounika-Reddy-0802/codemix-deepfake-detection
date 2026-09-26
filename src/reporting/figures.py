@@ -56,8 +56,10 @@ DPI = 200
 SYSTEM_MATRIX: dict[str, dict[str, tuple[float, str]]] = {
     "S1 baseline\n(English-trained)": {
         "English\n(ASVspoof eval)": (0.85, "asvspoof_retention_summary.json"),
-        "Code-mixed\nclean": (53.71, "gap_closure_v1.md"),
-        "Code-mixed\nchannel (G.711)": (54.92, "channel_matched_v1.md"),
+        # P-032 retired the 53.71 / 54.92 pre-normalisation pair. These are S1 on the
+        # normalised eval pool, the same clips the S2 cells below are scored on.
+        "Code-mixed\nclean": (48.21, "results/s1_norm (P-032)"),
+        "Code-mixed\nchannel (G.711)": (58.42, "results/s1_norm (P-032)"),
     },
     "S2 LoRA\n(clean-trained)": {
         "English\n(ASVspoof eval)": (8.38, "asvspoof_retention_summary.json"),
@@ -234,7 +236,7 @@ def system_matrix_figure(out_dir: str = FIGURES_DIR) -> str:
 
     fig, ax = plt.subplots(figsize=(7.2, 3.4))
     values = frame.to_numpy(dtype=float)
-    # Log-scaled colour: the cells span 0.85% to 54.92%, so a linear map would show
+    # Log-scaled colour: the cells span 0.85% to 58.42%, so a linear map would show
     # four indistinguishable dark squares and one bright one.
     image = ax.imshow(np.log10(values), cmap="RdYlGn_r", aspect="auto")
 

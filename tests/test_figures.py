@@ -190,3 +190,21 @@ def test_systems_figure_writes_a_png(tmp_path):
 def test_systems_figure_refuses_a_missing_source(tmp_path):
     with pytest.raises(fg.FigureDataError, match="not built"):
         fg.systems_figure(str(tmp_path), source=str(tmp_path / "absent.json"))
+
+
+def test_s1_codemix_cells_match_the_normalised_runs():
+    """S1's code-mixed cells come from results/s1_norm, not the retired pair (P-032)."""
+    import json
+
+    for column, name in [
+        ("Code-mixed\nclean", "stage1__eval_pool.json"),
+        ("Code-mixed\nchannel (G.711)", "stage1__eval_pool_channel.json"),
+    ]:
+        source = Path("results/s1_norm") / name
+        if not source.exists():  # a light checkout may not carry the 12 MB of scores
+            pytest.skip(f"{source} not present")
+        measured = json.loads(source.read_text())["pooled"]["eer"] * 100
+        plotted = fg.SYSTEM_MATRIX["S1 baseline\n(English-trained)"][column][0]
+        assert plotted == pytest.approx(
+            measured, abs=0.01
+        ), f"S1 {column!r} cell says {plotted}% but {source} measured {measured:.2f}%"
