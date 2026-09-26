@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live detection console</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%93%9E%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/console.css" />
+</head>
+<body class="console">
+  <div class="chead">
+    <div>
+      <h1>Cloned-voice detection on a live Hindi&ndash;English phone call</h1>
+      <div class="sub">One caller, one receiver, one monitored line. The receiver is warned while the call is still running.</div>
+    </div>
+    <div class="badges" id="badges"></div>
+  </div>
+
+  <div class="cgrid">
+    <!-- ------------------------------------------------------------ caller -->
+    <section class="panel handset" id="callerPanel">
+      <h2>Caller &middot; device A</h2>
+      <div class="face" id="callerFace">R</div>
+      <div class="nm">Ravi Kumar</div>
+      <div class="no">+91 98200 11234</div>
+      <div class="peer" id="callerPeer">dialling Priya Sharma &middot; +91 98200 55678</div>
+      <div class="st" id="callerState">Ready to dial</div>
+      <div class="tmr" id="callerTimer"></div>
+      <div class="pick">
+        <label for="clip">Voice on this line</label>
+        <select id="clip"></select>
+        <span class="tag" id="clipTag"></span>
+      </div>
+      <div class="btnrow">
+        <button class="rb go" id="callBtn">&#9742; Call</button>
+        <button class="rb stop" id="callerEnd" disabled>End</button>
+      </div>
+    </section>
+
+    <!-- -------------------------------------------------------- signal path -->
+    <section class="panel path">
+      <h2>Signal path</h2>
+      <div class="hop" id="hopA"><span class="dot"></span><div>Caller audio<small id="hopAsub">idle</small></div></div>
+      <div class="wireline" id="wireA"></div>
+      <div class="hop" id="hopB"><span class="dot"></span><div>Telephone channel<small>G.711 &micro;-law, 8 kHz narrowband</small></div></div>
+      <div class="wireline" id="wireB"></div>
+      <div class="hop" id="hopC"><span class="dot"></span><div>Detector<small id="hopCsub">wav2vec 2.0 + LoRA &middot; 4 s window every 2 s</small></div></div>
+      <div class="wireline" id="wireC"></div>
+      <div class="hop" id="hopD"><span class="dot"></span><div>Receiver warning<small id="hopDsub">verdict shown to the receiver only</small></div></div>
+
+      <div class="metrics">
+        <div class="metric"><span class="mv" id="mWindows">0</span><span class="ml">windows scored</span></div>
+        <div class="metric"><span class="mv" id="mFlag">&ndash;</span><span class="ml">time to warning</span></div>
+        <div class="metric"><span class="mv" id="mScore">&ndash;</span><span class="ml">last P(genuine)</span></div>
+        <div class="metric"><span class="mv" id="mLevel">&ndash;</span><span class="ml">line level</span></div>
+      </div>
+      <p class="pathnote">Every 2 seconds the last 4 seconds of the caller's speech are scored. Two low
+        windows raise a caution, four raise the warning. Nothing about the call is sent anywhere else.</p>
+    </section>
+
+    <!-- ---------------------------------------------------------- receiver -->
+    <section class="panel handset" id="receiverPanel">
+      <h2>Receiver &middot; device B</h2>
+      <div class="face" id="rxFace">PS</div>
+      <div class="nm">Priya Sharma</div>
+      <div class="no">+91 98200 55678</div>
+      <div class="peer" id="rxPeer">no incoming call</div>
+      <div class="st" id="rxState">Idle</div>
+      <div class="tmr" id="rxTimer"></div>
+      <div class="btnrow">
+        <button class="rb go" id="acceptBtn" disabled>&#9742; Accept</button>
+        <button class="rb stop" id="rxEnd" disabled>Decline</button>
+      </div>
+      <div class="alertbox" id="alertBox"></div>
+      <div class="eventlog" id="eventLog"></div>
+    </section>
+  </div>
+
+  <!-- --------------------------------------------------------- analysis row -->
+  <div class="analysis">
+    <section class="panel">
+      <h2>Live analysis of the caller's voice</h2>
+      <div class="vbig v-listening" id="verdictWrap">
+        <span class="vlight"></span>
+        <div>
+          <div class="vtext" id="verdictText">Listening</div>
+          <div class="vsub" id="verdictSub">no speech scored yet</div>
+        </div>
+      </div>
+      <canvas class="wave" id="wave"></canvas>
+      <canvas class="bars" id="bars"></canvas>
+    </section>
+
+    <section class="panel">
+      <h2>Decision rule</h2>
+      <div class="ladder">
+        <div class="rung" id="rungListening"><span class="pip"></span> Listening for speech <span class="cnt" id="cntWindows">0 windows</span></div>
+        <div class="rung" id="rungGenuine"><span class="pip"></span> Genuine &middot; score at or above threshold <span class="cnt" id="cntGenuine">&ndash;</span></div>
+        <div class="rung" id="rungSusp"><span class="pip"></span> Suspicious after 2 low windows <span class="cnt" id="cntSusp">0 / 2</span></div>
+        <div class="rung" id="rungFake"><span class="pip"></span> Likely cloned after 4 low windows <span class="cnt" id="cntFake">0 / 4</span></div>
+      </div>
+      <div class="ribbon">
+        <h2 style="margin-top:1rem">Measured on held-out data</h2>
+        <table id="results"><tbody><tr><td class="vsub">loading…</td></tr></tbody></table>
+        <div class="note" id="resultsNote"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">
+    <span>Two-device version: <a href="/phone/caller" target="_blank">caller</a> &middot; <a href="/phone/receiver" target="_blank">receiver</a></span>
+    <span><a href="/dashboard" target="_blank">Full dashboard</a></span>
+    <span><a href="/" target="_blank">Project overview</a></span>
+    <span id="foot-model"></span>
+  </div>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/phone.js"></script>
+  <script>
+    // This page is BOTH handsets, so one screen tells the whole story. Each role
+    // still has its own signalling socket and peer connection, exactly as the
+    // two-device pages do; nothing is faked for the demo.
+    const ROOM = qs("room", "console");
+    const CALLER = { name: "Ravi Kumar", number: "+91 98200 11234" };
+    const RX = { name: "Priya Sharma", number: "+91 98200 55678" };
+
+    const $ = (id) => document.getElementById(id);
+    const callerMedia = new Media();
+    const rxAudio = new Audio();
+    rxAudio.autoplay = true;
+
+    let callerLine = null, rxLine = null;
+    let callerTimer = null, rxTimer = null;
+    let points = [], threshold = 0.5, lowRun = 0, analyser = null, waveData = null;
+
+    // ------------------------------------------------------------- top badges
+    getJSON("/api/health").then((h) => {
+      threshold = h.detector.threshold ?? 0.5;
+      $("badges").replaceChildren(
+        el("span", { class: "badge live", text: "detector running" }),
+        el("span", { class: "badge", html: "" , text: "model: " + (h.detector.checkpoint || "?") }),
+        el("span", { class: "badge", text: "device: " + h.detector.device }),
+        el("span", { class: "badge", text: "alert threshold: " + threshold.toFixed(3) }),
+      );
+      $("foot-model").textContent = "checkpoint " + (h.detector.checkpoint || "");
+      $("hopCsub").textContent = "wav2vec 2.0 + LoRA adapter · 4 s window every 2 s · " + h.detector.device;
+    }).catch(() => {});
+
+    // -------------------------------------------------------------- results
+    getJSON("/api/results").then((r) => {
+      const cells = ((r.systems || {}).cells) || [];
+      const pick = (system, variant, condition, set) =>
+        cells.find((c) => c.system === system && c.variant === variant &&
+                          c.condition === condition && c.set === set);
+      const deployed = (set) => pick("S2 LoRA", "xtts+rvc", "channel", set);
+      const s1 = (set) => pick("S1 English-only", "asvspoof", "channel", set);
+      const rows = [
+        ["Seen cloning tool (XTTS)", deployed("eval_pool"), s1("eval_pool")],
+        ["Voice conversion (RVC)", deployed("rvc_test"), s1("rvc_test")],
+        ["Unseen tool (Tortoise)", deployed("cm04"), s1("cm04")],
+        ["English (ASVspoof LA)", deployed("english"), s1("english")],
+      ];
+      const table = el("table");
+      const head = el("tr", {}, [el("th", { text: "Test set" }), el("th", { text: "Our system" }),
+                                 el("th", { text: "English-only baseline" })]);
+      const body = [head];
+      for (const [label, ours, base] of rows) {
+        if (!ours) continue;
+        const ok = ours.clears_floor !== false;
+        body.push(el("tr", {}, [
+          el("td", { text: label }),
+          el("td", { class: ok ? "good" : "bad", text: ours.eer.toFixed(2) + "% EER" }),
+          el("td", { text: base ? base.eer.toFixed(2) + "%" : "—" }),
+        ]));
+      }
+      table.append(el("tbody", {}, body));
+      $("results").replaceWith(table);
+      table.id = "results";
+      $("resultsNote").textContent =
+        "Equal error rate, lower is better. Deployed model: adapted on code-mixed speech in the " +
+        "telephone condition. The unseen-tool row is the limitation we report openly.";
+    }).catch(() => {});
+
+    // ---------------------------------------------------------------- clips
+    // Demo order, verified on the live call path, not just offline:
+    // docs/results/demo_clips_live_check.json. The genuine clip that survives the
+    // call's Opus encoding cleanly leads, so the first thing an evaluator sees is a
+    // real caller staying green.
+    const ORDER = ["rvc_genuine", "xtts_clone", "rvc_conversion", "tortoise_clone", "genuine"];
+    let clips = [];
+    getJSON("/api/demo-clips").then((list) => {
+      list.sort((a, b) => (ORDER.indexOf(a.id) + 1 || 99) - (ORDER.indexOf(b.id) + 1 || 99));
+      clips = list;
+      $("clip").replaceChildren(...list.map((c) =>
+        el("option", { value: c.id, text: c.title })));
+      showTag();
+    }).catch(() => {});
+    $("clip").addEventListener("change", showTag);
+    function showTag() {
+      const c = clips.find((x) => x.id === $("clip").value);
+      if (!c) return;
+      const fake = c.label === "spoof";
+      $("clipTag").className = "tag " + (fake ? "fake" : "real");
+      $("clipTag").textContent = fake ? "ground truth: cloned voice" : "ground truth: real human";
+    }
+
+    // ------------------------------------------------------------- the lines
+    function hops(n) {
+      ["hopA", "hopB", "hopC", "hopD"].forEach((id, i) => $(id).classList.toggle("on", i < n));
+      ["wireA", "wireB", "wireC"].forEach((id, i) => $(id).classList.toggle("flow", i < n - 1));
+    }
+
+    async function openLines() {
+      callerLine = new Line({ room: ROOM, role: "caller", ...CALLER });
+      callerLine
+        .on("ringing", () => { $("callerState").textContent = "Ringing…"; hops(1); })
+        .on("connected", (m) => {
+          $("callerState").textContent = "Connected";
+          callerTimer = startTimer($("callerTimer"), m.connected);
+          callerMedia.playClip();
+          hops(4);
+        })
+        .on("ended", (m) => endUI(m))
+        .on("renegotiate", () => callerMedia.negotiate({ room: ROOM, role: "caller", name: CALLER.name }));
+      await callerLine.connect();
+
+      rxLine = new Line({ room: ROOM, role: "receiver", ...RX });
+      rxLine
+        .on("ringing", (m) => {
+          const c = (m.parties || {}).caller || CALLER;
+          $("rxPeer").innerHTML = "&#9742; incoming from <b>" + c.name + "</b> &middot; " + c.number;
+          $("rxState").textContent = "Incoming call…";
+          $("receiverPanel").classList.add("ring");
+          $("acceptBtn").disabled = false;
+          $("rxEnd").disabled = false;
+          startRing("ring");
+          // Open the receiver's audio path now, while the phone rings. Adding it
+          // after the answer makes the caller's connection renegotiate mid-speech,
+          // and that glitch used to score as a low window on a genuine caller.
+          armReceiverAudio();
+        })
+        .on("connected", (m) => {
+          stopRing();
+          $("receiverPanel").classList.remove("ring");
+          $("rxState").textContent = "Connected · voice being checked";
+          if (rxMedia && rxMedia.stream) rxMedia.stream.getAudioTracks().forEach((t) => (t.enabled = true));
+          logEvent("Call answered", 0, "");
+          $("acceptBtn").disabled = true;
+          $("rxEnd").textContent = "End";
+          rxTimer = startTimer($("rxTimer"), m.connected);
+        })
+        .on("verdict", onVerdict)
+        .on("renegotiate", () => rxMedia && rxMedia.negotiate({ room: ROOM, role: "receiver", name: RX.name, monitor: false }))
+        .on("ended", (m) => endUI(m));
+      await rxLine.connect();
+    }
+
+    // ------------------------------------------------------------- the call
+    $("callBtn").onclick = async () => {
+      unlockAudio();
+      resetAnalysis();
+      $("callBtn").disabled = true;
+      clearInterval(callerTimer); clearInterval(rxTimer);
+      callerTimer = rxTimer = null;
+      $("callerTimer").textContent = "";
+      $("rxTimer").textContent = "";
+      const id = $("clip").value;
+      try {
+        await callerMedia.open("clip", { clipUrl: `/api/demo-clips/${id}/audio` });
+        attachWave(callerMedia);
+        await callerMedia.connect({ room: ROOM, role: "caller", name: CALLER.name, monitor: true },
+                                  () => {});
+        callerLine.send("pc", { pc_id: callerMedia.pcId });
+      } catch (err) {
+        $("callerState").textContent = "Cannot start audio: " + err.message;
+        $("callBtn").disabled = false;
+        return;
+      }
+      callerLine.send("dial");
+      $("callerEnd").disabled = false;
+      $("callerState").textContent = "Calling…";
+      $("rxState").textContent = "Idle";
+      $("hopAsub").textContent = clips.find((c) => c.id === id)?.title || "caller audio";
+      hops(1);
+    };
+
+    $("acceptBtn").onclick = () => { unlockAudio(); rxLine.send("accept"); };
+    $("rxEnd").onclick = () => { rxLine.send(rxLine.state === "ringing" ? "decline" : "hangup"); };
+    $("callerEnd").onclick = () => { callerLine.send("hangup"); };
+
+    // Both handsets go back to an idle phone. The running clock is cleared, not left
+    // frozen on screen: a stale duration under "Call ended" reads as a live call.
+    function endUI(msg) {
+      stopRing();
+      clearInterval(callerTimer); clearInterval(rxTimer);
+      callerTimer = rxTimer = null;
+      callerMedia.close();
+      if (rxMedia) { rxMedia.close(); rxMedia = null; }
+      $("receiverPanel").classList.remove("ring");
+      $("callerTimer").textContent = "";
+      $("rxTimer").textContent = "";
+      const lasted = msg && msg.connected && msg.ended
+        ? " · lasted " + mmss(msg.ended - msg.connected)
+        : "";
+      const why = msg && msg.end_reason ? msg.end_reason : "call ended";
+      $("callerState").textContent = "Call ended" + lasted;
+      $("rxState").textContent = why.charAt(0).toUpperCase() + why.slice(1) + lasted;
+      $("rxPeer").textContent = "no incoming call";
+      $("callBtn").disabled = false;
+      $("callerEnd").disabled = true;
+      $("acceptBtn").disabled = true;
+      $("rxEnd").disabled = true;
+      $("rxEnd").textContent = "Decline";
+      hops(0);
+      if (analyser) { analyser = null; }
+    }
+
+    // ---------------------------------------------------------- the analysis
+    function resetAnalysis() {
+      points = []; lowRun = 0;
+      $("alertBox").className = "alertbox";
+      $("verdictWrap").className = "vbig v-listening";
+      $("verdictText").textContent = "Listening";
+      $("verdictSub").textContent = "no speech scored yet";
+      $("cntWindows").textContent = "0 windows";
+      $("cntSusp").textContent = "0 / 2";
+      $("cntFake").textContent = "0 / 4";
+      $("mWindows").textContent = "0";
+      $("mFlag").textContent = "–"; $("mFlag").classList.remove("hot");
+      $("mScore").textContent = "–"; $("mLevel").textContent = "–";
+      ["rungListening", "rungGenuine", "rungSusp", "rungFake"].forEach((id) => $(id).classList.remove("hit"));
+      $("rungListening").classList.add("hit");
+      $("receiverPanel").classList.remove("alarm-suspicious", "alarm-likely_fake");
+      $("eventLog").replaceChildren();
+      drawBars();
+    }
+
+    function onVerdict(msg) {
+      if (msg.state) {
+        $("verdictWrap").className = "vbig v-" + msg.state;
+        $("verdictText").textContent = stateText(msg.state);
+        ["rungListening", "rungGenuine", "rungSusp", "rungFake"].forEach((id) => $(id).classList.remove("hit"));
+        $({ listening: "rungListening", genuine: "rungGenuine",
+            suspicious: "rungSusp", likely_fake: "rungFake" }[msg.state] || "rungListening").classList.add("hit");
+      }
+      if (msg.score !== undefined && msg.score !== null && msg.t !== undefined) {
+        points.push({ t: msg.t, score: msg.score });
+        lowRun = msg.score < threshold ? lowRun + 1 : 0;
+        $("cntWindows").textContent = points.length + (points.length === 1 ? " window" : " windows");
+        $("cntSusp").textContent = Math.min(lowRun, 2) + " / 2";
+        $("cntFake").textContent = Math.min(lowRun, 4) + " / 4";
+        $("verdictSub").textContent =
+          "P(genuine) " + msg.score.toFixed(3) + " · window at " + Math.round(msg.t) + " s";
+        $("mWindows").textContent = points.length;
+        $("mScore").textContent = msg.score.toFixed(3);
+        if (msg.level !== undefined && msg.level !== null) $("mLevel").textContent = msg.level + " dBFS";
+        drawBars();
+      }
+      // An alert arrives as an "event" whose severity is in state; kind names the
+      // channel it went out on (beep to the handset, sms to the receiver's phone).
+      const severe = msg.event === "event" && (msg.state === "suspicious" || msg.state === "likely_fake");
+      if (severe) {
+        const box = $("alertBox");
+        box.className = "alertbox show " + msg.state;
+        box.innerHTML = msg.state === "likely_fake"
+          ? "<b>&#9888; Warning: this voice is likely cloned</b>Do not share codes, passwords or money. Verify the caller another way."
+          : "<b>&#9888; Caution: this voice may be synthetic</b>Stay on the call, but do not act on any request yet.";
+        $("receiverPanel").classList.remove("alarm-suspicious", "alarm-likely_fake");
+        $("receiverPanel").classList.add("alarm-" + msg.state);
+        if (msg.state === "likely_fake" && $("mFlag").textContent === "–") {
+          $("mFlag").textContent = Math.round(msg.at) + " s";
+          $("mFlag").classList.add("hot");
+        }
+        logEvent(msg.state === "likely_fake"
+          ? "Warning sent to receiver · tone + SMS"
+          : "Caution sent to receiver · tone", msg.at, msg.state);
+        warningTone(msg.state === "likely_fake" ? "sms" : "beep");
+      }
+    }
+
+    let rxMedia = null;
+    async function armReceiverAudio() {
+      if (rxMedia) return;
+      rxMedia = new Media();
+      try {
+        await rxMedia.open("mic", {});
+        rxMedia.stream.getAudioTracks().forEach((t) => (t.enabled = false)); // muted until answered
+        await rxMedia.connect({ room: ROOM, role: "receiver", name: RX.name, monitor: false },
+                              (s) => (rxAudio.srcObject = s));
+        rxLine.send("pc", { pc_id: rxMedia.pcId });
+      } catch (err) {
+        rxMedia = null; // no microphone on this machine: the call still works one way
+      }
+    }
+
+    function logEvent(text, at, level) {
+      const when = at === undefined || at === null ? "" : mmss(at);
+      $("eventLog").prepend(el("div", { class: "ev " + (level || ""), },
+        [el("span", { class: "evt", text: when }), el("span", { text: text })]));
+    }
+
+    // live waveform of what the caller is sending
+    function attachWave(media) {
+      const a = media.ctx.createAnalyser();
+      a.fftSize = 1024;
+      media.ctx.createMediaStreamSource(media.stream).connect(a);
+      analyser = a;
+      waveData = new Uint8Array(a.fftSize);
+      drawWave();
+    }
+
+    function drawWave() {
+      const c = $("wave"), dpr = devicePixelRatio || 1;
+      const w = c.clientWidth, h = c.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d");
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+      if (analyser) {
+        analyser.getByteTimeDomainData(waveData);
+        ctx.strokeStyle = "rgba(79,140,255,0.85)";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        for (let i = 0; i < waveData.length; i++) {
+          const x = (i / waveData.length) * w;
+          const y = h / 2 + ((waveData[i] - 128) / 128) * (h / 2) * 0.92;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.stroke();
+      } else {
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+      }
+      requestAnimationFrame(drawWave);
+    }
+
+    // one bar per scored 4 s window, with the threshold line
+    function drawBars() {
+      const c = $("bars"), dpr = devicePixelRatio || 1;
+      const w = c.clientWidth, h = c.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d");
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+      const padB = 18, padT = 14, padL = 30;
+      const y = (v) => padT + (h - padT - padB) * (1 - v);
+
+      ctx.font = "10px Segoe UI, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      for (const v of [0, 0.5, 1]) {
+        ctx.beginPath(); ctx.moveTo(padL, y(v)); ctx.lineTo(w, y(v)); ctx.stroke();
+        ctx.fillText(v.toFixed(1), 6, y(v) + 3);
+      }
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = "rgba(255,77,77,0.75)";
+      ctx.beginPath(); ctx.moveTo(padL, y(threshold)); ctx.lineTo(w, y(threshold)); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(255,120,120,0.9)";
+      ctx.fillText("alert threshold", padL + 4, y(threshold) - 4);
+
+      const n = Math.max(14, points.length);
+      const bw = Math.max(4, (w - padL - 6) / n - 3);
+      points.forEach((p, i) => {
+        const x = padL + 4 + i * ((w - padL - 6) / n);
+        const bottom = y(0);
+        const top = Math.min(y(p.score), bottom - 9); // a 0.000 score must still be visible
+        const low = p.score < threshold;
+        ctx.fillStyle = low ? "rgba(255,77,77,0.8)" : "rgba(37,208,122,0.8)";
+        ctx.fillRect(x, top, bw, bottom - top);
+        ctx.fillStyle = low ? "#ff6b6b" : "#3ae48c";
+        ctx.fillRect(x, top - 2, bw, 3); // cap, so the bar reads even at zero
+      });
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.fillText(points.length ? "P(genuine) per 4 s window" : "windows appear here once the call connects",
+                   padL + 4, h - 5);
+    }
+
+    drawBars();
+    drawWave();
+    openLines().catch(() => ($("callerState").textContent = "server unreachable"));
+    window.addEventListener("beforeunload", () => callerMedia.close());
+  </script>
+</body>
+</html>

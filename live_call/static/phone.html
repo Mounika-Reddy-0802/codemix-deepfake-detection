@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Telephone demo</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/phone.css" />
+  <style>
+    .pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .pick a { display: block; text-decoration: none; color: inherit; }
+    .pick .card { height: 100%; transition: border-color 0.15s ease, transform 0.15s ease; }
+    .pick a:hover .card { border-color: var(--accent); transform: translateY(-2px); }
+    .pick .big { font-size: 2rem; }
+    .flow { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.92rem; }
+    .flow .step { background: #eef3fb; border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem 0.7rem; }
+    .flow .arrow { color: var(--muted); }
+    code.url { background: #eef3fb; padding: 0.15rem 0.4rem; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Telephone demo<small>two handsets, one monitored line</small></div>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/demo">Live console</a>
+      <a href="/phone" class="active">Phone demo</a>
+      <a href="/dashboard" target="_blank">Dashboard</a>
+      <a href="/call" target="_blank">Old harness</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Place a call, and watch the receiver get warned</h1>
+    <p class="lead">Two separate handsets on two devices. The caller dials, the receiver's phone rings and is
+      answered, and while they talk the detector scores the caller's voice and warns the receiver if it is
+      synthetic. The caller is never told.</p>
+
+    <div class="card">
+      <div class="flow">
+        <span class="step"><b>Caller</b> device A</span>
+        <span class="arrow">&rarr;</span>
+        <span class="step">dials</span>
+        <span class="arrow">&rarr;</span>
+        <span class="step"><b>Exchange</b> + detector, this server</span>
+        <span class="arrow">&rarr;</span>
+        <span class="step">rings</span>
+        <span class="arrow">&rarr;</span>
+        <span class="step"><b>Receiver</b> device B</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+      <h2>Showing this to one person on one screen?</h2>
+      <p class="small">Open the <a href="/demo"><b>live console</b></a> instead. It puts both handsets,
+        the signal path and the detector's live analysis on a single screen, which is the view built for
+        an evaluation. Use the two handsets below when you want them on genuinely separate devices.</p>
+    </div>
+
+    <div class="pick" style="margin-top:1rem">
+      <a href="/phone/caller" target="_blank">
+        <div class="card">
+          <div class="big">&#9742;</div>
+          <h2>Open the caller handset</h2>
+          <p class="small muted">Device A. Choose a microphone, a prepared clip or a file, then press call.
+            Use a cloned clip to demonstrate the attack.</p>
+        </div>
+      </a>
+      <a href="/phone/receiver" target="_blank">
+        <div class="card">
+          <div class="big">&#128222;</div>
+          <h2>Open the receiver handset</h2>
+          <p class="small muted">Device B. The phone rings, you accept, and the verdict appears live on this
+            screen with the warning banner and tone.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="grid two" style="margin-top:1rem">
+      <div class="card">
+        <h2>Running it on two devices</h2>
+        <ol class="small">
+          <li>Keep this server running on the laptop.</li>
+          <li>On the laptop open the <b>receiver</b> handset.</li>
+          <li>On a phone or second laptop open the <b>caller</b> handset at
+            <code class="url" id="lanUrl">http://&lt;this-machine&gt;:8000/phone/caller</code>.</li>
+          <li>Browsers only allow a microphone on <code>localhost</code> or <code>https</code>. For a second
+            device, expose the server over https, for example with ngrok, and use that address.</li>
+          <li>Both handsets must use the same line name. Add <code>?room=demo2</code> to both for a second pair.</li>
+        </ol>
+        <p class="small muted">No microphone on the second device? Open both handsets in two windows on one
+          machine and have the caller send a prepared clip. The panels stay visually separate.</p>
+      </div>
+      <div class="card">
+        <h2>Three-minute script for an evaluator</h2>
+        <ol class="small">
+          <li><b>A genuine call.</b> Caller sends the real clip or speaks. Receiver accepts and the panel stays
+            green throughout.</li>
+          <li><b>A cloned call.</b> Caller picks the XTTS or RVC clip and calls again. Within about six seconds
+            the receiver sees amber, then red at about ten seconds, with a tone and a warning.</li>
+          <li><b>The limitation.</b> Caller picks the Tortoise clip, the tool the model never trained on. Say
+            plainly that it is missed over a phone line, and that this is measured, not hidden.</li>
+          <li>Open the <a href="/dashboard" target="_blank">dashboard</a> to show the per-window scores behind
+            the verdict.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="status-row" id="health" style="margin-top:1rem"></div>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script>
+    renderHealth(document.getElementById("health"));
+    document.getElementById("lanUrl").textContent = location.origin + "/phone/caller";
+  </script>
+</body>
+</html>
