@@ -2,9 +2,10 @@
   "sources": {
     "s2": "results/w10/w10_summary.json",
     "s3": "docs/results/s3_native/s3_summary.json",
-    "s1_english": "experiments/asvspoof_retention_summary.json"
+    "s1_english": "experiments/asvspoof_retention_summary.json",
+    "s1_codemix": "results/s1_norm"
   },
-  "s1_codemix_normalised": "not measured",
+  "s1_codemix_normalised": "measured",
   "cells": [
     {
       "system": "S2 LoRA",
@@ -522,6 +523,54 @@
       "system": "S1 English-only",
       "variant": "asvspoof",
       "condition": "clean",
+      "set": "eval_pool",
+      "run": "stage1_baseline",
+      "eer": 48.21,
+      "eer_ci": [
+        46.77,
+        49.8
+      ],
+      "auc": 0.5572,
+      "clips": 3966,
+      "floor": 5.17,
+      "clears_floor": false
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "clean",
+      "set": "cm04",
+      "run": "stage1_baseline",
+      "eer": 41.67,
+      "eer_ci": [
+        39.26,
+        43.53
+      ],
+      "auc": 0.5969,
+      "clips": 2024,
+      "floor": 31.21,
+      "clears_floor": false
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "clean",
+      "set": "rvc_test",
+      "run": "stage1_baseline",
+      "eer": 43.46,
+      "eer_ci": [
+        39.9,
+        47.98
+      ],
+      "auc": 0.5462,
+      "clips": 619,
+      "floor": 28.76,
+      "clears_floor": false
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "clean",
       "set": "english",
       "run": "stage1_baseline",
       "eer": 0.85,
@@ -530,6 +579,54 @@
       "clips": 71237,
       "floor": null,
       "clears_floor": null
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "channel",
+      "set": "eval_pool",
+      "run": "stage1_baseline",
+      "eer": 58.42,
+      "eer_ci": [
+        57.07,
+        60.31
+      ],
+      "auc": 0.3814,
+      "clips": 3966,
+      "floor": 10.01,
+      "clears_floor": false
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "channel",
+      "set": "cm04",
+      "run": "stage1_baseline",
+      "eer": 44.15,
+      "eer_ci": [
+        41.05,
+        46.83
+      ],
+      "auc": 0.5607,
+      "clips": 2024,
+      "floor": 25.79,
+      "clears_floor": false
+    },
+    {
+      "system": "S1 English-only",
+      "variant": "asvspoof",
+      "condition": "channel",
+      "set": "rvc_test",
+      "run": "stage1_baseline",
+      "eer": 55.57,
+      "eer_ci": [
+        52.33,
+        59.78
+      ],
+      "auc": 0.4253,
+      "clips": 619,
+      "floor": 22.46,
+      "clears_floor": false
     },
     {
       "system": "S1 English-only",

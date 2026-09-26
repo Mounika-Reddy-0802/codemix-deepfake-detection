@@ -46,6 +46,7 @@ EXPECTED_MODULES = [
     "src/inference/predict.py",
     "src/inference/streaming.py",
     "src/inference/export_onnx.py",
+    "src/inference/interpretability.py",
     "src/utils/audio_utils.py",
     "src/utils/seed.py",
     "src/utils/logging_utils.py",

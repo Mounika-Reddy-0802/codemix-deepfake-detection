@@ -1,0 +1,56 @@
+# What the deployed detector responds to (src/inference/interpretability.py).
+# Roots are machine-specific; every other path below is relative to them.
+checkpoint: C:/dfdata/checkpoints/lora_norm_rvc_channel_best.pt
+device: cuda
+seed: 1234
+clip_seconds: 60.0   # whole demo calls; perturbations use only the first max_windows
+demo_clips_dir: C:/dfdata/demo_clips
+asvspoof_root: C:/dfdata/raw/asvspoof2019_LA/LA
+out: experiments/results/interpretability.json
+
+# The five demo calls: held-out eval-pool audio, G.711 @ 20 dB (docs/viva/demo_script.md).
+clips:
+  genuine:          {file: genuine.wav,        label: bonafide}
+  rvc_source:       {file: rvc_genuine.wav,    label: bonafide}
+  xtts_clone:       {file: xtts_clone.wav,     label: spoof}
+  rvc_conversion:   {file: rvc_conversion.wav, label: spoof}
+  tortoise_clone:   {file: tortoise_clone.wav, label: spoof}
+
+perturbations:
+  max_windows: 8
+  names:
+    - original
+    - volume_x0.1
+    - mu_law_pass
+    - noise_20db
+    - noise_10db
+    - stft_roundtrip
+    - phase_vocoder_rate_1.0
+    - phase_scramble
+    - time_reverse
+    - shuffle_500ms
+    - shuffle_100ms
+    - shuffle_25ms
+    - shuffle_5ms
+    - keep_0_1khz
+    - keep_1_2khz
+    - keep_2_4khz
+    - remove_0.3_1khz
+    - remove_2_4khz
+    - slower_x1.4
+    - faster_x0.7
+    - pitch_up_3
+    - pitch_down_3
+
+# Tortoise is left out: the deployed model does not detect it, so it would blur
+# the question of where real and detected-fake separate.
+layers:
+  clips: [genuine, rvc_source, xtts_clone, rvc_conversion]
+  windows_per_clip: 20
+  train_frac: 0.6
+
+english:
+  protocol: ASVspoof2019_LA_cm_protocols/ASVspoof2019.LA.cm.eval.trl.txt
+  audio_dir: ASVspoof2019_LA_eval/flac
+  per_class: 200
+  windows_per_clip: 3

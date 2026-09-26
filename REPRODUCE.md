@@ -2,10 +2,9 @@
 
 Exact commands to regenerate every number this project currently claims.
 
-**Two halves.** The first is reproducible **today** — corpus counts, the channel
-protocol, the spoof pilot, the transliteration audit. The second is the paper's
-tables and figures, which do not exist yet; that half is finalised in Week 10
-(owner M) once there are checkpoints to archive.
+**Two halves.** Sections 1-5 rebuild the corpus, the channel protocol, the spoof
+pilot and the transliteration audit. Section 6 rebuilds every table and figure in
+the paper from the trained checkpoints.
 
 Nothing here needs a GPU except spoof generation and training.
 
@@ -150,16 +149,103 @@ hearing. Do not open `docs/qa/pilot_script_answer_key.csv` before rating.
 
 ---
 
-## 6. Paper tables and figures — not yet reproducible
+## 6. Paper tables and figures
 
-These need Stage-1 training, which cannot start: **ASVspoof 2019 LA is not on the
-GPU machine**, and it is the only Stage-1 training corpus.
+Every number in the paper comes from one of the artefacts below. Training needs a
+GPU; the reporting steps are pure numpy/pandas and run anywhere.
 
-- [ ] Stage-1 baseline (`scripts/04_train_baseline.sh` + `configs/train_baseline.yaml`)
-- [ ] Gap matrix (`scripts/05_eval_gap_matrix.sh` + `configs/eval_matrix.yaml`)
-- [ ] Stage-3 LoRA (`scripts/06_train_lora.sh` + `configs/train_lora_codemix.yaml`)
-- [ ] Figure + table regeneration from archived checkpoints
-- [ ] Seeds, checkpoint SHA-256s, and the exact commit per table
+`$DATA_ROOT` for the code-mixed work is the **level-normalised** bundle, not the
+first build: `lora_bundle_norm` for clean audio and `lora_bundle_norm_ch20` for the
+G.711 @ 20 dB condition (Sec. 2 and `docs/results/bundle_normalisation_v1.md`).
 
-Until this section is filled in, **no cross-lingual gap number from this repo
-should be quoted** — see the limitations in `README.md`.
+### 6.1 S1, English only
+
+```bash
+bash scripts/04_train_baseline.sh            # configs/train_stage1_run.yaml
+python -m src.training.evaluate     --checkpoint checkpoints/baseline/best.pt     --manifest data/manifests/asvspoof_eval.csv --device cuda     --out results/s1_norm/stage1__asvspoof_eval.json
+```
+
+Every adapter starts from this checkpoint. To confirm a checkpoint is the one an
+adapter was built on, compare a frozen encoder tensor between the two: they must be
+bit-identical (the deployed adapter stores its base weights under `.base.weight`).
+
+### 6.2 S2 adapters and S3 native models
+
+Four training configs each, identical but for data mix and condition:
+
+```bash
+for cfg in train_lora_norm_clean train_lora_norm_channel            train_lora_norm_rvc_clean train_lora_norm_rvc_channel            train_s3_native_clean train_s3_native_channel            train_s3_native_rvc_clean train_s3_native_rvc_channel; do
+    python -m src.training.train --config configs/$cfg.yaml
+done
+```
+
+Both W10 runs were done on Kaggle T4s from a clean clone:
+`notebooks/kaggle_w10_retrain_normalised.ipynb` (S2) and
+`notebooks/kaggle_w10_s3_native.ipynb` (S3). `src/training/config_guard.py` refuses
+any config that puts code-mixed rows into a run that is neither LoRA nor
+`s3_native`, and `tests/test_splits.py` refuses a Tortoise clip in any training
+manifest. Both run before a launch.
+
+### 6.3 Scoring
+
+One command per (model, set, condition); per-clip scores go beside each JSON.
+
+```bash
+python -m src.training.evaluate --checkpoint <ckpt>     --manifest data/manifests/<manifest>.csv     --data-root $DATA_ROOT --device cuda     --out results/<run>__<set>.json --scores-out results/<run>__<set>_scores.csv     --partial results/_partial_<set>.csv
+```
+
+| Set | Clean manifest | Channel manifest |
+|---|---|---|
+| Eval pool (XTTS) | `codemix_eval.csv` | `codemix_eval_channel20.csv` |
+| CM04 (Tortoise) | `score_cm04_norm.csv` | `score_cm04_norm_channel20.csv` |
+| RVC test | `rvc_holdout_test.csv` | `rvc_holdout_test_channel20.csv` |
+| English | `asvspoof_eval.csv` | same clips |
+
+`--partial` is a resume cache: a run killed by a driver reset or a reboot continues
+from where it stopped when you repeat the command. Delete the cache once the
+`_scores.csv` exists.
+
+### 6.4 Shortcut floors, then the tables
+
+The floors must exist before any EER is read, one per set and condition:
+
+```bash
+python -m src.data.lowlevel_cue --help     # fit on adaptation pool, score eval pool
+python -m src.reporting.ablation           # experiments/results/ablations.json
+python -m src.reporting.systems            # systems_s1_s2_s3.json + reverse degradation
+python -m src.reporting.figures --table    # experiments/figures/*.png
+```
+
+`src.reporting.systems` reads `results/s1_norm/` for S1's code-mixed cells and
+leaves them out if that directory is incomplete, rather than filling them with
+pre-normalisation numbers (P-032).
+
+### 6.5 Live-call operating point and the probes
+
+```bash
+python -m src.inference.calibrate --help                    # threshold + ladder (P-031)
+python -m src.inference.interpretability     --config configs/interpretability.yaml                  # what the model responds to
+```
+
+Outputs: `configs/threshold.yaml` with
+`experiments/results/threshold_calibration.json`, and
+`experiments/results/interpretability.json`
+(`docs/results/interpretability_v1.md`).
+
+### 6.6 What each paper table is built from
+
+| Paper element | Artefact |
+|---|---|
+| S1 gap table | `results/s1_norm/stage1__*.json` |
+| Shortcut floors | `experiments/results/lowlevel_cue_check_*.json` |
+| Main systems table | `experiments/results/systems_s1_s2_s3.json` |
+| RVC ablation | `experiments/results/ablations.json` |
+| English retention | `experiments/results/s3_reverse_degradation.json` |
+| Probe subsection | `experiments/results/interpretability.json` |
+| Live-call behaviour | `experiments/results/threshold_calibration.json` |
+
+### 6.7 Still open
+
+- [ ] Checkpoint SHA-256s and the commit hash per table, recorded at the freeze.
+- [ ] Checkpoints are in a private Kaggle dataset (`codemix-w10-results`); only the
+      deployed adapter is on the demo machine.

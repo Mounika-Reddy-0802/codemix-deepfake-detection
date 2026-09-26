@@ -79,3 +79,36 @@ def test_committed_artefacts_match_the_committed_summaries():
     assert row["eer"].iloc[0] == round(100 * s3["s3_native_rvc_clean__eval_pool"]["eer"], 2)
     reverse = json.load(open(sy.REVERSE_OUT))
     assert len(reverse["models"]) == 2 * len(sy.PAIRS)
+
+
+def _s1_codemix(eer: float = 0.48) -> dict:
+    return {
+        f"stage1_{condition}__{ev}": _run(eer) for ev in SETS for condition in ("clean", "channel")
+    }
+
+
+def test_s1_codemix_cells_are_read_against_the_same_floors():
+    s2, s3 = _summaries()
+    frame = sy.build_table(s2, s3, 0.85, FLOOR_VALUES, _s1_codemix(0.48))
+    s1 = frame[(frame["system"] == "S1 English-only") & (frame["set"] != "english")]
+    assert len(s1) == 2 * len(SETS)
+    assert (s1["floor"] == 20.0).all()
+    assert not s1["clears_floor"].any()
+
+
+def test_s1_codemix_is_omitted_when_not_measured():
+    s2, s3 = _summaries()
+    frame = sy.build_table(s2, s3, 0.85, FLOOR_VALUES)
+    s1 = frame[frame["system"] == "S1 English-only"]
+    assert set(s1["set"]) == {"english"}
+
+
+def test_load_s1_codemix_needs_every_set_and_condition(tmp_path):
+    assert sy.load_s1_codemix(str(tmp_path)) is None
+    for ev in SETS:
+        for suffix in ("", "_channel"):
+            (tmp_path / f"stage1__{ev}{suffix}.json").write_text(json.dumps({"pooled": _run(0.4)}))
+    loaded = sy.load_s1_codemix(str(tmp_path))
+    assert loaded is not None and len(loaded) == 2 * len(SETS)
+    (tmp_path / "stage1__cm04_channel.json").unlink()
+    assert sy.load_s1_codemix(str(tmp_path)) is None

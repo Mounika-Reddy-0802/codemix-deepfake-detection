@@ -9,6 +9,13 @@ Encoder: `wav2vec2-base`
 Maximum clip duration: 4.0 s  
 Evaluation manifest: `data/manifests/asvspoof_eval.csv`
 
+> **Two runs share this path.** The 0.5843% below is a Kaggle retrain. The
+> checkpoint now at `checkpoints/baseline/best.pt`, which every S2 adapter and the
+> deployed model descend from, measures **0.90% EER (AUC 0.9940)** locally and
+> 0.85% on a T4 (`results/s1_norm/stage1__asvspoof_eval.json`,
+> `experiments/asvspoof_retention_summary.json`). The paper reports 0.85%. See
+> P-032.
+
 ## Result
 
 | Metric | Result |

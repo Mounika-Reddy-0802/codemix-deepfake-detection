@@ -1,0 +1,42 @@
+# The deployed S2 adapter on the same clips as configs/interpretability_s1.yaml.
+checkpoint: C:/dfdata/checkpoints/lora_norm_rvc_channel_best.pt
+out: experiments/results/interpretability_s2_en.json
+device: cuda
+seed: 1234
+clip_seconds: 40.0
+demo_clips_dir: C:/dfdata/probe_clips
+asvspoof_root: C:/dfdata/raw/asvspoof2019_LA/LA
+
+# English calls built from ASVspoof eval clips (one real speaker, two attacks),
+# plus the code-mixed pair, so S1 and S2 are probed on identical audio.
+clips:
+  en_genuine:     {file: en_genuine.wav,     label: bonafide}
+  en_spoof_a10:   {file: en_spoof_a10.wav,   label: spoof}
+  en_spoof_a17:   {file: en_spoof_a17.wav,   label: spoof}
+  cm_genuine:     {file: cm_genuine.wav,     label: bonafide}
+  cm_xtts_clone:  {file: cm_xtts_clone.wav,  label: spoof}
+
+perturbations:
+  max_windows: 8
+  names:
+    - original
+    - volume_x0.1
+    - mu_law_pass
+    - noise_10db
+    - stft_roundtrip
+    - phase_scramble
+    - time_reverse
+    - shuffle_500ms
+    - shuffle_100ms
+    - shuffle_25ms
+    - shuffle_5ms
+    - keep_0_1khz
+    - keep_2_4khz
+    - remove_2_4khz
+    - slower_x1.4
+    - pitch_up_3
+
+layers:
+  clips: [en_genuine, en_spoof_a10, en_spoof_a17]
+  windows_per_clip: 20
+  train_frac: 0.6

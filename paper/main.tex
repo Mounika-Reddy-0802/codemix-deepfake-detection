@@ -1,12 +1,32 @@
-% IEEE conference template placeholder (Week 9, owner ALL).
-% TODO: paste IEEE conference class + sections/ includes.
 \documentclass[conference]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{url}
+
 \begin{document}
+
 \title{Quantifying and Closing the Code-Mixing Generalisation Gap in Audio Deepfake Detection}
-% \author{...}  % filled Week 9
+% \author{...}
+
 \maketitle
+
 \begin{abstract}
-Placeholder abstract.
+Placeholder abstract, to be written last from the final section text.
 \end{abstract}
-% \input{sections/...}  % Week 9
+
+% Section owners follow docs plan, Week 9. Uncomment each line once its file exists.
+% \input{sections/introduction}   % SK
+% \input{sections/related_work}   % SK
+% \input{sections/dataset}        % L: dataset, channel protocol, ethics
+\input{sections/methodology}      % M
+\input{sections/results}          % M
+% \input{sections/system}         % SK: live call system, label sec:system
+% \input{sections/conclusion}     % SK
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
 \end{document}
