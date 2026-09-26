@@ -1,0 +1,185 @@
+% Methodology (owner M). Every number below is read from a committed config,
+% manifest or results file; the source is named in a comment beside it.
+
+\section{Methodology}
+\label{sec:method}
+
+\subsection{Three systems}
+\label{sec:systems}
+
+We compare three detectors that share one architecture and differ only in what
+they are trained on and which weights move.
+
+\begin{itemize}
+  \item \textbf{S1, English only.} Trained on ASVspoof 2019 LA~\cite{todisco2019asvspoof}
+        and nothing else. It is the conventional detector whose transfer to
+        code-mixed speech we measure.
+  \item \textbf{S2, LoRA adaptation.} S1 with low-rank adapters~\cite{hu2022lora}
+        trained on code-mixed Hindi--English data. The encoder weights of S1 stay
+        frozen, so S2 can be read as S1 plus a small correction.
+  \item \textbf{S3, native training.} The same architecture fine-tuned end to end on
+        exactly the code-mixed manifests used by the matching S2 run, starting from
+        the self-supervised checkpoint and never from S1. It shows what the
+        code-mixed data alone supports.
+\end{itemize}
+
+S2 and S3 are each trained in four variants: on XTTS clones only or on XTTS clones
+plus RVC conversions, and on clean audio or on channel-matched audio
+(Sec.~\ref{sec:channel}). This gives eight code-mixed models and one English model.
+
+\subsection{Data}
+\label{sec:data}
+
+\textbf{English.} ASVspoof 2019 LA~\cite{todisco2019asvspoof}: the official training
+partition for S1, and the official evaluation partition of 71{,}237 clips over
+attacks A07--A19 for English retention.
+
+\textbf{Code-mixed real speech.} Hindi--English code-switched lecture speech from the
+MUCS 2021 corpus~\cite{diwan2021mucs}. Speakers are divided into disjoint pools
+before any synthesis: an adaptation pool of 10 speakers, used only by S2 and S3,
+and an evaluation pool of 15 speakers, never seen in training.
+% configs/data/splits.yaml; docs/datasheet.md
+
+\textbf{Code-mixed synthetic speech.} Four attack sets are built from these pools
+(Table~\ref{tab:attacks}). XTTS-v2~\cite{casanova2024xtts} zero-shot clones are made
+for both pools, so at test time XTTS is a \emph{seen tool on unseen speakers}.
+RVC~\cite{rvc2023} converts one MUCS speaker into another. Its conversions are split
+by speaker so that neither the source nor the target speaker of any training
+conversion appears in the RVC test half. Tortoise-TTS~\cite{betker2023tortoise}
+clones of the evaluation pool form the held-out attack: by rule it never appears in
+any training manifest, and an automated test fails the build if it does.
+% tests/test_splits.py, tests/test_config_guard.py
+
+\begin{table}[t]
+\centering
+\caption{Code-mixed attack sets. Usable clips passed the quality screen.}
+\label{tab:attacks}
+\small
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Set  & Tool      & Usable  & Role \\
+\midrule
+CM01 & XTTS-v2   & 3{,}998 & test, seen tool \\
+CM02 & RVC       & 1{,}404 & split: train half, test half \\
+CM03 & XTTS-v2   & 1{,}600 & adaptation only \\
+CM04 & Tortoise  & 458     & test, unseen tool \\
+\bottomrule
+\end{tabular}
+% docs/datasheet.md
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Code-mixed training and test sets (clips).}
+\label{tab:splits}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Set & Real & Fake & Total \\
+\midrule
+Adaptation, XTTS only   & 874     & 1{,}280 & 2{,}154 \\
+Adaptation, XTTS + RVC  & 1{,}217 & 1{,}637 & 2{,}854 \\
+Adaptation dev          & 186     & 320     & 506 \\
+\midrule
+Eval pool (XTTS)        & 1{,}566 & 2{,}400 & 3{,}966 \\
+CM04 (Tortoise)         & 1{,}566 & 458     & 2{,}024 \\
+RVC test\textsuperscript{a} & 302     & 317     & 619 \\
+\bottomrule
+\multicolumn{4}{@{}l}{\footnotesize \textsuperscript{a}Real side: MUCS source clips of the held-out speakers.}
+\end{tabular}
+% data/manifests/codemix_adapt_*.csv, codemix_eval.csv; results/w10/*.json
+\end{table}
+
+\textbf{Preprocessing.} All audio is resampled to 16~kHz mono, trimmed by voice
+activity detection and kept between 2 and 10~s. Every clip is level-normalised to
+$-23$~dBFS RMS. This step matters: without it the XTTS clones arrive
+peak-normalised while the lecture audio does not, and signal level alone separates
+the classes (Sec.~\ref{sec:floor}).
+% configs/data/channel_sim.yaml (preprocess block); docs/results/bundle_normalisation_v1.md
+
+\subsection{Channel-matched condition}
+\label{sec:channel}
+
+The target application is a telephone call. We therefore render every clip through a
+narrowband telephony chain: resample from 16 to 8~kHz, encode and decode with G.711
+$\mu$-law, add white noise at 20~dB SNR and resample back to 16~kHz. Noise is seeded
+per clip from a hash of its name. A single shared noise draw would add one identical
+waveform to every clip, which a detector could learn in place of the speech. On the
+evaluation render, energy above 4~kHz falls from 0.185\% to 0.0001\% and the measured
+SNR is 18.8~dB. A model is always scored in the condition it was trained in.
+% configs/data/channel_sim.yaml; docs/results/channel_matched_v1.md
+
+\subsection{Model}
+\label{sec:model}
+
+The detector is a wav2vec~2.0 base encoder~\cite{baevski2020wav2vec} followed by
+attentive statistics pooling~\cite{okabe2018attentive} and a two-layer classifier.
+The encoder reads the raw 16~kHz waveform. Seven convolutional layers produce one
+768-dimensional frame every 20~ms, each covering 25~ms of audio, and twelve
+transformer layers contextualise the frames. Pooling computes an attention-weighted
+mean and standard deviation over frames (attention width 128), giving a
+1{,}536-dimensional vector. The classifier is Linear(1536, 256), ReLU, dropout 0.3 and
+Linear(256, 2); its softmax output is read as $P(\text{genuine})$. The model has
+95{,}454{,}083 parameters. In every system the convolutional feature extractor is
+frozen, following common practice for self-supervised
+anti-spoofing~\cite{tak2022wav2vec}.
+% src/models/{encoder,pooling,classifier,detector}.py
+
+\subsection{Training}
+\label{sec:training}
+
+All systems use AdamW with weight decay $10^{-5}$, 4~s training crops, mixed
+precision and seed 1234. The remaining settings are in Table~\ref{tab:hparams}.
+The checkpoint with the lowest EER on the development set is kept.
+
+\textbf{S2.} Rank-8 adapters ($\alpha = 16$, dropout 0.05) wrap the query, key,
+value and output projections of all twelve transformer layers. Only the adapters and
+the classifier head are trained: 1{,}082{,}371 parameters, or 1.13\% of the model.
+% src/models/lora.py; docs/results/gap_closure_v1.md
+
+\textbf{S2 and S3} use class-weighted cross-entropy, since the adaptation sets are
+not balanced (Table~\ref{tab:splits}).
+
+\begin{table}[t]
+\centering
+\caption{Training settings.}
+\label{tab:hparams}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+                 & S1 & S2 (LoRA) & S3 (native) \\
+\midrule
+Initialised from & wav2vec 2.0 & S1 & wav2vec 2.0 \\
+Trained weights  & transformer, head & adapters, head & transformer, head \\
+Learning rate    & $10^{-5}$ & $10^{-4}$ & $10^{-5}$ \\
+Batch size       & 4 & 8 & 8 \\
+Epochs           & 3 & 5 & 10 \\
+Training data    & ASVspoof LA & code-mixed & code-mixed \\
+\bottomrule
+\end{tabular}
+% configs/train_stage1_run.yaml, train_lora_norm_*.yaml, train_s3_native_*.yaml
+\end{table}
+
+\subsection{Evaluation}
+\label{sec:eval}
+
+We report equal error rate (EER) and area under the ROC curve (AUC), scoring one
+deterministic 4~s crop per clip, with 95\% bootstrap confidence intervals over clips.
+Three code-mixed test sets probe three kinds of generalisation: the evaluation pool
+(seen tool, unseen speakers), CM04 (unseen tool) and the RVC test half (speakers
+unseen as either source or target). The ASVspoof 2019 LA evaluation set measures
+what each code-mixed model retains of English.
+
+\subsubsection{Shortcut floor}
+\label{sec:floor}
+A low EER on a newly built corpus is not evidence by itself. The real and fake halves
+come from different pipelines, and pipeline provenance can separate them without any
+knowledge of synthetic speech. Following the check proposed with
+AffectDF~\cite{affectdf2026}, we fit a logistic regression on eight cheap signal
+statistics (RMS mean and standard deviation, peak amplitude, clipping ratio, DC
+offset, zero-crossing rate, spectral roll-off and high-frequency energy ratio) on the
+adaptation pool, and score it on the speaker-disjoint test set. Its EER is that set's
+\emph{shortcut floor}, measured separately for every test set and condition. We count
+a detector's result as evidence only when the upper bound of its confidence interval
+lies below the floor.
+% src/data/lowlevel_cue.py; experiments/results/lowlevel_cue_check_*.json
