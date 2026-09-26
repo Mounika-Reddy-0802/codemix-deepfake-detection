@@ -140,3 +140,130 @@ def test_media_stream_becomes_a_monitored_session(client):
 def test_results_endpoint_reads_committed_json(client):
     body = client.get("/api/results").json()
     assert set(body) == {"systems", "ablation", "reverse_degradation", "calibration"}
+
+
+def test_phone_pages_are_served(client):
+    for path in ("/phone", "/phone/caller", "/phone/receiver"):
+        response = client.get(path)
+        assert response.status_code == 200 and "<html" in response.text
+
+
+def test_two_handsets_ring_accept_and_hang_up(client):
+    """The full call, driven through the two handset sockets the browsers use."""
+    caller_q = "/ws/phone?room=t1&role=caller&name=Ravi&number=%2B911"
+    receiver_q = "/ws/phone?room=t1&role=receiver&name=Priya&number=%2B912"
+    with client.websocket_connect(caller_q) as caller:
+        assert caller.receive_json()["type"] == "joined"
+        with client.websocket_connect(receiver_q) as receiver:
+            assert receiver.receive_json()["type"] == "joined"
+            caller.receive_json()  # the caller is told the receiver appeared
+
+            caller.send_json({"action": "dial"})
+            ringing = receiver.receive_json()
+            assert ringing["type"] == "ringing"
+            assert ringing["parties"]["caller"]["name"] == "Ravi"
+            assert ringing["you"] == "receiver"
+            assert caller.receive_json()["type"] == "ringing"
+
+            receiver.send_json({"action": "accept"})
+            assert receiver.receive_json()["type"] == "connected"
+            assert caller.receive_json()["type"] == "connected"
+
+            receiver.send_json({"action": "hangup"})
+            ended = caller.receive_json()
+            assert ended["type"] == "ended" and "receiver" in ended["reason"]
+
+
+def test_a_declined_call_never_connects(client):
+    with client.websocket_connect("/ws/phone?room=t2&role=caller") as caller:
+        caller.receive_json()
+        with client.websocket_connect("/ws/phone?room=t2&role=receiver") as receiver:
+            receiver.receive_json()
+            caller.receive_json()
+            caller.send_json({"action": "dial"})
+            receiver.receive_json()
+            caller.receive_json()
+            receiver.send_json({"action": "decline"})
+            ended = caller.receive_json()
+            assert ended["type"] == "ended" and ended["state"] == "ended"
+            assert ended["connected"] is None
+
+
+def test_dialling_without_a_receiver_reports_unavailable(client):
+    with client.websocket_connect("/ws/phone?room=t3&role=caller") as caller:
+        caller.receive_json()
+        caller.send_json({"action": "dial"})
+        assert caller.receive_json()["type"] == "unavailable"
+
+
+def test_an_unknown_role_is_rejected(client):
+    from starlette.websockets import WebSocketDisconnect
+
+    with pytest.raises(WebSocketDisconnect):
+        with client.websocket_connect("/ws/phone?room=t4&role=operator") as ws:
+            ws.receive_json()
+
+
+def test_the_verdict_relay_is_running(client):
+    """Startup subscribes the exchange to the hub; routing itself is unit-tested
+    in tests/test_phone.py, which does not need the event loop."""
+    assert client.shared.hub.subscribers >= 1, "the relay did not subscribe to the hub"
+
+
+def test_caller_audio_is_monitored_only_once_the_call_is_answered(client):
+    """Scoring must not start while the phone rings: the media path is still
+    settling, and a renegotiation glitch there used to caution a genuine caller."""
+    from live_call.phone import CALLER
+    from live_call.session import SessionInfo
+
+    shared = client.shared
+    with client.websocket_connect("/ws/phone?room=t6&role=caller") as caller:
+        caller.receive_json()
+        with client.websocket_connect("/ws/phone?room=t6&role=receiver") as receiver:
+            receiver.receive_json()
+            caller.receive_json()
+            line = shared.exchange.line("t6")
+            assert line.parties.get(CALLER) is not None
+
+            # the caller's audio arrives while the line is still idle
+            info = SessionInfo("held-1", "webrtc", "caller in t6", meta={"room": "t6"})
+            shared.pending.setdefault("t6", []).append((info, _silent_source()))
+            assert shared.sessions.get("held-1") is None, "must not be scored yet"
+
+            caller.send_json({"action": "dial"})
+            receiver.receive_json()
+            caller.receive_json()
+            assert "t6" in shared.pending, "still only ringing"
+
+            receiver.send_json({"action": "accept"})
+            receiver.receive_json()
+            caller.receive_json()
+            assert "t6" not in shared.pending, "answering releases the held audio"
+            assert shared.exchange.line("t6").session_id == "held-1"
+
+
+def test_declining_throws_away_the_held_audio(client):
+    shared = client.shared
+    with client.websocket_connect("/ws/phone?room=t7&role=caller") as caller:
+        caller.receive_json()
+        with client.websocket_connect("/ws/phone?room=t7&role=receiver") as receiver:
+            receiver.receive_json()
+            caller.receive_json()
+            shared.pending.setdefault("t7", []).append(("info", "source"))
+            caller.send_json({"action": "dial"})
+            receiver.receive_json()
+            caller.receive_json()
+            receiver.send_json({"action": "decline"})
+            caller.receive_json()
+            assert "t7" not in shared.pending
+
+
+def _silent_source():
+    """A PcmFrameSource that ends immediately, for tests that only need an object."""
+
+    class _Source:
+        async def frames(self):
+            return
+            yield  # pragma: no cover - makes this an async generator
+
+    return _Source()

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Receiver handset</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/phone.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Receiver handset<small>device B &mdash; the person being called, and the warning</small></div>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/demo">Live console</a>
+      <a href="/phone">Phone demo</a>
+      <a href="/phone/caller" target="_blank">Caller</a>
+      <a href="/phone/receiver" class="active">Receiver</a>
+      <a href="/dashboard" target="_blank">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="stage">
+      <section class="device receiver">
+        <div class="notch"></div>
+        <div class="statusbar"><span id="net">connecting…</span><span>line <b id="roomTag">demo</b></span></div>
+        <div class="screen">
+          <span class="role-tag">Receiver</span>
+
+          <div class="who">
+            <div class="avatar" id="avatar">?</div>
+            <div class="name" id="peerName">Waiting for a call</div>
+            <div class="number" id="peerNumber">this handset is free</div>
+            <div class="callstate" id="callstate">Idle</div>
+            <div class="timer" id="timer"></div>
+          </div>
+
+          <div class="detector listening" id="detector" hidden>
+            <div class="head"><span class="light"></span> Voice authenticity</div>
+            <div class="verdict-text" id="verdictText">Listening…</div>
+            <div class="score" id="scoreText">waiting for speech</div>
+            <div class="bar"><div id="scoreBar"></div></div>
+            <canvas id="spark"></canvas>
+          </div>
+
+          <div class="warn" id="warn"></div>
+
+          <div class="summary" id="summary" hidden>
+            <b>Call summary</b>
+            <dl>
+              <dt>Duration</dt><dd id="sumDuration">–</dd>
+              <dt>Worst verdict</dt><dd id="sumVerdict">–</dd>
+              <dt>Windows scored</dt><dd id="sumWindows">–</dd>
+              <dt>Fake-leaning</dt><dd id="sumFake">–</dd>
+            </dl>
+          </div>
+
+          <div class="keys">
+            <div class="keywrap">
+              <button class="key answer" id="acceptBtn" title="Accept" disabled>&#9742;</button>
+              <span class="label">Accept</span>
+            </div>
+            <div class="keywrap">
+              <button class="key end" id="endBtn" title="Decline / end" disabled>&#10006;</button>
+              <span class="label" id="endLabel">Decline</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="link">
+        <div class="state" id="linkState">Idle</div>
+        <div class="wire"></div>
+        <div class="hops">
+          <span class="hop" id="hop1">caller handset</span>
+          <span class="hop" id="hop2">detector</span>
+          <span class="hop" id="hop3">receiver handset</span>
+        </div>
+        <p class="small" style="margin-top:1rem">Only this side sees the verdict. The caller's screen shows
+          nothing, so a fraudster would not know they were detected.</p>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:760px;margin:1.5rem auto 0">
+      <h2>Identity on this handset</h2>
+      <div class="grid two">
+        <label>Your name<br /><input type="text" id="myName" /></label>
+        <label>Your number<br /><input type="text" id="myNumber" /></label>
+      </div>
+      <label class="small"><input type="checkbox" id="sound" checked /> warning tone and ringtone</label>
+      <p class="small muted">Reload after changing these. The live dashboard shows the same call in full detail.</p>
+    </div>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/phone.js"></script>
+  <script>
+    const room = qs("room", "demo");
+    document.getElementById("roomTag").textContent = room;
+    const nameEl = document.getElementById("myName");
+    const numberEl = document.getElementById("myNumber");
+    nameEl.value = qs("name", "Priya Sharma");
+    numberEl.value = qs("number", "+91 98200 55678");
+
+    const ui = {
+      state: document.getElementById("callstate"),
+      timer: document.getElementById("timer"),
+      peerName: document.getElementById("peerName"),
+      peerNumber: document.getElementById("peerNumber"),
+      avatar: document.getElementById("avatar"),
+      accept: document.getElementById("acceptBtn"),
+      end: document.getElementById("endBtn"),
+      endLabel: document.getElementById("endLabel"),
+      net: document.getElementById("net"),
+      detector: document.getElementById("detector"),
+      verdictText: document.getElementById("verdictText"),
+      scoreText: document.getElementById("scoreText"),
+      scoreBar: document.getElementById("scoreBar"),
+      spark: document.getElementById("spark"),
+      warn: document.getElementById("warn"),
+      summary: document.getElementById("summary"),
+      linkState: document.getElementById("linkState"),
+    };
+
+    const media = new Media();
+    const remote = new Audio();
+    remote.autoplay = true;
+    let line = null, timerId = null, points = [], threshold = null, soundOn = true;
+    document.getElementById("sound").addEventListener("change", (e) => (soundOn = e.target.checked));
+
+    getJSON("/api/health").then((h) => (threshold = h.detector.threshold)).catch(() => {});
+
+    function setHops(on) {
+      ["hop1", "hop2", "hop3"].forEach((id, i) =>
+        document.getElementById(id).classList.toggle("on", i < on));
+    }
+
+    function resetCall() {
+      clearInterval(timerId);
+      stopRing();
+      media.close();
+      points = [];
+      ui.timer.textContent = "";
+      ui.avatar.classList.remove("ringing");
+      ui.accept.disabled = true;
+      ui.end.disabled = true;
+      ui.endLabel.textContent = "Decline";
+      setHops(0);
+      ui.linkState.textContent = "Idle";
+    }
+
+    function clearVerdict() {
+      ui.detector.hidden = true;
+      ui.detector.className = "detector listening";
+      ui.verdictText.textContent = "Listening…";
+      ui.scoreText.textContent = "waiting for speech";
+      ui.scoreBar.style.width = "0%";
+      ui.warn.className = "warn";
+      ui.warn.textContent = "";
+      ui.summary.hidden = true;
+    }
+
+    async function openLine() {
+      line = new Line({ room, role: "receiver", name: nameEl.value, number: numberEl.value });
+      line
+        .on("joined", onLine)
+        .on("line", onLine)
+        .on("ringing", onRinging)
+        .on("connected", onConnected)
+        .on("ended", onEnded)
+        .on("verdict", onVerdict)
+        .on("renegotiate", () => media.negotiate({ room, role: "receiver", name: nameEl.value, monitor: false }))
+        .on("closed", () => (ui.net.textContent = "disconnected"));
+      await line.connect();
+      ui.net.textContent = "on the network";
+    }
+
+    function onLine(msg) {
+      const peer = (msg.parties || {}).caller;
+      if (msg.state === "idle" || msg.state === "ended") {
+        ui.peerName.textContent = peer ? "Waiting for a call" : "No caller handset";
+        ui.peerNumber.textContent = peer ? peer.number + " is on the line" : "open /phone/caller on the other device";
+        ui.avatar.textContent = "?";
+      }
+    }
+
+    function onRinging(msg) {
+      const caller = (msg.parties || {}).caller || { name: "Unknown", number: "" };
+      clearVerdict();
+      ui.peerName.textContent = caller.name;
+      ui.peerNumber.textContent = caller.number;
+      ui.avatar.textContent = initials(caller.name);
+      ui.avatar.classList.add("ringing");
+      ui.state.textContent = "Incoming call…";
+      ui.accept.disabled = false;
+      ui.end.disabled = false;
+      ui.endLabel.textContent = "Decline";
+      ui.linkState.textContent = "Ringing";
+      setHops(1);
+      if (soundOn) startRing("ring");
+    }
+
+    async function onConnected(msg) {
+      stopRing();
+      ui.avatar.classList.remove("ringing");
+      ui.state.textContent = "Connected";
+      ui.accept.disabled = true;
+      ui.end.disabled = false;
+      ui.endLabel.textContent = "End";
+      ui.detector.hidden = false;
+      timerId = startTimer(ui.timer, msg.connected);
+      ui.linkState.textContent = "In call";
+      setHops(3);
+      try {
+        await media.open("mic", {});
+        await media.connect({ room, role: "receiver", name: nameEl.value, monitor: false },
+                            (stream) => (remote.srcObject = stream));
+        line.send("pc", { pc_id: media.pcId });
+      } catch (err) {
+        ui.state.textContent = "Connected (no microphone: " + err.message + ")";
+      }
+    }
+
+    function onVerdict(msg) {
+      if (msg.state) {
+        ui.detector.className = "detector " + msg.state;
+        ui.verdictText.textContent = stateText(msg.state);
+      }
+      if (msg.score !== undefined && msg.score !== null && msg.t !== undefined) {
+        points.push({ t: msg.t, score: msg.score, smoothed: msg.smoothed });
+        ui.scoreBar.style.width = Math.round(100 * msg.score) + "%";
+        ui.scoreText.textContent = "P(genuine) " + msg.score.toFixed(3) + " · " + Math.round(msg.t) + " s of speech";
+        drawTimeline(ui.spark, points, threshold);
+      }
+      // severity lives in state; kind names the channel the alert went out on
+      if (msg.event === "event" && (msg.state === "suspicious" || msg.state === "likely_fake")) {
+        ui.warn.className = "warn show " + msg.state;
+        ui.warn.innerHTML = msg.state === "likely_fake"
+          ? "<b>Warning: this voice is likely cloned.</b>Do not share codes, passwords or money. Verify the caller another way."
+          : "<b>Caution: this voice may be synthetic.</b>Stay on the call but do not act on any request yet.";
+        if (soundOn) warningTone(msg.state === "likely_fake" ? "sms" : "beep");
+      }
+      if (msg.event === "session_end") {
+        document.getElementById("sumWindows").textContent = msg.scored_windows ?? "–";
+        document.getElementById("sumFake").textContent = msg.fake_leaning_windows ?? "–";
+        document.getElementById("sumVerdict").textContent = stateText(msg.peak_state || "listening");
+        ui.summary.hidden = false;
+      }
+    }
+
+    function onEnded(msg) {
+      ui.state.textContent = "Call ended" + (msg.duration ? " · " + mmss(msg.duration) : "");
+      document.getElementById("sumDuration").textContent = mmss(msg.duration || 0);
+      ui.summary.hidden = false;
+      resetCall();
+    }
+
+    ui.accept.onclick = () => { unlockAudio(); line.send("accept"); };
+    ui.end.onclick = () => {
+      line.send(line.state === "ringing" ? "decline" : "hangup");
+      resetCall();
+    };
+
+    openLine().catch(() => (ui.net.textContent = "server unreachable"));
+    window.addEventListener("beforeunload", () => media.close());
+  </script>
+</body>
+</html>

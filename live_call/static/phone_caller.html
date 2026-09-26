@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Caller handset</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/phone.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Caller handset<small>device A &mdash; the person placing the call</small></div>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/demo">Live console</a>
+      <a href="/phone">Phone demo</a>
+      <a href="/phone/caller" class="active">Caller</a>
+      <a href="/phone/receiver" target="_blank">Receiver</a>
+      <a href="/dashboard" target="_blank">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="stage">
+      <section class="device caller">
+        <div class="notch"></div>
+        <div class="statusbar"><span id="net">connecting…</span><span>line <b id="roomTag">demo</b></span></div>
+        <div class="screen">
+          <span class="role-tag">Caller</span>
+
+          <div class="who">
+            <div class="avatar" id="avatar">R</div>
+            <div class="name" id="peerName">Receiver</div>
+            <div class="number" id="peerNumber">…</div>
+            <div class="callstate" id="callstate">Ready to call</div>
+            <div class="timer" id="timer"></div>
+          </div>
+
+          <div id="setup">
+            <div class="field">
+              <label for="src">What this caller sends</label>
+              <select id="src">
+                <option value="mic">My microphone (a real person speaking)</option>
+                <option value="clip">A prepared clip (real or cloned voice)</option>
+                <option value="file">An audio file from this device</option>
+              </select>
+            </div>
+            <div class="field" id="clipField" hidden>
+              <label for="clip">Clip</label>
+              <select id="clip"></select>
+            </div>
+            <div class="field" id="fileField" hidden>
+              <label for="file">File</label>
+              <input type="file" id="file" accept="audio/*" />
+            </div>
+          </div>
+
+          <div class="meter"><div id="meterBar"></div></div>
+          <div class="hint" id="hint">Your voice is carried to the receiver.</div>
+
+          <div class="keys">
+            <div class="keywrap">
+              <button class="key answer" id="callBtn" title="Call">&#9742;</button>
+              <span class="label">Call</span>
+            </div>
+            <div class="keywrap">
+              <button class="key end" id="endBtn" title="End call" disabled>&#10006;</button>
+              <span class="label">End</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="link">
+        <div class="state" id="linkState">Idle</div>
+        <div class="wire"></div>
+        <div class="hops">
+          <span class="hop" id="hop1">caller handset</span>
+          <span class="hop" id="hop2">detector</span>
+          <span class="hop" id="hop3">receiver handset</span>
+        </div>
+        <p class="small" style="margin-top:1rem">The caller is never told the verdict, exactly as in a real
+          fraud warning. Watch the receiver's screen.</p>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:760px;margin:1.5rem auto 0">
+      <h2>Identity on this handset</h2>
+      <div class="grid two">
+        <label>Your name<br /><input type="text" id="myName" /></label>
+        <label>Your number<br /><input type="text" id="myNumber" /></label>
+      </div>
+      <p class="small muted">Set these before calling; they appear on the receiver's screen. Change the line with
+        <code>?room=demo2</code> if two pairs demo at once.</p>
+    </div>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/phone.js"></script>
+  <script>
+    const room = qs("room", "demo");
+    document.getElementById("roomTag").textContent = room;
+    const nameEl = document.getElementById("myName");
+    const numberEl = document.getElementById("myNumber");
+    nameEl.value = qs("name", "Ravi Kumar");
+    numberEl.value = qs("number", "+91 98200 11234");
+
+    const ui = {
+      state: document.getElementById("callstate"),
+      timer: document.getElementById("timer"),
+      peerName: document.getElementById("peerName"),
+      peerNumber: document.getElementById("peerNumber"),
+      avatar: document.getElementById("avatar"),
+      call: document.getElementById("callBtn"),
+      end: document.getElementById("endBtn"),
+      net: document.getElementById("net"),
+      hint: document.getElementById("hint"),
+      setup: document.getElementById("setup"),
+      linkState: document.getElementById("linkState"),
+    };
+
+    const media = new Media();
+    const remote = new Audio();
+    remote.autoplay = true;
+    let line = null, timerId = null;
+
+    function setHops(on) {
+      ["hop1", "hop2", "hop3"].forEach((id, i) =>
+        document.getElementById(id).classList.toggle("on", i < on));
+    }
+
+    function showState(text) { ui.state.textContent = text; }
+
+    function reset() {
+      clearInterval(timerId);
+      stopRing();
+      media.close();
+      ui.timer.textContent = "";
+      ui.avatar.classList.remove("ringing");
+      ui.call.disabled = false;
+      ui.end.disabled = true;
+      ui.setup.style.display = "";
+      setHops(0);
+      ui.linkState.textContent = "Idle";
+    }
+
+    async function loadClips() {
+      try {
+        const clips = await getJSON("/api/demo-clips");
+        const select = document.getElementById("clip");
+        select.replaceChildren(...clips.map((c) =>
+          el("option", { value: c.id, text: c.title + (c.label === "spoof" ? " (cloned)" : " (real)") })));
+      } catch (e) { /* no prepared clips on this machine */ }
+    }
+    loadClips();
+
+    document.getElementById("src").addEventListener("change", (ev) => {
+      document.getElementById("clipField").hidden = ev.target.value !== "clip";
+      document.getElementById("fileField").hidden = ev.target.value !== "file";
+    });
+
+    async function openLine() {
+      line = new Line({ room, role: "caller", name: nameEl.value, number: numberEl.value });
+      line
+        .on("joined", onLine)
+        .on("line", onLine)
+        .on("ringing", (m) => { onLine(m); showState("Ringing…"); startRing("ringback");
+                                ui.avatar.classList.add("ringing"); ui.linkState.textContent = "Ringing"; setHops(1); })
+        .on("connected", onConnected)
+        .on("ended", onEnded)
+        .on("unavailable", (m) => { showState(m.message); reset(); })
+        .on("renegotiate", () => media.negotiate({ room, role: "caller", name: nameEl.value }))
+        .on("closed", () => { ui.net.textContent = "disconnected"; });
+      await line.connect();
+      ui.net.textContent = "on the network";
+    }
+
+    function onLine(msg) {
+      const peer = (msg.parties || {}).receiver;
+      ui.peerName.textContent = peer ? peer.name : "No receiver handset";
+      ui.peerNumber.textContent = peer ? peer.number : "open /phone/receiver on the other device";
+      ui.avatar.textContent = initials(peer ? peer.name : "?");
+      ui.call.disabled = !peer || ["ringing", "connected"].includes(msg.state);
+    }
+
+    async function onConnected(msg) {
+      stopRing();
+      ui.avatar.classList.remove("ringing");
+      showState("Connected");
+      timerId = startTimer(ui.timer, msg.connected);
+      ui.linkState.textContent = "In call";
+      setHops(3);
+      media.playClip();
+      ui.hint.textContent = "Connected. The detector is scoring this side of the call.";
+    }
+
+    function onEnded(msg) {
+      showState("Call ended" + (msg.duration ? " · " + mmss(msg.duration) : ""));
+      reset();
+    }
+
+    ui.call.onclick = async () => {
+      unlockAudio();
+      ui.call.disabled = true;
+      const mode = document.getElementById("src").value;
+      const clipId = document.getElementById("clip").value;
+      try {
+        await media.open(mode, {
+          clipUrl: clipId ? `/api/demo-clips/${clipId}/audio` : null,
+          file: document.getElementById("file").files[0],
+          meterBar: document.getElementById("meterBar"),
+        });
+      } catch (err) {
+        showState("Cannot start audio: " + err.message);
+        ui.call.disabled = false;
+        return;
+      }
+      await media.connect({ room, role: "caller", name: nameEl.value, monitor: true },
+                          (stream) => (remote.srcObject = stream));
+      line.send("pc", { pc_id: media.pcId });
+      line.send("dial");
+      ui.end.disabled = false;
+      ui.setup.style.display = "none";
+      showState("Calling…");
+    };
+
+    ui.end.onclick = () => { line.send("hangup"); reset(); showState("Call ended"); };
+
+    openLine().catch(() => (ui.net.textContent = "server unreachable"));
+    window.addEventListener("beforeunload", () => media.close());
+  </script>
+</body>
+</html>
