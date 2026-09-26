@@ -1,0 +1,138 @@
+{
+  "checkpoint": "C:/dfdata/checkpoints/lora_norm_rvc_channel_best.pt",
+  "seed": 1234,
+  "clip_seconds": 40.0,
+  "perturbations": {
+    "original": {
+      "en_genuine": 0.9998364299535751,
+      "en_spoof_a10": 0.8347719621378928,
+      "en_spoof_a17": 0.00018685341274249367,
+      "cm_genuine": 0.9986951798200607,
+      "cm_xtts_clone": 0.00018745566558209248
+    },
+    "volume_x0.1": {
+      "en_genuine": 0.9998364299535751,
+      "en_spoof_a10": 0.8348730525467545,
+      "en_spoof_a17": 0.00018685379473026842,
+      "cm_genuine": 0.9986950159072876,
+      "cm_xtts_clone": 0.00018745514353213366
+    },
+    "mu_law_pass": {
+      "en_genuine": 0.9998355954885483,
+      "en_spoof_a10": 0.8502072745468467,
+      "en_spoof_a17": 0.00018609330254548695,
+      "cm_genuine": 0.9949747994542122,
+      "cm_xtts_clone": 0.00018920442926173564
+    },
+    "noise_10db": {
+      "en_genuine": 0.9774707183241844,
+      "en_spoof_a10": 0.7443879740312696,
+      "en_spoof_a17": 0.5442808274237905,
+      "cm_genuine": 0.8827494829893112,
+      "cm_xtts_clone": 0.0003922511787095573
+    },
+    "stft_roundtrip": {
+      "en_genuine": 0.9998364299535751,
+      "en_spoof_a10": 0.8348952832166106,
+      "en_spoof_a17": 0.00018685303075471893,
+      "cm_genuine": 0.998694010078907,
+      "cm_xtts_clone": 0.00018745381385087967
+    },
+    "phase_scramble": {
+      "en_genuine": 0.00021230560196272563,
+      "en_spoof_a10": 0.00019701797828020062,
+      "en_spoof_a17": 0.00020453366778383497,
+      "cm_genuine": 0.004219777505568345,
+      "cm_xtts_clone": 0.00019019016326637939
+    },
+    "time_reverse": {
+      "en_genuine": 0.12460223607195076,
+      "en_spoof_a10": 0.00019879965657310095,
+      "en_spoof_a17": 0.00021037714395788498,
+      "cm_genuine": 0.28900208336381183,
+      "cm_xtts_clone": 0.00019663658713398036
+    },
+    "shuffle_500ms": {
+      "en_genuine": 0.9640363156795502,
+      "en_spoof_a10": 0.00021816980734001845,
+      "en_spoof_a17": 0.00019116744988423306,
+      "cm_genuine": 0.9995753392577171,
+      "cm_xtts_clone": 0.00018684703536564484
+    },
+    "shuffle_100ms": {
+      "en_genuine": 0.00020905562450934667,
+      "en_spoof_a10": 0.0001948763838299783,
+      "en_spoof_a17": 0.00020232207134540658,
+      "cm_genuine": 0.9995395615696907,
+      "cm_xtts_clone": 0.00019368867287994362
+    },
+    "shuffle_25ms": {
+      "en_genuine": 0.00022182681095728185,
+      "en_spoof_a10": 0.00021881923021283,
+      "en_spoof_a17": 0.0002868444407795323,
+      "cm_genuine": 0.6336385533522844,
+      "cm_xtts_clone": 0.00020646461234719027
+    },
+    "shuffle_5ms": {
+      "en_genuine": 0.00020402091467985883,
+      "en_spoof_a10": 0.000220790849198238,
+      "en_spoof_a17": 0.00020032992142660078,
+      "cm_genuine": 0.00021642471619998105,
+      "cm_xtts_clone": 0.00023878821230027825
+    },
+    "keep_0_1khz": {
+      "en_genuine": 0.37308945755466993,
+      "en_spoof_a10": 0.0003373117306182394,
+      "en_spoof_a17": 0.0002227716122433776,
+      "cm_genuine": 0.9636016115546227,
+      "cm_xtts_clone": 0.000342379560606787
+    },
+    "keep_2_4khz": {
+      "en_genuine": 0.6516076183652331,
+      "en_spoof_a10": 0.00023510012033511885,
+      "en_spoof_a17": 0.2166786885336478,
+      "cm_genuine": 0.7101015402004123,
+      "cm_xtts_clone": 0.1605125656205928
+    },
+    "remove_2_4khz": {
+      "en_genuine": 0.999832846224308,
+      "en_spoof_a10": 0.6763617164415336,
+      "en_spoof_a17": 0.00019739544586627744,
+      "cm_genuine": 0.9991917461156845,
+      "cm_xtts_clone": 0.017365355271977023
+    },
+    "slower_x1.4": {
+      "en_genuine": 0.1286716417325806,
+      "en_spoof_a10": 0.10416713665108546,
+      "en_spoof_a17": 0.005184112134884344,
+      "cm_genuine": 0.48388299019279657,
+      "cm_xtts_clone": 0.10090424746886129
+    },
+    "pitch_up_3": {
+      "en_genuine": 0.00023838668494136073,
+      "en_spoof_a10": 0.0003029601903108414,
+      "en_spoof_a17": 0.0002255413965031039,
+      "cm_genuine": 0.2942395407008007,
+      "cm_xtts_clone": 0.00031982592190615833
+    }
+  },
+  "layers": {
+    "genuine_windows": 19,
+    "cloned_windows": 38,
+    "held_out_auc": {
+      "cnn_output": 0.9545454545454546,
+      "transformer_1": 0.9318181818181818,
+      "transformer_2": 0.9696969696969697,
+      "transformer_3": 1.0,
+      "transformer_4": 1.0,
+      "transformer_5": 1.0,
+      "transformer_6": 1.0,
+      "transformer_7": 1.0,
+      "transformer_8": 1.0,
+      "transformer_9": 1.0,
+      "transformer_10": 1.0,
+      "transformer_11": 1.0,
+      "transformer_12": 1.0
+    }
+  }
+}

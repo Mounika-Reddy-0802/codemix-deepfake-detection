@@ -1,0 +1,194 @@
+{
+  "checkpoint": "C:/dfdata/checkpoints/lora_norm_rvc_channel_best.pt",
+  "seed": 1234,
+  "clip_seconds": 60.0,
+  "perturbations": {
+    "original": {
+      "genuine": 0.9986951798200607,
+      "rvc_source": 0.9997257515788078,
+      "xtts_clone": 0.00018745566558209248,
+      "rvc_conversion": 0.002346021401535836,
+      "tortoise_clone": 0.991495206952095
+    },
+    "volume_x0.1": {
+      "genuine": 0.9986950159072876,
+      "rvc_source": 0.9997257813811302,
+      "xtts_clone": 0.00018745514353213366,
+      "rvc_conversion": 0.002345163507925463,
+      "tortoise_clone": 0.9915059804916382
+    },
+    "mu_law_pass": {
+      "genuine": 0.9949747994542122,
+      "rvc_source": 0.9994302913546562,
+      "xtts_clone": 0.00018920442926173564,
+      "rvc_conversion": 0.0011708784259099048,
+      "tortoise_clone": 0.8782557076774538
+    },
+    "noise_20db": {
+      "genuine": 0.9766076430678368,
+      "rvc_source": 0.9910932555794716,
+      "xtts_clone": 0.0007040642194624525,
+      "rvc_conversion": 0.05604256831065868,
+      "tortoise_clone": 0.9754652604460716
+    },
+    "noise_10db": {
+      "genuine": 0.881782703101635,
+      "rvc_source": 0.9565929546952248,
+      "xtts_clone": 0.0009569384528731462,
+      "rvc_conversion": 0.28098203684203327,
+      "tortoise_clone": 0.971315436065197
+    },
+    "stft_roundtrip": {
+      "genuine": 0.998694010078907,
+      "rvc_source": 0.999725766479969,
+      "xtts_clone": 0.00018745381385087967,
+      "rvc_conversion": 0.0023539827761851484,
+      "tortoise_clone": 0.9915186688303947
+    },
+    "phase_vocoder_rate_1.0": {
+      "genuine": 0.9985829219222069,
+      "rvc_source": 0.9997364580631256,
+      "xtts_clone": 0.00018682240443013143,
+      "rvc_conversion": 0.0006034729831299046,
+      "tortoise_clone": 0.988865002989769
+    },
+    "phase_scramble": {
+      "genuine": 0.00027545736156753264,
+      "rvc_source": 0.001719789048365783,
+      "xtts_clone": 0.00019083789084106684,
+      "rvc_conversion": 0.044783292221836746,
+      "tortoise_clone": 0.501792079758161
+    },
+    "time_reverse": {
+      "genuine": 0.5105340349346079,
+      "rvc_source": 0.1437770431421086,
+      "xtts_clone": 0.00019722422075574286,
+      "rvc_conversion": 0.00023321611297433265,
+      "tortoise_clone": 0.5165690016729059
+    },
+    "shuffle_500ms": {
+      "genuine": 0.9996038973331451,
+      "rvc_source": 0.9992918968200684,
+      "xtts_clone": 0.0001867002520157257,
+      "rvc_conversion": 0.0001935903237608727,
+      "tortoise_clone": 0.9976859763264656
+    },
+    "shuffle_100ms": {
+      "genuine": 0.9994707033038139,
+      "rvc_source": 0.9973996430635452,
+      "xtts_clone": 0.00019375266492716037,
+      "rvc_conversion": 0.00019778322530328296,
+      "tortoise_clone": 0.8584299267386086
+    },
+    "shuffle_25ms": {
+      "genuine": 0.5247957923675131,
+      "rvc_source": 0.936256542801857,
+      "xtts_clone": 0.00020859154574282002,
+      "rvc_conversion": 0.00020432585006346926,
+      "tortoise_clone": 0.9938549548387527
+    },
+    "shuffle_5ms": {
+      "genuine": 0.00020433167264855,
+      "rvc_source": 0.00019931115457438864,
+      "xtts_clone": 0.00021763629047200084,
+      "rvc_conversion": 0.00022385450029105414,
+      "tortoise_clone": 0.00020855006914644036
+    },
+    "keep_0_1khz": {
+      "genuine": 0.9636016115546227,
+      "rvc_source": 0.99394291639328,
+      "xtts_clone": 0.000342379560606787,
+      "rvc_conversion": 0.5626965051051229,
+      "tortoise_clone": 0.8763695601373911
+    },
+    "keep_1_2khz": {
+      "genuine": 0.06557422058904194,
+      "rvc_source": 0.028759399607224623,
+      "xtts_clone": 0.12599571628015838,
+      "rvc_conversion": 0.10726201585202944,
+      "tortoise_clone": 0.17801613768097013
+    },
+    "keep_2_4khz": {
+      "genuine": 0.7101015402004123,
+      "rvc_source": 0.7011722736060619,
+      "xtts_clone": 0.1605125656205928,
+      "rvc_conversion": 0.32046829574392177,
+      "tortoise_clone": 0.5939912373178231
+    },
+    "remove_0.3_1khz": {
+      "genuine": 0.9993147403001785,
+      "rvc_source": 0.9977486804127693,
+      "xtts_clone": 0.45177632199192885,
+      "rvc_conversion": 0.12059583401060081,
+      "tortoise_clone": 0.998873844742775
+    },
+    "remove_2_4khz": {
+      "genuine": 0.9991917461156845,
+      "rvc_source": 0.998405933380127,
+      "xtts_clone": 0.017365355271977023,
+      "rvc_conversion": 0.1152226642207097,
+      "tortoise_clone": 0.9976495653390884
+    },
+    "slower_x1.4": {
+      "genuine": 0.48388299019279657,
+      "rvc_source": 0.9386885389685631,
+      "xtts_clone": 0.10090424746886129,
+      "rvc_conversion": 0.014000626373672276,
+      "tortoise_clone": 0.8433732403209433
+    },
+    "faster_x0.7": {
+      "genuine": 0.1773787518759491,
+      "rvc_source": 0.7512769048116752,
+      "xtts_clone": 0.00019800396876235027,
+      "rvc_conversion": 0.00039182272485049907,
+      "tortoise_clone": 0.7147827688604593
+    },
+    "pitch_up_3": {
+      "genuine": 0.2942395407008007,
+      "rvc_source": 0.48528504442583653,
+      "xtts_clone": 0.00031982592190615833,
+      "rvc_conversion": 0.00027611805307969917,
+      "tortoise_clone": 0.6184820889029652
+    },
+    "pitch_down_3": {
+      "genuine": 0.8792787920683622,
+      "rvc_source": 0.994097039103508,
+      "xtts_clone": 0.17749109857140866,
+      "rvc_conversion": 0.11423956867292873,
+      "tortoise_clone": 0.8572366163134575
+    }
+  },
+  "layers": {
+    "genuine_windows": 40,
+    "cloned_windows": 40,
+    "held_out_auc": {
+      "cnn_output": 0.9007936507936508,
+      "transformer_1": 0.7936507936507936,
+      "transformer_2": 0.8650793650793651,
+      "transformer_3": 1.0,
+      "transformer_4": 0.996031746031746,
+      "transformer_5": 1.0,
+      "transformer_6": 1.0,
+      "transformer_7": 1.0,
+      "transformer_8": 1.0,
+      "transformer_9": 1.0,
+      "transformer_10": 1.0,
+      "transformer_11": 1.0,
+      "transformer_12": 1.0
+    }
+  },
+  "english": {
+    "bonafide": {
+      "clips_drawn": 200.0,
+      "clips_scored": 53.0,
+      "mean_score": 0.9998274929118607,
+      "correct_pct": 100.0
+    },
+    "spoof": {
+      "clips_drawn": 200.0,
+      "clips_scored": 33.0,
+      "mean_score": 0.1545069990418716,
+      "correct_pct": 84.84848484848484
+    }
+  }
+}
