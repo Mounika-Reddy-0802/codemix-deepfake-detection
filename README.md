@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%2010%20of%2012-yellow)
+![Phase](https://img.shields.io/badge/phase-week%2011%20of%2012-yellow)
 ![Tests](https://img.shields.io/badge/tests-752%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
@@ -534,6 +534,8 @@ outside this repo.
 | **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ✅ **CM04 generated** — the held-out Tortoise attack, 500/500 clips over 15 eval-pool speakers, 91.6% QA pass, archived + metadata committed ([W4-T3](docs/W4T3_cm04_heldout_tortoise.md)) |
 | **10** | — | ✅ **Normalised retrain**: 4 LoRA adapters with and without RVC, per-set shortcut floors, RVC ablation (P-026, P-027); ✅ **S3 native training** scored beside S2 and on English — seen-tool ceiling, English at chance (P-028, P-030) | ✅ **Live detection system**: streaming scorer, verdict ladder, alerts, web demo, receiver dashboard, WebRTC calls, Twilio Media Streams + receiver-only warning + SMS; ✅ **demo threshold calibrated** on dev calls through the live path, validated on held-out calls (P-029, P-031) |
 
+| **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 over the channel, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | — |
+
 **Open before the results freeze:** activate the Twilio trial and run the phone
 demo on real numbers; seed-repeat the phone-line adapter; score S1 on the normalised
 sets; reconcile the Stage-1 checkpoint discrepancy; the results freeze meeting
@@ -582,6 +584,7 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/gpu_laptop_setup.md`](docs/gpu_laptop_setup.md) | Bringing a second machine to an identical state |
 | [`docs/licences.md`](docs/licences.md) | Per-corpus licence table and usage restrictions |
 | [`docs/attack_taxonomy.md`](docs/attack_taxonomy.md) | Attack IDs, tool, pool, split — AffectDF Table-1 format |
+| [`docs/results/interpretability_v1.md`](docs/results/interpretability_v1.md) | **What the detector responds to** — layer, band and phase probes for S1 and S2, and the evasion finding that turned out to be a shuffle bug. |
 | `docs/W<week>_<member>_<work>.md` | **Per-member weekly records** — what each of us did that week, the numbers we got, and the limitations we know about. One per person per week, e.g. [`docs/W9_krishna_cm02_gate_cm01_recovery.md`](docs/W9_krishna_cm02_gate_cm01_recovery.md) |
 
 ---
