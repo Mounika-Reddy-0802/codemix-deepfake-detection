@@ -1,0 +1,27 @@
+{
+  "checkpoint": "checkpoints/baseline/best.pt",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.5557482190235443,
+    "eer_ci_low": 0.5233308115441652,
+    "eer_ci_high": 0.5977946926620843,
+    "auc": 0.4252616625232415,
+    "auc_ci_low": 0.38237741139795833,
+    "auc_ci_high": 0.47230823410586636,
+    "f1": 0.4386252045826514,
+    "threshold": 0.6348550319671631,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 0.321999
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.555748
+    }
+  ]
+}

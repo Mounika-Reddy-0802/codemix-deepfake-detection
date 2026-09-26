@@ -15,8 +15,11 @@ condition (``ablation.FLOORS``), so a cell only counts as evidence when its CI u
 bound is below that floor. English has no floor: ASVspoof LA is the benchmark the
 floor idea was borrowed from, where AffectDF's replica sits at chance.
 
-S1 was never scored on the normalised code-mixed sets, so those cells are ``None``
-and reported as unmeasured rather than filled with the pre-normalisation numbers.
+S1 on the normalised code-mixed sets comes from ``results/s1_norm/`` (one
+``stage1__<set>[_channel].json`` per set and condition, written by
+``src.training.evaluate``). When that directory is incomplete the S1 code-mixed
+cells are left out and reported as unmeasured, never filled with the
+pre-normalisation numbers.
 
 Pure json/pandas, so CI runs it.
 """
@@ -33,6 +36,7 @@ from src.reporting.ablation import SETS, load_floors
 S2_SUMMARY = "results/w10/w10_summary.json"
 S3_SUMMARY = "docs/results/s3_native/s3_summary.json"
 S1_ENGLISH = "experiments/asvspoof_retention_summary.json"
+S1_CODEMIX_DIR = "results/s1_norm"
 OUT = "experiments/results/systems_s1_s2_s3.json"
 REVERSE_OUT = "experiments/results/s3_reverse_degradation.json"
 
@@ -68,10 +72,30 @@ def _cell(summary: dict, key: str, floor: float | None) -> dict:
     }
 
 
+def load_s1_codemix(directory: str = S1_CODEMIX_DIR) -> dict | None:
+    """S1's pooled results keyed ``stage1_<condition>__<set>``; ``None`` if any is missing."""
+    out = {}
+    for ev in SETS:
+        for condition, suffix in (("clean", ""), ("channel", "_channel")):
+            path = Path(directory) / f"stage1__{ev}{suffix}.json"
+            if not path.exists():
+                return None
+            out[f"stage1_{condition}__{ev}"] = json.loads(path.read_text())["pooled"]
+    return out
+
+
 def build_table(
-    s2: dict, s3: dict, s1_english: float, floors: dict[tuple[str, str], float]
+    s2: dict,
+    s3: dict,
+    s1_english: float,
+    floors: dict[tuple[str, str], float],
+    s1_codemix: dict | None = None,
 ) -> pd.DataFrame:
-    """One row per (system, variant, condition, set), including English."""
+    """One row per (system, variant, condition, set), including English.
+
+    ``s1_codemix`` (from :func:`load_s1_codemix`) adds S1's code-mixed cells, each
+    read against the same floor as S2 and S3 in that set and condition.
+    """
     rows = []
     for (variant, condition), (s2_run, s3_run) in PAIRS.items():
         for system, summary, run in (("S2 LoRA", s2, s2_run), ("S3 native", s3, s3_run)):
@@ -100,6 +124,19 @@ def build_table(
                 }
             )
     for condition in ("clean", "channel"):
+        if s1_codemix is not None:
+            for ev in SETS:
+                cell = _cell(s1_codemix, f"stage1_{condition}__{ev}", floors[(ev, condition)])
+                rows.append(
+                    {
+                        "system": "S1 English-only",
+                        "variant": "asvspoof",
+                        "condition": condition,
+                        "set": ev,
+                        "run": "stage1_baseline",
+                        **cell,
+                    }
+                )
         rows.append(
             {
                 "system": "S1 English-only",
@@ -162,11 +199,17 @@ def build(out: str = OUT, reverse_out: str = REVERSE_OUT) -> dict:
     s1 = round(
         100.0 * json.loads(Path(S1_ENGLISH).read_text())["results"]["stage1_baseline"]["eer"], 2
     )
-    frame = build_table(s2, s3, s1, load_floors())
+    s1_codemix = load_s1_codemix()
+    frame = build_table(s2, s3, s1, load_floors(), s1_codemix)
     reverse = reverse_degradation(frame, s1)
     result = {
-        "sources": {"s2": S2_SUMMARY, "s3": S3_SUMMARY, "s1_english": S1_ENGLISH},
-        "s1_codemix_normalised": "not measured",
+        "sources": {
+            "s2": S2_SUMMARY,
+            "s3": S3_SUMMARY,
+            "s1_english": S1_ENGLISH,
+            "s1_codemix": S1_CODEMIX_DIR if s1_codemix else None,
+        },
+        "s1_codemix_normalised": "measured" if s1_codemix else "not measured",
         "cells": json.loads(frame.to_json(orient="records")),
     }
     for path, payload in ((out, result), (reverse_out, reverse)):
