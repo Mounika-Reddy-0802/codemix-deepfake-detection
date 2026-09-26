@@ -28,12 +28,18 @@ never in CI.
 from __future__ import annotations
 
 import asyncio
+import itertools
 import logging
 from collections.abc import AsyncIterator, Callable
 from contextlib import suppress
 from pathlib import Path
 
-from aiortc import RTCPeerConnection, RTCSessionDescription
+from aiortc import (
+    RTCConfiguration,
+    RTCIceServer,
+    RTCPeerConnection,
+    RTCSessionDescription,
+)
 from aiortc.contrib.media import MediaRelay
 from aiortc.mediastreams import MediaStreamTrack
 from av.audio.resampler import AudioResampler
@@ -63,11 +69,22 @@ class Room:
     def __init__(self, name: str) -> None:
         self.name = name
         self.relay = MediaRelay()
-        self.pcs: set[RTCPeerConnection] = set()
-        # Most-recent relayed audio track per participant, for best-effort SFU.
-        self.audio_tracks: list[MediaStreamTrack] = []
+        #: peer connection id -> connection. Ids let a client renegotiate its own
+        #: connection instead of opening a second one (see :func:`handle_offer`).
+        self.pcs: dict[str, RTCPeerConnection] = {}
+        #: peer connection id -> the audio that connection is currently sending.
+        #: Keyed by peer, not appended to a list: a room that accumulated one track
+        #: per past call would hand a new joiner more tracks than its offer has
+        #: m-lines, and aiortc fails the whole negotiation.
+        self.tracks: dict[str, MediaStreamTrack] = {}
+        #: peer connection id -> ids of the source tracks already given to it.
+        self.sent: dict[str, set[int]] = {}
         # Fan-in of every participant's resampled 16 kHz mono PCM.
         self.queue: asyncio.Queue[PcmFrame] = asyncio.Queue(maxsize=_ROOM_QUEUE_MAXSIZE)
+
+    def live_tracks(self, except_pc: str) -> list[MediaStreamTrack]:
+        """Audio currently being sent by the other connected peers."""
+        return [t for pc_id, t in self.tracks.items() if pc_id != except_pc and pc_id in self.pcs]
 
     def source(self) -> PcmFrameSource:
         """Return a :class:`PcmFrameSource` view over this room's tapped audio."""
@@ -149,43 +166,88 @@ async def _tap_track(track: MediaStreamTrack, room: Room, own: _TrackSource | No
 
 #: Called as ``on_track(room_name, participant_id, source)`` for every audio track.
 TrackHook = Callable[[str, str, PcmFrameSource], None]
+#: Called as ``on_renegotiate(room_name, pc_id)`` when a peer has to re-offer to hear
+#: audio that arrived after it connected. Without it a two-party call is one-way:
+#: whoever connects first never receives the track the second party adds later.
+RenegotiateHook = Callable[[str, str], None]
+
+_pc_ids = itertools.count(1)
 
 
-async def handle_offer(params: dict, on_track: TrackHook | None = None) -> JSONResponse:
-    """WebRTC signalling shared by this harness and the detection server."""
+def _forward(room: Room, pc_id: str, pc: RTCPeerConnection, track: MediaStreamTrack) -> bool:
+    """Give ``track`` to ``pc`` unless it already has it. True if newly added."""
+    seen = room.sent.setdefault(pc_id, set())
+    if id(track) in seen:
+        return False
+    pc.addTrack(track)
+    seen.add(id(track))
+    return True
+
+
+async def handle_offer(
+    params: dict,
+    on_track: TrackHook | None = None,
+    on_renegotiate: RenegotiateHook | None = None,
+) -> JSONResponse:
+    """WebRTC signalling shared by this harness and the detection server.
+
+    Pass the ``pc_id`` from an earlier answer to renegotiate that same connection
+    after new audio has been added to it; omit it to create a new one. Set
+    ``monitor`` false to carry a participant's audio without handing it to
+    ``on_track``, which is how the receiver's own voice is kept out of the detector.
+    """
     room = get_room(params.get("room", "default"))
+    pc_id = str(params.get("pc_id") or "")
+    monitor = bool(params.get("monitor", True))
 
-    pc = RTCPeerConnection()
-    room.pcs.add(pc)
-    participant = f"p{len(room.pcs)}"
+    pc = room.pcs.get(pc_id)
+    if pc is None:  # a new connection, not a renegotiation
+        # A public STUN server lets a phone on mobile data reach a laptop behind home NAT.
+        pc = RTCPeerConnection(
+            RTCConfiguration(iceServers=[RTCIceServer(urls="stun:stun.l.google.com:19302")])
+        )
+        pc_id = f"pc{next(_pc_ids)}"
+        room.pcs[pc_id] = pc
+        this_id = pc_id
 
-    @pc.on("connectionstatechange")
-    async def _on_state() -> None:
-        logger.info("room %s pc state -> %s", room.name, pc.connectionState)
-        if pc.connectionState in {"failed", "closed", "disconnected"}:
-            await _close_pc(pc, room)
+        @pc.on("connectionstatechange")
+        async def _on_state() -> None:
+            logger.info("room %s pc %s state -> %s", room.name, this_id, pc.connectionState)
+            if pc.connectionState in {"failed", "closed", "disconnected"}:
+                await _close_pc(pc, room)
 
-    @pc.on("track")
-    def _on_track(track: MediaStreamTrack) -> None:
-        if track.kind != "audio":
-            return
-        logger.info("room %s received audio track", room.name)
-        relayed = room.relay.subscribe(track)
-        room.audio_tracks.append(relayed)
-        own = _TrackSource() if on_track is not None else None
-        asyncio.ensure_future(_tap_track(room.relay.subscribe(track), room, own))
-        if on_track is not None:
-            on_track(room.name, participant, own)
+        @pc.on("track")
+        def _on_track(track: MediaStreamTrack) -> None:
+            if track.kind != "audio":
+                return
+            logger.info("room %s pc %s received audio track", room.name, this_id)
+            room.tracks[this_id] = room.relay.subscribe(track)
+            own = _TrackSource() if (on_track is not None and monitor) else None
+            asyncio.ensure_future(_tap_track(room.relay.subscribe(track), room, own))
+            if own is not None and on_track is not None:
+                on_track(room.name, this_id, own)
+            # Give the new audio to everyone already in the room, then ask them to
+            # re-offer, because a track added after connecting needs negotiating.
+            for other_id, other in list(room.pcs.items()):
+                if other_id == this_id:
+                    continue
+                if _forward(room, other_id, other, room.relay.subscribe(track)):
+                    logger.info("room %s: pc %s must renegotiate", room.name, other_id)
+                    if on_renegotiate is not None:
+                        on_renegotiate(room.name, other_id)
 
-    # Best-effort: let this joiner hear a participant who is already in the room.
-    for existing in room.audio_tracks:
-        pc.addTrack(existing)
+        # Let this joiner hear whoever is already on the call. Only live peers, so a
+        # fresh call never inherits tracks from calls that have ended.
+        for existing in room.live_tracks(except_pc=pc_id):
+            _forward(room, pc_id, pc, existing)
 
     await pc.setRemoteDescription(RTCSessionDescription(sdp=params["sdp"], type=params["type"]))
     answer = await pc.createAnswer()
     await pc.setLocalDescription(answer)
 
-    return JSONResponse({"sdp": pc.localDescription.sdp, "type": pc.localDescription.type})
+    return JSONResponse(
+        {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type, "pc_id": pc_id}
+    )
 
 
 app = FastAPI(title="WebRTC dev harness")
@@ -206,14 +268,18 @@ async def offer(request: Request) -> JSONResponse:
 async def _close_pc(pc: RTCPeerConnection, room: Room) -> None:
     with suppress(Exception):
         await pc.close()
-    room.pcs.discard(pc)
+    for pc_id, known in list(room.pcs.items()):
+        if known is pc:
+            del room.pcs[pc_id]
+            room.sent.pop(pc_id, None)
+            room.tracks.pop(pc_id, None)  # its audio leaves the room with it
 
 
 @app.on_event("shutdown")
 async def _on_shutdown() -> None:
     """Close every peer connection on server shutdown."""
     for room in _rooms.values():
-        await asyncio.gather(*(pc.close() for pc in room.pcs), return_exceptions=True)
+        await asyncio.gather(*(pc.close() for pc in room.pcs.values()), return_exceptions=True)
         room.pcs.clear()
 
 
