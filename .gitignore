@@ -99,3 +99,7 @@ GIT_RULES.md
 
 # Run logs: machine-local stdout from training/eval, regenerated every run.
 logs/
+
+# duration cache for the dataset inventory: regenerate with
+#   python -m src.reporting.datasets
+experiments/results/_duration_cache.csv
