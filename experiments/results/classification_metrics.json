@@ -1,0 +1,1841 @@
+{
+  "positive_class": "spoof",
+  "rule": "a clip is called spoof when P(bonafide) < threshold",
+  "deployed_threshold": 0.49997557675233106,
+  "note": "accuracy depends on the class balance of each set, which is given per row; EER and AUC are the threshold-free numbers the paper reports",
+  "runs": [
+    {
+      "run": "lora_norm_channel",
+      "run_label": "S2 LoRA, XTTS, channel",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "results/w10/lora_norm_channel__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.2816342920242935,
+      "auc": 0.7996480895893635,
+      "eer_threshold": 0.9908998012542725,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 39,
+          "fn": 419,
+          "tn": 1559,
+          "fp": 7
+        },
+        "accuracy": 0.7895256916996047,
+        "precision": 0.8478260869565217,
+        "recall": 0.0851528384279476,
+        "specificity": 0.9955300127713921,
+        "f1": 0.15476190476190477,
+        "balanced_accuracy": 0.5403414255996698,
+        "false_alarm_rate": 0.004469987228607919,
+        "miss_rate": 0.9148471615720524
+      },
+      "eer_point": {
+        "threshold": 0.9908998012542725,
+        "confusion": {
+          "tp": 329,
+          "fn": 129,
+          "tn": 1125,
+          "fp": 441
+        },
+        "accuracy": 0.7183794466403162,
+        "precision": 0.42727272727272725,
+        "recall": 0.7183406113537117,
+        "specificity": 0.7183908045977011,
+        "f1": 0.5358306188925082,
+        "balanced_accuracy": 0.7183657079757064,
+        "false_alarm_rate": 0.2816091954022989,
+        "miss_rate": 0.28165938864628826
+      }
+    },
+    {
+      "run": "lora_norm_channel",
+      "run_label": "S2 LoRA, XTTS, channel",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "results/w10/lora_norm_channel__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.044113984674329504,
+      "auc": 0.9862515964240102,
+      "eer_threshold": 0.9645057320594788,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2188,
+          "fn": 212,
+          "tn": 1559,
+          "fp": 7
+        },
+        "accuracy": 0.9447806354009077,
+        "precision": 0.9968109339407745,
+        "recall": 0.9116666666666666,
+        "specificity": 0.9955300127713921,
+        "f1": 0.9523394994559303,
+        "balanced_accuracy": 0.9535983397190293,
+        "false_alarm_rate": 0.004469987228607919,
+        "miss_rate": 0.08833333333333337
+      },
+      "eer_point": {
+        "threshold": 0.9645057320594788,
+        "confusion": {
+          "tp": 2294,
+          "fn": 106,
+          "tn": 1497,
+          "fp": 69
+        },
+        "accuracy": 0.9558749369641957,
+        "precision": 0.9707998307236564,
+        "recall": 0.9558333333333333,
+        "specificity": 0.9559386973180076,
+        "f1": 0.963258450556372,
+        "balanced_accuracy": 0.9558860153256705,
+        "false_alarm_rate": 0.044061302681992376,
+        "miss_rate": 0.04416666666666669
+      }
+    },
+    {
+      "run": "lora_norm_channel",
+      "run_label": "S2 LoRA, XTTS, channel",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "results/w10/lora_norm_channel__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.2956159776046128,
+      "auc": 0.76378298201266,
+      "eer_threshold": 0.9919970631599426,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 56,
+          "fn": 261,
+          "tn": 302,
+          "fp": 0
+        },
+        "accuracy": 0.5783521809369951,
+        "precision": 1.0,
+        "recall": 0.17665615141955837,
+        "specificity": 1.0,
+        "f1": 0.30026809651474534,
+        "balanced_accuracy": 0.5883280757097792,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.8233438485804416
+      },
+      "eer_point": {
+        "threshold": 0.9919970631599426,
+        "confusion": {
+          "tp": 223,
+          "fn": 94,
+          "tn": 213,
+          "fp": 89
+        },
+        "accuracy": 0.7043618739903069,
+        "precision": 0.7147435897435898,
+        "recall": 0.7034700315457413,
+        "specificity": 0.7052980132450332,
+        "f1": 0.7090620031796503,
+        "balanced_accuracy": 0.7043840223953872,
+        "false_alarm_rate": 0.29470198675496684,
+        "miss_rate": 0.2965299684542587
+      }
+    },
+    {
+      "run": "lora_norm_clean",
+      "run_label": "S2 LoRA, XTTS, clean",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "results/w10/lora_norm_clean__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.0544317845929049,
+      "auc": 0.9825376309904242,
+      "eer_threshold": 0.9997081160545349,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 196,
+          "fn": 262,
+          "tn": 1566,
+          "fp": 0
+        },
+        "accuracy": 0.8705533596837944,
+        "precision": 1.0,
+        "recall": 0.4279475982532751,
+        "specificity": 1.0,
+        "f1": 0.599388379204893,
+        "balanced_accuracy": 0.7139737991266375,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.5720524017467249
+      },
+      "eer_point": {
+        "threshold": 0.9997081160545349,
+        "confusion": {
+          "tp": 433,
+          "fn": 25,
+          "tn": 1481,
+          "fp": 85
+        },
+        "accuracy": 0.9456521739130435,
+        "precision": 0.8359073359073359,
+        "recall": 0.9454148471615721,
+        "specificity": 0.9457215836526182,
+        "f1": 0.8872950819672132,
+        "balanced_accuracy": 0.9455682154070951,
+        "false_alarm_rate": 0.05427841634738184,
+        "miss_rate": 0.05458515283842791
+      }
+    },
+    {
+      "run": "lora_norm_clean",
+      "run_label": "S2 LoRA, XTTS, clean",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "results/w10/lora_norm_clean__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.014635217113665389,
+      "auc": 0.996754736057897,
+      "eer_threshold": 0.9992393255233765,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2295,
+          "fn": 105,
+          "tn": 1566,
+          "fp": 0
+        },
+        "accuracy": 0.9735249621785174,
+        "precision": 1.0,
+        "recall": 0.95625,
+        "specificity": 1.0,
+        "f1": 0.9776357827476039,
+        "balanced_accuracy": 0.978125,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.043749999999999956
+      },
+      "eer_point": {
+        "threshold": 0.9992393255233765,
+        "confusion": {
+          "tp": 2365,
+          "fn": 35,
+          "tn": 1543,
+          "fp": 23
+        },
+        "accuracy": 0.9853756933938477,
+        "precision": 0.9903685092127303,
+        "recall": 0.9854166666666667,
+        "specificity": 0.9853128991060025,
+        "f1": 0.9878863826232248,
+        "balanced_accuracy": 0.9853647828863346,
+        "false_alarm_rate": 0.014687100893997496,
+        "miss_rate": 0.014583333333333282
+      }
+    },
+    {
+      "run": "lora_norm_clean",
+      "run_label": "S2 LoRA, XTTS, clean",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "results/w10/lora_norm_clean__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.23907911504794535,
+      "auc": 0.8377640127854263,
+      "eer_threshold": 0.9998214840888977,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 83,
+          "fn": 234,
+          "tn": 302,
+          "fp": 0
+        },
+        "accuracy": 0.6219709208400647,
+        "precision": 1.0,
+        "recall": 0.2618296529968454,
+        "specificity": 1.0,
+        "f1": 0.415,
+        "balanced_accuracy": 0.6309148264984227,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.7381703470031546
+      },
+      "eer_point": {
+        "threshold": 0.9998214840888977,
+        "confusion": {
+          "tp": 241,
+          "fn": 76,
+          "tn": 230,
+          "fp": 72
+        },
+        "accuracy": 0.7609046849757674,
+        "precision": 0.7699680511182109,
+        "recall": 0.7602523659305994,
+        "specificity": 0.7615894039735099,
+        "f1": 0.7650793650793651,
+        "balanced_accuracy": 0.7609208849520547,
+        "false_alarm_rate": 0.23841059602649006,
+        "miss_rate": 0.23974763406940058
+      }
+    },
+    {
+      "run": "lora_norm_rvc_channel",
+      "run_label": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "results/w10/lora_norm_rvc_channel__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.3098749630521954,
+      "auc": 0.7534605453217108,
+      "eer_threshold": 0.9995300769805908,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 51,
+          "fn": 407,
+          "tn": 1552,
+          "fp": 14
+        },
+        "accuracy": 0.7919960474308301,
+        "precision": 0.7846153846153846,
+        "recall": 0.11135371179039301,
+        "specificity": 0.9910600255427842,
+        "f1": 0.19502868068833654,
+        "balanced_accuracy": 0.5512068686665886,
+        "false_alarm_rate": 0.008939974457215838,
+        "miss_rate": 0.888646288209607
+      },
+      "eer_point": {
+        "threshold": 0.9995300769805908,
+        "confusion": {
+          "tp": 316,
+          "fn": 142,
+          "tn": 1081,
+          "fp": 485
+        },
+        "accuracy": 0.6902173913043478,
+        "precision": 0.3945068664169788,
+        "recall": 0.6899563318777293,
+        "specificity": 0.69029374201788,
+        "f1": 0.5019857029388404,
+        "balanced_accuracy": 0.6901250369478047,
+        "false_alarm_rate": 0.30970625798212004,
+        "miss_rate": 0.3100436681222707
+      }
+    },
+    {
+      "run": "lora_norm_rvc_channel",
+      "run_label": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "results/w10/lora_norm_rvc_channel__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.027479246487867176,
+      "auc": 0.9970713601532567,
+      "eer_threshold": 0.9722098708152771,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2264,
+          "fn": 136,
+          "tn": 1552,
+          "fp": 14
+        },
+        "accuracy": 0.962178517397882,
+        "precision": 0.9938542581211589,
+        "recall": 0.9433333333333334,
+        "specificity": 0.9910600255427842,
+        "f1": 0.9679350149636597,
+        "balanced_accuracy": 0.9671966794380588,
+        "false_alarm_rate": 0.008939974457215838,
+        "miss_rate": 0.05666666666666664
+      },
+      "eer_point": {
+        "threshold": 0.9722098708152771,
+        "confusion": {
+          "tp": 2334,
+          "fn": 66,
+          "tn": 1523,
+          "fp": 43
+        },
+        "accuracy": 0.9725163893091275,
+        "precision": 0.9819099705511148,
+        "recall": 0.9725,
+        "specificity": 0.9725415070242657,
+        "f1": 0.9771823320075361,
+        "balanced_accuracy": 0.9725207535121329,
+        "false_alarm_rate": 0.027458492975734328,
+        "miss_rate": 0.02749999999999997
+      }
+    },
+    {
+      "run": "lora_norm_rvc_channel",
+      "run_label": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "results/w10/lora_norm_rvc_channel__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.05007103014602962,
+      "auc": 0.9751603401090522,
+      "eer_threshold": 0.9971613883972168,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 264,
+          "fn": 53,
+          "tn": 297,
+          "fp": 5
+        },
+        "accuracy": 0.9063004846526656,
+        "precision": 0.9814126394052045,
+        "recall": 0.832807570977918,
+        "specificity": 0.9834437086092715,
+        "f1": 0.901023890784983,
+        "balanced_accuracy": 0.9081256397935948,
+        "false_alarm_rate": 0.01655629139072845,
+        "miss_rate": 0.16719242902208198
+      },
+      "eer_point": {
+        "threshold": 0.9971613883972168,
+        "confusion": {
+          "tp": 301,
+          "fn": 16,
+          "tn": 287,
+          "fp": 15
+        },
+        "accuracy": 0.9499192245557351,
+        "precision": 0.9525316455696202,
+        "recall": 0.9495268138801262,
+        "specificity": 0.9503311258278145,
+        "f1": 0.9510268562401263,
+        "balanced_accuracy": 0.9499289698539704,
+        "false_alarm_rate": 0.04966887417218546,
+        "miss_rate": 0.050473186119873836
+      }
+    },
+    {
+      "run": "lora_norm_rvc_clean",
+      "run_label": "S2 LoRA, XTTS+RVC, clean",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "results/w10/lora_norm_rvc_clean__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.12006921090643422,
+      "auc": 0.9431484827697747,
+      "eer_threshold": 0.9994478821754456,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 87,
+          "fn": 371,
+          "tn": 1559,
+          "fp": 7
+        },
+        "accuracy": 0.8132411067193676,
+        "precision": 0.925531914893617,
+        "recall": 0.18995633187772926,
+        "specificity": 0.9955300127713921,
+        "f1": 0.3152173913043478,
+        "balanced_accuracy": 0.5927431723245606,
+        "false_alarm_rate": 0.004469987228607919,
+        "miss_rate": 0.8100436681222707
+      },
+      "eer_point": {
+        "threshold": 0.9994478821754456,
+        "confusion": {
+          "tp": 403,
+          "fn": 55,
+          "tn": 1378,
+          "fp": 188
+        },
+        "accuracy": 0.8799407114624506,
+        "precision": 0.6818950930626058,
+        "recall": 0.8799126637554585,
+        "specificity": 0.879948914431673,
+        "f1": 0.7683508102955197,
+        "balanced_accuracy": 0.8799307890935657,
+        "false_alarm_rate": 0.120051085568327,
+        "miss_rate": 0.12008733624454149
+      }
+    },
+    {
+      "run": "lora_norm_rvc_clean",
+      "run_label": "S2 LoRA, XTTS+RVC, clean",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "results/w10/lora_norm_rvc_clean__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.019897828863346106,
+      "auc": 0.9979842486164325,
+      "eer_threshold": 0.9898200631141663,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2319,
+          "fn": 81,
+          "tn": 1559,
+          "fp": 7
+        },
+        "accuracy": 0.9778113968734241,
+        "precision": 0.9969905417024936,
+        "recall": 0.96625,
+        "specificity": 0.9955300127713921,
+        "f1": 0.9813796022005924,
+        "balanced_accuracy": 0.980890006385696,
+        "false_alarm_rate": 0.004469987228607919,
+        "miss_rate": 0.03374999999999995
+      },
+      "eer_point": {
+        "threshold": 0.9898200631141663,
+        "confusion": {
+          "tp": 2352,
+          "fn": 48,
+          "tn": 1535,
+          "fp": 31
+        },
+        "accuracy": 0.9800806858295512,
+        "precision": 0.9869911875786823,
+        "recall": 0.98,
+        "specificity": 0.9802043422733078,
+        "f1": 0.9834831695588543,
+        "balanced_accuracy": 0.9801021711366539,
+        "false_alarm_rate": 0.01979565772669223,
+        "miss_rate": 0.020000000000000018
+      }
+    },
+    {
+      "run": "lora_norm_rvc_clean",
+      "run_label": "S2 LoRA, XTTS+RVC, clean",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "results/w10/lora_norm_rvc_clean__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.05007103014602962,
+      "auc": 0.9858932040863225,
+      "eer_threshold": 0.9979888200759888,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 288,
+          "fn": 29,
+          "tn": 300,
+          "fp": 2
+        },
+        "accuracy": 0.9499192245557351,
+        "precision": 0.993103448275862,
+        "recall": 0.9085173501577287,
+        "specificity": 0.9933774834437086,
+        "f1": 0.9489291598023065,
+        "balanced_accuracy": 0.9509474168007186,
+        "false_alarm_rate": 0.0066225165562914245,
+        "miss_rate": 0.09148264984227128
+      },
+      "eer_point": {
+        "threshold": 0.9979888200759888,
+        "confusion": {
+          "tp": 301,
+          "fn": 16,
+          "tn": 287,
+          "fp": 15
+        },
+        "accuracy": 0.9499192245557351,
+        "precision": 0.9525316455696202,
+        "recall": 0.9495268138801262,
+        "specificity": 0.9503311258278145,
+        "f1": 0.9510268562401263,
+        "balanced_accuracy": 0.9499289698539704,
+        "false_alarm_rate": 0.04966887417218546,
+        "miss_rate": 0.050473186119873836
+      }
+    },
+    {
+      "run": "lora_norm_channel",
+      "run_label": "S2 LoRA, XTTS, channel",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/lora_norm_channel__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.025538318855267035,
+      "auc": 0.9772501245125833,
+      "eer_threshold": 0.999581515789032,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 42879,
+          "fn": 21003,
+          "tn": 7354,
+          "fp": 1
+        },
+        "accuracy": 0.7051532209385573,
+        "precision": 0.9999766791044776,
+        "recall": 0.6712219404527097,
+        "specificity": 0.9998640380693405,
+        "f1": 0.8032633333957776,
+        "balanced_accuracy": 0.8355429892610251,
+        "false_alarm_rate": 0.00013596193065945616,
+        "miss_rate": 0.32877805954729034
+      },
+      "eer_point": {
+        "threshold": 0.999581515789032,
+        "confusion": {
+          "tp": 62252,
+          "fn": 1630,
+          "tn": 7167,
+          "fp": 188
+        },
+        "accuracy": 0.9744795541642686,
+        "precision": 0.9969891095451634,
+        "recall": 0.974484205253436,
+        "specificity": 0.9744391570360299,
+        "f1": 0.9856082075964598,
+        "balanced_accuracy": 0.974461681144733,
+        "false_alarm_rate": 0.0255608429639701,
+        "miss_rate": 0.025515794746563958
+      }
+    },
+    {
+      "run": "lora_norm_clean",
+      "run_label": "S2 LoRA, XTTS, clean",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/lora_norm_clean__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.15832071180865825,
+      "auc": 0.8583919416686242,
+      "eer_threshold": 0.9997926354408264,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 33092,
+          "fn": 30790,
+          "tn": 7325,
+          "fp": 30
+        },
+        "accuracy": 0.567359658604377,
+        "precision": 0.9990942575931405,
+        "recall": 0.5180175949406719,
+        "specificity": 0.9959211420802175,
+        "f1": 0.6822811430456477,
+        "balanced_accuracy": 0.7569693685104447,
+        "false_alarm_rate": 0.004078857919782464,
+        "miss_rate": 0.4819824050593281
+      },
+      "eer_point": {
+        "threshold": 0.9997926354408264,
+        "confusion": {
+          "tp": 53799,
+          "fn": 10083,
+          "tn": 6187,
+          "fp": 1168
+        },
+        "accuracy": 0.8420624113873408,
+        "precision": 0.9787508868957738,
+        "recall": 0.8421621113928807,
+        "specificity": 0.8411964649898028,
+        "f1": 0.9053336586761352,
+        "balanced_accuracy": 0.8416792881913417,
+        "false_alarm_rate": 0.15880353501019717,
+        "miss_rate": 0.15783788860711934
+      }
+    },
+    {
+      "run": "lora_norm_rvc_channel",
+      "run_label": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/lora_norm_rvc_channel__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.024185393144238516,
+      "auc": 0.9803766444722362,
+      "eer_threshold": 0.999792754650116,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 49435,
+          "fn": 14447,
+          "tn": 7353,
+          "fp": 2
+        },
+        "accuracy": 0.7971700099667308,
+        "precision": 0.9999595444707405,
+        "recall": 0.773848658464043,
+        "specificity": 0.9997280761386812,
+        "f1": 0.8724926976058738,
+        "balanced_accuracy": 0.8867883673013621,
+        "false_alarm_rate": 0.0002719238613188013,
+        "miss_rate": 0.22615134153595695
+      },
+      "eer_point": {
+        "threshold": 0.999792754650116,
+        "confusion": {
+          "tp": 62338,
+          "fn": 1544,
+          "tn": 7177,
+          "fp": 178
+        },
+        "accuracy": 0.9758271684658253,
+        "precision": 0.9971527289014013,
+        "recall": 0.975830437368899,
+        "specificity": 0.975798776342624,
+        "f1": 0.9863763667146631,
+        "balanced_accuracy": 0.9758146068557615,
+        "false_alarm_rate": 0.02420122365737598,
+        "miss_rate": 0.024169562631101038
+      }
+    },
+    {
+      "run": "lora_norm_rvc_clean",
+      "run_label": "S2 LoRA, XTTS+RVC, clean",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/lora_norm_rvc_clean__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.037523899807537314,
+      "auc": 0.9689610269069558,
+      "eer_threshold": 0.9996887445449829,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 50851,
+          "fn": 13031,
+          "tn": 7334,
+          "fp": 21
+        },
+        "accuracy": 0.8167806055841768,
+        "precision": 0.9995871992451644,
+        "recall": 0.7960145267837575,
+        "specificity": 0.9971447994561523,
+        "f1": 0.8862610453666102,
+        "balanced_accuracy": 0.896579663119955,
+        "false_alarm_rate": 0.0028552005438476913,
+        "miss_rate": 0.2039854732162425
+      },
+      "eer_point": {
+        "threshold": 0.9996887445449829,
+        "confusion": {
+          "tp": 61485,
+          "fn": 2397,
+          "tn": 7079,
+          "fp": 276
+        },
+        "accuracy": 0.9624773642910286,
+        "precision": 0.995531160441055,
+        "recall": 0.962477693246924,
+        "specificity": 0.9624745071380013,
+        "f1": 0.9787254363553879,
+        "balanced_accuracy": 0.9624761001924627,
+        "false_alarm_rate": 0.03752549286199869,
+        "miss_rate": 0.037522306753075996
+      }
+    },
+    {
+      "run": "s3_native_channel",
+      "run_label": "S3 native, XTTS, channel",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "docs/results/s3_native/s3_native_channel__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.13710424021371168,
+      "auc": 0.9288908129632418,
+      "eer_threshold": 0.995318591594696,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 83,
+          "fn": 375,
+          "tn": 1562,
+          "fp": 4
+        },
+        "accuracy": 0.8127470355731226,
+        "precision": 0.9540229885057471,
+        "recall": 0.1812227074235808,
+        "specificity": 0.9974457215836526,
+        "f1": 0.30458715596330277,
+        "balanced_accuracy": 0.5893342145036167,
+        "false_alarm_rate": 0.0025542784163473664,
+        "miss_rate": 0.8187772925764192
+      },
+      "eer_point": {
+        "threshold": 0.995318591594696,
+        "confusion": {
+          "tp": 395,
+          "fn": 63,
+          "tn": 1352,
+          "fp": 214
+        },
+        "accuracy": 0.8631422924901185,
+        "precision": 0.6486042692939245,
+        "recall": 0.8624454148471615,
+        "specificity": 0.8633461047254151,
+        "f1": 0.7403936269915652,
+        "balanced_accuracy": 0.8628957597862883,
+        "false_alarm_rate": 0.13665389527458494,
+        "miss_rate": 0.13755458515283847
+      }
+    },
+    {
+      "run": "s3_native_channel",
+      "run_label": "S3 native, XTTS, channel",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/s3_native_channel__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.5582851612606359,
+      "auc": 0.4391592580056733,
+      "eer_threshold": 0.9928434491157532,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 18,
+          "fn": 63864,
+          "tn": 7355,
+          "fp": 0
+        },
+        "accuracy": 0.10349958588935525,
+        "precision": 1.0,
+        "recall": 0.0002817695125387433,
+        "specificity": 1.0,
+        "f1": 0.0005633802816901408,
+        "balanced_accuracy": 0.5001408847562694,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.9997182304874612
+      },
+      "eer_point": {
+        "threshold": 0.9928434491157532,
+        "confusion": {
+          "tp": 28216,
+          "fn": 35666,
+          "tn": 3249,
+          "fp": 4106
+        },
+        "accuracy": 0.44169462498420764,
+        "precision": 0.8729657818204319,
+        "recall": 0.44168936476628784,
+        "specificity": 0.4417403127124405,
+        "f1": 0.5865868363061827,
+        "balanced_accuracy": 0.4417148387393642,
+        "false_alarm_rate": 0.5582596872875595,
+        "miss_rate": 0.5583106352337122
+      }
+    },
+    {
+      "run": "s3_native_channel",
+      "run_label": "S3 native, XTTS, channel",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "docs/results/s3_native/s3_native_channel__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.019161877394636012,
+      "auc": 0.9990692848020434,
+      "eer_threshold": 0.9643762111663818,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2298,
+          "fn": 102,
+          "tn": 1562,
+          "fp": 4
+        },
+        "accuracy": 0.9732728189611699,
+        "precision": 0.998262380538662,
+        "recall": 0.9575,
+        "specificity": 0.9974457215836526,
+        "f1": 0.9774564015312633,
+        "balanced_accuracy": 0.9774728607918264,
+        "false_alarm_rate": 0.0025542784163473664,
+        "miss_rate": 0.04249999999999998
+      },
+      "eer_point": {
+        "threshold": 0.9643762111663818,
+        "confusion": {
+          "tp": 2354,
+          "fn": 46,
+          "tn": 1536,
+          "fp": 30
+        },
+        "accuracy": 0.9808371154815936,
+        "precision": 0.9874161073825504,
+        "recall": 0.9808333333333333,
+        "specificity": 0.9808429118773946,
+        "f1": 0.9841137123745819,
+        "balanced_accuracy": 0.980838122605364,
+        "false_alarm_rate": 0.019157088122605415,
+        "miss_rate": 0.019166666666666665
+      }
+    },
+    {
+      "run": "s3_native_channel",
+      "run_label": "S3 native, XTTS, channel",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "docs/results/s3_native/s3_native_channel__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.321479307247164,
+      "auc": 0.757259698748616,
+      "eer_threshold": 0.9962953925132751,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 38,
+          "fn": 279,
+          "tn": 302,
+          "fp": 0
+        },
+        "accuracy": 0.5492730210016155,
+        "precision": 1.0,
+        "recall": 0.11987381703470032,
+        "specificity": 1.0,
+        "f1": 0.21408450704225354,
+        "balanced_accuracy": 0.5599369085173501,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.8801261829652997
+      },
+      "eer_point": {
+        "threshold": 0.9962953925132751,
+        "confusion": {
+          "tp": 215,
+          "fn": 102,
+          "tn": 205,
+          "fp": 97
+        },
+        "accuracy": 0.678513731825525,
+        "precision": 0.6891025641025641,
+        "recall": 0.6782334384858044,
+        "specificity": 0.6788079470198676,
+        "f1": 0.6836248012718601,
+        "balanced_accuracy": 0.678520692752836,
+        "false_alarm_rate": 0.3211920529801324,
+        "miss_rate": 0.3217665615141956
+      }
+    },
+    {
+      "run": "s3_native_clean",
+      "run_label": "S3 native, XTTS, clean",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "docs/results/s3_native/s3_native_clean__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.27721589229645244,
+      "auc": 0.8225062323277953,
+      "eer_threshold": 0.9963653087615967,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 71,
+          "fn": 387,
+          "tn": 1565,
+          "fp": 1
+        },
+        "accuracy": 0.808300395256917,
+        "precision": 0.9861111111111112,
+        "recall": 0.15502183406113537,
+        "specificity": 0.9993614303959132,
+        "f1": 0.2679245283018868,
+        "balanced_accuracy": 0.5771916322285243,
+        "false_alarm_rate": 0.0006385696040868138,
+        "miss_rate": 0.8449781659388647
+      },
+      "eer_point": {
+        "threshold": 0.9963653087615967,
+        "confusion": {
+          "tp": 331,
+          "fn": 127,
+          "tn": 1132,
+          "fp": 434
+        },
+        "accuracy": 0.7228260869565217,
+        "precision": 0.4326797385620915,
+        "recall": 0.722707423580786,
+        "specificity": 0.722860791826309,
+        "f1": 0.5412919051512673,
+        "balanced_accuracy": 0.7227841077035475,
+        "false_alarm_rate": 0.277139208173691,
+        "miss_rate": 0.277292576419214
+      }
+    },
+    {
+      "run": "s3_native_clean",
+      "run_label": "S3 native, XTTS, clean",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/s3_native_clean__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.5641566343077613,
+      "auc": 0.4042979066327913,
+      "eer_threshold": 0.9969685673713684,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 32,
+          "fn": 63850,
+          "tn": 7338,
+          "fp": 17
+        },
+        "accuracy": 0.1034574729424316,
+        "precision": 0.6530612244897959,
+        "recall": 0.0005009235778466548,
+        "specificity": 0.9976886471787899,
+        "f1": 0.0010010792886080305,
+        "balanced_accuracy": 0.4990947853783183,
+        "false_alarm_rate": 0.0023113528212100887,
+        "miss_rate": 0.9994990764221533
+      },
+      "eer_point": {
+        "threshold": 0.9969685673713684,
+        "confusion": {
+          "tp": 27848,
+          "fn": 36034,
+          "tn": 3205,
+          "fp": 4150
+        },
+        "accuracy": 0.43591111360669316,
+        "precision": 0.8703043940246266,
+        "recall": 0.43592874362105133,
+        "specificity": 0.4357579877634262,
+        "f1": 0.5808927826449729,
+        "balanced_accuracy": 0.4358433656922388,
+        "false_alarm_rate": 0.5642420122365738,
+        "miss_rate": 0.5640712563789487
+      }
+    },
+    {
+      "run": "s3_native_clean",
+      "run_label": "S3 native, XTTS, clean",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "docs/results/s3_native/s3_native_clean__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.014635217113665389,
+      "auc": 0.9977184440187313,
+      "eer_threshold": 0.9785536527633667,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2266,
+          "fn": 134,
+          "tn": 1565,
+          "fp": 1
+        },
+        "accuracy": 0.9659606656580938,
+        "precision": 0.9995588883987648,
+        "recall": 0.9441666666666667,
+        "specificity": 0.9993614303959132,
+        "f1": 0.971073494750375,
+        "balanced_accuracy": 0.97176404853129,
+        "false_alarm_rate": 0.0006385696040868138,
+        "miss_rate": 0.05583333333333329
+      },
+      "eer_point": {
+        "threshold": 0.9785536527633667,
+        "confusion": {
+          "tp": 2365,
+          "fn": 35,
+          "tn": 1543,
+          "fp": 23
+        },
+        "accuracy": 0.9853756933938477,
+        "precision": 0.9903685092127303,
+        "recall": 0.9854166666666667,
+        "specificity": 0.9853128991060025,
+        "f1": 0.9878863826232248,
+        "balanced_accuracy": 0.9853647828863346,
+        "false_alarm_rate": 0.014687100893997496,
+        "miss_rate": 0.014583333333333282
+      }
+    },
+    {
+      "run": "s3_native_clean",
+      "run_label": "S3 native, XTTS, clean",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "docs/results/s3_native/s3_native_clean__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.45071761338709343,
+      "auc": 0.583904359997493,
+      "eer_threshold": 0.9967922568321228,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 6,
+          "fn": 311,
+          "tn": 302,
+          "fp": 0
+        },
+        "accuracy": 0.4975767366720517,
+        "precision": 1.0,
+        "recall": 0.01892744479495268,
+        "specificity": 1.0,
+        "f1": 0.03715170278637771,
+        "balanced_accuracy": 0.5094637223974764,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.9810725552050473
+      },
+      "eer_point": {
+        "threshold": 0.9967922568321228,
+        "confusion": {
+          "tp": 174,
+          "fn": 143,
+          "tn": 166,
+          "fp": 136
+        },
+        "accuracy": 0.5492730210016155,
+        "precision": 0.5612903225806452,
+        "recall": 0.5488958990536278,
+        "specificity": 0.5496688741721855,
+        "f1": 0.5550239234449762,
+        "balanced_accuracy": 0.5492823866129066,
+        "false_alarm_rate": 0.45033112582781454,
+        "miss_rate": 0.4511041009463722
+      }
+    },
+    {
+      "run": "s3_native_rvc_channel",
+      "run_label": "S3 native, XTTS+RVC, channel",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "docs/results/s3_native/s3_native_rvc_channel__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.3166622050449788,
+      "auc": 0.75831743880607,
+      "eer_threshold": 0.9971158504486084,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 56,
+          "fn": 402,
+          "tn": 1557,
+          "fp": 9
+        },
+        "accuracy": 0.7969367588932806,
+        "precision": 0.8615384615384616,
+        "recall": 0.1222707423580786,
+        "specificity": 0.9942528735632183,
+        "f1": 0.2141491395793499,
+        "balanced_accuracy": 0.5582618079606485,
+        "false_alarm_rate": 0.005747126436781658,
+        "miss_rate": 0.8777292576419214
+      },
+      "eer_point": {
+        "threshold": 0.9971158504486084,
+        "confusion": {
+          "tp": 313,
+          "fn": 145,
+          "tn": 1070,
+          "fp": 496
+        },
+        "accuracy": 0.683300395256917,
+        "precision": 0.3868974042027194,
+        "recall": 0.6834061135371179,
+        "specificity": 0.6832694763729247,
+        "f1": 0.49408050513022894,
+        "balanced_accuracy": 0.6833377949550212,
+        "false_alarm_rate": 0.3167305236270753,
+        "miss_rate": 0.3165938864628821
+      }
+    },
+    {
+      "run": "s3_native_rvc_channel",
+      "run_label": "S3 native, XTTS+RVC, channel",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/s3_native_rvc_channel__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.5224981494709048,
+      "auc": 0.5098248148763236,
+      "eer_threshold": 0.9937525391578674,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 3,
+          "fn": 63879,
+          "tn": 7355,
+          "fp": 0
+        },
+        "accuracy": 0.10328902115473701,
+        "precision": 1.0,
+        "recall": 4.6961585423123884e-05,
+        "specificity": 1.0,
+        "f1": 9.391876027236441e-05,
+        "balanced_accuracy": 0.5000234807927115,
+        "false_alarm_rate": 0.0,
+        "miss_rate": 0.9999530384145768
+      },
+      "eer_point": {
+        "threshold": 0.9937525391578674,
+        "confusion": {
+          "tp": 30504,
+          "fn": 33378,
+          "tn": 3512,
+          "fp": 3843
+        },
+        "accuracy": 0.477504667518284,
+        "precision": 0.8881124989082015,
+        "recall": 0.47750540058232366,
+        "specificity": 0.4774983004758668,
+        "f1": 0.621079314662676,
+        "balanced_accuracy": 0.4775018505290952,
+        "false_alarm_rate": 0.5225016995241332,
+        "miss_rate": 0.5224945994176764
+      }
+    },
+    {
+      "run": "s3_native_rvc_channel",
+      "run_label": "S3 native, XTTS+RVC, channel",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "docs/results/s3_native/s3_native_rvc_channel__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.01789830779054917,
+      "auc": 0.9991743827160494,
+      "eer_threshold": 0.8627490401268005,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2327,
+          "fn": 73,
+          "tn": 1557,
+          "fp": 9
+        },
+        "accuracy": 0.9793242561775088,
+        "precision": 0.9961472602739726,
+        "recall": 0.9695833333333334,
+        "specificity": 0.9942528735632183,
+        "f1": 0.9826858108108109,
+        "balanced_accuracy": 0.9819181034482758,
+        "false_alarm_rate": 0.005747126436781658,
+        "miss_rate": 0.030416666666666647
+      },
+      "eer_point": {
+        "threshold": 0.8627490401268005,
+        "confusion": {
+          "tp": 2357,
+          "fn": 43,
+          "tn": 1538,
+          "fp": 28
+        },
+        "accuracy": 0.9820978315683309,
+        "precision": 0.9882599580712789,
+        "recall": 0.9820833333333333,
+        "specificity": 0.9821200510855683,
+        "f1": 0.9851619644723094,
+        "balanced_accuracy": 0.9821016922094508,
+        "false_alarm_rate": 0.017879948914431676,
+        "miss_rate": 0.017916666666666692
+      }
+    },
+    {
+      "run": "s3_native_rvc_channel",
+      "run_label": "S3 native, XTTS+RVC, channel",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "docs/results/s3_native/s3_native_rvc_channel__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.05976977876198634,
+      "auc": 0.9547809555643763,
+      "eer_threshold": 0.9965555667877197,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 270,
+          "fn": 47,
+          "tn": 298,
+          "fp": 4
+        },
+        "accuracy": 0.9176090468497576,
+        "precision": 0.9854014598540146,
+        "recall": 0.8517350157728707,
+        "specificity": 0.9867549668874173,
+        "f1": 0.9137055837563451,
+        "balanced_accuracy": 0.9192449913301439,
+        "false_alarm_rate": 0.013245033112582738,
+        "miss_rate": 0.1482649842271293
+      },
+      "eer_point": {
+        "threshold": 0.9965555667877197,
+        "confusion": {
+          "tp": 298,
+          "fn": 19,
+          "tn": 284,
+          "fp": 18
+        },
+        "accuracy": 0.9402261712439418,
+        "precision": 0.9430379746835443,
+        "recall": 0.9400630914826499,
+        "specificity": 0.9403973509933775,
+        "f1": 0.9415481832543445,
+        "balanced_accuracy": 0.9402302212380137,
+        "false_alarm_rate": 0.05960264900662249,
+        "miss_rate": 0.05993690851735012
+      }
+    },
+    {
+      "run": "s3_native_rvc_clean",
+      "run_label": "S3 native, XTTS+RVC, clean",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "docs/results/s3_native/s3_native_rvc_clean__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.2139473082478654,
+      "auc": 0.8316651050990759,
+      "eer_threshold": 0.9951678514480591,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 221,
+          "fn": 237,
+          "tn": 1535,
+          "fp": 31
+        },
+        "accuracy": 0.8675889328063241,
+        "precision": 0.876984126984127,
+        "recall": 0.48253275109170307,
+        "specificity": 0.9802043422733078,
+        "f1": 0.6225352112676057,
+        "balanced_accuracy": 0.7313685466825054,
+        "false_alarm_rate": 0.01979565772669223,
+        "miss_rate": 0.517467248908297
+      },
+      "eer_point": {
+        "threshold": 0.9951678514480591,
+        "confusion": {
+          "tp": 360,
+          "fn": 98,
+          "tn": 1231,
+          "fp": 335
+        },
+        "accuracy": 0.7860671936758893,
+        "precision": 0.5179856115107914,
+        "recall": 0.7860262008733624,
+        "specificity": 0.7860791826309068,
+        "f1": 0.6244579358196011,
+        "balanced_accuracy": 0.7860526917521347,
+        "false_alarm_rate": 0.21392081736909319,
+        "miss_rate": 0.2139737991266376
+      }
+    },
+    {
+      "run": "s3_native_rvc_clean",
+      "run_label": "S3 native, XTTS+RVC, clean",
+      "set": "english",
+      "set_label": "English (ASVspoof LA)",
+      "source": "docs/results/s3_native/s3_native_rvc_clean__english_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.5090447002568532,
+      "auc": 0.5044311145053706,
+      "eer_threshold": 0.9579859972000122,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 15790,
+          "fn": 48092,
+          "tn": 6107,
+          "fp": 1248
+        },
+        "accuracy": 0.3073823995957157,
+        "precision": 0.9267519661932152,
+        "recall": 0.24717447794370873,
+        "specificity": 0.8303195105370497,
+        "f1": 0.3902619871478003,
+        "balanced_accuracy": 0.5387469942403792,
+        "false_alarm_rate": 0.16968048946295033,
+        "miss_rate": 0.7528255220562913
+      },
+      "eer_point": {
+        "threshold": 0.9579859972000122,
+        "confusion": {
+          "tp": 31363,
+          "fn": 32519,
+          "tn": 3611,
+          "fp": 3744
+        },
+        "accuracy": 0.4909527352359027,
+        "precision": 0.8933546016463954,
+        "recall": 0.4909520678751448,
+        "specificity": 0.4909585316111489,
+        "f1": 0.6336663669700675,
+        "balanced_accuracy": 0.49095529974314683,
+        "false_alarm_rate": 0.5090414683888511,
+        "miss_rate": 0.5090479321248552
+      }
+    },
+    {
+      "run": "s3_native_rvc_clean",
+      "run_label": "S3 native, XTTS+RVC, clean",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "docs/results/s3_native/s3_native_rvc_clean__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.008317369093231162,
+      "auc": 0.9996833759046403,
+      "eer_threshold": 0.12089895457029343,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2386,
+          "fn": 14,
+          "tn": 1535,
+          "fp": 31
+        },
+        "accuracy": 0.9886535552193646,
+        "precision": 0.9871741828713281,
+        "recall": 0.9941666666666666,
+        "specificity": 0.9802043422733078,
+        "f1": 0.9906580859456092,
+        "balanced_accuracy": 0.9871855044699872,
+        "false_alarm_rate": 0.01979565772669223,
+        "miss_rate": 0.005833333333333357
+      },
+      "eer_point": {
+        "threshold": 0.12089895457029343,
+        "confusion": {
+          "tp": 2380,
+          "fn": 20,
+          "tn": 1553,
+          "fp": 13
+        },
+        "accuracy": 0.9916792738275341,
+        "precision": 0.9945674885081488,
+        "recall": 0.9916666666666667,
+        "specificity": 0.991698595146871,
+        "f1": 0.9931149593156687,
+        "balanced_accuracy": 0.9916826309067688,
+        "false_alarm_rate": 0.008301404853129024,
+        "miss_rate": 0.008333333333333304
+      }
+    },
+    {
+      "run": "s3_native_rvc_clean",
+      "run_label": "S3 native, XTTS+RVC, clean",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "docs/results/s3_native/s3_native_rvc_clean__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.08240019219921868,
+      "auc": 0.9375613679570477,
+      "eer_threshold": 0.9938788414001465,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 275,
+          "fn": 42,
+          "tn": 294,
+          "fp": 8
+        },
+        "accuracy": 0.9192245557350566,
+        "precision": 0.9717314487632509,
+        "recall": 0.8675078864353313,
+        "specificity": 0.9735099337748344,
+        "f1": 0.9166666666666666,
+        "balanced_accuracy": 0.9205089101050828,
+        "false_alarm_rate": 0.026490066225165587,
+        "miss_rate": 0.13249211356466872
+      },
+      "eer_point": {
+        "threshold": 0.9938788414001465,
+        "confusion": {
+          "tp": 291,
+          "fn": 26,
+          "tn": 277,
+          "fp": 25
+        },
+        "accuracy": 0.9176090468497576,
+        "precision": 0.9208860759493671,
+        "recall": 0.917981072555205,
+        "specificity": 0.9172185430463576,
+        "f1": 0.9194312796208529,
+        "balanced_accuracy": 0.9175998078007813,
+        "false_alarm_rate": 0.08278145695364236,
+        "miss_rate": 0.082018927444795
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "asvspoof_eval",
+      "set_label": "English (ASVspoof LA)",
+      "source": "results/s1_norm/stage1__asvspoof_eval_scores.csv",
+      "clips": 71237,
+      "bonafide": 7355,
+      "spoof": 63882,
+      "eer": 0.008971575119669038,
+      "auc": 0.9940003642848385,
+      "eer_threshold": 0.9983422756195068,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 59707,
+          "fn": 4175,
+          "tn": 7328,
+          "fp": 27
+        },
+        "accuracy": 0.941013799008942,
+        "precision": 0.9995479961161148,
+        "recall": 0.9346451269528192,
+        "specificity": 0.9963290278721958,
+        "f1": 0.9660076365519026,
+        "balanced_accuracy": 0.9654870774125075,
+        "false_alarm_rate": 0.0036709721278042062,
+        "miss_rate": 0.0653548730471808
+      },
+      "eer_point": {
+        "threshold": 0.9983422756195068,
+        "confusion": {
+          "tp": 63309,
+          "fn": 573,
+          "tn": 7289,
+          "fp": 66
+        },
+        "accuracy": 0.9910299423052628,
+        "precision": 0.9989585798816568,
+        "recall": 0.9910303371841833,
+        "specificity": 0.9910265125764786,
+        "f1": 0.9949786652207737,
+        "balanced_accuracy": 0.9910284248803309,
+        "false_alarm_rate": 0.008973487423521442,
+        "miss_rate": 0.008969662815816681
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "cm04_channel",
+      "set_label": "unseen tool (Tortoise), channel",
+      "source": "results/s1_norm/stage1__cm04_channel_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.4414691004812974,
+      "auc": 0.5607421907677893,
+      "eer_threshold": 0.4786771237850189,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 259,
+          "fn": 199,
+          "tn": 859,
+          "fp": 707
+        },
+        "accuracy": 0.5523715415019763,
+        "precision": 0.26811594202898553,
+        "recall": 0.5655021834061136,
+        "specificity": 0.5485312899106003,
+        "f1": 0.36376404494382025,
+        "balanced_accuracy": 0.5570167366583569,
+        "false_alarm_rate": 0.4514687100893997,
+        "miss_rate": 0.4344978165938864
+      },
+      "eer_point": {
+        "threshold": 0.4786771237850189,
+        "confusion": {
+          "tp": 256,
+          "fn": 202,
+          "tn": 874,
+          "fp": 692
+        },
+        "accuracy": 0.558300395256917,
+        "precision": 0.270042194092827,
+        "recall": 0.5589519650655022,
+        "specificity": 0.558109833971903,
+        "f1": 0.364153627311522,
+        "balanced_accuracy": 0.5585308995187026,
+        "false_alarm_rate": 0.44189016602809705,
+        "miss_rate": 0.44104803493449785
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "cm04",
+      "set_label": "unseen tool (Tortoise)",
+      "source": "results/s1_norm/stage1__cm04_scores.csv",
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "eer": 0.41668897477510636,
+      "auc": 0.5969022402917901,
+      "eer_threshold": 0.0005139785353094339,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 444,
+          "fn": 14,
+          "tn": 82,
+          "fp": 1484
+        },
+        "accuracy": 0.2598814229249012,
+        "precision": 0.23029045643153526,
+        "recall": 0.9694323144104804,
+        "specificity": 0.05236270753512133,
+        "f1": 0.37217099748533106,
+        "balanced_accuracy": 0.5108975109728009,
+        "false_alarm_rate": 0.9476372924648787,
+        "miss_rate": 0.03056768558951961
+      },
+      "eer_point": {
+        "threshold": 0.0005139785353094339,
+        "confusion": {
+          "tp": 267,
+          "fn": 191,
+          "tn": 914,
+          "fp": 652
+        },
+        "accuracy": 0.583498023715415,
+        "precision": 0.29053318824809576,
+        "recall": 0.5829694323144105,
+        "specificity": 0.5836526181353767,
+        "f1": 0.3877995642701525,
+        "balanced_accuracy": 0.5833110252248936,
+        "false_alarm_rate": 0.4163473818646233,
+        "miss_rate": 0.41703056768558955
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "eval_pool_channel",
+      "set_label": "seen tool (XTTS), channel",
+      "source": "results/s1_norm/stage1__eval_pool_channel_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.5842289272030652,
+      "auc": 0.3814237441464453,
+      "eer_threshold": 0.6874585151672363,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 629,
+          "fn": 1771,
+          "tn": 859,
+          "fp": 707
+        },
+        "accuracy": 0.3751891074130106,
+        "precision": 0.4708083832335329,
+        "recall": 0.26208333333333333,
+        "specificity": 0.5485312899106003,
+        "f1": 0.3367237687366167,
+        "balanced_accuracy": 0.4053073116219668,
+        "false_alarm_rate": 0.4514687100893997,
+        "miss_rate": 0.7379166666666667
+      },
+      "eer_point": {
+        "threshold": 0.6874585151672363,
+        "confusion": {
+          "tp": 998,
+          "fn": 1402,
+          "tn": 651,
+          "fp": 915
+        },
+        "accuracy": 0.4157841654059506,
+        "precision": 0.5216936748562467,
+        "recall": 0.41583333333333333,
+        "specificity": 0.4157088122605364,
+        "f1": 0.46278692325527476,
+        "balanced_accuracy": 0.41577107279693487,
+        "false_alarm_rate": 0.5842911877394636,
+        "miss_rate": 0.5841666666666667
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "eval_pool",
+      "set_label": "seen tool (XTTS)",
+      "source": "results/s1_norm/stage1__eval_pool_scores.csv",
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "eer": 0.4821016922094508,
+      "auc": 0.5572090517241379,
+      "eer_threshold": 0.0005222922773100436,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 2222,
+          "fn": 178,
+          "tn": 82,
+          "fp": 1484
+        },
+        "accuracy": 0.5809379727685325,
+        "precision": 0.5995682676740421,
+        "recall": 0.9258333333333333,
+        "specificity": 0.05236270753512133,
+        "f1": 0.7278087127415657,
+        "balanced_accuracy": 0.4890980204342273,
+        "false_alarm_rate": 0.9476372924648787,
+        "miss_rate": 0.07416666666666671
+      },
+      "eer_point": {
+        "threshold": 0.0005222922773100436,
+        "confusion": {
+          "tp": 1243,
+          "fn": 1157,
+          "tn": 811,
+          "fp": 755
+        },
+        "accuracy": 0.5179021684316691,
+        "precision": 0.6221221221221221,
+        "recall": 0.5179166666666667,
+        "specificity": 0.5178799489144317,
+        "f1": 0.5652569349704412,
+        "balanced_accuracy": 0.5178983077905492,
+        "false_alarm_rate": 0.4821200510855683,
+        "miss_rate": 0.4820833333333333
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "rvc_test_channel",
+      "set_label": "RVC, unseen speakers, channel",
+      "source": "results/s1_norm/stage1__rvc_test_channel_scores.csv",
+      "clips": 618,
+      "bonafide": 302,
+      "spoof": 316,
+      "eer": 0.5566267080224663,
+      "auc": 0.4266074272780619,
+      "eer_threshold": 0.6343293786048889,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 106,
+          "fn": 210,
+          "tn": 171,
+          "fp": 131
+        },
+        "accuracy": 0.4482200647249191,
+        "precision": 0.4472573839662447,
+        "recall": 0.33544303797468356,
+        "specificity": 0.5662251655629139,
+        "f1": 0.3833634719710669,
+        "balanced_accuracy": 0.45083410176879873,
+        "false_alarm_rate": 0.4337748344370861,
+        "miss_rate": 0.6645569620253164
+      },
+      "eer_point": {
+        "threshold": 0.6343293786048889,
+        "confusion": {
+          "tp": 140,
+          "fn": 176,
+          "tn": 134,
+          "fp": 168
+        },
+        "accuracy": 0.44336569579288027,
+        "precision": 0.45454545454545453,
+        "recall": 0.4430379746835443,
+        "specificity": 0.44370860927152317,
+        "f1": 0.4487179487179487,
+        "balanced_accuracy": 0.4433732919775337,
+        "false_alarm_rate": 0.5562913907284768,
+        "miss_rate": 0.5569620253164558
+      }
+    },
+    {
+      "run": "stage1",
+      "run_label": "S1 baseline (English-only)",
+      "set": "rvc_test",
+      "set_label": "RVC, unseen speakers",
+      "source": "results/s1_norm/stage1__rvc_test_scores.csv",
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "eer": 0.4345530323604989,
+      "auc": 0.5461852633338208,
+      "eer_threshold": 0.0005190885858610272,
+      "deployed": {
+        "threshold": 0.49997557675233106,
+        "confusion": {
+          "tp": 308,
+          "fn": 9,
+          "tn": 15,
+          "fp": 287
+        },
+        "accuracy": 0.5218093699515347,
+        "precision": 0.5176470588235295,
+        "recall": 0.9716088328075709,
+        "specificity": 0.04966887417218543,
+        "f1": 0.6754385964912281,
+        "balanced_accuracy": 0.5106388534898781,
+        "false_alarm_rate": 0.9503311258278145,
+        "miss_rate": 0.028391167192429068
+      },
+      "eer_point": {
+        "threshold": 0.0005190885858610272,
+        "confusion": {
+          "tp": 179,
+          "fn": 138,
+          "tn": 171,
+          "fp": 131
+        },
+        "accuracy": 0.5654281098546042,
+        "precision": 0.5774193548387097,
+        "recall": 0.5646687697160884,
+        "specificity": 0.5662251655629139,
+        "f1": 0.5709728867623605,
+        "balanced_accuracy": 0.5654469676395011,
+        "false_alarm_rate": 0.4337748344370861,
+        "miss_rate": 0.43533123028391163
+      }
+    }
+  ]
+}
