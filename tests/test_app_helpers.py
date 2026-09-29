@@ -56,6 +56,7 @@ def test_unknown_model_key_is_refused():
 
 
 def test_prepare_resamples_to_16k_and_normalises_the_level():
+    pytest.importorskip("librosa")  # resampling wheel, not installed in CI
     from src.utils.audio_utils import amp_to_db, rms
 
     audio = _voice(2.0, sr=44_100) * 0.01  # quiet, and at the wrong rate
@@ -72,6 +73,7 @@ def test_prepare_leaves_a_16k_clip_at_its_own_length():
 
 def test_the_phone_line_removes_energy_above_4_khz():
     """A narrowband line cannot carry 6 kHz. The tone must come back gutted."""
+    pytest.importorskip("librosa")  # resampling wheel, not installed in CI
     t = np.arange(2 * core.SAMPLE_RATE) / core.SAMPLE_RATE
     wideband = (0.3 * np.sin(2 * np.pi * 300 * t) + 0.3 * np.sin(2 * np.pi * 6000 * t)).astype(
         np.float32
