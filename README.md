@@ -583,7 +583,8 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/gpu_laptop_setup.md`](docs/gpu_laptop_setup.md) | Bringing a second machine to an identical state |
 | [`docs/licences.md`](docs/licences.md) | Per-corpus licence table and usage restrictions |
 | [`docs/attack_taxonomy.md`](docs/attack_taxonomy.md) | Attack IDs, tool, pool, split — AffectDF Table-1 format |
-| [`docs/results/demo_clips_live_check.json`](docs/results/demo_clips_live_check.json) | **Live-path check of every demo clip** — replayed through the browser call path rather than scored offline, because the call is carried by Opus and the detector is trained on G.711. |
+| [`docs/results/demo_clips_live_check.json`](docs/results/demo_clips_live_check.json) | **Live-path check of every demo clip** — replayed through the browser call path rather than scored offline, because the two disagree. |
+| [`docs/results/carrier_effect_v1.md`](docs/results/carrier_effect_v1.md) | **What a carrier does to the scores** — the codec was the obvious explanation for that disagreement and it is wrong: Opus leaves both genuine clips at zero low windows. A withdrawn explanation, recorded. |
 | [`docs/results/interpretability_v1.md`](docs/results/interpretability_v1.md) | **What the detector responds to** — layer, band and phase probes for S1 and S2, and the evasion finding that turned out to be a shuffle bug. |
 | `docs/W<week>_<member>_<work>.md` | **Per-member weekly records** — what each of us did that week, the numbers we got, and the limitations we know about. One per person per week, e.g. [`docs/W9_krishna_cm02_gate_cm01_recovery.md`](docs/W9_krishna_cm02_gate_cm01_recovery.md) |
 

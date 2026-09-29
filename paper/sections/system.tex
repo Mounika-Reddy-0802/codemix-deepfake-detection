@@ -143,11 +143,29 @@ correctly, the message was dispatched --- and no warning was ever displayed.
 \subsection{Deployment status}
 
 The WebRTC carrier is verified end to end against the deployed checkpoint. Each
-demonstration clip was replayed through the live path and its behaviour recorded,
-rather than inferred from offline scores: this matters because the browser encodes
-the call with Opus while the detector is trained on G.711, and a low-bitrate encode
-of a genuine voice can score like a synthetic one. The call is therefore negotiated
-at a high constant bitrate with discontinuous transmission disabled.
+demonstration clip was replayed through the live path and its behaviour recorded
+rather than inferred from offline scores, because the two disagree: on a live call a
+genuine caller can lose several consecutive windows that the same clip never loses
+offline.
+
+We tested the obvious explanation and it does not hold. Encoding each clip through
+the browser's carrier offline --- resample to 48\,kHz, Opus encode and decode,
+resample back --- and rescoring through the identical streaming path leaves both
+genuine clips at zero windows below the threshold, with a worst window of 0.984
+against the 0.001 seen live. Both seen attacks stay fully detected through every
+carrier. The codec, and the resampling around it, therefore do not account for the
+live degradation, and clone detection does not depend on codec artefacts.\footnote{%
+\texttt{docs/results/carrier\_effect\_v1.md}; reproduce with
+\texttt{python -m src.inference.carrier\_sim}.}
+
+By elimination the cause lies in the real-time transport rather than in the coding:
+jitter buffering, packet-loss concealment, or the bitrate adaptation a browser
+applies while a connection is still settling. Concealment is the candidate we would
+test first, because it synthesises audio to fill gaps, and a detector reporting that
+machine-generated audio is not human would produce exactly this signature. That
+remains untested. The call is negotiated at a high constant bitrate with
+discontinuous transmission disabled, which is sensible for a demonstration, but the
+dip survived that change and it should not be presented as the remedy.
 
 The Twilio carrier is implemented and unit-tested but has not been verified on live
 numbers, because the account's trial credit was exhausted. This is the clearest
