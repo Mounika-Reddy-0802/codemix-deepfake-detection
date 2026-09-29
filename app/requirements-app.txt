@@ -1,0 +1,8 @@
+# Extra dependencies for the Streamlit demo (app/streamlit_app.py).
+# Install these ON TOP of requirements.txt, which already pins torch, transformers,
+# soundfile, librosa, numpy and the rest of the detection pipeline:
+#
+#     pip install -r requirements.txt -r app/requirements-app.txt
+#
+streamlit==1.40.2      # 1.40 is the first release with st.audio_input (microphone tab)
+matplotlib==3.11.1     # waveform and per-window timeline plots
