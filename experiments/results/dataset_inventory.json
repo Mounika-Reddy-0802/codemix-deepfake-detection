@@ -1,0 +1,602 @@
+{
+  "note": "hours are measured from audio headers or the clip index; clips whose audio is not on this machine are counted under unmeasured_clips and never estimated",
+  "data_root": "C:\\dfdata",
+  "corpora": {
+    "hiacc": {
+      "clips": 3318,
+      "hours": 3.22,
+      "speakers": 24,
+      "unmeasured_clips": 0
+    },
+    "mucs2021": {
+      "clips": 52825,
+      "hours": 89.55,
+      "speakers": 520,
+      "unmeasured_clips": 0
+    }
+  },
+  "attack_tools": {
+    "RVC v2 (CM02)": {
+      "clips": 2435,
+      "hours": 4.28,
+      "speakers": 12,
+      "unmeasured_clips": 0
+    },
+    "Tortoise-TTS (CM04, held out)": {
+      "clips": 458,
+      "hours": 1.06,
+      "speakers": 15,
+      "unmeasured_clips": 0
+    },
+    "XTTS-v2 (CM01 / CM03)": {
+      "clips": 7497,
+      "hours": 13.37,
+      "speakers": 50,
+      "unmeasured_clips": 0
+    }
+  },
+  "generated_pools": {
+    "CM01/CM03 XTTS-v2 outputs": {
+      "clips": 4025,
+      "hours": 7.03,
+      "speakers": 0,
+      "unmeasured_clips": 0,
+      "on_disk": true,
+      "note": ""
+    },
+    "CM02 RVC v2, train pool": {
+      "clips": 1500,
+      "hours": 2.62,
+      "speakers": 0,
+      "unmeasured_clips": 0,
+      "on_disk": true,
+      "note": ""
+    },
+    "CM04 Tortoise-TTS, held out": {
+      "clips": 500,
+      "hours": 1.19,
+      "speakers": 0,
+      "unmeasured_clips": 0,
+      "on_disk": true,
+      "note": ""
+    }
+  },
+  "asvspoof_splits": {
+    "dev bonafide": {
+      "clips": 2548,
+      "hours": 2.48,
+      "speakers": 20,
+      "unmeasured_clips": 0
+    },
+    "dev spoof": {
+      "clips": 22296,
+      "hours": 21.52,
+      "speakers": 10,
+      "unmeasured_clips": 0
+    },
+    "eval bonafide": {
+      "clips": 7355,
+      "hours": 6.94,
+      "speakers": 67,
+      "unmeasured_clips": 0
+    },
+    "eval spoof": {
+      "clips": 63882,
+      "hours": 54.56,
+      "speakers": 48,
+      "unmeasured_clips": 0
+    },
+    "train bonafide": {
+      "clips": 2580,
+      "hours": 2.43,
+      "speakers": 20,
+      "unmeasured_clips": 0
+    },
+    "train spoof": {
+      "clips": 22800,
+      "hours": 21.72,
+      "speakers": 20,
+      "unmeasured_clips": 0
+    }
+  },
+  "manifests": {
+    "codemix_adapt_train": {
+      "clips": 2154,
+      "bonafide": {
+        "clips": 874,
+        "hours": 1.51,
+        "speakers": 8,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 1280,
+        "hours": 2.21,
+        "speakers": 8,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.46,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 874,
+          "hours": 1.51,
+          "speakers": 8,
+          "unmeasured_clips": 0
+        },
+        "XTTS-v2 (CM01 / CM03)": {
+          "clips": 1280,
+          "hours": 2.21,
+          "speakers": 8,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "codemix_adapt_train_rvc": {
+      "clips": 2854,
+      "bonafide": {
+        "clips": 1217,
+        "hours": 2.13,
+        "speakers": 21,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 1637,
+        "hours": 2.87,
+        "speakers": 14,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.35,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 1217,
+          "hours": 2.13,
+          "speakers": 21,
+          "unmeasured_clips": 0
+        },
+        "RVC v2 (CM02)": {
+          "clips": 357,
+          "hours": 0.65,
+          "speakers": 6,
+          "unmeasured_clips": 0
+        },
+        "XTTS-v2 (CM01 / CM03)": {
+          "clips": 1280,
+          "hours": 2.21,
+          "speakers": 8,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "codemix_adapt_dev": {
+      "clips": 506,
+      "bonafide": {
+        "clips": 186,
+        "hours": 0.42,
+        "speakers": 2,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 320,
+        "hours": 0.61,
+        "speakers": 2,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.72,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 186,
+          "hours": 0.42,
+          "speakers": 2,
+          "unmeasured_clips": 0
+        },
+        "XTTS-v2 (CM01 / CM03)": {
+          "clips": 320,
+          "hours": 0.61,
+          "speakers": 2,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "codemix_eval": {
+      "clips": 3966,
+      "bonafide": {
+        "clips": 1566,
+        "hours": 2.74,
+        "speakers": 15,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 2400,
+        "hours": 4.51,
+        "speakers": 15,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.53,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 1566,
+          "hours": 2.74,
+          "speakers": 15,
+          "unmeasured_clips": 0
+        },
+        "XTTS-v2 (CM01 / CM03)": {
+          "clips": 2400,
+          "hours": 4.51,
+          "speakers": 15,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "score_cm02": {
+      "clips": 2749,
+      "bonafide": {
+        "clips": 1345,
+        "hours": 2.34,
+        "speakers": 25,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 1404,
+        "hours": 2.44,
+        "speakers": 12,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.04,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 1345,
+          "hours": 2.34,
+          "speakers": 25,
+          "unmeasured_clips": 0
+        },
+        "RVC v2 (CM02)": {
+          "clips": 1404,
+          "hours": 2.44,
+          "speakers": 12,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "score_cm04_norm": {
+      "clips": 2024,
+      "bonafide": {
+        "clips": 1566,
+        "hours": 2.74,
+        "speakers": 15,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 458,
+        "hours": 1.06,
+        "speakers": 15,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 0.29,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 1566,
+          "hours": 2.74,
+          "speakers": 15,
+          "unmeasured_clips": 0
+        },
+        "Tortoise-TTS (CM04, held out)": {
+          "clips": 458,
+          "hours": 1.06,
+          "speakers": 15,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "rvc_holdout_train": {
+      "clips": 700,
+      "bonafide": {
+        "clips": 343,
+        "hours": 0.62,
+        "speakers": 13,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 357,
+        "hours": 0.65,
+        "speakers": 6,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.04,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 343,
+          "hours": 0.62,
+          "speakers": 13,
+          "unmeasured_clips": 0
+        },
+        "RVC v2 (CM02)": {
+          "clips": 357,
+          "hours": 0.65,
+          "speakers": 6,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "rvc_holdout_test": {
+      "clips": 619,
+      "bonafide": {
+        "clips": 302,
+        "hours": 0.51,
+        "speakers": 12,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 317,
+        "hours": 0.53,
+        "speakers": 6,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.05,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 302,
+          "hours": 0.51,
+          "speakers": 12,
+          "unmeasured_clips": 0
+        },
+        "RVC v2 (CM02)": {
+          "clips": 317,
+          "hours": 0.53,
+          "speakers": 6,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "gap_codemix_clean": {
+      "clips": 4434,
+      "bonafide": {
+        "clips": 2217,
+        "hours": 359.53,
+        "speakers": 25,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 2217,
+        "hours": 3.82,
+        "speakers": 25,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 1.0,
+      "by_tool": {
+        "bonafide (no tool)": {
+          "clips": 2217,
+          "hours": 359.53,
+          "speakers": 25,
+          "unmeasured_clips": 0
+        },
+        "XTTS-v2 (CM01 / CM03)": {
+          "clips": 2217,
+          "hours": 3.82,
+          "speakers": 25,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "asvspoof_train": {
+      "clips": 25380,
+      "bonafide": {
+        "clips": 2580,
+        "hours": 2.43,
+        "speakers": 20,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 22800,
+        "hours": 21.72,
+        "speakers": 20,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 8.84,
+      "by_tool": {
+        "a01": {
+          "clips": 3800,
+          "hours": 2.91,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        },
+        "a02": {
+          "clips": 3800,
+          "hours": 4.38,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        },
+        "a03": {
+          "clips": 3800,
+          "hours": 3.49,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        },
+        "a04": {
+          "clips": 3800,
+          "hours": 3.33,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        },
+        "a05": {
+          "clips": 3800,
+          "hours": 3.81,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        },
+        "a06": {
+          "clips": 3800,
+          "hours": 3.8,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        },
+        "bonafide (no tool)": {
+          "clips": 2580,
+          "hours": 2.43,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "asvspoof_dev": {
+      "clips": 24844,
+      "bonafide": {
+        "clips": 2548,
+        "hours": 2.48,
+        "speakers": 20,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 22296,
+        "hours": 21.52,
+        "speakers": 10,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 8.75,
+      "by_tool": {
+        "a01": {
+          "clips": 3716,
+          "hours": 2.91,
+          "speakers": 10,
+          "unmeasured_clips": 0
+        },
+        "a02": {
+          "clips": 3716,
+          "hours": 4.35,
+          "speakers": 10,
+          "unmeasured_clips": 0
+        },
+        "a03": {
+          "clips": 3716,
+          "hours": 3.41,
+          "speakers": 10,
+          "unmeasured_clips": 0
+        },
+        "a04": {
+          "clips": 3716,
+          "hours": 3.26,
+          "speakers": 10,
+          "unmeasured_clips": 0
+        },
+        "a05": {
+          "clips": 3716,
+          "hours": 3.8,
+          "speakers": 10,
+          "unmeasured_clips": 0
+        },
+        "a06": {
+          "clips": 3716,
+          "hours": 3.8,
+          "speakers": 10,
+          "unmeasured_clips": 0
+        },
+        "bonafide (no tool)": {
+          "clips": 2548,
+          "hours": 2.48,
+          "speakers": 20,
+          "unmeasured_clips": 0
+        }
+      }
+    },
+    "asvspoof_eval": {
+      "clips": 71237,
+      "bonafide": {
+        "clips": 7355,
+        "hours": 6.94,
+        "speakers": 67,
+        "unmeasured_clips": 0
+      },
+      "spoof": {
+        "clips": 63882,
+        "hours": 54.56,
+        "speakers": 48,
+        "unmeasured_clips": 0
+      },
+      "spoof_per_real": 8.69,
+      "by_tool": {
+        "a07": {
+          "clips": 4914,
+          "hours": 3.71,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a08": {
+          "clips": 4914,
+          "hours": 3.82,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a09": {
+          "clips": 4914,
+          "hours": 4.12,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a10": {
+          "clips": 4914,
+          "hours": 3.52,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a11": {
+          "clips": 4914,
+          "hours": 3.58,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a12": {
+          "clips": 4914,
+          "hours": 4.23,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a13": {
+          "clips": 4914,
+          "hours": 3.95,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a14": {
+          "clips": 4914,
+          "hours": 4.68,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a15": {
+          "clips": 4914,
+          "hours": 4.69,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a16": {
+          "clips": 4914,
+          "hours": 4.39,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a17": {
+          "clips": 4914,
+          "hours": 4.62,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a18": {
+          "clips": 4914,
+          "hours": 4.63,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "a19": {
+          "clips": 4914,
+          "hours": 4.62,
+          "speakers": 48,
+          "unmeasured_clips": 0
+        },
+        "bonafide (no tool)": {
+          "clips": 7355,
+          "hours": 6.94,
+          "speakers": 67,
+          "unmeasured_clips": 0
+        }
+      }
+    }
+  }
+}

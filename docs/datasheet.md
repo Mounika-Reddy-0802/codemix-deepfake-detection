@@ -88,12 +88,13 @@ would be void. `speaker_pools.verify_frozen()` re-checks the hash before use, an
 
 \* CM03's usable count is the number that reached the adaptation manifests (1,280 train + 320 dev); it was not screened separately the way CM01 and CM02 were.
 
-**CM04 now exists.** It is the only genuinely unseen attack — the one tool no model
-is ever allowed to see — and the claim "these results are not shortcut artefacts"
-finally has held-out-tool evidence available to it. 500 clips over the 15 eval-pool
-speakers, 458 usable. It has **not been scored yet**: generating the attack and
-measuring against it are two different tasks, and only the first is done.
-See [W4-T3](W4T3_cm04_heldout_tortoise.md).
+**CM04 now exists, and has been scored.** It is the only genuinely unseen attack —
+the one tool no model is ever allowed to see — so it is what turns "these results are
+not shortcut artefacts" from an assertion into a measurement. 500 clips over the 15
+eval-pool speakers, 458 usable. Every system has now been evaluated against it
+(P-027, P-030), and **the answer is split by channel**: on clean audio the adapters do
+generalise to a tool they have never seen, and over a telephone line they do not.
+See [W4-T3](W4T3_cm04_heldout_tortoise.md) and section 2.4 for the numbers.
 
 ### 2.1 CM01 — XTTS-v2, the seen TTS attack
 
@@ -171,6 +172,31 @@ near-silent clips, and they are **not evenly spread**: speaker `136325` alone
 accounts for 19 of the 42, dropping from 34 clips to 15 usable while every other
 speaker keeps at least 30. That is a reference-quality problem for one speaker, not
 a Tortoise-wide one. Zero clips had clipped samples.
+
+**Scored (P-027, P-030).** Each EER sits beside the shortcut floor for this set —
+the error rate eight cheap signal statistics reach on the same clips — because a
+number worse than its floor is not evidence of detection:
+
+| System | Clean (floor 31.21%) | Channel (floor 25.79%) |
+|---|---:|---:|
+| S1 baseline, English-only | 41.67% ✗ | 44.15% ✗ |
+| S2 LoRA, XTTS | **5.44%** ✓ | 28.16% ✗ |
+| S2 LoRA, XTTS+RVC (deployed) | **12.01%** ✓ | 30.99% ✗ |
+| S3 native, XTTS | 27.72% ✓ | **13.71%** ✓ |
+| S3 native, XTTS+RVC | 21.39% ✓ | 31.67% ✗ |
+
+✓ clears its floor, ✗ does not.
+
+**What this says.** On clean audio the adapters transfer to an unseen tool: 5.44%
+against a 31.21% floor is real generalisation, not a shortcut. **Over the telephone
+channel that transfer collapses** — the deployed model reaches 30.99% against a
+25.79% floor, so on a phone line it has no measurable ability to detect Tortoise at
+all. S3 native XTTS is the single exception (13.71%) and it does not survive the
+addition of RVC.
+
+At the deployed operating point this is 51 of 458 Tortoise clips caught, an 11.1%
+recall (`docs/results/classification_metrics_v1.md`), and in the live-call check
+2 of 6 Tortoise calls raised an alert (P-031).
 
 Full write-up, including the two defects fixed during generation and the
 budget-and-resume design the 12-hour session limit forced:
@@ -292,11 +318,13 @@ different romanisation. 0 unmapped characters across all 56,143 rows.
    studio → Hinglish lecture*, not code-mixing alone. The channel-matched columns and
    a monolingual-Hindi column are the two ways to separate them; the mono-lingual
    columns are not built yet.
-3. **The held-out attack exists but has not been scored (CM04).** 500 Tortoise
-   clips over eval-pool speakers are generated, screened and archived, and no
-   training manifest may contain them. No checkpoint has been evaluated against
-   them, so the shortcut question is answerable in principle and unanswered in
-   fact. Every *scored* number in this repo still comes from a seen tool.
+3. **The unseen attack is scored, and over a phone line we fail it.** CM04 has now
+   been evaluated against every system (section 2.4). On clean audio the adapters
+   generalise to a tool they never saw (5.44–12.01% EER against a 31.21% floor).
+   Over the telephone channel the deployed model reaches 30.99% against a 25.79%
+   floor — worse than its own shortcut floor, so against an unseen tool on a real
+   phone line this system has no demonstrated detection ability. That is the
+   sharpest limitation in this project and it is reported, not hidden.
 4. **Spoof quality is uneven.** CM01 rated 1.5/5 "sounds human" and 1/5
    "code-switch natural" by the team. These are easy fakes, and detector numbers
    against them are optimistic.
