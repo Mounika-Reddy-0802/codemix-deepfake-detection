@@ -72,18 +72,25 @@ Tests: 798 pass, ruff clean.
    tap died immediately, caught its own exception, logged at info level — which
    uvicorn drops — and every call scored zero windows while looking healthy.
 4. **A genuine caller was cautioned.** Offline the clip scores ≥0.993 on every
-   window; through the call it dipped to 0.001. The browser encodes with Opus while
-   the detector is trained on G.711 telephone audio, and the cue the model uses is
-   phase-level, so a thrifty encode of a *real* voice can look synthetic. Fixed by
-   forcing constant high-bitrate Opus with DTX off, and by scoring only after the
-   call is answered.
+   window; through the call it dipped to 0.001. I attributed this to the codec --
+   the browser carries the call with Opus while the detector is trained on G.711 --
+   and mitigated it by forcing constant high-bitrate Opus with DTX off and by
+   scoring only after the call is answered.
+
+   **That attribution was wrong, and is withdrawn** (week 12,
+   [`carrier_effect_v1.md`](results/carrier_effect_v1.md)). Encoding the same clips
+   through the browser's carrier offline and rescoring them leaves both genuine
+   clips at zero low windows, worst case 0.984. The codec does not account for the
+   drop; by elimination the cause is in the real-time transport. The two changes
+   above are still sensible, but they are not the remedy: the dip survived them.
 
 ## Honest limitations
 
-- **Defect 4 is mitigated, not solved.** One of the two genuine clips still dips to
-  3 low windows out of 9 on the live path. It stays under the 4-window warning
-  threshold, but it would raise a caution on a longer call. The real fix is training
-  or calibrating on Opus-encoded audio, which is not done.
+- **Defect 4 is open, and its cause is unknown.** One genuine clip still dips to 3
+  low windows out of 9 on the live path. It stays under the 4-window warning
+  threshold, but it would raise a caution on a longer call. Week 12 ruled out the
+  codec as the cause; calibrating on Opus-encoded audio would therefore calibrate
+  against a transform that does not reproduce the problem.
 - **The demo clip order is chosen from measurement.** The genuine clip that survives
   the live path cleanly is listed first. That is honest, but it means the default
   demo shows the system at its best.
@@ -115,6 +122,7 @@ pytest tests/test_phone.py tests/test_rtc_room.py tests/test_live_server.py
 
 - Put the Twilio leg back under test once the account is funded; the receiver-only
   warning path is written but unproven on a real carrier.
-- Calibrate a second operating point for Opus-carried calls, so the WebRTC demo and
-  the PSTN deployment do not share a threshold measured on one channel only.
+- Calibrate a second operating point on **real** live calls, not on a simulated
+  carrier, so the WebRTC demo and the PSTN deployment stop sharing a threshold
+  measured on one channel only.
 - Record the backup screen capture of the console demo (week-10 risk item 3).

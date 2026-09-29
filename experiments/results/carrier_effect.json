@@ -1,0 +1,128 @@
+{
+  "what": "each demo clip scored offline under each carrier transform",
+  "why": "to test, rather than assume, that the codec explains why a genuine caller scores lower on a live call than offline",
+  "threshold": 0.5,
+  "checkpoint": "lora_norm_rvc_channel_best.pt",
+  "results": [
+    {
+      "clip": "genuine",
+      "carrier": "none",
+      "windows": 22,
+      "low_windows": 0,
+      "min_score": 0.9932,
+      "mean_score": 0.9994
+    },
+    {
+      "clip": "genuine",
+      "carrier": "opus_48k",
+      "windows": 22,
+      "low_windows": 0,
+      "min_score": 0.984,
+      "mean_score": 0.9989
+    },
+    {
+      "clip": "genuine",
+      "carrier": "g711_20db",
+      "windows": 22,
+      "low_windows": 0,
+      "min_score": 0.9856,
+      "mean_score": 0.9986
+    },
+    {
+      "clip": "rvc_conversion",
+      "carrier": "none",
+      "windows": 24,
+      "low_windows": 24,
+      "min_score": 0.0002,
+      "mean_score": 0.0282
+    },
+    {
+      "clip": "rvc_conversion",
+      "carrier": "opus_48k",
+      "windows": 24,
+      "low_windows": 24,
+      "min_score": 0.0002,
+      "mean_score": 0.0159
+    },
+    {
+      "clip": "rvc_conversion",
+      "carrier": "g711_20db",
+      "windows": 24,
+      "low_windows": 22,
+      "min_score": 0.0002,
+      "mean_score": 0.0619
+    },
+    {
+      "clip": "rvc_genuine",
+      "carrier": "none",
+      "windows": 23,
+      "low_windows": 0,
+      "min_score": 0.994,
+      "mean_score": 0.9992
+    },
+    {
+      "clip": "rvc_genuine",
+      "carrier": "opus_48k",
+      "windows": 23,
+      "low_windows": 0,
+      "min_score": 0.9961,
+      "mean_score": 0.9993
+    },
+    {
+      "clip": "rvc_genuine",
+      "carrier": "g711_20db",
+      "windows": 23,
+      "low_windows": 0,
+      "min_score": 0.9655,
+      "mean_score": 0.998
+    },
+    {
+      "clip": "tortoise_clone",
+      "carrier": "none",
+      "windows": 22,
+      "low_windows": 0,
+      "min_score": 0.9339,
+      "mean_score": 0.9965
+    },
+    {
+      "clip": "tortoise_clone",
+      "carrier": "opus_48k",
+      "windows": 22,
+      "low_windows": 1,
+      "min_score": 0.0582,
+      "mean_score": 0.9567
+    },
+    {
+      "clip": "tortoise_clone",
+      "carrier": "g711_20db",
+      "windows": 22,
+      "low_windows": 0,
+      "min_score": 0.9919,
+      "mean_score": 0.9992
+    },
+    {
+      "clip": "xtts_clone",
+      "carrier": "none",
+      "windows": 23,
+      "low_windows": 23,
+      "min_score": 0.0002,
+      "mean_score": 0.0002
+    },
+    {
+      "clip": "xtts_clone",
+      "carrier": "opus_48k",
+      "windows": 23,
+      "low_windows": 23,
+      "min_score": 0.0002,
+      "mean_score": 0.0002
+    },
+    {
+      "clip": "xtts_clone",
+      "carrier": "g711_20db",
+      "windows": 23,
+      "low_windows": 23,
+      "min_score": 0.0002,
+      "mean_score": 0.0002
+    }
+  ]
+}

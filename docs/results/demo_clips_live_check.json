@@ -1,6 +1,6 @@
 {
   "what": "every demo clip replayed through the browser call path (/demo), not offline",
-  "why": "the call is carried by Opus; the detector is trained on G.711, so live and offline scores differ and the demo must default to a clip verified here",
+  "why": "live and offline scores differ, so a clip must be verified on the live path before it is demonstrated; the cause of the difference is NOT the codec (ruled out in docs/results/carrier_effect_v1.md) but something in the real-time transport, still unidentified",
   "checked": "2026-09-26",
   "checkpoint": "lora_norm_rvc_channel_best.pt",
   "threshold": 0.49997557675233106,
