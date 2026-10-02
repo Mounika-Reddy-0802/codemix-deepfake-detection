@@ -1,0 +1,67 @@
+% Related work (owner SK). Only sources actually consulted and cited in refs.bib
+% appear here; the scope limits of this survey are stated rather than hidden.
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Anti-spoofing benchmarks and their language}
+
+ASVspoof 2019 LA~\cite{todisco2019asvspoof} is the reference benchmark for logical
+access attacks and the training source for our Stage-1 system. It is English, read
+in studio conditions, and its attacks are the text-to-speech and voice conversion
+systems of its era. Its influence is what makes the question in this paper worth
+asking: a field that tunes against one language in one recording condition can
+mistake in-domain accuracy for detection ability.
+
+\subsection{Self-supervised representations for detection}
+
+The current recipe is to fine-tune a self-supervised speech encoder rather than
+engineer features. wav2vec~2.0~\cite{baevski2020wav2vec} learns from unlabelled audio
+and transfers well to spoofing detection, where using it as a front-end gives large
+gains over hand-designed features~\cite{tak2022wav2vec}. We adopt that architecture
+directly: a wav2vec~2.0 encoder with attentive statistics
+pooling~\cite{okabe2018attentive} and a linear classifier.
+
+What this literature does not settle is what the encoder's transfer depends on. Our
+probing results (Section~\ref{sec:probe}) find the decision forming within the first
+three layers, before linguistic representation exists --- which is consistent with a
+detector reading low-level synthesis artefacts, and is why a change of channel hurts
+it more than a change of language.
+
+\subsection{Parameter-efficient adaptation}
+
+LoRA~\cite{hu2022lora} adapts a frozen model through low-rank updates, training a
+small fraction of the parameters. It is normally motivated by cost. Our results
+suggest a second reason to prefer it here: with 1.13\% of parameters trainable, the
+adapted model gains code-mixed performance \emph{and keeps} English, whereas
+fine-tuning the whole encoder on identical data reaches a better seen-tool error and
+loses English almost entirely (Section~\ref{sec:systems}). Restricting capacity
+appears to limit catastrophic forgetting in a way that matters for deployment.
+
+\subsection{The attacks}
+
+We generate attacks rather than reuse a fixed attack set, because the code-mixed
+attacks we need do not exist as a benchmark. XTTS-v2~\cite{casanova2024xtts} provides
+zero-shot cross-lingual cloning from a few seconds of reference audio;
+RVC~\cite{rvc2023} provides voice conversion, which changes speaker identity while
+preserving the original delivery and therefore probes a different cue;
+Tortoise-TTS~\cite{betker2023tortoise} is held out entirely and used only as an
+unseen tool at evaluation. AffectDF~\cite{affectdf2026} informs our attack taxonomy
+and reporting format.
+
+\subsection{Code-mixed speech resources}
+
+MUCS 2021~\cite{diwan2021mucs} supplies the Hindi--English speech this work is built
+on. Code-mixed corpora are scarce relative to monolingual ones, which is itself part
+of the problem this paper describes: the detector cannot be evaluated on a language
+setting for which no evaluation data has been assembled.
+
+\subsection{What this survey does not cover}
+
+This is a targeted review of the work our system is built from, not a complete
+survey of audio deepfake detection. In particular we do not review the wider
+countermeasure literature beyond the self-supervised line, nor the speaker
+verification literature that anti-spoofing was originally developed to protect, nor
+detection for languages other than English and Hindi--English. We also found no
+prior work measuring detector generalisation to code-mixed speech over a telephone
+channel; we state that as the gap we address rather than as a claim of novelty we
+can prove exhaustively.

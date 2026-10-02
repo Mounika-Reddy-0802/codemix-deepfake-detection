@@ -1,0 +1,76 @@
+% Introduction (owner SK). Every figure quoted here appears with its source in
+% Section~\ref{sec:results}; nothing is stated here that is not measured there.
+\section{Introduction}
+\label{sec:intro}
+
+Voice cloning has become a consumer technology. A few seconds of a person's speech
+is enough for a zero-shot system to produce new sentences in their
+voice~\cite{casanova2024xtts,betker2023tortoise}, and voice conversion does the same
+without needing a transcript~\cite{rvc2023}. The obvious criminal application is the
+telephone call: a voice the victim recognises, asking for money or a code, on a line
+that carries no signal of who is really speaking.
+
+Detection research has answered with strong results. On ASVspoof 2019
+LA~\cite{todisco2019asvspoof}, self-supervised speech representations fine-tuned for
+anti-spoofing reach error rates below one percent~\cite{tak2022wav2vec}. Our own
+replication of that recipe reaches \textbf{0.85\% EER} on the evaluation partition.
+
+That number is measured on English studio speech. The people most exposed to voice
+fraud are not speaking English studio speech. In India, everyday conversation is
+routinely \emph{code-mixed} --- Hindi and English alternating inside a single utterance
+--- and it arrives over a narrowband telephone channel. This paper asks what happens
+to a detector when both of those change at once, and what it costs to fix.
+
+\subsection{The gap, and why it is not obvious}
+
+The same checkpoint that scores 0.85\% EER on English scores \textbf{48.21\% EER on
+clean code-mixed speech and 58.42\% over a simulated telephone channel}
+(Section~\ref{sec:gap}). Over the channel its AUC is 0.381: below chance, meaning
+the clones look \emph{more} genuine to it than the real speakers do.
+
+The failure is not a mild degradation and it is not symmetric. At a 0.5 threshold
+this model rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English ---
+a 256-fold rise in the false-alarm rate on real speech. It has not become a weaker
+detector of clones so much as a system that has stopped recognising real speakers.
+
+\subsection{Measuring against a floor, not against zero}
+
+A low error rate on a code-mixed test set is easy to obtain for the wrong reason. If
+the real and cloned clips differ in loudness, bandwidth, or recording room, a model
+can separate them without learning anything about synthesis, and the resulting
+number looks like detection.
+
+We therefore report every result beside a \textbf{shortcut floor}: the error rate
+eight cheap signal statistics reach on the same clips. A result better than its floor
+is evidence that the model found something a trivial classifier could not; a result
+at or above its floor is not evidence of anything. This discipline changes the
+conclusions of this paper more than once --- including one of our own headline
+conditions, which fails it.
+
+\subsection{Contributions}
+
+\begin{enumerate}
+  \item \textbf{A measured gap.} The English-trained detector fails on code-mixed
+    speech at 41.67--48.21\% EER clean and 44.15--58.42\% over the channel, against
+    floors of 5.17--31.21\% and 10.01--25.79\%, with the failure characterised as a
+    rejection of genuine speech rather than a loss of sensitivity to clones
+    (Section~\ref{sec:gap}).
+  \item \textbf{A cheap closure.} Low-rank adapters~\cite{hu2022lora} over a frozen
+    wav2vec~2.0 encoder~\cite{baevski2020wav2vec}, training \textbf{1.13\% of the
+    parameters}, bring channel-matched code-mixed error to \textbf{2.75\% EER} while
+    retaining 2.42\% on English (Section~\ref{sec:systems}).
+  \item \textbf{An honest generalisation result.} Against a cloning tool no model was
+    ever allowed to see, the adapters generalise on clean audio (5.44\% EER against a
+    31.21\% floor) and \emph{fail over the telephone channel} (30.99\% against a
+    25.79\% floor). We report the failure as prominently as the success.
+  \item \textbf{Adaptation beats full fine-tuning where it matters.} Training the
+    whole encoder on the same data reaches the lowest seen-tool error in the study
+    (0.83\%) and collapses to chance on English. The adapters keep both.
+  \item \textbf{A deployed system, not an illustration.} The detector runs on a live
+    call and warns the callee --- and only the callee --- roughly ten seconds into
+    the speech, using the same windowing and operating point the evaluation uses
+    (Section~\ref{sec:system}).
+\end{enumerate}
+
+The corpora, attacks, manifests, configurations and per-clip scores behind every
+number are committed, and each result table names the file it was read from.
