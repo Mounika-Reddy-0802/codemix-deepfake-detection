@@ -1,0 +1,654 @@
+{
+  "n_boot": 1000,
+  "seed": 0,
+  "results": [
+    {
+      "eer_a": 0.014635217113665389,
+      "eer_a_ci": [
+        0.0012759520237569236,
+        0.0268410112526792
+      ],
+      "eer_b": 0.05169540229885057,
+      "eer_b_ci": [
+        0.020543543051830798,
+        0.08215123926051783
+      ],
+      "diff": -0.03706018518518518,
+      "diff_ci": [
+        -0.07159447829173075,
+        -0.002425350639048806
+      ],
+      "p_value": 0.036,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, clean",
+      "test_set": "eval_pool",
+      "condition": "clean",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.0544317845929049,
+      "eer_a_ci": [
+        0.03741969273927737,
+        0.0693311963704623
+      ],
+      "eer_b": 0.29488949120781677,
+      "eer_b_ci": [
+        0.20600767943840095,
+        0.37477530438424395
+      ],
+      "diff": -0.24045770661491186,
+      "diff_ci": [
+        -0.3264677110326717,
+        -0.1474719010578971
+      ],
+      "p_value": 0.001,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, clean",
+      "test_set": "cm04",
+      "condition": "clean",
+      "clips": 2024,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.23907911504794535,
+      "eer_a_ci": [
+        0.1494245825586934,
+        0.3146566473063665
+      ],
+      "eer_b": 0.17930933628595902,
+      "eer_b_ci": [
+        0.07692750399977652,
+        0.23071009922478844
+      ],
+      "diff": 0.05976977876198633,
+      "diff_ci": [
+        -0.033804406500845596,
+        0.19841126038055953
+      ],
+      "p_value": 0.206,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, clean",
+      "test_set": "rvc_test",
+      "condition": "clean",
+      "clips": 619,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.044113984674329504,
+      "eer_a_ci": [
+        0.006566115003995331,
+        0.10693789873128216
+      ],
+      "eer_b": 0.10012771392081737,
+      "eer_b_ci": [
+        0.03201394104904506,
+        0.15749386885404779
+      ],
+      "diff": -0.05601372924648787,
+      "diff_ci": [
+        -0.12143206385490408,
+        0.040479987814773424
+      ],
+      "p_value": 0.278,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, channel",
+      "test_set": "eval_pool",
+      "condition": "channel",
+      "clips": 3966,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.2816342920242935,
+      "eer_a_ci": [
+        0.2234974813673315,
+        0.337959064004076
+      ],
+      "eer_b": 0.33638536141924186,
+      "eer_b_ci": [
+        0.2411838701779866,
+        0.44644034870229427
+      ],
+      "diff": -0.05475106939494834,
+      "diff_ci": [
+        -0.19425054710182024,
+        0.058345287839465604
+      ],
+      "p_value": 0.428,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, channel",
+      "test_set": "cm04",
+      "condition": "channel",
+      "clips": 2024,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.2956159776046128,
+      "eer_a_ci": [
+        0.2199495039382189,
+        0.3768476990059751
+      ],
+      "eer_b": 0.23907911504794535,
+      "eer_b_ci": [
+        0.13515981735159815,
+        0.3124888441679438
+      ],
+      "diff": 0.05653686255666743,
+      "diff_ci": [
+        -0.03451796780814845,
+        0.19699208940228544
+      ],
+      "p_value": 0.222,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, channel",
+      "test_set": "rvc_test",
+      "condition": "channel",
+      "clips": 619,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.019897828863346106,
+      "eer_a_ci": [
+        0.000548415424623506,
+        0.03396856416727674
+      ],
+      "eer_b": 0.0562220625798212,
+      "eer_b_ci": [
+        0.0210939333446492,
+        0.09412393511681304
+      ],
+      "diff": -0.0363242337164751,
+      "diff_ci": [
+        -0.07757751967609873,
+        -0.0021394944151157318
+      ],
+      "p_value": 0.032,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, clean",
+      "test_set": "eval_pool",
+      "condition": "clean",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.12006921090643422,
+      "eer_a_ci": [
+        0.07976734483200407,
+        0.15843773235462663
+      ],
+      "eer_b": 0.3142933627800365,
+      "eer_b_ci": [
+        0.22017778385282674,
+        0.40216766656630737
+      ],
+      "diff": -0.19422415187360229,
+      "diff_ci": [
+        -0.2951077381977123,
+        -0.08974477159238971
+      ],
+      "p_value": 0.001,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, clean",
+      "test_set": "cm04",
+      "condition": "clean",
+      "clips": 2024,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.05007103014602962,
+      "eer_a_ci": [
+        0.014352288287600422,
+        0.07868450088899542
+      ],
+      "eer_b": 0.1696105876700023,
+      "eer_b_ci": [
+        0.05106113079396381,
+        0.2338498705327026
+      ],
+      "diff": -0.11953955752397269,
+      "diff_ci": [
+        -0.18180431074058886,
+        -0.008675646594837634
+      ],
+      "p_value": 0.032,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, clean",
+      "test_set": "rvc_test",
+      "condition": "clean",
+      "clips": 619,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.027479246487867176,
+      "eer_a_ci": [
+        0.009178918103536835,
+        0.04292259053276395
+      ],
+      "eer_b": 0.0996000957854406,
+      "eer_b_ci": [
+        0.03872452868956692,
+        0.15927926488799451
+      ],
+      "diff": -0.07212084929757342,
+      "diff_ci": [
+        -0.12923485828654444,
+        -0.011026600703188604
+      ],
+      "p_value": 0.008,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "test_set": "eval_pool",
+      "condition": "channel",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.3098749630521954,
+      "eer_a_ci": [
+        0.2517540620609837,
+        0.3655205451371124
+      ],
+      "eer_b": 0.37788123163066695,
+      "eer_b_ci": [
+        0.2675199500828836,
+        0.48205372093674875
+      ],
+      "diff": -0.06800626857847153,
+      "diff_ci": [
+        -0.2232299943324055,
+        0.0873922500452594
+      ],
+      "p_value": 0.498,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "test_set": "cm04",
+      "condition": "channel",
+      "clips": 2024,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.05007103014602962,
+      "eer_a_ci": [
+        0.020639140217755012,
+        0.09382677894534701
+      ],
+      "eer_b": 0.20517266592851024,
+      "eer_b_ci": [
+        0.09941645085069994,
+        0.28969275806993233
+      ],
+      "diff": -0.15510163578248062,
+      "diff_ci": [
+        -0.23282894626121514,
+        -0.06083577081347662
+      ],
+      "p_value": 0.002,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "test_set": "rvc_test",
+      "condition": "channel",
+      "clips": 619,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.014635217113665389,
+      "eer_a_ci": [
+        0.004851485848043478,
+        0.024540824015691052
+      ],
+      "eer_b": 0.05169540229885057,
+      "eer_b_ci": [
+        0.020543543051830798,
+        0.08215123926051783
+      ],
+      "diff": -0.03706018518518518,
+      "diff_ci": [
+        -0.06784468018434116,
+        -0.009636830396776446
+      ],
+      "p_value": 0.001,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS, clean",
+      "test_set": "eval_pool",
+      "condition": "clean",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.27721589229645244,
+      "eer_a_ci": [
+        0.20977135177212447,
+        0.34450185620530555
+      ],
+      "eer_b": 0.29488949120781677,
+      "eer_b_ci": [
+        0.20600767943840095,
+        0.37477530438424395
+      ],
+      "diff": -0.01767359891136433,
+      "diff_ci": [
+        -0.15305489016961393,
+        0.11380790690122779
+      ],
+      "p_value": 0.878,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS, clean",
+      "test_set": "cm04",
+      "condition": "clean",
+      "clips": 2024,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.45071761338709343,
+      "eer_a_ci": [
+        0.34042491444810746,
+        0.5316803748630441
+      ],
+      "eer_b": 0.17930933628595902,
+      "eer_b_ci": [
+        0.07692750399977652,
+        0.23071009922478844
+      ],
+      "diff": 0.2714082771011344,
+      "diff_ci": [
+        0.17380827116519268,
+        0.39676993056632215
+      ],
+      "p_value": 0.001,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS, clean",
+      "test_set": "rvc_test",
+      "condition": "clean",
+      "clips": 619,
+      "verdict": "worse than floor",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.019161877394636012,
+      "eer_a_ci": [
+        0.0007231757167327209,
+        0.031920734271616014
+      ],
+      "eer_b": 0.10012771392081737,
+      "eer_b_ci": [
+        0.03201394104904506,
+        0.15749386885404779
+      ],
+      "diff": -0.08096583652618136,
+      "diff_ci": [
+        -0.14546135157691242,
+        -0.012921666461113857
+      ],
+      "p_value": 0.008,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS, channel",
+      "test_set": "eval_pool",
+      "condition": "channel",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.13710424021371168,
+      "eer_a_ci": [
+        0.10550708868232181,
+        0.16753231423402112
+      ],
+      "eer_b": 0.33638536141924186,
+      "eer_b_ci": [
+        0.2411838701779866,
+        0.44644034870229427
+      ],
+      "diff": -0.19928112120553018,
+      "diff_ci": [
+        -0.3295176191539189,
+        -0.08912113929847085
+      ],
+      "p_value": 0.001,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS, channel",
+      "test_set": "cm04",
+      "condition": "channel",
+      "clips": 2024,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.321479307247164,
+      "eer_a_ci": [
+        0.2295316938821375,
+        0.37526459359178105
+      ],
+      "eer_b": 0.23907911504794535,
+      "eer_b_ci": [
+        0.13515981735159815,
+        0.3124888441679438
+      ],
+      "diff": 0.08240019219921865,
+      "diff_ci": [
+        -0.0016782134843985588,
+        0.19967320261437904
+      ],
+      "p_value": 0.056,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS, channel",
+      "test_set": "rvc_test",
+      "condition": "channel",
+      "clips": 619,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.008317369093231162,
+      "eer_a_ci": [
+        0.0007630720164990214,
+        0.016418738923230137
+      ],
+      "eer_b": 0.0562220625798212,
+      "eer_b_ci": [
+        0.0210939333446492,
+        0.09412393511681304
+      ],
+      "diff": -0.04790469348659004,
+      "diff_ci": [
+        -0.08276700785643863,
+        -0.01611848683045153
+      ],
+      "p_value": 0.001,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS+RVC, clean",
+      "test_set": "eval_pool",
+      "condition": "clean",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.2139473082478654,
+      "eer_a_ci": [
+        0.14300831603175257,
+        0.29633186426871533
+      ],
+      "eer_b": 0.3142933627800365,
+      "eer_b_ci": [
+        0.22017778385282674,
+        0.40216766656630737
+      ],
+      "diff": -0.1003460545321711,
+      "diff_ci": [
+        -0.24664300420111418,
+        0.05971543472962461
+      ],
+      "p_value": 0.296,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS+RVC, clean",
+      "test_set": "cm04",
+      "condition": "clean",
+      "clips": 2024,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.08240019219921868,
+      "eer_a_ci": [
+        0.029777187177717403,
+        0.13165657579348905
+      ],
+      "eer_b": 0.1696105876700023,
+      "eer_b_ci": [
+        0.05106113079396381,
+        0.2338498705327026
+      ],
+      "diff": -0.08721039547078363,
+      "diff_ci": [
+        -0.15773311619309555,
+        0.02979757120756842
+      ],
+      "p_value": 0.156,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS+RVC, clean",
+      "test_set": "rvc_test",
+      "condition": "clean",
+      "clips": 619,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.01789830779054917,
+      "eer_a_ci": [
+        0.001259328803526248,
+        0.03370045494083974
+      ],
+      "eer_b": 0.0996000957854406,
+      "eer_b_ci": [
+        0.03872452868956692,
+        0.15927926488799451
+      ],
+      "diff": -0.08170178799489143,
+      "diff_ci": [
+        -0.14166336832740734,
+        -0.018747608317520557
+      ],
+      "p_value": 0.002,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS+RVC, channel",
+      "test_set": "eval_pool",
+      "condition": "channel",
+      "clips": 3966,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.3166622050449788,
+      "eer_a_ci": [
+        0.23689924562357428,
+        0.387124713462502
+      ],
+      "eer_b": 0.37788123163066695,
+      "eer_b_ci": [
+        0.2675199500828836,
+        0.48205372093674875
+      ],
+      "diff": -0.061219026585688174,
+      "diff_ci": [
+        -0.2131800397203317,
+        0.09476584340386936
+      ],
+      "p_value": 0.506,
+      "n_speakers": 15,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS+RVC, channel",
+      "test_set": "cm04",
+      "condition": "channel",
+      "clips": 2024,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.05976977876198634,
+      "eer_a_ci": [
+        0.023103664016748106,
+        0.10939569148603866
+      ],
+      "eer_b": 0.20517266592851024,
+      "eer_b_ci": [
+        0.09941645085069994,
+        0.28969275806993233
+      ],
+      "diff": -0.14540288716652391,
+      "diff_ci": [
+        -0.23336489076889727,
+        -0.03805208289880582
+      ],
+      "p_value": 0.008,
+      "n_speakers": 12,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S3 native, XTTS+RVC, channel",
+      "test_set": "rvc_test",
+      "condition": "channel",
+      "clips": 619,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    }
+  ]
+}
