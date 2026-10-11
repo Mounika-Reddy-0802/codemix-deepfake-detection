@@ -1,0 +1,27 @@
+{
+  "checkpoint": "checkpoints/ablation_encoder/run_w2v2base_lora/best.pt",
+  "manifest": "data/manifests/codemix_eval_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.045905172413793105,
+    "eer_ci_low": 0.0391102096892886,
+    "eer_ci_high": 0.05094207817596897,
+    "auc": 0.9896236430395913,
+    "auc_ci_low": 0.9874684429848264,
+    "auc_ci_high": 0.9915830475358938,
+    "f1": 0.9425867507886435,
+    "threshold": 0.8093051910400391,
+    "clips": 3966,
+    "bonafide": 1566,
+    "spoof": 2400,
+    "score_std": 0.475793
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2400,
+      "eer": 0.045905
+    }
+  ]
+}
