@@ -1,0 +1,68 @@
+% Conclusion and future work (owner SK). The limitations section is deliberately
+% longer than the contributions section; every item in it is measured, not feared.
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+An English-trained deepfake detector that reaches 0.85\% EER on ASVspoof does not
+work on Hindi--English telephone speech. It reaches 48.21\% EER on clean code-mixed
+audio and 58.42\% over the channel, with AUC below chance in the channel condition,
+and its failure mode is the rejection of genuine speakers rather than the acceptance
+of clones. Low-rank adaptation over a frozen encoder, training 1.13\% of the
+parameters on speaker-disjoint code-mixed data and its clones, brings channel-matched
+error to 2.75\% EER while retaining 2.42\% on English. Full fine-tuning on identical
+data is better on the tool it saw (0.83\%) and collapses to chance on English; the
+adapters keep both, which is what a deployment needs.
+
+The detector runs on a live call. It scores four-second windows of the caller's
+speech, escalates only when consecutive windows agree, and warns the callee --- never
+the caller --- about ten seconds into the speech, using the same operating point the
+evaluation reports.
+
+\subsection{What we could not do}
+
+\textbf{Against an unseen tool, over a telephone line, this system does not work.}
+On clean audio the adapters transfer to Tortoise-TTS at 5.44--12.01\% EER against a
+31.21\% floor, which is genuine generalisation. Over the channel the deployed model
+reaches 30.99\% against a 25.79\% floor --- above its own shortcut floor, meaning we
+have no measurable evidence that it detects an unseen tool on a real phone line. This
+is the sharpest limitation of the work and it constrains every deployment claim made
+here.
+
+\textbf{The attacks are ours, and they are not hard.} We generated the code-mixed
+attacks because no benchmark provides them, which means our numbers are against
+attacks of our own construction, screened by our own quality checks. The team rated
+the seen attack 1.5 out of 5 for sounding human. Detector numbers against easy fakes
+are optimistic.
+
+\textbf{The telephone leg is simulated, not carried.} The channel condition is an
+8~kHz G.711 render with additive noise, validated by measurement and by ear, and the
+live system is implemented against a real telephony carrier --- but the carrier leg
+has not been exercised on live numbers. The protocol this work was designed around
+is the telephone network, and that is the one leg not yet demonstrated end to end.
+
+\textbf{One live-call behaviour is unexplained.} A genuine caller occasionally loses
+consecutive windows on a live call that the same clip never loses offline. We tested
+the obvious explanation --- that the browser's codec degrades the audio --- by
+encoding each clip through that carrier offline and rescoring it, and it does not
+hold: both genuine clips keep every window. By elimination the cause lies in the
+real-time transport, and we have not isolated it.
+
+\textbf{Interpretability covers two systems of three.} The probes could not be run on
+the fully fine-tuned system, and the probe set is five clips: enough to refute an
+explanation, not to characterise one.
+
+\subsection{Future work}
+
+The most valuable next result is the one that would change a deployment decision:
+\emph{what makes an unseen tool detectable over a narrowband channel?} Our probing
+suggests a direction --- adaptation moved the model's evidence for genuine speech
+into the pitch-harmonic band that survives a codec --- so training explicitly for
+band-limited evidence, rather than merely training on band-limited audio, is worth
+testing.
+
+Beyond that: exercising the telephony carrier on live numbers; calibrating a second
+operating point on real calls rather than on a simulated carrier; extending the
+corpus beyond one code-mixed pair and one recording domain, since the present gap
+measures \emph{English studio to Hindi--English lecture} and not code-mixing in
+isolation; and harder attacks, since a detector is only ever as tested as the fakes
+it was shown.

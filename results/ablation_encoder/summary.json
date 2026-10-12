@@ -1,0 +1,38 @@
+{
+  "floors": {
+    "eval_pool_channel": 10.01,
+    "cm04_channel": 25.79,
+    "rvc_test_channel": 22.46
+  },
+  "published": {
+    "S2 LoRA from S1, XTTS+RVC (deployed)": {
+      "eval_pool_channel": 2.75,
+      "cm04_channel": 30.99,
+      "rvc_test_channel": 5.01
+    },
+    "S3 native, XTTS+RVC": {
+      "eval_pool_channel": 1.79,
+      "cm04_channel": 31.67,
+      "rvc_test_channel": 5.98
+    }
+  },
+  "ablation": {
+    "w2v2base_lora": {
+      "eval_pool_channel": {
+        "eer": 4.5905172413793105,
+        "ci_low": 3.91102096892886,
+        "ci_high": 5.094207817596897
+      },
+      "cm04_channel": {
+        "eer": 39.11364308141902,
+        "ci_low": 36.612978139553995,
+        "ci_high": 41.618124472101556
+      },
+      "rvc_test_channel": {
+        "eer": 9.85647732258132,
+        "ci_low": 7.270714673320539,
+        "ci_high": 12.769601074714693
+      }
+    }
+  }
+}

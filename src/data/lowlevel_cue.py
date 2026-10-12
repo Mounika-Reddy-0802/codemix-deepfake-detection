@@ -89,13 +89,24 @@ def features(signal: np.ndarray, sr: int, frame: int = 1_024) -> np.ndarray:
     )
 
 
-def extract(manifest: pd.DataFrame, data_root: str | None = None, target_sr: int = 16_000):
-    """Feature matrix ``[N, 8]`` and label vector ``[N]`` (1 = bonafide) for a manifest."""
+def extract(
+    manifest: pd.DataFrame,
+    data_root: str | None = None,
+    target_sr: int = 16_000,
+    return_index: bool = False,
+):
+    """Feature matrix ``[N, 8]`` and label vector ``[N]`` (1 = bonafide) for a manifest.
+
+    An unreadable clip is skipped, so N can be smaller than the manifest. With
+    ``return_index`` the positions of the rows that were kept come back as a third
+    value, which is what lets floor scores be paired clip by clip with a detector's.
+    """
     from src.utils.audio_utils import load_wav
     from src.utils.paths import resolve as resolve_path
 
     rows: list[np.ndarray] = []
     labels: list[int] = []
+    kept: list[int] = []
     for i, row in enumerate(manifest.to_dict(orient="records")):
         try:
             audio, sr = load_wav(str(resolve_path(row["filepath"], data_root)), target_sr=target_sr)
@@ -104,9 +115,14 @@ def extract(manifest: pd.DataFrame, data_root: str | None = None, target_sr: int
             continue
         rows.append(features(audio, sr))
         labels.append(1 if str(row["label"]).lower() == "bonafide" else 0)
+        kept.append(i)
         if (i + 1) % 500 == 0:
             print(f"  featurised {i + 1}/{len(manifest)}", flush=True)
-    return np.asarray(rows, dtype=np.float64), np.asarray(labels, dtype=np.int64)
+    x = np.asarray(rows, dtype=np.float64).reshape(-1, len(FEATURE_NAMES))
+    y = np.asarray(labels, dtype=np.int64)
+    if return_index:
+        return x, y, np.asarray(kept, dtype=np.int64)
+    return x, y
 
 
 class Standardiser:

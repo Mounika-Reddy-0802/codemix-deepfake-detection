@@ -129,13 +129,12 @@ def load_detector(checkpoint: str, encoder: str = "wav2vec2-base", device: str |
     """Load any of the project's checkpoints (S1, S2 LoRA, S3) for inference."""
     import torch
 
-    from src.models.detector import Detector
-    from src.training.evaluate import _encoder_id, _restore_lora
+    from src.training.evaluate import _restore_lora, build_detector
     from src.utils.device import resolve_device
 
     resolved = resolve_device(device)
-    model = Detector(_encoder_id(encoder))
     state = torch.load(checkpoint, map_location=resolved, weights_only=False)
+    model = build_detector(encoder, state)
     _restore_lora(model, state)
     model.load_state_dict(state["model"] if "model" in state else state)
     return model.to(resolved).eval(), resolved

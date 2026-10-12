@@ -72,6 +72,15 @@ class TrainConfig:
     lora_targets: list[str] | None = None
     #: Submodules trained alongside the adapters (pooling + head by default).
     lora_train: list[str] | None = None
+    #: Give each clip a fresh random crop every epoch. Off is the published recipe,
+    #: in which a clip's crop is seeded by its index alone and so never changes.
+    crop_per_epoch: bool = False
+    #: On-the-fly augmentation recipe (see ``src.data.augment.RECIPES``); None = off.
+    #: Implies per-epoch randomness, so it also varies the crop.
+    augment: str | None = None
+    #: Classifier reads a learned mix of every encoder layer instead of the last
+    #: layer only (``src.models.encoder.LayerWeightedSum``).
+    layer_weighting: bool = False
     device: str | None = None  # None/"auto" -> detect; "cpu"/"cuda" -> force
     data_root: str | None = None  # None -> $DATA_ROOT, else this machine's data dir
     wandb_project: str = "codemix-deepfake-detection"
@@ -142,16 +151,30 @@ def train(cfg: TrainConfig) -> dict[str, float]:
     print(describe(device))
     loader_opts = dataloader_kwargs(device, cfg.num_workers)
 
+    augment = None
+    if cfg.augment:
+        from src.data.augment import build_augment
+
+        augment = build_augment(cfg.augment)
     train_ds = AudioManifestDataset(
         cfg.train_manifest,
         data_root=cfg.data_root,
         max_seconds=cfg.max_seconds,
         random_crop=True,
         seed=cfg.seed,
+        augment=augment,
     )
     if cfg.subset_frac < 1.0:
         n = max(1, int(len(train_ds) * cfg.subset_frac))
         train_ds.df = train_ds.df.sample(n=n, random_state=cfg.seed).reset_index(drop=True)
+    # Per-epoch randomness has to travel with each item: the workers are persistent
+    # and hold their own dataset copies (see src/training/sampling.py). The default
+    # recipe keeps PyTorch's own shuffling so published configs train as before.
+    epoch_sampler = None
+    if cfg.crop_per_epoch or cfg.augment:
+        from src.training.sampling import EpochSampler
+
+        epoch_sampler = EpochSampler(len(train_ds), seed=cfg.seed)
     dev_ds = AudioManifestDataset(
         cfg.dev_manifest,
         data_root=cfg.data_root,
@@ -175,7 +198,8 @@ def train(cfg: TrainConfig) -> dict[str, float]:
     train_loader = DataLoader(
         train_ds,
         batch_size=cfg.batch_size,
-        shuffle=True,
+        shuffle=epoch_sampler is None,
+        sampler=epoch_sampler,
         collate_fn=collate_fn,
         **loader_opts,
     )
@@ -191,6 +215,7 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         cfg.encoder,
         freeze_feature_extractor=cfg.freeze_feature_extractor,
         freeze_encoder=cfg.freeze_encoder,
+        layer_weighting=cfg.layer_weighting,
     )
     if cfg.init_from:
         # Load BEFORE the adapters go on, so the checkpoint's keys match the
@@ -209,6 +234,8 @@ def train(cfg: TrainConfig) -> dict[str, float]:
 
         targets = tuple(cfg.lora_targets) if cfg.lora_targets else DEFAULT_TARGETS
         trainable = tuple(cfg.lora_train) if cfg.lora_train else DEFAULT_TRAINABLE
+        if cfg.layer_weighting:  # the layer mix is new, so it must learn too
+            trainable = (*trainable, "encoder.layer_mix")
         wrapped = apply_lora(
             model, targets, r=cfg.lora_r, alpha=cfg.lora_alpha, dropout=cfg.lora_dropout
         )
@@ -277,6 +304,8 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         flush=True,
     )
     for epoch in range(start_epoch, cfg.epochs):
+        if epoch_sampler is not None:  # same epoch -> same order and crops, also on resume
+            epoch_sampler.set_epoch(epoch)
         model.train()
         for batch in train_loader:
             wav = batch["waveforms"].to(device)

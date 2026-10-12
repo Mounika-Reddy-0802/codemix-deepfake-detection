@@ -1,0 +1,42 @@
+{
+  "0.0001": {
+    "ok": true,
+    "collapsed": false,
+    "crashed": false,
+    "first_loss": 0.6947,
+    "last_loss": 0.6893,
+    "dev_eer": 0.4926,
+    "score_std": 0.0002,
+    "minutes": 2.9
+  },
+  "0.0003": {
+    "ok": true,
+    "collapsed": false,
+    "crashed": false,
+    "first_loss": 0.6984,
+    "last_loss": 0.6903,
+    "dev_eer": 0.4778,
+    "score_std": 0.0004,
+    "minutes": 2.4
+  },
+  "0.001": {
+    "ok": false,
+    "collapsed": true,
+    "crashed": false,
+    "first_loss": 0.7164,
+    "last_loss": 0.6947,
+    "dev_eer": 0.6985,
+    "score_std": 0.0,
+    "minutes": 3.0
+  },
+  "0.003": {
+    "ok": false,
+    "collapsed": true,
+    "crashed": false,
+    "first_loss": 0.7417,
+    "last_loss": 0.764,
+    "dev_eer": 0.3823,
+    "score_std": 0.0,
+    "minutes": 3.0
+  }
+}

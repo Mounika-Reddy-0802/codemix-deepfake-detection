@@ -1,0 +1,27 @@
+{
+  "checkpoint": "/kaggle/working/codemix-deepfake-detection/checkpoints/w12/xlsr53_lora/best.pt",
+  "manifest": "data/manifests/codemix_eval_channel20.csv",
+  "encoder": "xlsr-53",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.4222972541507024,
+    "eer_ci_low": 0.40768669018766057,
+    "eer_ci_high": 0.43744443986263337,
+    "auc": 0.6137300446998722,
+    "auc_ci_low": 0.5959193771647803,
+    "auc_ci_high": 0.6285411233305676,
+    "f1": 0.5193687230989957,
+    "threshold": 0.5127688646316528,
+    "clips": 3966,
+    "bonafide": 1566,
+    "spoof": 2400,
+    "score_std": 0.001036
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2400,
+      "eer": 0.422297
+    }
+  ]
+}

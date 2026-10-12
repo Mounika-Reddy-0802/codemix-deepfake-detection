@@ -1,0 +1,25 @@
+# Encoder ablation (week 12): the same LoRA recipe from the PRETRAINED encoder, no
+# Stage-1 init, so the encoder is the only difference between the two runs.
+# Same manifests as train_lora_norm_rvc_channel.yaml. Compare against
+# ablation_encoder_w2v2base_lora.yaml, not against S2,
+# which starts from the English checkpoint and is a different recipe.
+encoder: xlsr-53
+lora: true
+lora_r: 8
+lora_alpha: 16.0
+lora_dropout: 0.05
+train_manifest: data/manifests/codemix_adapt_train_rvc_channel20.csv
+dev_manifest: data/manifests/codemix_adapt_dev_channel20.csv
+out_dir: checkpoints/ablation_encoder/run_xlsr53_lora
+lr: 1.0e-4
+weight_decay: 1.0e-5
+batch_size: 8
+max_seconds: 4.0
+epochs: 5
+num_workers: 2   # 4 -> 2 for RAM: the 4-worker run grew the page file until a checkpoint save failed
+seed: 1234
+device: cuda
+amp: true
+class_weighted: true
+log_every: 25
+wandb_mode: offline

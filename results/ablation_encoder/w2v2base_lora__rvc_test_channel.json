@@ -1,0 +1,27 @@
+{
+  "checkpoint": "checkpoints/ablation_encoder/run_w2v2base_lora/best.pt",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.0985647732258132,
+    "eer_ci_low": 0.07270714673320539,
+    "eer_ci_high": 0.12769601074714693,
+    "auc": 0.9443144546347171,
+    "auc_ci_low": 0.9210870915886062,
+    "auc_ci_high": 0.9629188077035552,
+    "f1": 0.8991735537190083,
+    "threshold": 0.9649038910865784,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 0.46578
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.098565
+    }
+  ]
+}
