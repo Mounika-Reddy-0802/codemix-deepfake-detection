@@ -1,0 +1,87 @@
+{
+  "checkpoint": "C:\\Users\\kuchu\\codemix-deepfake-detection\\checkpoints\\baseline\\best.pt",
+  "manifest": "data/manifests/asvspoof_eval_subset6k_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.06496753246753247,
+    "eer_ci_low": 0.05918538504789001,
+    "eer_ci_high": 0.0719206056074688,
+    "auc": 0.9774782717282717,
+    "auc_ci_low": 0.9747459504290876,
+    "auc_ci_high": 0.9806806447119043,
+    "f1": 0.9055690072639225,
+    "threshold": 0.8540982604026794,
+    "clips": 6004,
+    "bonafide": 2000,
+    "spoof": 4004,
+    "score_std": 0.416215
+  },
+  "per_attack": [
+    {
+      "attack": "A08",
+      "spoof_clips": 308,
+      "eer": 0.129935
+    },
+    {
+      "attack": "A15",
+      "spoof_clips": 308,
+      "eer": 0.122688
+    },
+    {
+      "attack": "A10",
+      "spoof_clips": 308,
+      "eer": 0.107071
+    },
+    {
+      "attack": "A18",
+      "spoof_clips": 308,
+      "eer": 0.093828
+    },
+    {
+      "attack": "A14",
+      "spoof_clips": 308,
+      "eer": 0.077711
+    },
+    {
+      "attack": "A11",
+      "spoof_clips": 308,
+      "eer": 0.048101
+    },
+    {
+      "attack": "A12",
+      "spoof_clips": 308,
+      "eer": 0.044977
+    },
+    {
+      "attack": "A07",
+      "spoof_clips": 308,
+      "eer": 0.038981
+    },
+    {
+      "attack": "A09",
+      "spoof_clips": 308,
+      "eer": 0.035857
+    },
+    {
+      "attack": "A17",
+      "spoof_clips": 308,
+      "eer": 0.02936
+    },
+    {
+      "attack": "A19",
+      "spoof_clips": 308,
+      "eer": 0.01949
+    },
+    {
+      "attack": "A16",
+      "spoof_clips": 308,
+      "eer": 0.016117
+    },
+    {
+      "attack": "A13",
+      "spoof_clips": 308,
+      "eer": 0.00025
+    }
+  ]
+}
