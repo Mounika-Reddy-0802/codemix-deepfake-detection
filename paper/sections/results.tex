@@ -208,6 +208,62 @@ removes the Tortoise advantage, for S2 and S3 alike. Detecting a synthesis tool 
 seen in training, after a narrowband channel has removed the high frequencies,
 remains open, and we report it as the main limitation of this work.
 
+\subsection{The deployment trade-off}
+\label{sec:tradeoff}
+
+Finding~2 trains each adapter in the condition it will be used in.
+Table~\ref{tab:tradeoff} shows what that choice costs: every S2 adapter scored in the
+condition it was \emph{not} trained in, to be read against its own row in
+Table~\ref{tab:main}.
+
+\begin{table*}[t]
+\centering
+\caption{S2 adapters scored in the condition they were not trained in. EER (\%) with
+95\% bootstrap confidence intervals over clips. The same adapters in their own
+condition are in Table~\ref{tab:main}. --: not yet scored.}
+\label{tab:tradeoff}
+\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Training attacks & Trained $\rightarrow$ scored & Eval pool (XTTS) & CM04 (Tortoise) & RVC test \\
+\midrule
+XTTS       & clean $\rightarrow$ channel & 27.64 {\scriptsize[26.55, 29.18]} & 18.98 {\scriptsize[16.74, 21.24]} & 39.74 {\scriptsize[36.49, 44.10]} \\
+XTTS       & channel $\rightarrow$ clean & 12.51 {\scriptsize[11.70, 13.59]} & 18.78 {\scriptsize[16.50, 20.77]} & 31.50 {\scriptsize[28.11, 35.22]} \\
+XTTS + RVC & clean $\rightarrow$ channel & 22.97 {\scriptsize[21.59, 24.36]} & 31.02 {\scriptsize[27.97, 33.70]} & 26.49 {\scriptsize[23.26, 29.72]} \\
+XTTS + RVC & channel $\rightarrow$ clean & 6.71 {\scriptsize[6.03, 7.57]}    & 18.33 {\scriptsize[16.23, 20.59]} & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\textbf{Training over the channel is the safer choice.} An adapter trained over the
+channel loses less on clean audio than a clean-trained adapter loses over the
+channel. On the evaluation pool the deployed adapter goes from 2.75\% to 6.71\% on
+clean audio, while its clean-trained counterpart goes from 1.99\% to 22.97\% over the
+channel; the XTTS-only pair repeats the pattern (4.41\% to 12.51\%, against 1.46\% to
+27.64\%). The channel-trained adapters also keep clean English best, at 2.55\% and
+2.42\%. The unseen tool is the exception: every adapter, whichever condition it was
+trained in, does worse on Tortoise over the channel than on clean Tortoise (for the
+deployed adapter, 30.99\% against 18.33\%). The channel itself, not the training
+condition, is what makes Tortoise hard.
+
+\textbf{The deployed model is not an English telephone detector.} We passed a fixed
+sample of 6,004 ASVspoof evaluation clips (all 13 attacks, all 67 speakers) through
+the same G.711 chain. The deployed model's EER rises from 2.30\% {\scriptsize[1.84,
+2.85]} on the clean sample to 24.20\% {\scriptsize[23.27, 25.30]}; at its operating
+point it calls 7.45\% of genuine English clips fake and lets 40\% of English fakes
+through. S1, which never heard telephone audio, scores 6.50\%
+{\scriptsize[5.92, 7.19]} on the same clips. Adaptation taught the model what genuine
+Hindi--English speech sounds like over a phone line, and English over the same line
+no longer matches it.
+
+For deployment this means the channel-trained XTTS + RVC adapter is the right model
+for a Hindi--English telephone service, which is how we use it, but it should not be
+trusted with English calls. A service that takes both needs either a language
+identification step that sends English calls to S1, or English telephone audio in the
+adaptation data. We have tested neither.
+% src/reporting/tradeoff.py; experiments/results/tradeoff_v1.json;
+% experiments/results/cross_condition_v1/; docs/results/tradeoff_v1.md
+
 \subsection{What the detector responds to}
 \label{sec:probe}
 
@@ -252,6 +308,7 @@ single vocal-cord pulse, rather than what is being said or in which language.
 \subsection{Summary}
 The best all-round system is S2 trained on XTTS and RVC in the channel condition. It
 beats its floor on the seen tool (2.75\%) and on RVC (5.01\%) at the speaker level,
-keeps English at 2.42\%, and on the unseen tool over the channel is inconclusive
-against its floor (30.99\% against 37.79\%). It is the model used in the live
-call system of Sec.~\ref{sec:system}.
+keeps clean English at 2.42\%, and on the unseen tool over the channel is
+inconclusive against its floor (30.99\% against 37.79\%). It is the model used in the
+live call system of Sec.~\ref{sec:system}, for Hindi--English calls only: English over
+the same channel rises to 24.20\% (Sec.~\ref{sec:tradeoff}).
