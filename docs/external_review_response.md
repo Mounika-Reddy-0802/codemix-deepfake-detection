@@ -112,8 +112,17 @@ detector. On the same clips the deployed model is level with that floor (26.78% 
 detector's exact clips), paired speaker-level test for all 24 system × set cells,
 interpretation paragraph and residual-cue list: `docs/results/shortcut_floor_v2.md`.
 
-**Planned.** Move the v2 table, the reading paragraph and the oracle/matched
-distinction into `paper/sections/methodology.tex` and `results.tex`.
+**Done in the paper.** `methodology.tex` now defines the matched floor, the paired
+speaker-level test, a "reading the floor" paragraph, and the oracle floor (disclosed,
+kept for reference). `results.tex` has a new floors table (matched and oracle), the
+main table marked by the paired test (bold = beats, italic = inconclusive,
+dagger = worse), and Findings 1, 2 and 5 and the summary rewritten to match. The
+abstract, introduction (a new "matched shortcut floors" contribution) and conclusion
+no longer say the deployed model *loses* to the Tortoise floor: it is below its
+matched floor (30.99% vs 37.79%) but inconclusive at the speaker level.
+
+**Still to do.** Regenerate the two floor figures (`systems_s2_s3.png`,
+`ablation_rvc.png`), which still draw the old floors.
 
 ## 6. Bibliography and positioning
 
@@ -134,7 +143,12 @@ layer-wise SSL analysis, AdamW, G.711, Opus, the bootstrap, codec/channel
 robustness, parameter-efficient anti-spoofing, and multilingual/Indic deepfake
 datasets (IndicSynth, SpeechFake, Indic-CodecFake).
 
-**Planned.** Related-work subsections and the "how this work differs" paragraph.
+**Done in the paper.** `related_work.tex` rewritten: benchmarks and generalisation;
+detectors and self-supervised front-ends; channel and codec robustness; parameter-
+efficient adaptation; multilingual and code-switched detection; and a "how this work
+differs" subsection. The old disclaimer that multilingual detection was out of scope
+is gone. AdamW, G.711, Opus, the bootstrap and the layer-wise claim are now cited.
+All 38 references are cited and every citation resolves.
 The verified literature shows each ingredient has precedent separately (real
 telephone/VoIP channel adaptation, Odyssey 2026; intra-utterance code-switched
 deepfakes, Arabic-English, ICLR 2026; LoRA for detectors, 2023 and ICASSP 2026), so

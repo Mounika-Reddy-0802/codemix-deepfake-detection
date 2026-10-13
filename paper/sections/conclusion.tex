@@ -20,13 +20,16 @@ evaluation reports.
 
 \subsection{What we could not do}
 
-\textbf{Against an unseen tool, over a telephone line, this system does not work.}
-On clean audio the adapters transfer to Tortoise-TTS at 5.44--12.01\% EER against a
-31.21\% floor, which is genuine generalisation. Over the channel the deployed model
-reaches 30.99\% against a 25.79\% floor --- above its own shortcut floor, meaning we
-have no measurable evidence that it detects an unseen tool on a real phone line. This
-is the sharpest limitation of the work and it constrains every deployment claim made
-here.
+\textbf{Against an unseen tool, over a telephone line, we cannot show that this system
+works.} On clean audio the adapters transfer to Tortoise-TTS at 5.44--12.01\% EER
+against matched floors of 29.49--31.43\%, which is learning beyond the shortcut. Over
+the channel the deployed model reaches 30.99\% against a matched floor of 37.79\%:
+below it, but with a speaker-level interval that includes zero, and with per-speaker
+error ranging from 6.4\% to 45.5\%. Only S3 trained on XTTS alone clears its floor
+there (13.71\% against 33.64\%), and adding RVC to its training removes that. We
+therefore have no conclusive evidence that the deployed model detects an unseen tool
+on a real phone line. This is the sharpest limitation of the work and it constrains
+every deployment claim made here.
 
 \textbf{The attacks are ours, and they are not hard.} We generated the code-mixed
 attacks because no benchmark provides them, which means our numbers are against
