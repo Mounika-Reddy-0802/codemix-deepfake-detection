@@ -40,6 +40,55 @@ Disjointness is enforced mechanically rather than by discipline.
 if a held-out tool reaches a training manifest, or if any excluded identifier appears
 anywhere. The anti-leakage checks run before every training launch.
 
+\subsection{Who the models hear, and who they are tested on}
+\label{sec:data-speakers}
+
+Table~\ref{tab:speakers} counts speakers per set. Adaptation uses 8 speakers for
+training and 2 for development. Models that train on RVC also hear the 13 source
+speakers of the RVC training half, drawn from the training pool, so the deployed model
+trains on 21 speakers. Its test sets hold 15 + 12 speakers it never heard, and HiACC
+adds 24 more, speaking spontaneously rather than reading.
+
+\begin{table}[t]
+\centering
+\caption{Speakers per set. No test speaker appears in any training set.}
+\label{tab:speakers}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Set & Clips & Speakers \\
+\midrule
+Training, XTTS only                & 2{,}154 & 8 \\
+Training, XTTS + RVC (deployed)    & 2{,}854 & 21 \\
+Development                        & 506     & 2 \\
+\midrule
+Evaluation pool / CM04 (read)      & 3{,}966 / 2{,}024 & 15 \\
+RVC test (read)                    & 619     & 12 \\
+HiACC adult (spontaneous, genuine) & 3{,}318 & 24 \\
+\bottomrule
+\end{tabular}
+% docs/results/hiacc_false_alarm_v1.md; experiments/results/floor_v2/per_speaker_eer.csv
+\end{table}
+
+\subsection{Different voices, different speaking style}
+\label{sec:data-styles}
+
+A pooled EER hides how unevenly the error falls on speakers. For the deployed model
+over the channel, per-speaker EER on the seen tool runs from 0.0\% to 11.0\% (median
+0.7\%), and on the unseen Tortoise attack from 6.4\% to 45.5\% (median 28.1\%), with 6
+of the 15 speakers above their own shortcut floor.
+
+Spontaneous speech is a harder test still. HiACC holds genuine speech only, so we
+measure false alarms: the share of genuine clips called fake at the deployed operating
+point. On the MUCS read lectures of the evaluation pool the deployed model calls
+0.89\% [0.54, 1.29] of genuine clips fake; on HiACC's 24 spontaneous speakers it calls
+54.37\% [44.43, 64.15] fake, a difference of 53.5 points, with every speaker above
+10\% (13.9--89.5\%). Clip length does not explain it: longer HiACC clips are rejected
+more often than short ones. Adaptation moved the detector's notion of genuine speech
+to the lecture recordings it was adapted on, not to Hindi--English speech in general.
+HiACC differs from MUCS in recording conditions as well as in speaking style, and this
+test cannot say which of the two drives the false alarms.
+
 \subsection{Attacks}
 
 No benchmark supplies code-mixed deepfakes, so they were generated. Each generator
