@@ -1,0 +1,205 @@
+{
+  "mode": "full",
+  "branch": "main",
+  "commit": "a83d36a38d60775c23e60a332b17c9bb169cc814",
+  "stage1_best_lr": null,
+  "stage2_xlsr_lr": 0.0001,
+  "stage1": {
+    "0.0001": {
+      "ok": true,
+      "collapsed": false,
+      "crashed": false,
+      "first_loss": 0.6947,
+      "last_loss": 0.6893,
+      "dev_eer": 0.4926,
+      "score_std": 0.0002,
+      "minutes": 2.9
+    },
+    "0.0003": {
+      "ok": true,
+      "collapsed": false,
+      "crashed": false,
+      "first_loss": 0.6984,
+      "last_loss": 0.6903,
+      "dev_eer": 0.4778,
+      "score_std": 0.0004,
+      "minutes": 2.4
+    },
+    "0.001": {
+      "ok": false,
+      "collapsed": true,
+      "crashed": false,
+      "first_loss": 0.7164,
+      "last_loss": 0.6947,
+      "dev_eer": 0.6985,
+      "score_std": 0.0,
+      "minutes": 3.0
+    },
+    "0.003": {
+      "ok": false,
+      "collapsed": true,
+      "crashed": false,
+      "first_loss": 0.7417,
+      "last_loss": 0.764,
+      "dev_eer": 0.3823,
+      "score_std": 0.0,
+      "minutes": 3.0
+    }
+  },
+  "results": {
+    "w2v2base_lora__eval_pool": {
+      "eer": 0.0640118135376756,
+      "eer_ci_low": 0.0572028446050484,
+      "eer_ci_high": 0.07160198500244092,
+      "auc": 0.9785394050659856,
+      "auc_ci_low": 0.9746584669229982,
+      "auc_ci_high": 0.9819956132230904,
+      "f1": 0.9202762084118017,
+      "threshold": 0.526673436164856,
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "score_std": 0.460205
+    },
+    "w2v2base_lora__cm04": {
+      "eer": 0.48674480081647675,
+      "eer_ci_low": 0.46287341569314827,
+      "eer_ci_high": 0.5152245895337888,
+      "auc": 0.5416499355853369,
+      "auc_ci_low": 0.5138405289658059,
+      "auc_ci_high": 0.5738660563975504,
+      "f1": 0.6201311222522174,
+      "threshold": 0.9811310768127441,
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "score_std": 0.230299
+    },
+    "w2v2base_lora__rvc_test": {
+      "eer": 0.1696105876700023,
+      "eer_ci_low": 0.1389636805362113,
+      "eer_ci_high": 0.20043423689898815,
+      "auc": 0.8981761965445924,
+      "auc_ci_low": 0.8692875048143196,
+      "auc_ci_high": 0.9247336245887284,
+      "f1": 0.827018121911038,
+      "threshold": 0.8672800660133362,
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "score_std": 0.442935
+    },
+    "xlsr53_lora__eval_pool": {
+      "eer": 0.4222972541507024,
+      "eer_ci_low": 0.40768669018766057,
+      "eer_ci_high": 0.43744443986263337,
+      "auc": 0.6137300446998722,
+      "auc_ci_low": 0.5959193771647803,
+      "auc_ci_high": 0.6285411233305676,
+      "f1": 0.5193687230989957,
+      "threshold": 0.5127688646316528,
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "score_std": 0.001036
+    },
+    "xlsr53_lora__cm04": {
+      "eer": 0.5850412978857491,
+      "eer_ci_low": 0.5502493457263785,
+      "eer_ci_high": 0.6057479651902976,
+      "auc": 0.41082263938385005,
+      "auc_ci_low": 0.38531814114094004,
+      "auc_ci_high": 0.44407598858583036,
+      "f1": 0.5233494363929146,
+      "threshold": 0.5130758881568909,
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "score_std": 0.001043
+    },
+    "xlsr53_lora__rvc_test": {
+      "eer": 0.5525153028182255,
+      "eer_ci_low": 0.5040569616602729,
+      "eer_ci_high": 0.5944582627815133,
+      "auc": 0.45406020849436984,
+      "auc_ci_low": 0.4060969637709108,
+      "auc_ci_high": 0.49913240323414065,
+      "f1": 0.4411764705882353,
+      "threshold": 0.5128766298294067,
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "score_std": 0.000791
+    },
+    "s3_native_xlsr__eval_pool": {
+      "eer": 0.05169540229885057,
+      "eer_ci_low": 0.0436481349761242,
+      "eer_ci_high": 0.060284671679586815,
+      "auc": 0.9659405598126862,
+      "auc_ci_low": 0.9592831725966597,
+      "auc_ci_high": 0.9721964138808376,
+      "f1": 0.9354330708661418,
+      "threshold": 0.8501567244529724,
+      "clips": 3966,
+      "bonafide": 1566,
+      "spoof": 2400,
+      "score_std": 0.418616
+    },
+    "s3_native_xlsr__cm04": {
+      "eer": 0.3207613199707764,
+      "eer_ci_low": 0.2903587565447309,
+      "eer_ci_high": 0.3476673034244812,
+      "auc": 0.7312584003970843,
+      "auc_ci_low": 0.7011262725593538,
+      "auc_ci_high": 0.7597100642741831,
+      "f1": 0.7662945624774936,
+      "threshold": 0.8718924522399902,
+      "clips": 2024,
+      "bonafide": 1566,
+      "spoof": 458,
+      "score_std": 0.228063
+    },
+    "s3_native_xlsr__rvc_test": {
+      "eer": 0.4103453318570205,
+      "eer_ci_low": 0.3733927156438245,
+      "eer_ci_high": 0.45393736409998553,
+      "auc": 0.6244281028683645,
+      "auc_ci_low": 0.5711969586120402,
+      "auc_ci_high": 0.6698686505738443,
+      "f1": 0.5836065573770493,
+      "threshold": 0.8765703439712524,
+      "clips": 619,
+      "bonafide": 302,
+      "spoof": 317,
+      "score_std": 0.243717
+    }
+  },
+  "floors": {
+    "eval_pool": 10.01,
+    "cm04": 25.79,
+    "rvc_test": 22.46
+  },
+  "published": {
+    "S2: LoRA from English S1, wav2vec2-base (deployed)": {
+      "eval_pool": 2.75,
+      "cm04": 30.99,
+      "rvc_test": 5.01
+    },
+    "S3: native, wav2vec2-base": {
+      "eval_pool": 1.79,
+      "cm04": 31.67,
+      "rvc_test": 5.98
+    }
+  },
+  "verdict": [
+    "RUN HEALTH: every step ran without error.",
+    "STAGE 1: within 300 steps XLSR + LoRA learned at NO rate tried; stage 2 used 1e-04.",
+    "STAGE 2: XLSR is WORSE than wav2vec2-base on the unseen tool (58.50% vs 48.67%).",
+    "        XLSR + LoRA stayed near chance even on the SEEN tool (42.23%): under LoRA it did not learn this task at all.",
+    "STAGE 3: S3 on XLSR reaches 32.08% on the unseen tool, against 31.67% for S3 on wav2vec2-base.",
+    "        It does not clear the unseen-tool floor (25.79%)."
+  ],
+  "collapsed": [],
+  "collapsed_unscored": [],
+  "failures": []
+}

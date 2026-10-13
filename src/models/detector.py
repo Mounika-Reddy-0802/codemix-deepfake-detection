@@ -21,9 +21,12 @@ class Detector(nn.Module):
         dropout: float = 0.3,
         freeze_feature_extractor: bool = True,
         freeze_encoder: bool = False,
+        layer_weighting: bool = False,
     ) -> None:
         super().__init__()
-        self.encoder = SSLEncoder(encoder_name, freeze_feature_extractor, freeze_encoder)
+        self.encoder = SSLEncoder(
+            encoder_name, freeze_feature_extractor, freeze_encoder, layer_weighting=layer_weighting
+        )
         hidden = self.encoder.hidden_size
         self.pooling = AttentiveStatsPooling(hidden)
         self.head = MLPHead(2 * hidden, head_hidden, num_classes, dropout)

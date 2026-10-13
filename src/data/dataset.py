@@ -13,6 +13,7 @@ differs between the two machines.
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -62,6 +63,7 @@ class AudioManifestDataset:
         max_seconds: float | None = None,
         random_crop: bool = False,
         seed: int = 1234,
+        augment: Callable[[np.ndarray, np.random.Generator], np.ndarray] | None = None,
     ) -> None:
         df = pd.read_csv(manifest) if isinstance(manifest, str) else manifest.copy()
         if split is not None:
@@ -76,11 +78,18 @@ class AudioManifestDataset:
         #: deterministic, and ~4 s is the length anti-spoofing models are normally
         #: trained on anyway.
         self.max_seconds = max_seconds
-        #: Random crop for training (a free augmentation, and it sees the whole
-        #: clip across epochs); deterministic head crop for dev/eval, so a
-        #: validation number never moves because the crop moved.
+        #: Random crop for training; deterministic head crop for dev/eval, so a
+        #: validation number never moves because the crop moved. Read the seeding
+        #: carefully: fetched with a plain integer index, a clip's crop is seeded by
+        #: its index alone, so it gets the SAME crop in every epoch. That is the
+        #: published recipe and stays the default. Fetched with an ``(index, epoch)``
+        #: key -- what :class:`src.training.sampling.EpochSampler` yields -- the crop
+        #: changes every epoch, so training sees the whole clip over the run.
         self.random_crop = random_crop
         self.seed = seed
+        #: Optional on-the-fly augmentation ``(waveform, rng) -> waveform``, applied
+        #: after the crop with a generator seeded like the crop. ``None`` = off.
+        self.augment = augment
         #: Resolved lazily per item so ``$DATA_ROOT`` set after construction (or in
         #: a DataLoader worker process) is still honoured.
         self.data_root = data_root
@@ -88,13 +97,16 @@ class AudioManifestDataset:
     def __len__(self) -> int:
         return len(self.df)
 
-    def __getitem__(self, index: int) -> AudioSample:
+    def __getitem__(self, key: int | tuple[int, int]) -> AudioSample:
         from src.utils.audio_utils import load_wav
 
+        index, epoch = (int(key[0]), int(key[1])) if isinstance(key, tuple) else (int(key), None)
         row = self.df.iloc[index]
         filepath = resolve_path(row["filepath"], self.data_root)
         waveform, _ = load_wav(filepath, target_sr=self.target_sr)
-        waveform = self._crop(waveform, index)
+        waveform = self._crop(waveform, index, epoch)
+        if self.augment is not None:
+            waveform = self.augment(waveform, self._rng(index, epoch, stream=1))
         return AudioSample(
             waveform=waveform,
             label=LABEL_TO_INT[str(row["label"]).lower()],
@@ -103,7 +115,17 @@ class AudioManifestDataset:
             condition=str(row.get("condition", "")),
         )
 
-    def _crop(self, waveform: np.ndarray, index: int) -> np.ndarray:
+    def _rng(self, index: int, epoch: int | None, stream: int = 0) -> np.random.Generator:
+        """Per-item generator: reproducible, and independent of worker scheduling.
+
+        ``epoch=None`` with ``stream=0`` is the published seeding (``seed + index``),
+        kept bit-for-bit so existing configs train exactly as before.
+        """
+        if epoch is None and stream == 0:
+            return np.random.default_rng(self.seed + index)
+        return np.random.default_rng((self.seed, -1 if epoch is None else epoch, index, stream))
+
+    def _crop(self, waveform: np.ndarray, index: int, epoch: int | None = None) -> np.ndarray:
         """Limit one clip to ``max_seconds``. Shorter clips are returned as-is."""
         if self.max_seconds is None:
             return waveform
@@ -112,9 +134,7 @@ class AudioManifestDataset:
             return waveform
         if not self.random_crop:
             return waveform[:limit]
-        # Seeded per index so a given clip crops identically for a given epoch
-        # ordering -- reproducible, unlike a global RNG shared across workers.
-        rng = np.random.default_rng(self.seed + index)
+        rng = self._rng(index, epoch)
         start = int(rng.integers(0, waveform.shape[0] - limit + 1))
         return waveform[start : start + limit]
 

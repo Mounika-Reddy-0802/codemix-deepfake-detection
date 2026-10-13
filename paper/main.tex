@@ -14,17 +14,35 @@
 \maketitle
 
 \begin{abstract}
-Placeholder abstract, to be written last from the final section text.
+Audio deepfake detectors report error rates below one percent on English
+benchmarks. We ask what those numbers mean for the speech most exposed to voice
+fraud: Hindi--English code-mixed conversation carried over a telephone line. A
+wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\% equal error rate on
+English and 48.21\% on clean code-mixed speech, rising to 58.42\% over a simulated
+narrowband channel, where its AUC falls below chance. The failure is a rejection of
+genuine speakers rather than a loss of sensitivity to clones: at a fixed threshold it
+rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English. Low-rank
+adaptation of the frozen encoder, training 1.13\% of the parameters on
+speaker-disjoint code-mixed speech and clones generated for this study, reduces
+channel-matched error to 2.75\% while retaining 2.42\% on English; fine-tuning the
+whole encoder on identical data is better on the tool it saw (0.83\%) and collapses
+to chance on English. Every result is reported beside a shortcut floor, the error
+rate eight cheap signal statistics reach on the same clips, and one of our own
+conditions fails that test: against a cloning tool no model was allowed to see, the
+adapted system generalises on clean audio (5.44\% against a 31.21\% floor) but not
+over the channel (30.99\% against a 25.79\% floor). The detector runs on live calls
+and warns the callee, and only the callee, about ten seconds into the speech, using
+the windowing and operating point the evaluation reports.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.
-% \input{sections/introduction}   % SK
-% \input{sections/related_work}   % SK
+\input{sections/introduction}   % SK
+\input{sections/related_work}   % SK
 \input{sections/dataset}        % L: dataset, channel protocol, ethics
 \input{sections/methodology}      % M
 \input{sections/results}          % M
 \input{sections/system}           % SK: live call system, label sec:system
-% \input{sections/conclusion}     % SK
+\input{sections/conclusion}     % SK
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}

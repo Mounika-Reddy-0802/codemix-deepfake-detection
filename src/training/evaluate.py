@@ -46,7 +46,6 @@ def score_manifest(
     from torch.utils.data import DataLoader
 
     from src.data.dataset import AudioManifestDataset, collate_fn
-    from src.models.detector import Detector
     from src.utils.device import resolve_device
 
     resolved = resolve_device(device)
@@ -56,8 +55,8 @@ def score_manifest(
     if limit is not None:
         dataset.df = limit_rows(dataset.df, limit)
 
-    model = Detector(_encoder_id(encoder))
     state = torch.load(checkpoint, map_location=resolved, weights_only=False)
+    model = build_detector(encoder, state)
     note = _restore_lora(model, state)
     if note:
         print(f"  {note}", flush=True)
@@ -147,6 +146,23 @@ def limit_rows(df: pd.DataFrame, limit: int, seed: int = 0) -> pd.DataFrame:
         for lab, n in quota.items()
     ]
     return pd.concat(parts).sort_index().reset_index(drop=True)
+
+
+#: State-dict key present only in checkpoints trained with ``layer_weighting``.
+LAYER_MIX_KEY = "encoder.layer_mix.logits"
+
+
+def build_detector(encoder: str, state):
+    """A :class:`Detector` shaped like the one that wrote ``state``.
+
+    The shape is read from the checkpoint itself, so S1, S2 and S3 checkpoints from
+    before ``layer_weighting`` existed load exactly as they always did, and a newer
+    one with a learned layer mix gets that module back.
+    """
+    from src.models.detector import Detector
+
+    weights = state["model"] if isinstance(state, dict) and "model" in state else state
+    return Detector(_encoder_id(encoder), layer_weighting=LAYER_MIX_KEY in weights)
 
 
 def _restore_lora(model, state) -> str | None:

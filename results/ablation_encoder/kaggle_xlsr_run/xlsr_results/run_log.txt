@@ -1,0 +1,708 @@
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_search_xlsr_lr1e-4.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/kaggle/working/codemix-deepfake-detection/src/training/train.py:167: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  .apply(
+device=cuda (Tesla T4, 14.6 GiB)
+lora: r=8 alpha=16.0 on 96 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 2,229,251/317,667,971 (0.70%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 199 dev clips, batch 8, 357 steps/epoch x 1 epochs
+  epoch 1/1 step 25/300  loss 0.6947  2.54 steps/s
+  epoch 1/1 step 50/300  loss 0.7000  2.83 steps/s
+  epoch 1/1 step 75/300  loss 0.6944  2.93 steps/s
+  epoch 1/1 step 100/300  loss 0.6895  2.96 steps/s
+  epoch 1/1 step 125/300  loss 0.6947  2.97 steps/s
+  epoch 1/1 step 150/300  loss 0.7000  2.97 steps/s
+  epoch 1/1 step 175/300  loss 0.6910  2.97 steps/s
+  epoch 1/1 step 200/300  loss 0.6950  2.95 steps/s
+  epoch 1/1 step 225/300  loss 0.6964  2.92 steps/s
+  epoch 1/1 step 250/300  loss 0.6935  2.88 steps/s
+  epoch 1/1 step 275/300  loss 0.6910  2.84 steps/s
+  epoch 1/1 step 300/300  loss 0.6893  2.80 steps/s
+  evaluating on 199 dev clips ...
+  epoch 1: dev EER 0.4926  score std 0.0002  (2.0 min elapsed)
+done: best dev EER = 0.4926
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_search_xlsr_lr3e-4.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/kaggle/working/codemix-deepfake-detection/src/training/train.py:167: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  .apply(
+device=cuda (Tesla T4, 14.6 GiB)
+lora: r=8 alpha=16.0 on 96 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 2,229,251/317,667,971 (0.70%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 199 dev clips, batch 8, 357 steps/epoch x 1 epochs
+  epoch 1/1 step 25/300  loss 0.6984  2.61 steps/s
+  epoch 1/1 step 50/300  loss 0.7014  2.69 steps/s
+  epoch 1/1 step 75/300  loss 0.6914  2.68 steps/s
+  epoch 1/1 step 100/300  loss 0.6850  2.62 steps/s
+  epoch 1/1 step 125/300  loss 0.7114  2.57 steps/s
+  epoch 1/1 step 150/300  loss 0.6982  2.58 steps/s
+  epoch 1/1 step 175/300  loss 0.6897  2.60 steps/s
+  epoch 1/1 step 200/300  loss 0.6979  2.61 steps/s
+  epoch 1/1 step 225/300  loss 0.7016  2.63 steps/s
+  epoch 1/1 step 250/300  loss 0.6919  2.63 steps/s
+  epoch 1/1 step 275/300  loss 0.6943  2.64 steps/s
+  epoch 1/1 step 300/300  loss 0.6903  2.64 steps/s
+  evaluating on 199 dev clips ...
+  epoch 1: dev EER 0.4778  score std 0.0004  (2.1 min elapsed)
+done: best dev EER = 0.4778
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_search_xlsr_lr1e-3.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/kaggle/working/codemix-deepfake-detection/src/training/train.py:167: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  .apply(
+device=cuda (Tesla T4, 14.6 GiB)
+lora: r=8 alpha=16.0 on 96 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 2,229,251/317,667,971 (0.70%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 199 dev clips, batch 8, 357 steps/epoch x 1 epochs
+  epoch 1/1 step 25/300  loss 0.7164  2.55 steps/s
+  epoch 1/1 step 50/300  loss 0.7008  2.60 steps/s
+  epoch 1/1 step 75/300  loss 0.6924  2.58 steps/s
+  epoch 1/1 step 100/300  loss 0.6817  2.53 steps/s
+  epoch 1/1 step 125/300  loss 0.7202  2.53 steps/s
+  epoch 1/1 step 150/300  loss 0.6998  2.55 steps/s
+  epoch 1/1 step 175/300  loss 0.6895  2.58 steps/s
+  epoch 1/1 step 200/300  loss 0.6985  2.60 steps/s
+  epoch 1/1 step 225/300  loss 0.6961  2.62 steps/s
+  epoch 1/1 step 250/300  loss 0.6962  2.62 steps/s
+  epoch 1/1 step 275/300  loss 0.7016  2.62 steps/s
+  epoch 1/1 step 300/300  loss 0.6947  2.62 steps/s
+  evaluating on 199 dev clips ...
+  epoch 1: dev EER 0.6985  score std 0.0000  (2.1 min elapsed)
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 429, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 424, in main
+    result = train(cfg)
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 329, in train
+    raise RuntimeError(
+    ...<5 lines>...
+    )
+RuntimeError: model collapsed: dev score std 0.000018 < 0.0001 after epoch 1 -- it is emitting a constant regardless of input. Usually the learning rate is too high for a pretrained encoder (1e-4 does this to wav2vec2; 1e-5 works). Stopping instead of spending the remaining epochs.
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_search_xlsr_lr3e-3.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/kaggle/working/codemix-deepfake-detection/src/training/train.py:167: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  .apply(
+device=cuda (Tesla T4, 14.6 GiB)
+lora: r=8 alpha=16.0 on 96 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 2,229,251/317,667,971 (0.70%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 199 dev clips, batch 8, 357 steps/epoch x 1 epochs
+  epoch 1/1 step 25/300  loss 0.7417  2.49 steps/s
+  epoch 1/1 step 50/300  loss 0.7407  2.55 steps/s
+  epoch 1/1 step 75/300  loss 0.6930  2.53 steps/s
+  epoch 1/1 step 100/300  loss 0.6926  2.50 steps/s
+  epoch 1/1 step 125/300  loss 0.7144  2.52 steps/s
+  epoch 1/1 step 150/300  loss 0.7093  2.55 steps/s
+  epoch 1/1 step 175/300  loss 0.6989  2.59 steps/s
+  epoch 1/1 step 200/300  loss 0.7000  2.62 steps/s
+  epoch 1/1 step 225/300  loss 0.7028  2.63 steps/s
+  epoch 1/1 step 250/300  loss 0.6911  2.64 steps/s
+  epoch 1/1 step 275/300  loss 0.7609  2.65 steps/s
+  epoch 1/1 step 300/300  loss 0.7640  2.65 steps/s
+  evaluating on 199 dev clips ...
+  epoch 1: dev EER 0.3823  score std 0.0000  (2.1 min elapsed)
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 429, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 424, in main
+    result = train(cfg)
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 329, in train
+    raise RuntimeError(
+    ...<5 lines>...
+    )
+RuntimeError: model collapsed: dev score std 0.000047 < 0.0001 after epoch 1 -- it is emitting a constant regardless of input. Usually the learning rate is too high for a pretrained encoder (1e-4 does this to wav2vec2; 1e-5 works). Stopping instead of spending the remaining epochs.
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_w2v2base_lora.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+device=cuda (Tesla T4, 14.6 GiB)
+lora: r=8 alpha=16.0 on 48 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 1,082,371/95,454,083 (1.13%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 5 epochs
+  epoch 1/5 step 25/1785  loss 0.7025  3.57 steps/s  eta 8 min
+  epoch 1/5 step 50/1785  loss 0.6808  4.30 steps/s  eta 7 min
+  epoch 1/5 step 75/1785  loss 0.6772  4.61 steps/s  eta 6 min
+  epoch 1/5 step 100/1785  loss 0.6682  4.77 steps/s  eta 6 min
+  epoch 1/5 step 125/1785  loss 0.6607  4.87 steps/s  eta 6 min
+  epoch 1/5 step 150/1785  loss 0.6155  4.93 steps/s  eta 6 min
+  epoch 1/5 step 175/1785  loss 0.5479  4.97 steps/s  eta 5 min
+  epoch 1/5 step 200/1785  loss 0.5321  5.00 steps/s  eta 5 min
+  epoch 1/5 step 225/1785  loss 0.4655  5.02 steps/s  eta 5 min
+  epoch 1/5 step 250/1785  loss 0.4000  5.02 steps/s  eta 5 min
+  epoch 1/5 step 275/1785  loss 0.4231  5.03 steps/s  eta 5 min
+  epoch 1/5 step 300/1785  loss 0.3666  5.03 steps/s  eta 5 min
+  epoch 1/5 step 325/1785  loss 0.3222  5.02 steps/s  eta 5 min
+  epoch 1/5 step 350/1785  loss 0.2983  5.01 steps/s  eta 5 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.1228  score std 0.3815  (1.4 min elapsed)
+  epoch 2/5 step 375/1785  loss 0.2493  4.28 steps/s  eta 5 min
+  epoch 2/5 step 400/1785  loss 0.3656  4.29 steps/s  eta 5 min
+  epoch 2/5 step 425/1785  loss 0.2739  4.30 steps/s  eta 5 min
+  epoch 2/5 step 450/1785  loss 0.2788  4.30 steps/s  eta 5 min
+  epoch 2/5 step 475/1785  loss 0.2569  4.30 steps/s  eta 5 min
+  epoch 2/5 step 500/1785  loss 0.2779  4.30 steps/s  eta 5 min
+  epoch 2/5 step 525/1785  loss 0.2804  4.31 steps/s  eta 5 min
+  epoch 2/5 step 550/1785  loss 0.1914  4.32 steps/s  eta 5 min
+  epoch 2/5 step 575/1785  loss 0.2594  4.33 steps/s  eta 5 min
+  epoch 2/5 step 600/1785  loss 0.2042  4.34 steps/s  eta 5 min
+  epoch 2/5 step 625/1785  loss 0.1447  4.36 steps/s  eta 4 min
+  epoch 2/5 step 650/1785  loss 0.1913  4.37 steps/s  eta 4 min
+  epoch 2/5 step 675/1785  loss 0.0946  4.38 steps/s  eta 4 min
+  epoch 2/5 step 700/1785  loss 0.1435  4.39 steps/s  eta 4 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.0751  score std 0.4416  (2.9 min elapsed)
+  epoch 3/5 step 725/1785  loss 0.1434  4.07 steps/s  eta 4 min
+  epoch 3/5 step 750/1785  loss 0.1384  4.09 steps/s  eta 4 min
+  epoch 3/5 step 775/1785  loss 0.0924  4.10 steps/s  eta 4 min
+  epoch 3/5 step 800/1785  loss 0.1016  4.11 steps/s  eta 4 min
+  epoch 3/5 step 825/1785  loss 0.1279  4.12 steps/s  eta 4 min
+  epoch 3/5 step 850/1785  loss 0.0787  4.13 steps/s  eta 4 min
+  epoch 3/5 step 875/1785  loss 0.0961  4.14 steps/s  eta 4 min
+  epoch 3/5 step 900/1785  loss 0.1625  4.15 steps/s  eta 4 min
+  epoch 3/5 step 925/1785  loss 0.0886  4.16 steps/s  eta 3 min
+  epoch 3/5 step 950/1785  loss 0.0685  4.17 steps/s  eta 3 min
+  epoch 3/5 step 975/1785  loss 0.0755  4.18 steps/s  eta 3 min
+  epoch 3/5 step 1000/1785  loss 0.0422  4.19 steps/s  eta 3 min
+  epoch 3/5 step 1025/1785  loss 0.0571  4.20 steps/s  eta 3 min
+  epoch 3/5 step 1050/1785  loss 0.0275  4.21 steps/s  eta 3 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.1085  score std 0.4113  (4.4 min elapsed)
+  epoch 4/5 step 1075/1785  loss 0.0582  4.02 steps/s  eta 3 min
+  epoch 4/5 step 1100/1785  loss 0.0674  4.03 steps/s  eta 3 min
+  epoch 4/5 step 1125/1785  loss 0.0535  4.04 steps/s  eta 3 min
+  epoch 4/5 step 1150/1785  loss 0.0380  4.05 steps/s  eta 3 min
+  epoch 4/5 step 1175/1785  loss 0.0504  4.06 steps/s  eta 3 min
+  epoch 4/5 step 1200/1785  loss 0.0390  4.07 steps/s  eta 2 min
+  epoch 4/5 step 1225/1785  loss 0.0401  4.08 steps/s  eta 2 min
+  epoch 4/5 step 1250/1785  loss 0.0377  4.09 steps/s  eta 2 min
+  epoch 4/5 step 1275/1785  loss 0.0534  4.10 steps/s  eta 2 min
+  epoch 4/5 step 1300/1785  loss 0.0443  4.10 steps/s  eta 2 min
+  epoch 4/5 step 1325/1785  loss 0.0855  4.11 steps/s  eta 2 min
+  epoch 4/5 step 1350/1785  loss 0.0436  4.12 steps/s  eta 2 min
+  epoch 4/5 step 1375/1785  loss 0.0479  4.12 steps/s  eta 2 min
+  epoch 4/5 step 1400/1785  loss 0.0236  4.13 steps/s  eta 2 min
+  epoch 4/5 step 1425/1785  loss 0.0246  4.14 steps/s  eta 1 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.1286  score std 0.4351  (6.0 min elapsed)
+  epoch 5/5 step 1450/1785  loss 0.0352  4.00 steps/s  eta 1 min
+  epoch 5/5 step 1475/1785  loss 0.0099  4.01 steps/s  eta 1 min
+  epoch 5/5 step 1500/1785  loss 0.0260  4.02 steps/s  eta 1 min
+  epoch 5/5 step 1525/1785  loss 0.0472  4.02 steps/s  eta 1 min
+  epoch 5/5 step 1550/1785  loss 0.0316  4.03 steps/s  eta 1 min
+  epoch 5/5 step 1575/1785  loss 0.0097  4.04 steps/s  eta 1 min
+  epoch 5/5 step 1600/1785  loss 0.0103  4.04 steps/s  eta 1 min
+  epoch 5/5 step 1625/1785  loss 0.0193  4.05 steps/s  eta 1 min
+  epoch 5/5 step 1650/1785  loss 0.0145  4.06 steps/s  eta 1 min
+  epoch 5/5 step 1675/1785  loss 0.1001  4.06 steps/s  eta 0 min
+  epoch 5/5 step 1700/1785  loss 0.0303  4.07 steps/s  eta 0 min
+  epoch 5/5 step 1725/1785  loss 0.0466  4.07 steps/s  eta 0 min
+  epoch 5/5 step 1750/1785  loss 0.0076  4.08 steps/s  eta 0 min
+  epoch 5/5 step 1775/1785  loss 0.0189  4.09 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.1561  score std 0.4255  (7.5 min elapsed)
+done: best dev EER = 0.0751
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/w2v2base_lora/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/w2v2base_lora__eval_pool_scores.csv --out /kaggle/working/xlsr_results/w2v2base_lora__eval_pool.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.0640118135376756,
+  "eer_ci_low": 0.0572028446050484,
+  "eer_ci_high": 0.07160198500244092,
+  "auc": 0.9785394050659856,
+  "auc_ci_low": 0.9746584669229982,
+  "auc_ci_high": 0.9819956132230904,
+  "f1": 0.9202762084118017,
+  "threshold": 0.526673436164856,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.460205
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips      eer
+xtts_v2         2400 0.064012
+
+wrote /kaggle/working/xlsr_results/w2v2base_lora__eval_pool.json
+wrote /kaggle/working/xlsr_results/w2v2base_lora__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/w2v2base_lora/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/w2v2base_lora__cm04_scores.csv --out /kaggle/working/xlsr_results/w2v2base_lora__cm04.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.48674480081647675,
+  "eer_ci_low": 0.46287341569314827,
+  "eer_ci_high": 0.5152245895337888,
+  "auc": 0.5416499355853369,
+  "auc_ci_low": 0.5138405289658059,
+  "auc_ci_high": 0.5738660563975504,
+  "f1": 0.6201311222522174,
+  "threshold": 0.9811310768127441,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.230299
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.486745
+
+wrote /kaggle/working/xlsr_results/w2v2base_lora__cm04.json
+wrote /kaggle/working/xlsr_results/w2v2base_lora__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/w2v2base_lora/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/w2v2base_lora__rvc_test_scores.csv --out /kaggle/working/xlsr_results/w2v2base_lora__rvc_test.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+
+=== pooled ===
+{
+  "eer": 0.1696105876700023,
+  "eer_ci_low": 0.1389636805362113,
+  "eer_ci_high": 0.20043423689898815,
+  "auc": 0.8981761965445924,
+  "auc_ci_low": 0.8692875048143196,
+  "auc_ci_high": 0.9247336245887284,
+  "f1": 0.827018121911038,
+  "threshold": 0.8672800660133362,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.442935
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips      eer
+   rvc          317 0.169611
+
+wrote /kaggle/working/xlsr_results/w2v2base_lora__rvc_test.json
+wrote /kaggle/working/xlsr_results/w2v2base_lora__rvc_test_scores.csv
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_xlsr53_lora.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+device=cuda (Tesla T4, 14.6 GiB)
+lora: r=8 alpha=16.0 on 96 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 2,229,251/317,667,971 (0.70%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 5 epochs
+  epoch 1/5 step 25/1785  loss 0.6947  2.48 steps/s  eta 12 min
+  epoch 1/5 step 50/1785  loss 0.6999  2.53 steps/s  eta 11 min
+  epoch 1/5 step 75/1785  loss 0.6945  2.50 steps/s  eta 11 min
+  epoch 1/5 step 100/1785  loss 0.6888  2.48 steps/s  eta 11 min
+  epoch 1/5 step 125/1785  loss 0.6946  2.51 steps/s  eta 11 min
+  epoch 1/5 step 150/1785  loss 0.7004  2.54 steps/s  eta 11 min
+  epoch 1/5 step 175/1785  loss 0.6917  2.58 steps/s  eta 10 min
+  epoch 1/5 step 200/1785  loss 0.6952  2.60 steps/s  eta 10 min
+  epoch 1/5 step 225/1785  loss 0.6956  2.61 steps/s  eta 10 min
+  epoch 1/5 step 250/1785  loss 0.6922  2.61 steps/s  eta 10 min
+  epoch 1/5 step 275/1785  loss 0.6894  2.61 steps/s  eta 10 min
+  epoch 1/5 step 300/1785  loss 0.6903  2.61 steps/s  eta 9 min
+  epoch 1/5 step 325/1785  loss 0.6937  2.61 steps/s  eta 9 min
+  epoch 1/5 step 350/1785  loss 0.6973  2.61 steps/s  eta 9 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.3830  score std 0.0011  (2.8 min elapsed)
+  epoch 2/5 step 375/1785  loss 0.6914  2.11 steps/s  eta 11 min
+  epoch 2/5 step 400/1785  loss 0.6973  2.14 steps/s  eta 11 min
+  epoch 2/5 step 425/1785  loss 0.6904  2.16 steps/s  eta 10 min
+  epoch 2/5 step 450/1785  loss 0.6848  2.19 steps/s  eta 10 min
+  epoch 2/5 step 475/1785  loss 0.6869  2.20 steps/s  eta 10 min
+  epoch 2/5 step 500/1785  loss 0.6827  2.22 steps/s  eta 10 min
+  epoch 2/5 step 525/1785  loss 0.6695  2.24 steps/s  eta 9 min
+  epoch 2/5 step 550/1785  loss 0.6794  2.25 steps/s  eta 9 min
+  epoch 2/5 step 575/1785  loss 0.6819  2.27 steps/s  eta 9 min
+  epoch 2/5 step 600/1785  loss 0.6575  2.28 steps/s  eta 9 min
+  epoch 2/5 step 625/1785  loss 0.6554  2.30 steps/s  eta 8 min
+  epoch 2/5 step 650/1785  loss 0.6458  2.31 steps/s  eta 8 min
+  epoch 2/5 step 675/1785  loss 0.6258  2.32 steps/s  eta 8 min
+  epoch 2/5 step 700/1785  loss 0.6278  2.33 steps/s  eta 8 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.5534  score std 0.0017  (5.6 min elapsed)
+  epoch 3/5 step 725/1785  loss 0.5976  2.11 steps/s  eta 8 min
+  epoch 3/5 step 750/1785  loss 0.5853  2.12 steps/s  eta 8 min
+  epoch 3/5 step 775/1785  loss 0.5709  2.14 steps/s  eta 8 min
+  epoch 3/5 step 800/1785  loss 0.5963  2.15 steps/s  eta 8 min
+  epoch 3/5 step 825/1785  loss 0.6453  2.16 steps/s  eta 7 min
+  epoch 3/5 step 850/1785  loss 0.5985  2.17 steps/s  eta 7 min
+  epoch 3/5 step 875/1785  loss 0.6087  2.19 steps/s  eta 7 min
+  epoch 3/5 step 900/1785  loss 0.5496  2.20 steps/s  eta 7 min
+  epoch 3/5 step 925/1785  loss 0.5800  2.21 steps/s  eta 6 min
+  epoch 3/5 step 950/1785  loss 0.5892  2.22 steps/s  eta 6 min
+  epoch 3/5 step 975/1785  loss 0.5867  2.23 steps/s  eta 6 min
+  epoch 3/5 step 1000/1785  loss 0.6230  2.24 steps/s  eta 6 min
+  epoch 3/5 step 1025/1785  loss 0.6252  2.24 steps/s  eta 6 min
+  epoch 3/5 step 1050/1785  loss 0.5542  2.25 steps/s  eta 5 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.6243  score std 0.0048  (8.4 min elapsed)
+  epoch 4/5 step 1075/1785  loss 0.6091  2.11 steps/s  eta 6 min
+  epoch 4/5 step 1100/1785  loss 0.5226  2.12 steps/s  eta 5 min
+  epoch 4/5 step 1125/1785  loss 0.5476  2.13 steps/s  eta 5 min
+  epoch 4/5 step 1150/1785  loss 0.5360  2.14 steps/s  eta 5 min
+  epoch 4/5 step 1175/1785  loss 0.5404  2.15 steps/s  eta 5 min
+  epoch 4/5 step 1200/1785  loss 0.5726  2.16 steps/s  eta 5 min
+  epoch 4/5 step 1225/1785  loss 0.4731  2.16 steps/s  eta 4 min
+  epoch 4/5 step 1250/1785  loss 0.5830  2.17 steps/s  eta 4 min
+  epoch 4/5 step 1275/1785  loss 0.4520  2.18 steps/s  eta 4 min
+  epoch 4/5 step 1300/1785  loss 0.4867  2.19 steps/s  eta 4 min
+  epoch 4/5 step 1325/1785  loss 0.5261  2.20 steps/s  eta 3 min
+  epoch 4/5 step 1350/1785  loss 0.4647  2.20 steps/s  eta 3 min
+  epoch 4/5 step 1375/1785  loss 0.5573  2.21 steps/s  eta 3 min
+  epoch 4/5 step 1400/1785  loss 0.4898  2.22 steps/s  eta 3 min
+  epoch 4/5 step 1425/1785  loss 0.5589  2.22 steps/s  eta 3 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.6402  score std 0.0065  (11.2 min elapsed)
+  epoch 5/5 step 1450/1785  loss 0.5139  2.12 steps/s  eta 3 min
+  epoch 5/5 step 1475/1785  loss 0.5298  2.13 steps/s  eta 2 min
+  epoch 5/5 step 1500/1785  loss 0.5198  2.13 steps/s  eta 2 min
+  epoch 5/5 step 1525/1785  loss 0.4821  2.14 steps/s  eta 2 min
+  epoch 5/5 step 1550/1785  loss 0.4836  2.15 steps/s  eta 2 min
+  epoch 5/5 step 1575/1785  loss 0.5190  2.15 steps/s  eta 2 min
+  epoch 5/5 step 1600/1785  loss 0.4830  2.16 steps/s  eta 1 min
+  epoch 5/5 step 1625/1785  loss 0.5089  2.17 steps/s  eta 1 min
+  epoch 5/5 step 1650/1785  loss 0.4205  2.17 steps/s  eta 1 min
+  epoch 5/5 step 1675/1785  loss 0.4393  2.18 steps/s  eta 1 min
+  epoch 5/5 step 1700/1785  loss 0.4403  2.18 steps/s  eta 1 min
+  epoch 5/5 step 1725/1785  loss 0.4261  2.19 steps/s  eta 0 min
+  epoch 5/5 step 1750/1785  loss 0.4725  2.19 steps/s  eta 0 min
+  epoch 5/5 step 1775/1785  loss 0.5010  2.20 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.5534  score std 0.0090  (14.1 min elapsed)
+done: best dev EER = 0.3830
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/xlsr53_lora/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder xlsr-53 --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/xlsr53_lora__eval_pool_scores.csv --out /kaggle/working/xlsr_results/xlsr53_lora__eval_pool.json
+  lora checkpoint: r=8 alpha=16.0 restored on 96 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.4222972541507024,
+  "eer_ci_low": 0.40768669018766057,
+  "eer_ci_high": 0.43744443986263337,
+  "auc": 0.6137300446998722,
+  "auc_ci_low": 0.5959193771647803,
+  "auc_ci_high": 0.6285411233305676,
+  "f1": 0.5193687230989957,
+  "threshold": 0.5127688646316528,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.001036
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips      eer
+xtts_v2         2400 0.422297
+
+wrote /kaggle/working/xlsr_results/xlsr53_lora__eval_pool.json
+wrote /kaggle/working/xlsr_results/xlsr53_lora__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/xlsr53_lora/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder xlsr-53 --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/xlsr53_lora__cm04_scores.csv --out /kaggle/working/xlsr_results/xlsr53_lora__cm04.json
+  lora checkpoint: r=8 alpha=16.0 restored on 96 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.5850412978857491,
+  "eer_ci_low": 0.5502493457263785,
+  "eer_ci_high": 0.6057479651902976,
+  "auc": 0.41082263938385005,
+  "auc_ci_low": 0.38531814114094004,
+  "auc_ci_high": 0.44407598858583036,
+  "f1": 0.5233494363929146,
+  "threshold": 0.5130758881568909,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.001043
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.585041
+
+wrote /kaggle/working/xlsr_results/xlsr53_lora__cm04.json
+wrote /kaggle/working/xlsr_results/xlsr53_lora__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/xlsr53_lora/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder xlsr-53 --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/xlsr53_lora__rvc_test_scores.csv --out /kaggle/working/xlsr_results/xlsr53_lora__rvc_test.json
+  lora checkpoint: r=8 alpha=16.0 restored on 96 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+
+=== pooled ===
+{
+  "eer": 0.5525153028182255,
+  "eer_ci_low": 0.5040569616602729,
+  "eer_ci_high": 0.5944582627815133,
+  "auc": 0.45406020849436984,
+  "auc_ci_low": 0.4060969637709108,
+  "auc_ci_high": 0.49913240323414065,
+  "f1": 0.4411764705882353,
+  "threshold": 0.5128766298294067,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.000791
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips      eer
+   rvc          317 0.552515
+
+wrote /kaggle/working/xlsr_results/xlsr53_lora__rvc_test.json
+wrote /kaggle/working/xlsr_results/xlsr53_lora__rvc_test_scores.csv
+
+$ /usr/bin/python3 -m src.training.train --config configs/w12_s3_native_xlsr.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+device=cuda (Tesla T4, 14.6 GiB)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 10 epochs
+  epoch 1/10 step 25/3570  loss 0.6957  2.13 steps/s  eta 28 min
+  epoch 1/10 step 50/3570  loss 0.6967  2.22 steps/s  eta 26 min
+  epoch 1/10 step 75/3570  loss 0.6929  2.23 steps/s  eta 26 min
+  epoch 1/10 step 100/3570  loss 0.6946  2.21 steps/s  eta 26 min
+  epoch 1/10 step 125/3570  loss 0.6953  2.21 steps/s  eta 26 min
+  epoch 1/10 step 150/3570  loss 0.6936  2.19 steps/s  eta 26 min
+  epoch 1/10 step 175/3570  loss 0.6916  2.16 steps/s  eta 26 min
+  epoch 1/10 step 200/3570  loss 0.6962  2.13 steps/s  eta 26 min
+  epoch 1/10 step 225/3570  loss 0.6923  2.09 steps/s  eta 27 min
+  epoch 1/10 step 250/3570  loss 0.6934  2.07 steps/s  eta 27 min
+  epoch 1/10 step 275/3570  loss 0.6908  2.06 steps/s  eta 27 min
+  epoch 1/10 step 300/3570  loss 0.6929  2.06 steps/s  eta 26 min
+  epoch 1/10 step 325/3570  loss 0.6913  2.05 steps/s  eta 26 min
+  epoch 1/10 step 350/3570  loss 0.6935  2.04 steps/s  eta 26 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.5174  score std 0.0009  (3.5 min elapsed)
+  epoch 2/10 step 375/3570  loss 0.6907  1.69 steps/s  eta 31 min
+  epoch 2/10 step 400/3570  loss 0.6905  1.71 steps/s  eta 31 min
+  epoch 2/10 step 425/3570  loss 0.6933  1.72 steps/s  eta 31 min
+  epoch 2/10 step 450/3570  loss 0.6905  1.73 steps/s  eta 30 min
+  epoch 2/10 step 475/3570  loss 0.6905  1.74 steps/s  eta 30 min
+  epoch 2/10 step 500/3570  loss 0.6915  1.75 steps/s  eta 29 min
+  epoch 2/10 step 525/3570  loss 0.6916  1.75 steps/s  eta 29 min
+  epoch 2/10 step 550/3570  loss 0.6899  1.76 steps/s  eta 29 min
+  epoch 2/10 step 575/3570  loss 0.6949  1.77 steps/s  eta 28 min
+  epoch 2/10 step 600/3570  loss 0.6865  1.78 steps/s  eta 28 min
+  epoch 2/10 step 625/3570  loss 0.6867  1.78 steps/s  eta 28 min
+  epoch 2/10 step 650/3570  loss 0.6888  1.79 steps/s  eta 27 min
+  epoch 2/10 step 675/3570  loss 0.6927  1.79 steps/s  eta 27 min
+  epoch 2/10 step 700/3570  loss 0.6835  1.80 steps/s  eta 27 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.3555  score std 0.0165  (7.2 min elapsed)
+  epoch 3/10 step 725/3570  loss 0.6794  1.65 steps/s  eta 29 min
+  epoch 3/10 step 750/3570  loss 0.6905  1.66 steps/s  eta 28 min
+  epoch 3/10 step 775/3570  loss 0.6878  1.66 steps/s  eta 28 min
+  epoch 3/10 step 800/3570  loss 0.6855  1.67 steps/s  eta 28 min
+  epoch 3/10 step 825/3570  loss 0.6848  1.68 steps/s  eta 27 min
+  epoch 3/10 step 850/3570  loss 0.6821  1.68 steps/s  eta 27 min
+  epoch 3/10 step 875/3570  loss 0.6811  1.69 steps/s  eta 27 min
+  epoch 3/10 step 900/3570  loss 0.6788  1.70 steps/s  eta 26 min
+  epoch 3/10 step 925/3570  loss 0.6859  1.70 steps/s  eta 26 min
+  epoch 3/10 step 950/3570  loss 0.6752  1.71 steps/s  eta 26 min
+  epoch 3/10 step 975/3570  loss 0.6832  1.71 steps/s  eta 25 min
+  epoch 3/10 step 1000/3570  loss 0.6696  1.72 steps/s  eta 25 min
+  epoch 3/10 step 1025/3570  loss 0.6701  1.72 steps/s  eta 25 min
+  epoch 3/10 step 1050/3570  loss 0.6655  1.73 steps/s  eta 24 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.2413  score std 0.0407  (10.8 min elapsed)
+  epoch 4/10 step 1075/3570  loss 0.6672  1.63 steps/s  eta 25 min
+  epoch 4/10 step 1100/3570  loss 0.6678  1.64 steps/s  eta 25 min
+  epoch 4/10 step 1125/3570  loss 0.6535  1.65 steps/s  eta 25 min
+  epoch 4/10 step 1150/3570  loss 0.6677  1.65 steps/s  eta 24 min
+  epoch 4/10 step 1175/3570  loss 0.6576  1.66 steps/s  eta 24 min
+  epoch 4/10 step 1200/3570  loss 0.6705  1.66 steps/s  eta 24 min
+  epoch 4/10 step 1225/3570  loss 0.6571  1.67 steps/s  eta 23 min
+  epoch 4/10 step 1250/3570  loss 0.6435  1.67 steps/s  eta 23 min
+  epoch 4/10 step 1275/3570  loss 0.6714  1.68 steps/s  eta 23 min
+  epoch 4/10 step 1300/3570  loss 0.6291  1.68 steps/s  eta 23 min
+  epoch 4/10 step 1325/3570  loss 0.6282  1.68 steps/s  eta 22 min
+  epoch 4/10 step 1350/3570  loss 0.5910  1.69 steps/s  eta 22 min
+  epoch 4/10 step 1375/3570  loss 0.6385  1.69 steps/s  eta 22 min
+  epoch 4/10 step 1400/3570  loss 0.5760  1.69 steps/s  eta 21 min
+  epoch 4/10 step 1425/3570  loss 0.5749  1.70 steps/s  eta 21 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.4566  score std 0.0679  (14.5 min elapsed)
+  epoch 5/10 step 1450/3570  loss 0.5227  1.63 steps/s  eta 22 min
+  epoch 5/10 step 1475/3570  loss 0.6188  1.64 steps/s  eta 21 min
+  epoch 5/10 step 1500/3570  loss 0.5894  1.64 steps/s  eta 21 min
+  epoch 5/10 step 1525/3570  loss 0.5521  1.65 steps/s  eta 21 min
+  epoch 5/10 step 1550/3570  loss 0.5787  1.65 steps/s  eta 20 min
+  epoch 5/10 step 1575/3570  loss 0.5963  1.66 steps/s  eta 20 min
+  epoch 5/10 step 1600/3570  loss 0.5836  1.66 steps/s  eta 20 min
+  epoch 5/10 step 1625/3570  loss 0.5600  1.66 steps/s  eta 19 min
+  epoch 5/10 step 1650/3570  loss 0.5473  1.67 steps/s  eta 19 min
+  epoch 5/10 step 1675/3570  loss 0.5659  1.67 steps/s  eta 19 min
+  epoch 5/10 step 1700/3570  loss 0.5359  1.67 steps/s  eta 19 min
+  epoch 5/10 step 1725/3570  loss 0.4746  1.68 steps/s  eta 18 min
+  epoch 5/10 step 1750/3570  loss 0.4704  1.68 steps/s  eta 18 min
+  epoch 5/10 step 1775/3570  loss 0.4928  1.68 steps/s  eta 18 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.4667  score std 0.1524  (18.2 min elapsed)
+  epoch 6/10 step 1800/3570  loss 0.5168  1.63 steps/s  eta 18 min
+  epoch 6/10 step 1825/3570  loss 0.4893  1.64 steps/s  eta 18 min
+  epoch 6/10 step 1850/3570  loss 0.5459  1.64 steps/s  eta 17 min
+  epoch 6/10 step 1875/3570  loss 0.4836  1.64 steps/s  eta 17 min
+  epoch 6/10 step 1900/3570  loss 0.5962  1.65 steps/s  eta 17 min
+  epoch 6/10 step 1925/3570  loss 0.5139  1.65 steps/s  eta 17 min
+  epoch 6/10 step 1950/3570  loss 0.4756  1.65 steps/s  eta 16 min
+  epoch 6/10 step 1975/3570  loss 0.4477  1.66 steps/s  eta 16 min
+  epoch 6/10 step 2000/3570  loss 0.4479  1.66 steps/s  eta 16 min
+  epoch 6/10 step 2025/3570  loss 0.4124  1.66 steps/s  eta 15 min
+  epoch 6/10 step 2050/3570  loss 0.4417  1.66 steps/s  eta 15 min
+  epoch 6/10 step 2075/3570  loss 0.4117  1.67 steps/s  eta 15 min
+  epoch 6/10 step 2100/3570  loss 0.4192  1.67 steps/s  eta 15 min
+  epoch 6/10 step 2125/3570  loss 0.4008  1.67 steps/s  eta 14 min
+  evaluating on 506 dev clips ...
+  epoch 6: dev EER 0.6820  score std 0.1433  (21.8 min elapsed)
+  epoch 7/10 step 2150/3570  loss 0.3715  1.63 steps/s  eta 15 min
+  epoch 7/10 step 2175/3570  loss 0.3967  1.63 steps/s  eta 14 min
+  epoch 7/10 step 2200/3570  loss 0.4003  1.64 steps/s  eta 14 min
+  epoch 7/10 step 2225/3570  loss 0.3797  1.64 steps/s  eta 14 min
+  epoch 7/10 step 2250/3570  loss 0.3445  1.64 steps/s  eta 13 min
+  epoch 7/10 step 2275/3570  loss 0.4249  1.65 steps/s  eta 13 min
+  epoch 7/10 step 2300/3570  loss 0.3810  1.65 steps/s  eta 13 min
+  epoch 7/10 step 2325/3570  loss 0.4419  1.65 steps/s  eta 13 min
+  epoch 7/10 step 2350/3570  loss 0.3644  1.65 steps/s  eta 12 min
+  epoch 7/10 step 2375/3570  loss 0.4177  1.66 steps/s  eta 12 min
+  epoch 7/10 step 2400/3570  loss 0.4060  1.66 steps/s  eta 12 min
+  epoch 7/10 step 2425/3570  loss 0.4506  1.66 steps/s  eta 11 min
+  epoch 7/10 step 2450/3570  loss 0.4421  1.66 steps/s  eta 11 min
+  epoch 7/10 step 2475/3570  loss 0.3201  1.67 steps/s  eta 11 min
+  evaluating on 506 dev clips ...
+  epoch 7: dev EER 0.5809  score std 0.1659  (25.5 min elapsed)
+  epoch 8/10 step 2500/3570  loss 0.3151  1.63 steps/s  eta 11 min
+  epoch 8/10 step 2525/3570  loss 0.3705  1.63 steps/s  eta 11 min
+  epoch 8/10 step 2550/3570  loss 0.3073  1.63 steps/s  eta 10 min
+  epoch 8/10 step 2575/3570  loss 0.3706  1.64 steps/s  eta 10 min
+  epoch 8/10 step 2600/3570  loss 0.3965  1.64 steps/s  eta 10 min
+  epoch 8/10 step 2625/3570  loss 0.3385  1.64 steps/s  eta 10 min
+  epoch 8/10 step 2650/3570  loss 0.3634  1.64 steps/s  eta 9 min
+  epoch 8/10 step 2675/3570  loss 0.3477  1.65 steps/s  eta 9 min
+  epoch 8/10 step 2700/3570  loss 0.2985  1.65 steps/s  eta 9 min
+  epoch 8/10 step 2725/3570  loss 0.3438  1.65 steps/s  eta 9 min
+  epoch 8/10 step 2750/3570  loss 0.2606  1.65 steps/s  eta 8 min
+  epoch 8/10 step 2775/3570  loss 0.3673  1.66 steps/s  eta 8 min
+  epoch 8/10 step 2800/3570  loss 0.2428  1.66 steps/s  eta 8 min
+  epoch 8/10 step 2825/3570  loss 0.3316  1.66 steps/s  eta 7 min
+  epoch 8/10 step 2850/3570  loss 0.2978  1.66 steps/s  eta 7 min
+  evaluating on 506 dev clips ...
+  epoch 8: dev EER 0.0593  score std 0.3469  (29.1 min elapsed)
+  epoch 9/10 step 2875/3570  loss 0.3855  1.63 steps/s  eta 7 min
+  epoch 9/10 step 2900/3570  loss 0.2899  1.63 steps/s  eta 7 min
+  epoch 9/10 step 2925/3570  loss 0.3614  1.64 steps/s  eta 7 min
+  epoch 9/10 step 2950/3570  loss 0.3010  1.64 steps/s  eta 6 min
+  epoch 9/10 step 2975/3570  loss 0.2782  1.64 steps/s  eta 6 min
+  epoch 9/10 step 3000/3570  loss 0.3000  1.64 steps/s  eta 6 min
+  epoch 9/10 step 3025/3570  loss 0.2555  1.64 steps/s  eta 6 min
+  epoch 9/10 step 3050/3570  loss 0.2847  1.65 steps/s  eta 5 min
+  epoch 9/10 step 3075/3570  loss 0.2936  1.65 steps/s  eta 5 min
+  epoch 9/10 step 3100/3570  loss 0.2120  1.65 steps/s  eta 5 min
+  epoch 9/10 step 3125/3570  loss 0.2794  1.65 steps/s  eta 4 min
+  epoch 9/10 step 3150/3570  loss 0.2137  1.65 steps/s  eta 4 min
+  epoch 9/10 step 3175/3570  loss 0.3067  1.66 steps/s  eta 4 min
+  epoch 9/10 step 3200/3570  loss 0.1765  1.66 steps/s  eta 4 min
+  evaluating on 506 dev clips ...
+  epoch 9: dev EER 0.0376  score std 0.3795  (32.8 min elapsed)
+  epoch 10/10 step 3225/3570  loss 0.3531  1.63 steps/s  eta 4 min
+  epoch 10/10 step 3250/3570  loss 0.2303  1.63 steps/s  eta 3 min
+  epoch 10/10 step 3275/3570  loss 0.3118  1.63 steps/s  eta 3 min
+  epoch 10/10 step 3300/3570  loss 0.1791  1.63 steps/s  eta 3 min
+  epoch 10/10 step 3325/3570  loss 0.1949  1.64 steps/s  eta 2 min
+  epoch 10/10 step 3350/3570  loss 0.2154  1.64 steps/s  eta 2 min
+  epoch 10/10 step 3375/3570  loss 0.2316  1.64 steps/s  eta 2 min
+  epoch 10/10 step 3400/3570  loss 0.2216  1.64 steps/s  eta 2 min
+  epoch 10/10 step 3425/3570  loss 0.1899  1.64 steps/s  eta 1 min
+  epoch 10/10 step 3450/3570  loss 0.2957  1.65 steps/s  eta 1 min
+  epoch 10/10 step 3475/3570  loss 0.2100  1.65 steps/s  eta 1 min
+  epoch 10/10 step 3500/3570  loss 0.2344  1.65 steps/s  eta 1 min
+  epoch 10/10 step 3525/3570  loss 0.1822  1.65 steps/s  eta 0 min
+  epoch 10/10 step 3550/3570  loss 0.2321  1.65 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 10: dev EER 0.0751  score std 0.3812  (36.5 min elapsed)
+done: best dev EER = 0.0376
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/s3_native_xlsr/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder xlsr-53 --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/s3_native_xlsr__eval_pool_scores.csv --out /kaggle/working/xlsr_results/s3_native_xlsr__eval_pool.json
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.05169540229885057,
+  "eer_ci_low": 0.0436481349761242,
+  "eer_ci_high": 0.060284671679586815,
+  "auc": 0.9659405598126862,
+  "auc_ci_low": 0.9592831725966597,
+  "auc_ci_high": 0.9721964138808376,
+  "f1": 0.9354330708661418,
+  "threshold": 0.8501567244529724,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.418616
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips      eer
+xtts_v2         2400 0.051695
+
+wrote /kaggle/working/xlsr_results/s3_native_xlsr__eval_pool.json
+wrote /kaggle/working/xlsr_results/s3_native_xlsr__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/s3_native_xlsr/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder xlsr-53 --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/s3_native_xlsr__cm04_scores.csv --out /kaggle/working/xlsr_results/s3_native_xlsr__cm04.json
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.3207613199707764,
+  "eer_ci_low": 0.2903587565447309,
+  "eer_ci_high": 0.3476673034244812,
+  "auc": 0.7312584003970843,
+  "auc_ci_low": 0.7011262725593538,
+  "auc_ci_high": 0.7597100642741831,
+  "f1": 0.7662945624774936,
+  "threshold": 0.8718924522399902,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.228063
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.320761
+
+wrote /kaggle/working/xlsr_results/s3_native_xlsr__cm04.json
+wrote /kaggle/working/xlsr_results/s3_native_xlsr__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/w12/s3_native_xlsr/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder xlsr-53 --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/xlsr_results/s3_native_xlsr__rvc_test_scores.csv --out /kaggle/working/xlsr_results/s3_native_xlsr__rvc_test.json
+
+=== pooled ===
+{
+  "eer": 0.4103453318570205,
+  "eer_ci_low": 0.3733927156438245,
+  "eer_ci_high": 0.45393736409998553,
+  "auc": 0.6244281028683645,
+  "auc_ci_low": 0.5711969586120402,
+  "auc_ci_high": 0.6698686505738443,
+  "f1": 0.5836065573770493,
+  "threshold": 0.8765703439712524,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.243717
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips      eer
+   rvc          317 0.410345
+
+wrote /kaggle/working/xlsr_results/s3_native_xlsr__rvc_test.json
+wrote /kaggle/working/xlsr_results/s3_native_xlsr__rvc_test_scores.csv
