@@ -56,8 +56,57 @@ FLOORS: dict[tuple[str, str], str] = {
 }
 
 
+#: Matched floors with paired, speaker-level verdicts (``src/training/floor_compare.py``,
+#: ``docs/results/shortcut_floor_v2.md``): each detector's floor is fitted on its own
+#: training data and scored on its own clips. Supersedes the per-set floors above as
+#: the evidence test; those stay in every cell as ``floor_v1``.
+MATCHED = "experiments/results/floor_compare_v2.json"
+
+
 class AblationDataError(RuntimeError):
     """Raised when a run or a floor the table needs is missing."""
+
+
+def load_matched(path: str = MATCHED) -> dict[tuple[str, str], dict]:
+    """(run, set) -> matched floor (%), paired difference interval (%) and its verdict."""
+    from src.training.floor_compare import SYSTEMS
+
+    if not Path(path).is_file():
+        raise AblationDataError(f"matched floors not computed: {path}")
+    run_of = {system.name: Path(system.scores_prefix).name for system in SYSTEMS}
+    out = {}
+    for row in json.loads(Path(path).read_text())["results"]:
+        out[(run_of[row["system"]], row["test_set"])] = {
+            "floor": _pct(row["eer_b"]),
+            "diff_ci": [_pct(row["diff_ci"][0]), _pct(row["diff_ci"][1])],
+            "verdict": row["verdict"],
+        }
+    return out
+
+
+def floor_fields(eer: float, ci_high: float, floor_v1: float, matched: dict | None) -> dict:
+    """The floor columns of one cell.
+
+    With a matched entry, the evidence test is the paired speaker-level verdict against
+    the matched floor; the old per-set floor is kept beside it as ``floor_v1``. Without
+    one, the old rule: the clip-level interval's upper bound below the per-set floor.
+    """
+    if matched is None:
+        return {
+            "floor": floor_v1,
+            "margin": round(floor_v1 - eer, 2),
+            "clears_floor": ci_high < floor_v1,
+        }
+    from src.training.floor_compare import BEATS_FLOOR
+
+    return {
+        "floor": matched["floor"],
+        "margin": round(matched["floor"] - eer, 2),
+        "clears_floor": matched["verdict"] == BEATS_FLOOR,
+        "floor_verdict": matched["verdict"],
+        "diff_ci": matched["diff_ci"],
+        "floor_v1": floor_v1,
+    }
 
 
 def _pct(x: float) -> float:
@@ -74,8 +123,16 @@ def load_floors(floors: dict[tuple[str, str], str] = FLOORS) -> dict[tuple[str, 
     return out
 
 
-def table(summary: dict, floors: dict[tuple[str, str], float]) -> pd.DataFrame:
-    """One row per adapter x set: EER, CI, floor, margin, and whether it clears the floor."""
+def table(
+    summary: dict,
+    floors: dict[tuple[str, str], float],
+    matched: dict[tuple[str, str], dict] | None = None,
+) -> pd.DataFrame:
+    """One row per adapter x set: EER, CI, floor, margin, and whether it clears the floor.
+
+    With ``matched`` (:func:`load_matched`), each cell is judged against its matched
+    floor by the paired speaker-level test; without it, against the per-set floor.
+    """
     rows = []
     for run, (mix, condition) in ADAPTERS.items():
         for ev in SETS:
@@ -83,8 +140,10 @@ def table(summary: dict, floors: dict[tuple[str, str], float]) -> pd.DataFrame:
             if key not in summary:
                 raise AblationDataError(f"run missing from the summary: {key}")
             r = summary[key]
-            floor = floors[(ev, condition)]
             eer = _pct(r["eer"])
+            entry = None if matched is None else matched.get((run, ev))
+            if matched is not None and entry is None:
+                raise AblationDataError(f"no matched floor for {run} on {ev}")
             rows.append(
                 {
                     "adapter": run,
@@ -95,9 +154,7 @@ def table(summary: dict, floors: dict[tuple[str, str], float]) -> pd.DataFrame:
                     "eer_ci": [_pct(r["eer_ci_low"]), _pct(r["eer_ci_high"])],
                     "auc": round(float(r["auc"]), 4),
                     "clips": int(r["clips"]),
-                    "floor": floor,
-                    "margin": round(floor - eer, 2),
-                    "clears_floor": _pct(r["eer_ci_high"]) < floor,
+                    **floor_fields(eer, _pct(r["eer_ci_high"]), floors[(ev, condition)], entry),
                 }
             )
     return pd.DataFrame(rows)
@@ -130,13 +187,14 @@ def verdict(effect: pd.DataFrame) -> str:
 def build(summary_path: str = SUMMARY, out: str = OUT) -> dict:
     """Write ``ablations.json`` and return it."""
     summary = json.loads(Path(summary_path).read_text())
-    frame = table(summary, load_floors())
+    frame = table(summary, load_floors(), load_matched())
     effect = rvc_effect(frame)
     result = {
         "question": "W9-T1: does attack diversity (XTTS+RVC) improve unseen-tool EER?",
         "answer": verdict(effect),
         "source": summary_path,
-        "floors_pct": {f"{s}/{c}": v for (s, c), v in load_floors().items()},
+        "floor_rule": "matched floor, paired speaker-level test (floor_compare_v2.json)",
+        "floors_v1_pct": {f"{s}/{c}": v for (s, c), v in load_floors().items()},
         "rvc_effect_pct": effect.to_dict(orient="records"),
         "cells": frame.to_dict(orient="records"),
     }
