@@ -1,0 +1,27 @@
+{
+  "checkpoint": "D:/dfmodels/w10/lora_norm_clean_best.pt",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.3974136670357449,
+    "eer_ci_low": 0.36491582202080064,
+    "eer_ci_high": 0.4410361420334362,
+    "auc": 0.6417625921825056,
+    "auc_ci_low": 0.5957414321810139,
+    "auc_ci_high": 0.6834029442081382,
+    "f1": 0.5967213114754097,
+    "threshold": 0.9993440508842468,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 0.118795
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.397414
+    }
+  ]
+}
