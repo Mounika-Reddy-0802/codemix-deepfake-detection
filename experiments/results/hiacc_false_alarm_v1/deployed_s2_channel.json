@@ -1,0 +1,190 @@
+{
+  "checkpoint": "D:/dfmodels/w10/lora_norm_rvc_channel_best.pt",
+  "manifest": "data/manifests/hiacc_adult_eval_channel20.csv",
+  "summary": {
+    "threshold": 0.5,
+    "clips": 3318,
+    "speakers": 24,
+    "false_alarm_rate": 0.543701024713683,
+    "false_alarm_ci": [
+      0.4442711447780414,
+      0.6415156793547373
+    ],
+    "median_score": 0.2484041452407837,
+    "per_speaker_min": 0.13861386138613863,
+    "per_speaker_median": 0.5484951339661179,
+    "per_speaker_max": 0.8953488372093024,
+    "speakers_above_10pct": 24
+  },
+  "reference": {
+    "scores": "results/w10/lora_norm_rvc_channel__eval_pool_scores.csv",
+    "summary": {
+      "threshold": 0.5,
+      "clips": 1566,
+      "speakers": 15,
+      "false_alarm_rate": 0.008939974457215836,
+      "false_alarm_ci": [
+        0.005391597777846447,
+        0.012949973354649614
+      ],
+      "median_score": 0.9996818900108337,
+      "per_speaker_min": 0.0,
+      "per_speaker_median": 0.010101010101010102,
+      "per_speaker_max": 0.02531645569620253,
+      "speakers_above_10pct": 0
+    }
+  },
+  "difference": {
+    "difference": 0.5347610502564671,
+    "difference_ci": [
+      0.43510122485774266,
+      0.6316748172987832
+    ]
+  },
+  "per_speaker": [
+    {
+      "speaker": "AD40",
+      "clips": 172,
+      "false_alarms": 154,
+      "false_alarm_rate": 0.8953488372093024
+    },
+    {
+      "speaker": "AD60",
+      "clips": 151,
+      "false_alarms": 131,
+      "false_alarm_rate": 0.8675496688741722
+    },
+    {
+      "speaker": "AD63",
+      "clips": 119,
+      "false_alarms": 103,
+      "false_alarm_rate": 0.865546218487395
+    },
+    {
+      "speaker": "AD47",
+      "clips": 171,
+      "false_alarms": 141,
+      "false_alarm_rate": 0.8245614035087719
+    },
+    {
+      "speaker": "AD31",
+      "clips": 137,
+      "false_alarms": 112,
+      "false_alarm_rate": 0.8175182481751825
+    },
+    {
+      "speaker": "AD35",
+      "clips": 216,
+      "false_alarms": 170,
+      "false_alarm_rate": 0.7870370370370371
+    },
+    {
+      "speaker": "AD16",
+      "clips": 103,
+      "false_alarms": 81,
+      "false_alarm_rate": 0.7864077669902912
+    },
+    {
+      "speaker": "AD42",
+      "clips": 140,
+      "false_alarms": 100,
+      "false_alarm_rate": 0.7142857142857143
+    },
+    {
+      "speaker": "AD15",
+      "clips": 119,
+      "false_alarms": 85,
+      "false_alarm_rate": 0.7142857142857143
+    },
+    {
+      "speaker": "AD09",
+      "clips": 104,
+      "false_alarms": 63,
+      "false_alarm_rate": 0.6057692307692307
+    },
+    {
+      "speaker": "AD28",
+      "clips": 124,
+      "false_alarms": 73,
+      "false_alarm_rate": 0.5887096774193549
+    },
+    {
+      "speaker": "AD30",
+      "clips": 203,
+      "false_alarms": 115,
+      "false_alarm_rate": 0.5665024630541872
+    },
+    {
+      "speaker": "AD34",
+      "clips": 164,
+      "false_alarms": 87,
+      "false_alarm_rate": 0.5304878048780488
+    },
+    {
+      "speaker": "AD59",
+      "clips": 209,
+      "false_alarms": 102,
+      "false_alarm_rate": 0.4880382775119617
+    },
+    {
+      "speaker": "AD36",
+      "clips": 158,
+      "false_alarms": 51,
+      "false_alarm_rate": 0.3227848101265823
+    },
+    {
+      "speaker": "AD26",
+      "clips": 165,
+      "false_alarms": 49,
+      "false_alarm_rate": 0.296969696969697
+    },
+    {
+      "speaker": "AD43",
+      "clips": 105,
+      "false_alarms": 31,
+      "false_alarm_rate": 0.29523809523809524
+    },
+    {
+      "speaker": "AD27",
+      "clips": 109,
+      "false_alarms": 32,
+      "false_alarm_rate": 0.29357798165137616
+    },
+    {
+      "speaker": "AD23",
+      "clips": 92,
+      "false_alarms": 21,
+      "false_alarm_rate": 0.22826086956521738
+    },
+    {
+      "speaker": "AD41",
+      "clips": 97,
+      "false_alarms": 21,
+      "false_alarm_rate": 0.21649484536082475
+    },
+    {
+      "speaker": "AD21",
+      "clips": 143,
+      "false_alarms": 28,
+      "false_alarm_rate": 0.1958041958041958
+    },
+    {
+      "speaker": "AD13",
+      "clips": 89,
+      "false_alarms": 17,
+      "false_alarm_rate": 0.19101123595505617
+    },
+    {
+      "speaker": "AD25",
+      "clips": 127,
+      "false_alarms": 23,
+      "false_alarm_rate": 0.18110236220472442
+    },
+    {
+      "speaker": "AD22",
+      "clips": 101,
+      "false_alarms": 14,
+      "false_alarm_rate": 0.13861386138613863
+    }
+  ]
+}
