@@ -36,8 +36,12 @@ attacks A07--A19 for English retention.
 
 \textbf{Code-mixed real speech.} Hindi--English code-switched lecture speech from the
 MUCS 2021 corpus~\cite{diwan2021mucs}. Speakers are divided into disjoint pools
-before any synthesis: an adaptation pool of 10 speakers, used only by S2 and S3,
-and an evaluation pool of 15 speakers, never seen in training.
+before any synthesis: an adaptation pool of 10 speakers (8 for training, 2 for
+development), used only by S2 and S3, and an evaluation pool of 15 speakers, never
+seen in training. Models trained with RVC also hear the 13 source speakers of the RVC
+training half, drawn from the training pool, so they train on 21 speakers in all; the
+test sets hold 15 + 12 speakers none of them has heard
+(Section~\ref{sec:data-speakers}).
 % configs/data/splits.yaml; docs/datasheet.md
 
 \textbf{Code-mixed synthetic speech.} Four attack sets are built from these pools
