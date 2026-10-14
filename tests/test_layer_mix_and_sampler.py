@@ -77,6 +77,42 @@ def test_build_detector_reads_the_layer_mix_from_the_checkpoint(monkeypatch):
     assert [lw for _, lw in built] == [False, True, True]
 
 
+class _TinyEncoder(torch.nn.Module):
+    def __init__(self, layer_mix: bool):
+        super().__init__()
+        self.proj = torch.nn.Linear(2, 2)
+        self.layer_mix = LayerWeightedSum(3) if layer_mix else None
+
+
+class _TinyDetector(torch.nn.Module):
+    def __init__(self, layer_mix: bool):
+        super().__init__()
+        self.encoder = _TinyEncoder(layer_mix)
+        self.head = torch.nn.Linear(2, 2)
+
+
+def test_stage1_checkpoint_loads_into_a_model_with_a_layer_mix():
+    from src.training.train import load_initial_weights
+
+    stage1 = _TinyDetector(layer_mix=False)
+    model = _TinyDetector(layer_mix=True)
+    load_initial_weights(model, {"model": stage1.state_dict()})
+    assert torch.equal(model.head.weight, stage1.head.weight)
+    assert torch.equal(model.encoder.layer_mix.logits, torch.zeros(3))  # starts equal
+
+
+def test_any_other_mismatch_still_fails_the_load():
+    from src.training.train import load_initial_weights
+
+    stage1 = _TinyDetector(layer_mix=False).state_dict()
+    del stage1["head.weight"]
+    with pytest.raises(RuntimeError, match="head.weight"):
+        load_initial_weights(_TinyDetector(layer_mix=True), stage1)
+    extra = {**_TinyDetector(layer_mix=False).state_dict(), "stray.weight": torch.zeros(1)}
+    with pytest.raises(RuntimeError, match="stray.weight"):
+        load_initial_weights(_TinyDetector(layer_mix=False), extra)
+
+
 def test_new_training_options_default_to_the_published_recipe():
     from src.training.train import load_config
 

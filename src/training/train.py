@@ -97,6 +97,27 @@ def load_config(path: str) -> TrainConfig:
     return TrainConfig(**known)
 
 
+#: Parameters a starting checkpoint may lack: the learned layer mix is newer than
+#: Stage-1, so a run that adds it starts the mix fresh (equal weights).
+NEW_MODULE_PREFIXES = ("encoder.layer_mix.",)
+
+
+def load_initial_weights(model, state: dict) -> None:
+    """Load a starting checkpoint into ``model``, allowing only a missing layer mix.
+
+    A strict load fails when the model has a layer mix and the checkpoint (Stage-1)
+    does not. Anything else that does not match is still an error.
+    """
+    weights = state["model"] if "model" in state else state
+    result = model.load_state_dict(weights, strict=False)
+    missing = [k for k in result.missing_keys if not k.startswith(NEW_MODULE_PREFIXES)]
+    if missing or result.unexpected_keys:
+        raise RuntimeError(
+            "checkpoint does not match the model: "
+            f"missing {missing}, unexpected {list(result.unexpected_keys)}"
+        )
+
+
 #: Dev-score spread below which the model is considered collapsed. Real runs sit
 #: orders of magnitude above this; a collapsed one sits at exactly 0.
 COLLAPSE_STD = 1e-4
@@ -221,7 +242,7 @@ def train(cfg: TrainConfig) -> dict[str, float]:
         # Load BEFORE the adapters go on, so the checkpoint's keys match the
         # unwrapped module names and a rename never has to be guessed at.
         state = torch.load(cfg.init_from, map_location="cpu", weights_only=False)
-        model.load_state_dict(state["model"] if "model" in state else state)
+        load_initial_weights(model, state)
         print(f"initialised from {cfg.init_from}", flush=True)
     if cfg.lora:
         from src.models.lora import (
