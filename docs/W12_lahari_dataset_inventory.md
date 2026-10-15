@@ -148,7 +148,7 @@ attack, since EER alone hides what a caller would actually see.
 | English sample, clean | deployed S2 | 2.30% EER [1.84, 2.85] (full set: 2.42%) |
 | English sample, phone line | deployed S2 | **24.20%** EER [23.27, 25.30]; 7.45% of genuine flagged, 59.97% of fakes caught |
 | English sample, phone line | S1 | 6.50% EER [5.92, 7.19]; 0.65% of genuine flagged |
-| English sample, clean | S1 | not measured (see below) |
+| English sample, clean | S1 | 0.51% EER [0.35, 0.79]; 0.20% of genuine flagged (full set: 0.85%) |
 
 Both tests point the same way: adaptation taught the model what genuine *lecture
 recordings over a phone line* sound like, and genuine speech that sounds different
@@ -156,9 +156,9 @@ recordings over a phone line* sound like, and genuine speech that sounds differe
 
 ## Honest limitations
 
-- **S1 on the clean English sample is missing.** The run crashed twice, the second
-  time because the laptop had run out of memory while another job held it. Its
-  full-set number (0.85%) stands in until it is re-run.
+- **S1 on the clean English sample took three attempts.** The first two crashed when
+  the laptop ran out of memory while another job held it; the third completed
+  (0.51%, close to the 0.85% on the full set).
 - **One channel only** (G.711 at 20 dB) for both tests.
 - **The English phone-line numbers come from a sample.** The clean check (2.30%
   against 2.42% on all clips) suggests it is representative; the phone-line numbers
@@ -180,6 +180,6 @@ The full commands for normalising, rendering and scoring both tests are in
 
 ## What's next
 
-- Score S1 on the clean English sample once the laptop has memory free.
-- Run the HiACC test on the Kaggle variant models (augmentation, layer mix), to see
-  whether any of them lowers the false alarms.
+- Run the HiACC test on a variant model (augmentation, layer mix), to see whether any
+  of them lowers the false alarms. The Kaggle runs did not keep their checkpoints, so
+  this needs one variant retrained with its checkpoint saved.

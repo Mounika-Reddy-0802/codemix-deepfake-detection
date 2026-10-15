@@ -36,29 +36,30 @@ phone calls, so the question is how it treats English *over the phone line*.
 |---|---|---:|---:|---:|
 | Deployed S2 | clean | 2.30 [1.84, 2.85] | 0.05 [0.00, 0.16] | 77.35 |
 | Deployed S2 | phone line | **24.20** [23.27, 25.30] | **7.45** [4.27, 11.52] | **59.97** |
-| S1 (English only) | clean | pending | pending | pending |
+| S1 (English only) | clean | 0.51 [0.35, 0.79] | 0.20 [0.05, 0.40] | 94.23 |
 | S1 (English only) | phone line | 6.50 [5.92, 7.19] | 0.65 [0.30, 1.09] | 76.15 |
 
-S1 on the clean sample is still to be scored: the run stopped twice when the laptop
-ran out of memory. On all 71,237 clean clips S1 scores 0.85% EER.
+S1's clean number on the sample (0.51%) sits close to its 0.85% on all 71,237 clips,
+like the deployed model's (2.30% against 2.42%). The first two attempts at it stopped
+when the laptop ran out of memory; the third, on 13 October, completed.
 
 EER per attack:
 
-| Attack | Deployed S2, clean | Deployed S2, phone line | S1, phone line |
-|---|---:|---:|---:|
-| A07 | 0.65 | 37.94 | 3.90 |
-| A08 | 0.31 | 32.46 | 12.99 |
-| A09 | 0.07 | 14.01 | 3.59 |
-| A10 | 12.63 | 47.71 | 10.71 |
-| A11 | 0.34 | 30.85 | 4.81 |
-| A12 | 0.31 | 26.59 | 4.50 |
-| A13 | 0.00 | 3.90 | 0.03 |
-| A14 | 0.34 | 19.08 | 7.77 |
-| A15 | 4.21 | 33.11 | 12.27 |
-| A16 | 0.31 | 15.95 | 1.61 |
-| A17 | 2.26 | 8.11 | 2.94 |
-| A18 | 6.50 | 17.85 | 9.38 |
-| A19 | 0.34 | 3.51 | 1.95 |
+| Attack | Deployed S2, clean | Deployed S2, phone line | S1, clean | S1, phone line |
+|---|---:|---:|---:|---:|
+| A07 | 0.65 | 37.94 | 0.31 | 3.90 |
+| A08 | 0.31 | 32.46 | 0.03 | 12.99 |
+| A09 | 0.07 | 14.01 | 0.00 | 3.59 |
+| A10 | 12.63 | 47.71 | 1.95 | 10.71 |
+| A11 | 0.34 | 30.85 | 0.31 | 4.81 |
+| A12 | 0.31 | 26.59 | 0.29 | 4.50 |
+| A13 | 0.00 | 3.90 | 0.00 | 0.03 |
+| A14 | 0.34 | 19.08 | 0.29 | 7.77 |
+| A15 | 4.21 | 33.11 | 0.96 | 12.27 |
+| A16 | 0.31 | 15.95 | 0.31 | 1.61 |
+| A17 | 2.26 | 8.11 | 0.34 | 2.94 |
+| A18 | 6.50 | 17.85 | 1.95 | 9.38 |
+| A19 | 0.34 | 3.51 | 0.31 | 1.95 |
 
 ## What it means
 
@@ -66,8 +67,9 @@ EER per attack:
   from 2.30% to 24.20%. At the deployed threshold, one genuine English caller in 13
   is flagged (7.45%), and four English fakes in ten get through.
 - **It is not the channel alone.** S1 has never heard phone-line audio, yet on the
-  same clips it scores 6.50% and flags 0.65% of genuine callers. The adapted model is
-  almost four times worse. Adaptation tied "genuine over the phone" to the MUCS
+  same clips it scores 6.50% and flags 0.65% of genuine callers: the phone line costs
+  S1 six points (0.51% -> 6.50%) and the deployed model twenty-two (2.30% -> 24.20%).
+  The adapted model is almost four times worse over the line. Adaptation tied "genuine over the phone" to the MUCS
   Hinglish lectures it was trained on, which is the same pattern the HiACC test found
   for new Hinglish speakers (54% of their genuine speech called fake).
 - **Nearly every attack is affected.** On clean audio the deployed model is under 1%
