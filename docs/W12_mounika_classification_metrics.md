@@ -113,7 +113,8 @@ the phone line (Lahari's sample). A cell not yet measured shows as "not measured
 | S3 XTTS-only, Tortoise, 5 seeds | **19.72 ± 5.36**, every seed below its floor (33.64), 3 significant |
 | Deployed adapter, eval pool, clean instead of phone line | 2.75 -> 6.71 |
 | Clean-trained adapter, eval pool, phone line instead of clean | 1.99 -> 22.97 |
-| Deployed, English sample, clean -> phone line | 2.30 -> 24.20 (S1: 6.50 on the phone line) |
+| Deployed adapter, RVC test, clean instead of phone line | 5.01 -> 13.89 |
+| Deployed, English sample, clean -> phone line | 2.30 -> 24.20 (S1: 0.51 -> 6.50) |
 
 ## Honest limitations
 
@@ -122,8 +123,8 @@ the phone line (Lahari's sample). A cell not yet measured shows as "not measured
   conclusion now quote the mean.
 - **Five seeds give wide intervals**, and the t-interval assumes the seed EERs are
   roughly normal.
-- **One trade-off cell is missing**: the deployed adapter on the clean RVC set ran out
-  of memory on the laptop twice; about two minutes once memory is free.
+- **One trade-off cell came late**: the deployed adapter on the clean RVC set ran out
+  of memory on the laptop twice before it completed (13.89%).
 - **The S2 XTTS-only and S3 rows mix sessions**: four new seeds join the published 1234
   run, scored by the same code in an earlier session.
 
@@ -138,6 +139,5 @@ Full write-ups: `docs/results/seed_stability_v1.md`, `docs/results/tradeoff_v1.m
 
 ## What's next
 
-- Score the missing trade-off cell when the laptop has memory free.
 - The same seed analysis for the exploratory variant is in Krishna's
   `docs/results/variants_v1.md`.

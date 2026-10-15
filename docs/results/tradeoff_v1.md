@@ -17,7 +17,7 @@ and `experiments/results/english_channel_v1/` (English over the phone line; see
 Each S2 adapter is trained in one condition, clean or G.711 phone line. The paper
 reported each one only in its own condition, so the cost of the choice was invisible.
 New here: all four adapters scored on the three Hinglish test sets in the condition
-they were **not** trained in (11 of 12 cells; see below), on the laptop CPU with the
+they were **not** trained in (all 12 cells), on the laptop CPU with the
 same evaluation code, the same 4 s window and the same normalised bundles as the
 own-condition numbers.
 
@@ -30,13 +30,13 @@ EER (%). Own-condition numbers are the ones in the paper's main table.
 | XTTS | clean | 1.46 / 5.44 / 23.91 | 27.64 / 18.98 / 39.74 (channel) | 15.83 | 51.8% |
 | XTTS | channel | 4.41 / 28.16 / 29.56 | 12.51 / 18.78 / 31.50 (clean) | 2.55 | 67.1% |
 | XTTS + RVC | clean | 1.99 / 12.01 / 5.01 | 22.97 / 31.02 / 26.49 (channel) | 3.75 | 79.6% |
-| XTTS + RVC | channel (deployed) | 2.75 / 30.99 / 5.01 | 6.71 / 18.33 / not measured (clean) | 2.42 | 77.4% |
+| XTTS + RVC | channel (deployed) | 2.75 / 30.99 / 5.01 | 6.71 / 18.33 / 13.89 (clean) | 2.42 | 77.4% |
 
 English on the fixed 6,004-clip sample (Lahari's test, `english_channel_v1.md`):
 
 | Model | English sample, clean | English sample, phone line |
 |---|---:|---:|
-| S1 (English only) | not measured | 6.50 |
+| S1 (English only) | 0.51 | 6.50 |
 | Deployed S2 | 2.30 | 24.20 |
 
 Intervals for every cell are in `tradeoff_v1.json` and in the paper's table.
@@ -47,16 +47,18 @@ Intervals for every cell are in `tradeoff_v1.json` and in the paper's table.
   lot.** On the evaluation pool the deployed adapter goes from 2.75% to 6.71% on clean
   audio, while the clean-trained XTTS + RVC adapter goes from 1.99% to 22.97% over the
   phone line. The XTTS-only pair shows the same thing (4.41 -> 12.51 against
-  1.46 -> 27.64). The two channel-trained adapters also keep clean English best
-  (2.55% and 2.42%, against 15.83% and 3.75%).
+  1.46 -> 27.64), and so does RVC: the deployed adapter rises from 5.01% to 13.89% on
+  clean audio, its clean-trained counterpart from 5.01% to 26.49% over the phone line.
+  The two channel-trained adapters also keep clean English best (2.55% and 2.42%,
+  against 15.83% and 3.75%).
 - **Tortoise is harder over the phone line whatever the training condition.** All
   four adapters do worse on CM04 over the phone line than on clean CM04 (deployed:
   30.99% against 18.33%; clean-trained XTTS: 18.98% against 5.44%). The channel itself
   hides the unseen tool; choosing the training condition does not fix it.
 - **English over the phone line is the real cost.** The deployed model goes from
   2.30% to 24.20% on English once it passes through the same G.711 chain, while S1,
-  never trained on phone audio, scores 6.50%. The "keeps English at 2.42%" claim holds
-  only for clean English.
+  never trained on phone audio, goes only from 0.51% to 6.50%. The "keeps English at
+  2.42%" claim holds only for clean English.
 
 ## For a deployment
 
@@ -69,11 +71,11 @@ judge English calls. A service taking both would need a language-identification 
 sending English calls to S1, or English phone-line audio in the adaptation data;
 neither has been tested.
 
-## Still to measure
+## Measured late
 
-- The deployed adapter on the clean RVC test set. The run stopped twice when the
-  laptop ran out of memory; it takes about 2 minutes once memory is free.
-- S1 on the clean English sample (same cause, about 17 minutes).
+The deployed adapter on the clean RVC set and S1 on the clean English sample both
+stopped twice when the laptop ran out of memory; the third attempts, on 13 October,
+completed (13.89% and 0.51%).
 
 ## Reproduce
 
