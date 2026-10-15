@@ -1,0 +1,27 @@
+{
+  "checkpoint": "D:/dfmodels/w10/lora_norm_channel_best.pt",
+  "manifest": "data/manifests/codemix_eval.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.12507982120051087,
+    "eer_ci_low": 0.11698534136457184,
+    "eer_ci_high": 0.13594478400520577,
+    "auc": 0.9298290495955726,
+    "auc_ci_low": 0.9211005701853578,
+    "auc_ci_high": 0.936887142183277,
+    "f1": 0.8467243510506798,
+    "threshold": 0.48257917165756226,
+    "clips": 3966,
+    "bonafide": 1566,
+    "spoof": 2400,
+    "score_std": 0.456276
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2400,
+      "eer": 0.12508
+    }
+  ]
+}

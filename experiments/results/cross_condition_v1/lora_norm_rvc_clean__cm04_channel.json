@@ -1,0 +1,27 @@
+{
+  "checkpoint": "D:/dfmodels/w10/lora_norm_rvc_clean_best.pt",
+  "manifest": "data/manifests/score_cm04_norm_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.3101942478542388,
+    "eer_ci_low": 0.2796744580060001,
+    "eer_ci_high": 0.3370463658887329,
+    "auc": 0.7498584829370856,
+    "auc_ci_low": 0.7205816230824743,
+    "auc_ci_high": 0.7769773478824487,
+    "f1": 0.7747489239598278,
+    "threshold": 0.9965974688529968,
+    "clips": 2024,
+    "bonafide": 1566,
+    "spoof": 458,
+    "score_std": 0.048772
+  },
+  "per_attack": [
+    {
+      "attack": "tortoise",
+      "spoof_clips": 458,
+      "eer": 0.310194
+    }
+  ]
+}

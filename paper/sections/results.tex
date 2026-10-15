@@ -160,7 +160,9 @@ and 2.75\% over the telephone channel for the deployed model, 7.21 points under 
 floor [$-$12.92, $-$1.10]. The fourth, the XTTS-only channel adapter, scores 4.41\%
 against a 10.01\% floor, but with 15 test speakers the paired interval
 [$-$12.14, +4.05] reaches zero. Moving 1.13\% of the weights takes the detector from
-chance to below the floor on unseen speakers.
+chance to below the floor on unseen speakers. Retrained with five seeds, the deployed
+adapter beats this floor in three and is inconclusive in the other two
+(Sec.~\ref{sec:seeds}).
 
 \textbf{2. The adapter must be trained on the deployment channel.} Before
 normalisation, an adapter trained on clean audio and scored on channel-rendered
@@ -175,8 +177,9 @@ score each model in the condition it will be used in.
 data cuts RVC EER from 23.91\% to 5.01\% clean and from 29.56\% to 5.01\% over the
 channel, on speakers unseen as source or target. It also raises EER on the unseen
 Tortoise attack, from 5.44\% to 12.01\% clean and from 28.16\% to 30.99\% over the
-channel (Fig.~\ref{fig:ablation}). Covering one attack family moved the decision
-boundary away from another.
+channel (Fig.~\ref{fig:ablation}); averaged over five training seeds the channel
+figures are 25.59\% and 35.59\% (Sec.~\ref{sec:seeds}). Covering one attack family
+moved the decision boundary away from another.
 
 \begin{figure}[t]
 \centering
@@ -199,14 +202,122 @@ notion and extends it, which is why S2, not S3, is the system we deploy.
 \textbf{5. The unseen tool over a telephone line is the weakest result.} On clean
 audio both S2 models beat their matched Tortoise floors, 5.44\% and 12.01\% against
 29.49\% and 31.43\%. Over the channel one model does: S3 trained on XTTS alone, at
-13.71\% against 33.64\%, a paired difference of $-$19.93 points [$-$32.95, $-$8.91].
-The deployed model reaches 30.99\%, 6.80 points under its matched floor of 37.79\%,
-but the speaker interval [$-$22.32, +8.74] contains zero: it is not shown to lose to
-the shortcut, and not shown to beat it. Its error also varies widely by speaker, from
+13.71\% against 33.64\%, a paired difference of $-$19.93 points [$-$32.95, $-$8.91];
+retrained with five seeds it stays below that floor in all five (mean 19.72\%),
+significantly in three. The deployed model reaches 30.99\% in the published run, 6.80
+points under its matched floor of 37.79\%, but the speaker interval
+[$-$22.32, +8.74] contains zero: it is not shown to lose to the shortcut, and not
+shown to beat it. Over five seeds its mean is 35.59\%, and no seed beats the floor;
+the published run was a favourable draw. Its error also varies widely by speaker, from
 6.4\% to 45.5\% across the 15 test speakers. Adding RVC to channel training is what
 removes the Tortoise advantage, for S2 and S3 alike. Detecting a synthesis tool never
 seen in training, after a narrowband channel has removed the high frequencies,
 remains open, and we report it as the main limitation of this work.
+
+\subsection{Stability across training seeds}
+\label{sec:seeds}
+
+Every number above comes from one training run with seed 1234, and the clip-level
+intervals of Table~\ref{tab:main} say nothing about training randomness. We therefore
+retrained the three phone-line systems that carry the claims of this section with
+four further seeds each, the published configurations otherwise unchanged. The
+deployed model's seed 1234 was retrained too, and reproduces the published run (CM04
+30.14\% against 30.99\%). Table~\ref{tab:seeds} gives the spread across seeds and,
+for each seed, the paired speaker-level comparison with the matched floor.
+
+\begin{table*}[t]
+\centering
+\caption{Five training seeds per system, phone-line condition. EER (\%): mean
+$\pm$ standard deviation across seeds, 95\% $t$-interval of the mean, and range. Last
+column: seeds whose paired, speaker-level difference from the matched floor lies
+wholly below zero, with the floor in brackets.}
+\label{tab:seeds}
+\small
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+System & Test set & Mean $\pm$ sd & 95\% CI of mean & Range & Seeds beating floor \\
+\midrule
+S2 XTTS + RVC (deployed) & Eval pool (XTTS) & 3.27 $\pm$ 1.17 & [1.82, 4.73] & 2.42--5.24 & 3 of 5 (9.96) \\
+                         & CM04 (Tortoise) & 35.59 $\pm$ 3.35 & [31.43, 39.75] & 30.14--38.43 & 0 of 5 (37.79) \\
+                         & RVC test & 5.33 $\pm$ 1.27 & [3.75, 6.91] & 3.71--7.27 & 5 of 5 (20.52) \\
+\midrule
+S2 XTTS & Eval pool (XTTS) & 3.45 $\pm$ 0.72 & [2.56, 4.34] & 2.75--4.41 & 0 of 5 (10.01) \\
+        & CM04 (Tortoise) & 25.59 $\pm$ 5.27 & [19.05, 32.13] & 17.89--30.61 & 1 of 5 (33.64) \\
+        & RVC test & 27.07 $\pm$ 2.76 & [23.65, 30.50] & 24.23--30.21 & 0 of 5 (23.91) \\
+\midrule
+S3 XTTS & Eval pool (XTTS) & 1.78 $\pm$ 0.93 & [0.62, 2.93] & 0.63--3.20 & 4 of 5 (10.01) \\
+        & CM04 (Tortoise) & 19.72 $\pm$ 5.36 & [13.06, 26.38] & 13.71--27.07 & 3 of 5 (33.64) \\
+        & RVC test & 36.83 $\pm$ 3.39 & [32.62, 41.05] & 32.15--40.39 & 0 of 5 (23.91) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Three points follow. The deployed model is stable where it works: on RVC its standard
+deviation across seeds is 1.27 points and it beats its floor in every seed. On the
+unseen tool it is not: across seeds it sits two points under its floor, and the
+published 30.99\% was close to the best of five runs. S3 trained on XTTS alone is the
+more dependable unseen-tool result, below its floor in every seed, at the cost of
+RVC, where four of its five seeds are worse than the floor. And the standard
+deviation across seeds on CM04 is three to five points for every system, so a
+single-run difference of that size between two systems is not evidence.
+% src/reporting/seeds.py; experiments/results/seeds_v1.json;
+% docs/results/seed_stability_v1.md
+
+\subsection{The deployment trade-off}
+\label{sec:tradeoff}
+
+Finding~2 trains each adapter in the condition it will be used in.
+Table~\ref{tab:tradeoff} shows what that choice costs: every S2 adapter scored in the
+condition it was \emph{not} trained in, to be read against its own row in
+Table~\ref{tab:main}.
+
+\begin{table*}[t]
+\centering
+\caption{S2 adapters scored in the condition they were not trained in. EER (\%) with
+95\% bootstrap confidence intervals over clips. The same adapters in their own
+condition are in Table~\ref{tab:main}. --: not yet scored.}
+\label{tab:tradeoff}
+\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Training attacks & Trained $\rightarrow$ scored & Eval pool (XTTS) & CM04 (Tortoise) & RVC test \\
+\midrule
+XTTS       & clean $\rightarrow$ channel & 27.64 {\scriptsize[26.55, 29.18]} & 18.98 {\scriptsize[16.74, 21.24]} & 39.74 {\scriptsize[36.49, 44.10]} \\
+XTTS       & channel $\rightarrow$ clean & 12.51 {\scriptsize[11.70, 13.59]} & 18.78 {\scriptsize[16.50, 20.77]} & 31.50 {\scriptsize[28.11, 35.22]} \\
+XTTS + RVC & clean $\rightarrow$ channel & 22.97 {\scriptsize[21.59, 24.36]} & 31.02 {\scriptsize[27.97, 33.70]} & 26.49 {\scriptsize[23.26, 29.72]} \\
+XTTS + RVC & channel $\rightarrow$ clean & 6.71 {\scriptsize[6.03, 7.57]}    & 18.33 {\scriptsize[16.23, 20.59]} & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\textbf{Training over the channel is the safer choice.} An adapter trained over the
+channel loses less on clean audio than a clean-trained adapter loses over the
+channel. On the evaluation pool the deployed adapter goes from 2.75\% to 6.71\% on
+clean audio, while its clean-trained counterpart goes from 1.99\% to 22.97\% over the
+channel; the XTTS-only pair repeats the pattern (4.41\% to 12.51\%, against 1.46\% to
+27.64\%). The channel-trained adapters also keep clean English best, at 2.55\% and
+2.42\%. The unseen tool is the exception: every adapter, whichever condition it was
+trained in, does worse on Tortoise over the channel than on clean Tortoise (for the
+deployed adapter, 30.99\% against 18.33\%). The channel itself, not the training
+condition, is what makes Tortoise hard.
+
+\textbf{The deployed model is not an English telephone detector.} We passed a fixed
+sample of 6,004 ASVspoof evaluation clips (all 13 attacks, all 67 speakers) through
+the same G.711 chain. The deployed model's EER rises from 2.30\% {\scriptsize[1.84,
+2.85]} on the clean sample to 24.20\% {\scriptsize[23.27, 25.30]}; at its operating
+point it calls 7.45\% of genuine English clips fake and lets 40\% of English fakes
+through. S1, which never heard telephone audio, scores 6.50\%
+{\scriptsize[5.92, 7.19]} on the same clips. Adaptation taught the model what genuine
+Hindi--English speech sounds like over a phone line, and English over the same line
+no longer matches it.
+
+For deployment this means the channel-trained XTTS + RVC adapter is the right model
+for a Hindi--English telephone service, which is how we use it, but it should not be
+trusted with English calls. A service that takes both needs either a language
+identification step that sends English calls to S1, or English telephone audio in the
+adaptation data. We have tested neither.
+% src/reporting/tradeoff.py; experiments/results/tradeoff_v1.json;
+% experiments/results/cross_condition_v1/; docs/results/tradeoff_v1.md
 
 \subsection{What the detector responds to}
 \label{sec:probe}
@@ -252,6 +363,7 @@ single vocal-cord pulse, rather than what is being said or in which language.
 \subsection{Summary}
 The best all-round system is S2 trained on XTTS and RVC in the channel condition. It
 beats its floor on the seen tool (2.75\%) and on RVC (5.01\%) at the speaker level,
-keeps English at 2.42\%, and on the unseen tool over the channel is inconclusive
-against its floor (30.99\% against 37.79\%). It is the model used in the live
-call system of Sec.~\ref{sec:system}.
+keeps clean English at 2.42\%, and on the unseen tool over the channel is
+inconclusive against its floor (35.59\% over five seeds, against 37.79\%). It is the model used in the
+live call system of Sec.~\ref{sec:system}, for Hindi--English calls only: English over
+the same channel rises to 24.20\% (Sec.~\ref{sec:tradeoff}).
