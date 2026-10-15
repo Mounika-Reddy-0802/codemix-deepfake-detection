@@ -9,7 +9,7 @@ audio and 58.42\% over the channel, with AUC below chance in the channel conditi
 and its failure mode is the rejection of genuine speakers rather than the acceptance
 of clones. Low-rank adaptation over a frozen encoder, training 1.13\% of the
 parameters on speaker-disjoint code-mixed data and its clones, brings channel-matched
-error to 2.75\% EER while retaining 2.42\% on English. Full fine-tuning on identical
+error to 2.75\% EER while retaining 2.42\% on clean English. Full fine-tuning on identical
 data is better on the tool it saw (0.83\%) and collapses to chance on English; the
 adapters keep both, which is what a deployment needs.
 
@@ -23,13 +23,26 @@ evaluation reports.
 \textbf{Against an unseen tool, over a telephone line, we cannot show that this system
 works.} On clean audio the adapters transfer to Tortoise-TTS at 5.44--12.01\% EER
 against matched floors of 29.49--31.43\%, which is learning beyond the shortcut. Over
-the channel the deployed model reaches 30.99\% against a matched floor of 37.79\%:
-below it, but with a speaker-level interval that includes zero, and with per-speaker
-error ranging from 6.4\% to 45.5\%. Only S3 trained on XTTS alone clears its floor
-there (13.71\% against 33.64\%), and adding RVC to its training removes that. We
-therefore have no conclusive evidence that the deployed model detects an unseen tool
-on a real phone line. This is the sharpest limitation of the work and it constrains
-every deployment claim made here.
+the channel the deployed model averages 35.59\% across five training seeds against a
+matched floor of 37.79\% and beats it in no seed at the speaker level; its
+per-speaker error ranges from 6.4\% to 45.5\%, and the published single run
+(30.99\%) was a favourable draw. Only S3 trained on XTTS alone stays below its floor
+there in every seed (19.72\% against 33.64\%), and adding RVC to its training removes
+that. Randomising recording cues during training brings the deployed recipe to
+26.63\% over five seeds, but that variant was chosen after a test score had been seen
+and still does not clear the floor. We therefore have no conclusive evidence that the
+deployed model detects an unseen tool on a real phone line. This is the sharpest
+limitation of the work and it constrains every deployment claim made here.
+
+\textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
+lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model
+calls 54.37\% of genuine clips fake, against 0.89\% for the read lectures, and every
+speaker is above 10\%. Adaptation taught the model what genuine lecture recordings
+sound like, not genuine Hindi--English speech in general.
+
+\textbf{The deployed model is for Hindi--English calls only.} English passed through
+the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only
+S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio.
 
 \textbf{The attacks are ours, and they are not hard.} We generated the code-mixed
 attacks because no benchmark provides them, which means our numbers are against
@@ -61,7 +74,11 @@ The most valuable next result is the one that would change a deployment decision
 suggests a direction --- adaptation moved the model's evidence for genuine speech
 into the pitch-harmonic band that survives a codec --- so training explicitly for
 band-limited evidence, rather than merely training on band-limited audio, is worth
-testing.
+testing. The augmentation lead of Sec.~\ref{sec:variants} should be confirmed on a
+second unseen tool, and it carries a lesson for model selection: the in-domain dev set
+did not register a 9-point gain on the unseen tool, so choosing among detectors needs
+a validation split built from a synthesis tool held out from training, separate from
+the one used for testing.
 
 Beyond that: exercising the telephony carrier on live numbers; calibrating a second
 operating point on real calls rather than on a simulated carrier; extending the
