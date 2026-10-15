@@ -21,7 +21,14 @@
       "auc": 0.9968,
       "clips": 3966,
       "floor": 5.17,
-      "clears_floor": true
+      "clears_floor": true,
+      "margin": 3.71,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -7.16,
+        -0.24
+      ],
+      "floor_v1": 5.17
     },
     {
       "system": "S2 LoRA",
@@ -36,8 +43,15 @@
       ],
       "auc": 0.9825,
       "clips": 2024,
-      "floor": 31.21,
-      "clears_floor": true
+      "floor": 29.49,
+      "clears_floor": true,
+      "margin": 24.05,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -32.65,
+        -14.75
+      ],
+      "floor_v1": 31.21
     },
     {
       "system": "S2 LoRA",
@@ -52,8 +66,15 @@
       ],
       "auc": 0.8378,
       "clips": 619,
-      "floor": 28.76,
-      "clears_floor": true
+      "floor": 17.93,
+      "clears_floor": false,
+      "margin": -5.98,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -3.38,
+        19.84
+      ],
+      "floor_v1": 28.76
     },
     {
       "system": "S2 LoRA",
@@ -69,7 +90,11 @@
       "auc": 0.8584,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S3 native",
@@ -85,7 +110,14 @@
       "auc": 0.9977,
       "clips": 3966,
       "floor": 5.17,
-      "clears_floor": true
+      "clears_floor": true,
+      "margin": 3.71,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -6.78,
+        -0.96
+      ],
+      "floor_v1": 5.17
     },
     {
       "system": "S3 native",
@@ -100,8 +132,15 @@
       ],
       "auc": 0.8225,
       "clips": 2024,
-      "floor": 31.21,
-      "clears_floor": true
+      "floor": 29.49,
+      "clears_floor": false,
+      "margin": 1.77,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -15.31,
+        11.38
+      ],
+      "floor_v1": 31.21
     },
     {
       "system": "S3 native",
@@ -116,8 +155,15 @@
       ],
       "auc": 0.5839,
       "clips": 619,
-      "floor": 28.76,
-      "clears_floor": false
+      "floor": 17.93,
+      "clears_floor": false,
+      "margin": -27.14,
+      "floor_verdict": "worse than floor",
+      "diff_ci": [
+        17.38,
+        39.68
+      ],
+      "floor_v1": 28.76
     },
     {
       "system": "S3 native",
@@ -133,7 +179,11 @@
       "auc": 0.4043,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S2 LoRA",
@@ -149,7 +199,14 @@
       "auc": 0.9863,
       "clips": 3966,
       "floor": 10.01,
-      "clears_floor": true
+      "clears_floor": false,
+      "margin": 5.6,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -12.14,
+        4.05
+      ],
+      "floor_v1": 10.01
     },
     {
       "system": "S2 LoRA",
@@ -164,8 +221,15 @@
       ],
       "auc": 0.7996,
       "clips": 2024,
-      "floor": 25.79,
-      "clears_floor": false
+      "floor": 33.64,
+      "clears_floor": false,
+      "margin": 5.48,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -19.43,
+        5.83
+      ],
+      "floor_v1": 25.79
     },
     {
       "system": "S2 LoRA",
@@ -180,8 +244,15 @@
       ],
       "auc": 0.7638,
       "clips": 619,
-      "floor": 22.46,
-      "clears_floor": false
+      "floor": 23.91,
+      "clears_floor": false,
+      "margin": -5.65,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -3.45,
+        19.7
+      ],
+      "floor_v1": 22.46
     },
     {
       "system": "S2 LoRA",
@@ -197,7 +268,11 @@
       "auc": 0.9773,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S3 native",
@@ -213,7 +288,14 @@
       "auc": 0.9991,
       "clips": 3966,
       "floor": 10.01,
-      "clears_floor": true
+      "clears_floor": true,
+      "margin": 8.09,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -14.55,
+        -1.29
+      ],
+      "floor_v1": 10.01
     },
     {
       "system": "S3 native",
@@ -228,8 +310,15 @@
       ],
       "auc": 0.9289,
       "clips": 2024,
-      "floor": 25.79,
-      "clears_floor": true
+      "floor": 33.64,
+      "clears_floor": true,
+      "margin": 19.93,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -32.95,
+        -8.91
+      ],
+      "floor_v1": 25.79
     },
     {
       "system": "S3 native",
@@ -244,8 +333,15 @@
       ],
       "auc": 0.7573,
       "clips": 619,
-      "floor": 22.46,
-      "clears_floor": false
+      "floor": 23.91,
+      "clears_floor": false,
+      "margin": -8.24,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -0.17,
+        19.97
+      ],
+      "floor_v1": 22.46
     },
     {
       "system": "S3 native",
@@ -261,7 +357,11 @@
       "auc": 0.4392,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S2 LoRA",
@@ -276,8 +376,15 @@
       ],
       "auc": 0.998,
       "clips": 3966,
-      "floor": 5.17,
-      "clears_floor": true
+      "floor": 5.62,
+      "clears_floor": true,
+      "margin": 3.63,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -7.76,
+        -0.21
+      ],
+      "floor_v1": 5.17
     },
     {
       "system": "S2 LoRA",
@@ -292,8 +399,15 @@
       ],
       "auc": 0.9431,
       "clips": 2024,
-      "floor": 31.21,
-      "clears_floor": true
+      "floor": 31.43,
+      "clears_floor": true,
+      "margin": 19.42,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -29.51,
+        -8.97
+      ],
+      "floor_v1": 31.21
     },
     {
       "system": "S2 LoRA",
@@ -308,8 +422,15 @@
       ],
       "auc": 0.9859,
       "clips": 619,
-      "floor": 28.76,
-      "clears_floor": true
+      "floor": 16.96,
+      "clears_floor": true,
+      "margin": 11.95,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -18.18,
+        -0.87
+      ],
+      "floor_v1": 28.76
     },
     {
       "system": "S2 LoRA",
@@ -325,7 +446,11 @@
       "auc": 0.969,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S3 native",
@@ -340,8 +465,15 @@
       ],
       "auc": 0.9997,
       "clips": 3966,
-      "floor": 5.17,
-      "clears_floor": true
+      "floor": 5.62,
+      "clears_floor": true,
+      "margin": 4.79,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -8.28,
+        -1.61
+      ],
+      "floor_v1": 5.17
     },
     {
       "system": "S3 native",
@@ -356,8 +488,15 @@
       ],
       "auc": 0.8317,
       "clips": 2024,
-      "floor": 31.21,
-      "clears_floor": true
+      "floor": 31.43,
+      "clears_floor": false,
+      "margin": 10.04,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -24.66,
+        5.97
+      ],
+      "floor_v1": 31.21
     },
     {
       "system": "S3 native",
@@ -372,8 +511,15 @@
       ],
       "auc": 0.9376,
       "clips": 619,
-      "floor": 28.76,
-      "clears_floor": true
+      "floor": 16.96,
+      "clears_floor": false,
+      "margin": 8.72,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -15.77,
+        2.98
+      ],
+      "floor_v1": 28.76
     },
     {
       "system": "S3 native",
@@ -389,7 +535,11 @@
       "auc": 0.5044,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S2 LoRA",
@@ -404,8 +554,15 @@
       ],
       "auc": 0.9971,
       "clips": 3966,
-      "floor": 10.01,
-      "clears_floor": true
+      "floor": 9.96,
+      "clears_floor": true,
+      "margin": 7.21,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -12.92,
+        -1.1
+      ],
+      "floor_v1": 10.01
     },
     {
       "system": "S2 LoRA",
@@ -420,8 +577,15 @@
       ],
       "auc": 0.7535,
       "clips": 2024,
-      "floor": 25.79,
-      "clears_floor": false
+      "floor": 37.79,
+      "clears_floor": false,
+      "margin": 6.8,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -22.32,
+        8.74
+      ],
+      "floor_v1": 25.79
     },
     {
       "system": "S2 LoRA",
@@ -436,8 +600,15 @@
       ],
       "auc": 0.9752,
       "clips": 619,
-      "floor": 22.46,
-      "clears_floor": true
+      "floor": 20.52,
+      "clears_floor": true,
+      "margin": 15.51,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -23.28,
+        -6.08
+      ],
+      "floor_v1": 22.46
     },
     {
       "system": "S2 LoRA",
@@ -453,7 +624,11 @@
       "auc": 0.9804,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S3 native",
@@ -468,8 +643,15 @@
       ],
       "auc": 0.9992,
       "clips": 3966,
-      "floor": 10.01,
-      "clears_floor": true
+      "floor": 9.96,
+      "clears_floor": true,
+      "margin": 8.17,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -14.17,
+        -1.87
+      ],
+      "floor_v1": 10.01
     },
     {
       "system": "S3 native",
@@ -484,8 +666,15 @@
       ],
       "auc": 0.7583,
       "clips": 2024,
-      "floor": 25.79,
-      "clears_floor": false
+      "floor": 37.79,
+      "clears_floor": false,
+      "margin": 6.12,
+      "floor_verdict": "inconclusive",
+      "diff_ci": [
+        -21.32,
+        9.48
+      ],
+      "floor_v1": 25.79
     },
     {
       "system": "S3 native",
@@ -500,8 +689,15 @@
       ],
       "auc": 0.9548,
       "clips": 619,
-      "floor": 22.46,
-      "clears_floor": true
+      "floor": 20.52,
+      "clears_floor": true,
+      "margin": 14.54,
+      "floor_verdict": "beats floor",
+      "diff_ci": [
+        -23.34,
+        -3.81
+      ],
+      "floor_v1": 22.46
     },
     {
       "system": "S3 native",
@@ -517,7 +713,11 @@
       "auc": 0.5098,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -533,7 +733,11 @@
       "auc": 0.5572,
       "clips": 3966,
       "floor": 5.17,
-      "clears_floor": false
+      "clears_floor": false,
+      "margin": -43.04,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -548,8 +752,12 @@
       ],
       "auc": 0.5969,
       "clips": 2024,
-      "floor": 31.21,
-      "clears_floor": false
+      "floor": 29.49,
+      "clears_floor": false,
+      "margin": -12.18,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -564,8 +772,12 @@
       ],
       "auc": 0.5462,
       "clips": 619,
-      "floor": 28.76,
-      "clears_floor": false
+      "floor": 16.96,
+      "clears_floor": false,
+      "margin": -26.5,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -578,7 +790,11 @@
       "auc": null,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -593,8 +809,12 @@
       ],
       "auc": 0.3814,
       "clips": 3966,
-      "floor": 10.01,
-      "clears_floor": false
+      "floor": 9.96,
+      "clears_floor": false,
+      "margin": -48.46,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -610,7 +830,11 @@
       "auc": 0.5607,
       "clips": 2024,
       "floor": 25.79,
-      "clears_floor": false
+      "clears_floor": false,
+      "margin": -18.36,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -625,8 +849,12 @@
       ],
       "auc": 0.4253,
       "clips": 619,
-      "floor": 22.46,
-      "clears_floor": false
+      "floor": 20.52,
+      "clears_floor": false,
+      "margin": -35.05,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     },
     {
       "system": "S1 English-only",
@@ -639,7 +867,11 @@
       "auc": null,
       "clips": 71237,
       "floor": null,
-      "clears_floor": null
+      "clears_floor": null,
+      "margin": null,
+      "floor_verdict": null,
+      "diff_ci": null,
+      "floor_v1": null
     }
   ]
 }

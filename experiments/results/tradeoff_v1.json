@@ -1,0 +1,284 @@
+{
+  "adapters": [
+    {
+      "run": "lora_norm_clean",
+      "attacks": "XTTS",
+      "trained_condition": "clean",
+      "hinglish_own_condition": {
+        "eval_pool": {
+          "eer": 1.46,
+          "ci": [
+            1.01,
+            1.94
+          ]
+        },
+        "cm04": {
+          "eer": 5.44,
+          "ci": [
+            4.05,
+            6.57
+          ]
+        },
+        "rvc_test": {
+          "eer": 23.91,
+          "ci": [
+            20.33,
+            27.64
+          ]
+        }
+      },
+      "hinglish_other_condition": {
+        "eval_pool": {
+          "eer": 27.64,
+          "ci": [
+            26.55,
+            29.18
+          ]
+        },
+        "cm04": {
+          "eer": 18.98,
+          "ci": [
+            16.74,
+            21.24
+          ]
+        },
+        "rvc_test": {
+          "eer": 39.74,
+          "ci": [
+            36.49,
+            44.1
+          ]
+        }
+      },
+      "other_condition": "channel",
+      "english_clean_full": {
+        "eer": 15.83,
+        "ci": [
+          15.54,
+          16.04
+        ]
+      },
+      "english_at_deployed_threshold": {
+        "fakes_caught": 51.8,
+        "genuine_passed": 99.6
+      }
+    },
+    {
+      "run": "lora_norm_channel",
+      "attacks": "XTTS",
+      "trained_condition": "channel",
+      "hinglish_own_condition": {
+        "eval_pool": {
+          "eer": 4.41,
+          "ci": [
+            3.78,
+            5.19
+          ]
+        },
+        "cm04": {
+          "eer": 28.16,
+          "ci": [
+            25.44,
+            30.2
+          ]
+        },
+        "rvc_test": {
+          "eer": 29.56,
+          "ci": [
+            26.49,
+            32.79
+          ]
+        }
+      },
+      "hinglish_other_condition": {
+        "eval_pool": {
+          "eer": 12.51,
+          "ci": [
+            11.7,
+            13.59
+          ]
+        },
+        "cm04": {
+          "eer": 18.78,
+          "ci": [
+            16.5,
+            20.77
+          ]
+        },
+        "rvc_test": {
+          "eer": 31.5,
+          "ci": [
+            28.11,
+            35.22
+          ]
+        }
+      },
+      "other_condition": "clean",
+      "english_clean_full": {
+        "eer": 2.55,
+        "ci": [
+          2.43,
+          2.67
+        ]
+      },
+      "english_at_deployed_threshold": {
+        "fakes_caught": 67.1,
+        "genuine_passed": 100.0
+      }
+    },
+    {
+      "run": "lora_norm_rvc_clean",
+      "attacks": "XTTS + RVC",
+      "trained_condition": "clean",
+      "hinglish_own_condition": {
+        "eval_pool": {
+          "eer": 1.99,
+          "ci": [
+            1.47,
+            2.45
+          ]
+        },
+        "cm04": {
+          "eer": 12.01,
+          "ci": [
+            10.42,
+            13.64
+          ]
+        },
+        "rvc_test": {
+          "eer": 5.01,
+          "ci": [
+            3.55,
+            6.95
+          ]
+        }
+      },
+      "hinglish_other_condition": {
+        "eval_pool": {
+          "eer": 22.97,
+          "ci": [
+            21.59,
+            24.36
+          ]
+        },
+        "cm04": {
+          "eer": 31.02,
+          "ci": [
+            27.97,
+            33.7
+          ]
+        },
+        "rvc_test": {
+          "eer": 26.49,
+          "ci": [
+            23.26,
+            29.72
+          ]
+        }
+      },
+      "other_condition": "channel",
+      "english_clean_full": {
+        "eer": 3.75,
+        "ci": [
+          3.63,
+          3.91
+        ]
+      },
+      "english_at_deployed_threshold": {
+        "fakes_caught": 79.6,
+        "genuine_passed": 99.7
+      }
+    },
+    {
+      "run": "lora_norm_rvc_channel",
+      "attacks": "XTTS + RVC",
+      "trained_condition": "channel",
+      "hinglish_own_condition": {
+        "eval_pool": {
+          "eer": 2.75,
+          "ci": [
+            2.22,
+            3.37
+          ]
+        },
+        "cm04": {
+          "eer": 30.99,
+          "ci": [
+            28.72,
+            33.84
+          ]
+        },
+        "rvc_test": {
+          "eer": 5.01,
+          "ci": [
+            3.39,
+            6.95
+          ]
+        }
+      },
+      "hinglish_other_condition": {
+        "eval_pool": {
+          "eer": 6.71,
+          "ci": [
+            6.03,
+            7.57
+          ]
+        },
+        "cm04": {
+          "eer": 18.33,
+          "ci": [
+            16.23,
+            20.59
+          ]
+        },
+        "rvc_test": null
+      },
+      "other_condition": "clean",
+      "english_clean_full": {
+        "eer": 2.42,
+        "ci": [
+          2.31,
+          2.54
+        ]
+      },
+      "english_at_deployed_threshold": {
+        "fakes_caught": 77.4,
+        "genuine_passed": 100.0
+      }
+    }
+  ],
+  "english_sample": {
+    "s1": {
+      "label": "S1 (English only)",
+      "clean": null,
+      "channel": {
+        "eer": 6.5,
+        "ci": [
+          5.92,
+          7.19
+        ]
+      }
+    },
+    "deployed_s2": {
+      "label": "S2 XTTS + RVC, channel (deployed)",
+      "clean": {
+        "eer": 2.3,
+        "ci": [
+          1.84,
+          2.85
+        ]
+      },
+      "channel": {
+        "eer": 24.2,
+        "ci": [
+          23.27,
+          25.3
+        ]
+      }
+    }
+  },
+  "s1_english_at_deployed_threshold": {
+    "fakes_caught": 93.5,
+    "genuine_passed": 99.6
+  }
+}

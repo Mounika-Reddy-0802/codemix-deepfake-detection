@@ -105,7 +105,7 @@ the classes (Sec.~\ref{sec:floor}).
 \label{sec:channel}
 
 The target application is a telephone call. We therefore render every clip through a
-narrowband telephony chain: resample from 16 to 8~kHz, encode and decode with G.711
+narrowband telephony chain: resample from 16 to 8~kHz, encode and decode with G.711~\cite{itu1988g711}
 $\mu$-law, add white noise at 20~dB SNR and resample back to 16~kHz. Noise is seeded
 per clip from a hash of its name. A single shared noise draw would add one identical
 waveform to every clip, which a detector could learn in place of the speech. On the
@@ -132,7 +132,7 @@ anti-spoofing~\cite{tak2022wav2vec}.
 \subsection{Training}
 \label{sec:training}
 
-All systems use AdamW with weight decay $10^{-5}$, 4~s training crops, mixed
+All systems use AdamW~\cite{loshchilov2019adamw} with weight decay $10^{-5}$, 4~s training crops, mixed
 precision and seed 1234. The remaining settings are in Table~\ref{tab:hparams}.
 The checkpoint with the lowest EER on the development set is kept.
 
@@ -168,7 +168,12 @@ Training data    & ASVspoof LA & code-mixed & code-mixed \\
 \label{sec:eval}
 
 We report equal error rate (EER) and area under the ROC curve (AUC), scoring one
-deterministic 4~s crop per clip, with 95\% bootstrap confidence intervals over clips.
+deterministic 4~s crop per clip, with 95\% bootstrap confidence intervals over
+clips~\cite{efron1993bootstrap}. Clips from one speaker are not independent and each
+test set holds only 12--15 speakers, so every comparison between two systems, or
+between a system and its floor, is made on a paired bootstrap that resamples whole
+speakers (1{,}000 resamples), never by setting two separately computed intervals side
+by side.
 Three code-mixed test sets probe three kinds of generalisation: the evaluation pool
 (seen tool, unseen speakers), CM04 (unseen tool) and the RVC test half (speakers
 unseen as either source or target). The ASVspoof 2019 LA evaluation set measures
@@ -181,9 +186,26 @@ come from different pipelines, and pipeline provenance can separate them without
 knowledge of synthetic speech. Following the check proposed with
 AffectDF~\cite{affectdf2026}, we fit a logistic regression on eight cheap signal
 statistics (RMS mean and standard deviation, peak amplitude, clipping ratio, DC
-offset, zero-crossing rate, spectral roll-off and high-frequency energy ratio) on the
-adaptation pool, and score it on the speaker-disjoint test set. Its EER is that set's
-\emph{shortcut floor}, measured separately for every test set and condition. We count
-a detector's result as evidence only when the upper bound of its confidence interval
-lies below the floor.
-% src/data/lowlevel_cue.py; experiments/results/lowlevel_cue_check_*.json
+offset, zero-crossing rate, spectral roll-off and high-frequency energy ratio). Its
+EER is the \emph{shortcut floor}. Each detector gets its own floor: the regression is
+fitted on exactly the manifest the detector was trained on and scored on exactly the
+clips the detector is scored on, so the two differ only in what they can hear. A
+result counts as evidence only when the paired, speaker-resampled 95\% interval of
+EER(detector)~$-$~EER(floor) lies entirely below zero; an interval that contains zero
+is reported as inconclusive.
+
+\textbf{Reading the floor.} The floor is a reference, not a bound on what can be
+achieved. A detector below its floor uses information beyond the eight statistics,
+which rules out the cheapest explanation for its score but does not show that it
+ignores recording provenance: an encoder of 95M parameters can exploit subtler
+domain cues, such as room, microphone, noise or pause structure, that the eight
+statistics do not measure. A detector at or above its floor is not shown to rely on
+the shortcut either; its result simply carries no evidence of learning beyond it.
+
+An earlier version of this check fitted the CM04 floor on half of CM04 itself,
+Tortoise clips included, and scored it on the other half. That regression has seen
+the attack the detectors never see. We keep its value as an \emph{oracle floor}, the
+separation recording cues reach given labelled examples of the unseen tool, and
+report it beside the matched floor.
+% src/data/lowlevel_cue.py, src/training/floor_compare.py
+% experiments/results/floor_compare_v2.json; docs/results/shortcut_floor_v2.md

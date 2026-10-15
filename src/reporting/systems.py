@@ -10,10 +10,13 @@ cost English performance (W7-T2, reverse degradation)?
 - **English** for S2 and S3 was scored in the same Kaggle session on the 71,237-clip
   ASVspoof 2019 LA eval partition; S1's English number is the W8-T1 retention run.
 
-Every code-mixed cell is read against the shortcut floor of its own set and
-condition (``ablation.FLOORS``), so a cell only counts as evidence when its CI upper
-bound is below that floor. English has no floor: ASVspoof LA is the benchmark the
-floor idea was borrowed from, where AffectDF's replica sits at chance.
+Every S2 and S3 code-mixed cell is read against its matched shortcut floor -- fitted
+on that run's own training data, scored on its own clips -- and counts as evidence
+only when the paired, speaker-level interval of its difference from the floor lies
+below zero (``ablation.load_matched``, ``docs/results/shortcut_floor_v2.md``). The
+older per-set floor stays in each cell as ``floor_v1``. English has no floor: ASVspoof
+LA is the benchmark the floor idea was borrowed from, where AffectDF's replica sits at
+chance.
 
 S1 on the normalised code-mixed sets comes from ``results/s1_norm/`` (one
 ``stage1__<set>[_channel].json`` per set and condition, written by
@@ -31,7 +34,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.reporting.ablation import SETS, load_floors
+from src.reporting.ablation import SETS, floor_fields, load_floors, load_matched
 
 S2_SUMMARY = "results/w10/w10_summary.json"
 S3_SUMMARY = "docs/results/s3_native/s3_summary.json"
@@ -57,19 +60,22 @@ def _pct(x: float | None) -> float | None:
     return None if x is None else round(100.0 * float(x), 2)
 
 
-def _cell(summary: dict, key: str, floor: float | None) -> dict:
+def _cell(summary: dict, key: str, floor: float | None, matched: dict | None = None) -> dict:
     if key not in summary:
         raise SystemsDataError(f"missing run: {key}")
     r = summary[key]
     eer, hi = _pct(r["eer"]), _pct(r["eer_ci_high"])
-    return {
+    cell = {
         "eer": eer,
         "eer_ci": [_pct(r["eer_ci_low"]), hi],
         "auc": round(float(r["auc"]), 4),
         "clips": int(r["clips"]),
         "floor": floor,
-        "clears_floor": None if floor is None else hi < floor,
+        "clears_floor": None,
     }
+    if floor is not None:
+        cell.update(floor_fields(eer, hi, floor, matched))
+    return cell
 
 
 def load_s1_codemix(directory: str = S1_CODEMIX_DIR) -> dict | None:
@@ -90,17 +96,39 @@ def build_table(
     s1_english: float,
     floors: dict[tuple[str, str], float],
     s1_codemix: dict | None = None,
+    matched: dict[tuple[str, str], dict] | None = None,
 ) -> pd.DataFrame:
     """One row per (system, variant, condition, set), including English.
 
-    ``s1_codemix`` (from :func:`load_s1_codemix`) adds S1's code-mixed cells, each
-    read against the same floor as S2 and S3 in that set and condition.
+    ``s1_codemix`` (from :func:`load_s1_codemix`) adds S1's code-mixed cells. With
+    ``matched`` (:func:`src.reporting.ablation.load_matched`), each S2 and S3 cell is
+    judged against its own matched floor by the paired speaker-level test, and S1,
+    which has no code-mixed training data to match, is read against the lowest floor
+    of its set and condition. Without it, every cell uses the per-set floor.
     """
+
+    def lowest(ev: str, condition: str) -> float:
+        candidates = [floors[(ev, condition)]]
+        if matched is not None:
+            candidates += [
+                matched[(run, ev)]["floor"]
+                for (_, cond), runs in PAIRS.items()
+                if cond == condition
+                for run in runs
+                if (run, ev) in matched
+            ]
+        return min(candidates)
+
     rows = []
     for (variant, condition), (s2_run, s3_run) in PAIRS.items():
         for system, summary, run in (("S2 LoRA", s2, s2_run), ("S3 native", s3, s3_run)):
             for ev in SETS:
-                cell = _cell(summary, f"{run}__{ev}", floors[(ev, condition)])
+                entry = None
+                if matched is not None:
+                    entry = matched.get((run, ev))
+                    if entry is None:
+                        raise SystemsDataError(f"no matched floor for {run} on {ev}")
+                cell = _cell(summary, f"{run}__{ev}", floors[(ev, condition)], entry)
                 rows.append(
                     {
                         "system": system,
@@ -126,7 +154,7 @@ def build_table(
     for condition in ("clean", "channel"):
         if s1_codemix is not None:
             for ev in SETS:
-                cell = _cell(s1_codemix, f"stage1_{condition}__{ev}", floors[(ev, condition)])
+                cell = _cell(s1_codemix, f"stage1_{condition}__{ev}", lowest(ev, condition))
                 rows.append(
                     {
                         "system": "S1 English-only",
@@ -200,7 +228,7 @@ def build(out: str = OUT, reverse_out: str = REVERSE_OUT) -> dict:
         100.0 * json.loads(Path(S1_ENGLISH).read_text())["results"]["stage1_baseline"]["eer"], 2
     )
     s1_codemix = load_s1_codemix()
-    frame = build_table(s2, s3, s1, load_floors(), s1_codemix)
+    frame = build_table(s2, s3, s1, load_floors(), s1_codemix, load_matched())
     reverse = reverse_degradation(frame, s1)
     result = {
         "sources": {

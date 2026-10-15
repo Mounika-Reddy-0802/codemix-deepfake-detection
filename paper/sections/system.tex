@@ -24,7 +24,7 @@ has ended protects nobody. This sets a latency budget rather than a throughput o
 the first credible warning must land within roughly ten seconds of speech.
 
 \textbf{The audio the detector sees must be the audio it was trained on.} The
-adapted model is trained on 8\,kHz G.711 telephone audio, and its decision cue lives
+adapted model is trained on 8\,kHz G.711~\cite{itu1988g711} telephone audio, and its decision cue lives
 in fine waveform structure (Section~\ref{sec:results}). Any resampling, codec or
 level change between the carrier and the model is a domain shift.
 
@@ -149,7 +149,7 @@ genuine caller can lose several consecutive windows that the same clip never los
 offline.
 
 We tested the obvious explanation and it does not hold. Encoding each clip through
-the browser's carrier offline --- resample to 48\,kHz, Opus encode and decode,
+the browser's carrier offline --- resample to 48\,kHz, Opus~\cite{valin2012opus} encode and decode,
 resample back --- and rescoring through the identical streaming path leaves both
 genuine clips at zero windows below the threshold, with a worst window of 0.984
 against the 0.001 seen live. Both seen attacks stay fully detected through every

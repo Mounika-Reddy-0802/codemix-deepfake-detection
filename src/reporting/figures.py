@@ -358,23 +358,23 @@ def ablation_figure(out_dir: str = FIGURES_DIR, source: str = ABLATIONS) -> str:
                     label=("XTTS only", "XTTS + RVC")[k] if j == 0 else None,
                 )
                 ax.text(x, row["eer"] + 0.8, f"{row['eer']:.1f}", ha="center", fontsize=7)
-            floor = part[part["set"] == key]["floor"].iloc[0]
-            ax.hlines(
-                floor,
-                j - 0.4,
-                j + 0.4,
-                colors="black",
-                linestyles="--",
-                lw=1.1,
-                label="shortcut floor" if j == 0 else None,
-            )
+                # Each training mix has its own matched floor, so each bar gets its own.
+                ax.hlines(
+                    row["floor"],
+                    x - 0.17,
+                    x + 0.17,
+                    colors="black",
+                    linestyles="--",
+                    lw=1.1,
+                    label="shortcut floor (matched)" if (j == 0 and k == 0) else None,
+                )
         ax.set_xticks(range(len(sets)), [s for _, s in sets], fontsize=7.5)
         ax.set_title(
             "Clean" if condition == "clean" else "Channel-matched (G.711 @ 20 dB)", fontsize=9.5
         )
     axes[0].set_ylabel("EER (%) — lower is better")
     axes[0].legend(fontsize=7, loc="upper left")
-    fig.suptitle("Adding RVC to adaptation: bars below the dashed floor are evidence", fontsize=10)
+    fig.suptitle("Adding RVC to adaptation, each bar against its own matched floor", fontsize=10)
 
     out = Path(out_dir) / "ablation_rvc.png"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -426,7 +426,9 @@ def systems_figure(out_dir: str = FIGURES_DIR, source: str = SYSTEMS) -> str:
                         colors="black",
                         linestyles="--",
                         lw=1.0,
-                        label="shortcut floor" if (r == 0 and c == 0 and j == 0) else None,
+                        label="shortcut floor (matched)"
+                        if (r == 0 and c == 0 and j == 0)
+                        else None,
                     )
             ax.hlines(
                 s1_english,
