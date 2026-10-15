@@ -131,23 +131,25 @@ after normalisation, and English over the phone line.
 
 **Done.** Both missing conditions measured on the laptop CPU.
 - *Other condition* (Mounika, `docs/results/tradeoff_v1.md`): all four S2 adapters on
-  the three Hinglish sets in the condition they were not trained in, 11 of 12 cells.
+  the three Hinglish sets in the condition they were not trained in, all 12 cells.
   Training over the phone line costs little on clean audio (deployed, evaluation pool:
   2.75% → 6.71%); clean training costs a lot over the line (1.99% → 22.97%). Tortoise
   is harder over the line whatever the training condition.
 - *English over the phone line* (Lahari, `docs/results/english_channel_v1.md`): a fixed
   6,004-clip ASVspoof sample (all 13 attacks, all 67 speakers) through the same G.711
   chain. The deployed model goes from 2.30% to **24.20%**, flagging 7.45% of genuine
-  English clips at its threshold; S1, never trained on phone audio, holds 6.50%.
+  English clips at its threshold; S1, never trained on phone audio, goes from 0.51% to
+  6.50%.
 
 **Done in the paper.** `results.tex` has a new subsection, "The deployment trade-off"
 (`sec:tradeoff`), with the other-condition table and a deployment paragraph: the
 deployed model suits Hindi-English calls but should not judge English calls; the
 summary now says "clean English".
 
-**Still to do.** Two cells stopped when the laptop ran out of memory (the deployed
-adapter on the clean RVC set, about 2 minutes; S1 on the clean English sample, about
-17 minutes).
+**Completed late.** The last two cells first stopped when the laptop ran out of
+memory and completed on 13 October: the deployed adapter on the clean RVC set
+(13.89%, against 5.01% in its own condition) and S1 on the clean English sample
+(0.51%).
 
 ## 5. Interpreting the shortcut floor
 

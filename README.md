@@ -578,9 +578,8 @@ outside this repo.
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
 
 **Open:** fund the Twilio account and re-verify the phone demo on real numbers (trial
-credit exhausted, PSTN leg unproven since week 10); two laptop CPU scores (S1 on the
-clean English sample, the deployed adapter on the clean RVC set); confirm the
-augmentation lead on a second unseen tool; submit the paper.
+credit exhausted, PSTN leg unproven since week 10); confirm the augmentation lead on
+a second unseen tool; submit the paper.
 
 ---
 

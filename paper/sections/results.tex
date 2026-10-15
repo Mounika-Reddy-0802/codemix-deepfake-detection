@@ -330,7 +330,7 @@ Table~\ref{tab:main}.
 \centering
 \caption{S2 adapters scored in the condition they were not trained in. EER (\%) with
 95\% bootstrap confidence intervals over clips. The same adapters in their own
-condition are in Table~\ref{tab:main}. --: not yet scored.}
+condition are in Table~\ref{tab:main}.}
 \label{tab:tradeoff}
 \small
 \begin{tabular}{@{}llccc@{}}
@@ -340,7 +340,7 @@ Training attacks & Trained $\rightarrow$ scored & Eval pool (XTTS) & CM04 (Torto
 XTTS       & clean $\rightarrow$ channel & 27.64 {\scriptsize[26.55, 29.18]} & 18.98 {\scriptsize[16.74, 21.24]} & 39.74 {\scriptsize[36.49, 44.10]} \\
 XTTS       & channel $\rightarrow$ clean & 12.51 {\scriptsize[11.70, 13.59]} & 18.78 {\scriptsize[16.50, 20.77]} & 31.50 {\scriptsize[28.11, 35.22]} \\
 XTTS + RVC & clean $\rightarrow$ channel & 22.97 {\scriptsize[21.59, 24.36]} & 31.02 {\scriptsize[27.97, 33.70]} & 26.49 {\scriptsize[23.26, 29.72]} \\
-XTTS + RVC & channel $\rightarrow$ clean & 6.71 {\scriptsize[6.03, 7.57]}    & 18.33 {\scriptsize[16.23, 20.59]} & -- \\
+XTTS + RVC & channel $\rightarrow$ clean & 6.71 {\scriptsize[6.03, 7.57]}    & 18.33 {\scriptsize[16.23, 20.59]} & 13.89 {\scriptsize[11.15, 17.28]} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -350,7 +350,8 @@ channel loses less on clean audio than a clean-trained adapter loses over the
 channel. On the evaluation pool the deployed adapter goes from 2.75\% to 6.71\% on
 clean audio, while its clean-trained counterpart goes from 1.99\% to 22.97\% over the
 channel; the XTTS-only pair repeats the pattern (4.41\% to 12.51\%, against 1.46\% to
-27.64\%). The channel-trained adapters also keep clean English best, at 2.55\% and
+27.64\%), and so does RVC (5.01\% to 13.89\% clean, against 5.01\% to 26.49\% over
+the channel). The channel-trained adapters also keep clean English best, at 2.55\% and
 2.42\%. The unseen tool is the exception: every adapter, whichever condition it was
 trained in, does worse on Tortoise over the channel than on clean Tortoise (for the
 deployed adapter, 30.99\% against 18.33\%). The channel itself, not the training
@@ -361,7 +362,7 @@ sample of 6,004 ASVspoof evaluation clips (all 13 attacks, all 67 speakers) thro
 the same G.711 chain. The deployed model's EER rises from 2.30\% {\scriptsize[1.84,
 2.85]} on the clean sample to 24.20\% {\scriptsize[23.27, 25.30]}; at its operating
 point it calls 7.45\% of genuine English clips fake and lets 40\% of English fakes
-through. S1, which never heard telephone audio, scores 6.50\%
+through. S1, which never heard telephone audio, goes only from 0.51\% to 6.50\%
 {\scriptsize[5.92, 7.19]} on the same clips. Adaptation taught the model what genuine
 Hindi--English speech sounds like over a phone line, and English over the same line
 no longer matches it.
