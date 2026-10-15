@@ -231,7 +231,13 @@
             20.59
           ]
         },
-        "rvc_test": null
+        "rvc_test": {
+          "eer": 13.89,
+          "ci": [
+            11.15,
+            17.28
+          ]
+        }
       },
       "other_condition": "clean",
       "english_clean_full": {
@@ -250,7 +256,13 @@
   "english_sample": {
     "s1": {
       "label": "S1 (English only)",
-      "clean": null,
+      "clean": {
+        "eer": 0.51,
+        "ci": [
+          0.35,
+          0.79
+        ]
+      },
       "channel": {
         "eer": 6.5,
         "ci": [
