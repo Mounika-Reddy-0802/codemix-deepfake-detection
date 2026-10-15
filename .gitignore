@@ -53,6 +53,11 @@ data/manifests/eval.csv
 data/manifests/asvspoof_train.csv
 data/manifests/asvspoof_dev.csv
 data/manifests/asvspoof_eval.csv
+# The fixed 6,004-clip English sample has the same absolute paths; it rebuilds
+# byte-for-byte from asvspoof_eval.csv (seed 1234):
+# `python -m src.data.stratified_subset --manifest data/manifests/asvspoof_eval.csv --out data/manifests/asvspoof_eval_subset6k.csv`.
+# Its portable _norm and _channel20 versions ARE committed.
+data/manifests/asvspoof_eval_subset6k.csv
 
 checkpoints/**
 !checkpoints/**/
