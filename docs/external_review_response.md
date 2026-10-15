@@ -27,13 +27,20 @@ on CM04 on two machines.
 **Done.** Speaker-level paired bootstrap implemented (`src/training/floor_compare.py`)
 and applied to all eight main-table systems (`docs/results/shortcut_floor_v2.md`).
 
-**In progress (Kaggle).** `notebooks/kaggle_w12_review_runs.ipynb`, one Run All of
-about five T4-hours, retrains the deployed model (seed 1234 re-run, plus 2025, 7, 42,
-99), the XTTS-only channel model and S3 XTTS-only channel (2025, 7, 42, 99) with the
-published recipe unchanged. Results reach the laptop unattended through a private
-Kaggle dataset after every block. Analysis code is ready and tested:
-`src/reporting/seeds.py` (mean and t-interval over seeds, the paired floor test per
-seed).
+**Done (Mounika, `docs/results/seed_stability_v1.md`).** Five seeds each for the
+deployed model, S2 XTTS-only and S3 XTTS-only, phone line, published configs
+unchanged (`notebooks/kaggle_w12_review_runs.ipynb`; `src/reporting/seeds.py`). The
+deployed seed-1234 re-run reproduces the published run (CM04 30.14 vs 30.99).
+- Deployed: eval pool 3.27 ± 1.17 (beats floor in 3 of 5 seeds), **CM04 35.59 ± 3.35
+  (0 of 5)**, RVC 5.33 ± 1.27 (5 of 5). The published 30.99 on Tortoise was a
+  favourable draw.
+- S3 XTTS-only: **CM04 19.72 ± 5.36, below its floor in every seed (3 of 5
+  significant)**, but worse than its RVC floor in 4 of 5.
+- Seed spread on CM04 is 3-5 points for every system.
+
+**Done in the paper.** `results.tex`: a seed table (`tab:seeds`, `sec:seeds`), and
+Findings 1, 3, 5 and the summary quote seed means. Abstract, introduction and
+conclusion now state the Tortoise result from the seeds, not the single run.
 
 ## 2. Generalisation to unseen tools (Tortoise)
 
@@ -61,13 +68,24 @@ configs train exactly as before:
   systems, a second G.711 pass at a random 5-30 dB SNR (`src/data/augment.py`);
 - `layer_weighting` — a learned mix of every encoder layer (`LayerWeightedSum`).
 
-**In progress (same Kaggle run).** The deployed recipe is trained with four variants
-(crop; crop + augment; crop + layer mix; all three). One is chosen on dev EER alone,
-with ties within 0.5 points going to the variant with fewer changes; CM04 and RVC are
-scored for every variant but never used to choose. The chosen variant is retrained
-with two more seeds.
+**Done (Krishna, `docs/results/variants_v1.md`).** The deployed recipe trained with
+four variants (crop; crop + augment; crop + layer mix; all three), chosen by the rule
+fixed in advance (dev EER only, ties within 0.5 points to fewer changes). The
+published recipe stays: no variant improves dev EER. The two layer-mix variants first
+crashed (strict load of the Stage-1 checkpoint, fixed in `load_initial_weights`) and
+were re-run.
 
-**Planned.** Score fusion of the deployed model with S3 XTTS-only, weights set on dev.
+**Exploratory.** Crop + augment + layer mix, singled out after seeing its CM04 score
+(26.43), was retrained with four more seeds: **CM04 26.63 ± 1.66 against 35.59 ± 3.35
+for the published recipe**, every variant seed below every recipe seed (exact
+Mann-Whitney p = 0.008; 0.016 on the four seeds trained after the choice). RVC rises
+5.33 → 7.72; against the Tortoise floor it stays inconclusive in every seed. Its dev
+EER equals the recipe's, so the in-domain dev set cannot see unseen-tool gains.
+Reported in the paper as a lead to confirm on a second unseen tool
+(`results.tex`, `sec:variants`; conclusion, future work).
+
+**Not done.** Score fusion of the deployed model with S3 XTTS-only: it would need
+weights set on a dev set that, as above, cannot see the unseen tool.
 
 ## 3. More speakers and speaking styles
 
