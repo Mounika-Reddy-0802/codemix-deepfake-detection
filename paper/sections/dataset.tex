@@ -1,0 +1,150 @@
+% Dataset, channel protocol and ethics (owner L). Complements Section~\ref{sec:method},
+% which gives the attack and split tables; this section covers composition, the
+% speaker-pool discipline, exclusions, and what may be released.
+% Sources: docs/datasheet.md, docs/licences.md, docs/results/dataset_inventory_v1.md
+\section{Data}
+\label{sec:dataset}
+
+\subsection{Composition}
+
+The code-mixed side is built from two corpora, indexed clip by clip with durations
+measured from the audio rather than estimated:
+
+\begin{itemize}
+  \item \textbf{MUCS 2021 Hindi--English}~\cite{diwan2021mucs}: 52{,}825 clips,
+    89.5 hours, 520 speakers. Lecture and read speech, code-mixed at the utterance
+    level. This is the bonafide pool and the source of every cloning reference.
+  \item \textbf{HiACC, adult subset}: 3{,}318 clips, 3.2 hours, 24 speakers.
+    Spontaneous speech, used for evaluation only.
+\end{itemize}
+
+Together 56{,}143 clips and 92.8 hours over 544 speakers. The English side is
+ASVspoof 2019 LA~\cite{todisco2019asvspoof}: 121{,}461 clips and 109.6 hours across
+the official train, development and evaluation partitions, at a spoof-to-real ratio
+of 8.7:1.
+
+That ratio matters when reading results across the two. The code-mixed evaluation
+sets are close to balanced, near 1.5:1, so the same detector confidence produces
+different operating points on the two families and accuracy figures are not directly
+comparable between them.
+
+\subsection{Speaker pools, frozen before any audio was generated}
+
+The 520 MUCS speakers are divided once into three disjoint pools --- 25 for training,
+10 for adaptation, 15 for evaluation --- and the division was committed before a
+single clip was cloned. This ordering is the point: a pool drawn after seeing which
+speakers clone well would quietly select for them.
+
+Disjointness is enforced mechanically rather than by discipline.
+\texttt{tests/test\_splits.py} fails the build if a speaker crosses a pool boundary,
+if a held-out tool reaches a training manifest, or if any excluded identifier appears
+anywhere. The anti-leakage checks run before every training launch.
+
+\subsection{Who the models hear, and who they are tested on}
+\label{sec:data-speakers}
+
+Table~\ref{tab:speakers} counts speakers per set. Adaptation uses 8 speakers for
+training and 2 for development. Models that train on RVC also hear the 13 source
+speakers of the RVC training half, drawn from the training pool, so the deployed model
+trains on 21 speakers. Its test sets hold 15 + 12 speakers it never heard, and HiACC
+adds 24 more, speaking spontaneously rather than reading.
+
+\begin{table}[t]
+\centering
+\caption{Speakers per set. No test speaker appears in any training set.}
+\label{tab:speakers}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Set & Clips & Speakers \\
+\midrule
+Training, XTTS only                & 2{,}154 & 8 \\
+Training, XTTS + RVC (deployed)    & 2{,}854 & 21 \\
+Development                        & 506     & 2 \\
+\midrule
+Evaluation pool / CM04 (read)      & 3{,}966 / 2{,}024 & 15 \\
+RVC test (read)                    & 619     & 12 \\
+HiACC adult (spontaneous, genuine) & 3{,}318 & 24 \\
+\bottomrule
+\end{tabular}
+% docs/results/hiacc_false_alarm_v1.md; experiments/results/floor_v2/per_speaker_eer.csv
+\end{table}
+
+\subsection{Different voices, different speaking style}
+\label{sec:data-styles}
+
+A pooled EER hides how unevenly the error falls on speakers. For the deployed model
+over the channel, per-speaker EER on the seen tool runs from 0.0\% to 11.0\% (median
+0.7\%), and on the unseen Tortoise attack from 6.4\% to 45.5\% (median 28.1\%), with 6
+of the 15 speakers above their own shortcut floor.
+
+Spontaneous speech is a harder test still. HiACC holds genuine speech only, so we
+measure false alarms: the share of genuine clips called fake at the deployed operating
+point. On the MUCS read lectures of the evaluation pool the deployed model calls
+0.89\% [0.54, 1.29] of genuine clips fake; on HiACC's 24 spontaneous speakers it calls
+54.37\% [44.43, 64.15] fake, a difference of 53.5 points, with every speaker above
+10\% (13.9--89.5\%). Clip length does not explain it: longer HiACC clips are rejected
+more often than short ones. Adaptation moved the detector's notion of genuine speech
+to the lecture recordings it was adapted on, not to Hindi--English speech in general.
+HiACC differs from MUCS in recording conditions as well as in speaking style, and this
+test cannot say which of the two drives the false alarms.
+
+\subsection{Attacks}
+
+No benchmark supplies code-mixed deepfakes, so they were generated. Each generator
+ran from a job table committed \emph{before} the run, so what was generated is
+decided in version control rather than on a GPU, and every clip carries its speaker,
+transcript and seed.
+
+Quality screening rejects stalled, near-silent and clipped output. Pass rates were
+99.95\% for the XTTS-v2~\cite{casanova2024xtts} training attack, 93.6\% for
+RVC~\cite{rvc2023} conversion, and 91.6\% for the held-out
+Tortoise-TTS~\cite{betker2023tortoise} attack. The Tortoise failures are concentrated
+in one speaker, who drops from 34 clips to 15 usable while every other speaker keeps
+at least 30 --- a reference-quality problem for that speaker rather than a property
+of the tool.
+
+The held-out attack is held out completely. No model in this study is trained on
+Tortoise audio, and no training manifest may contain it.
+
+\subsection{The telephone channel}
+
+The channel condition is a simulated narrowband chain: resample to 8~kHz, G.711
+$\mu$-law encode and decode, additive noise at 20~dB SNR, resample back.
+
+It was validated by measurement rather than assumed. Energy above 4~kHz falls from
+0.185\% to 0.0001\% of total energy, and the measured SNR matches the requested one.
+Clean and channel copies of every evaluation set are retained separately, so the
+channel effect stays separable from the language effect throughout the results.
+
+\subsection{Exclusions and ethics}
+
+\textbf{Child audio is excluded entirely.} HiACC ships 5{,}176 files of which 1{,}858
+are children. They are quarantined on extraction and are never used as bonafide
+material, never as a cloning reference, and never as evaluation data.
+
+This is reported in detail because it failed once. An automatic quarantine silently
+did not run, and the child folder sat live in the corpus until it was caught by
+hand-verification against the real folder layout --- not by the code that was
+supposed to prevent it. After the fix the preprocessing reaches exactly 3{,}318 adult
+files and no child identifier appears in any manifest. The lesson we record is that a
+quarantine nobody audits is a quarantine that is not running.
+
+\textbf{The generated audio is not released.} It is cloned speech of identifiable
+people and this project's repository is public. The clones are held privately, while
+per-clip metadata, the job tables and SHA-256 checksums are committed, so the corpus
+is auditable without the audio being distributed.
+
+\textbf{Licensing constrains what a release could contain.} MUCS is CC BY-SA 4.0, so
+clones derived from MUCS references inherit ShareAlike. HiACC is CC BY 4.0, ASVspoof
+is under its own research licence, and one surveyed corpus is non-commercial only.
+Any future release of the code-mixed spoof set must satisfy the strictest of these.
+
+\subsection{What the composition cannot tell us}
+
+The gap this paper measures is \emph{English studio speech to Hindi--English lecture
+speech}, because that is what the two corpora are. Language and recording domain move
+together, and the design cannot separate them on its own. The channel-matched columns
+isolate one of the two confounds; a monolingual-Hindi column would isolate the other
+and has not been built. Readers should take the headline gap as the combination of
+both effects, not as a measurement of code-mixing alone.
