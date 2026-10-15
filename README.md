@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%2011%20of%2012-yellow)
-![Tests](https://img.shields.io/badge/tests-752%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-week%2012%20of%2012-green)
+![Tests](https://img.shields.io/badge/tests-914%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -11,16 +11,19 @@ project **measures that gap under a channel-matched telephony protocol**, closes
 most of it with LoRA, and demonstrates it live — a cloned voice on a phone call
 triggers a beep in the receiver's ear, a dashboard alert, and an SMS.
 
-> **Status: Week 11 of 12 — all three systems measured against shortcut floors, and the demo now runs as two handsets on one monitored line, verified call by call.**
+> **Status: Week 12 of 12 — the external review is answered: five training seeds per phone-line system, matched shortcut floors, new speakers, the English trade-off, and 38 verified references.**
 >
-> Every bundle is now level-normalised, and every evaluation set carries its own
-> **shortcut floor** (the EER eight cheap signal statistics reach on those clips).
-> On the phone-line condition the deployed adapter (S2 LoRA, trained with XTTS and
-> RVC) scores **2.75%** on the seen tool against a 10.01% floor, **5.01%** on RVC
-> from unseen speakers against 22.46%, and keeps English at **2.42%**. Native
-> training (S3) is the seen-tool ceiling (**0.83%**) but **scores English at
-> chance (50.9–56.4%)**. No model reliably catches the never-seen Tortoise tool
-> over a phone line — stated, not hidden.
+> Every detector is compared with a **matched shortcut floor** (eight cheap signal
+> statistics fitted on its own training data, scored on its own clips) by a paired
+> test over speakers. On the phone-line condition the deployed adapter (S2 LoRA, XTTS
+> + RVC) scores **2.75%** on the seen tool (**3.27 ± 1.17** over five seeds, floor
+> 9.96%), **5.01%** on RVC from unseen speakers (**5.33 ± 1.27**, floor 20.52%) and
+> **2.42%** on clean English, but **24.20%** on English over the same phone line.
+> Against the never-seen Tortoise tool it averages **35.59 ± 3.35** over five seeds,
+> about at its 37.79% floor: it is not shown to detect an unseen tool on a phone
+> line — stated, not hidden. S3 trained on XTTS alone stays under its Tortoise floor
+> in every seed (**19.72 ± 5.36**). On 24 new speakers talking freely, the deployed
+> model calls **54%** of genuine speech fake.
 >
 > The live system scores every 4 s of a call and warns the receiver. On held-out
 > 60 s calls at the frozen threshold: **0% of genuine calls alerted; 100% of XTTS
@@ -91,6 +94,42 @@ Every number below comes from a real run on real data and is reproducible from
 [Reproduce](#reproduce). **Start with the week-10 summary**: it supersedes the
 pre-normalisation numbers in sections 1–5, which are kept as the record of how we
 got here.
+
+### Week 12 — five training seeds, and what the external review changed
+
+The external review asked for seeds and intervals, unseen-tool work, more speakers
+and the English trade-off ([`docs/external_review_response.md`](docs/external_review_response.md)).
+Phone line, EER %, mean ± sd over five training seeds; the last column counts seeds
+that beat their matched floor at the speaker level on Tortoise.
+
+| System | Seen tool (XTTS) | Unseen tool (Tortoise) | RVC, unseen speakers | Seeds beating the Tortoise floor |
+|---|---:|---:|---:|---:|
+| *Matched floor (XTTS + RVC data / XTTS data)* | *9.96 / 10.01* | *37.79 / 33.64* | *20.52 / 23.91* | |
+| **S2 LoRA — XTTS + RVC (deployed)** | 3.27 ± 1.17 | 35.59 ± 3.35 | 5.33 ± 1.27 | 0 of 5 |
+| S2 LoRA — XTTS | 3.45 ± 0.72 | 25.59 ± 5.27 | 27.07 ± 2.76 | 1 of 5 |
+| S3 native — XTTS | 1.78 ± 0.93 | **19.72 ± 5.36** | 36.83 ± 3.39 | 3 of 5 (all 5 below it) |
+| S2 + crop + augment + layer mix *(exploratory)* | 2.65 ± 0.53 | 26.63 ± 1.66 | 7.72 ± 1.33 | 0 of 5 |
+
+What it says:
+
+1. **The deployed model's published Tortoise number (30.99%) was a good draw.** Its
+   mean over seeds sits at its floor. Where it works it is stable: RVC beats its
+   floor in all five seeds.
+2. **S3 trained on XTTS alone is the dependable unseen-tool result**, below its floor
+   in every seed, at the cost of RVC.
+3. **Randomising the recording cues lowers Tortoise by 9 points** across seeds (exact
+   p = 0.008), but the variant was singled out after seeing a test score, does not
+   clear the floor, and is invisible on the dev set: a lead, not a result.
+4. **The deployed model suits Hindi–English calls only.** English over the phone line
+   rises to 24.20% (S1: 6.50%), and new speakers talking freely are called fake 54%
+   of the time.
+
+→ [`seed_stability_v1.md`](docs/results/seed_stability_v1.md) ·
+[`variants_v1.md`](docs/results/variants_v1.md) ·
+[`tradeoff_v1.md`](docs/results/tradeoff_v1.md) ·
+[`english_channel_v1.md`](docs/results/english_channel_v1.md) ·
+[`hiacc_false_alarm_v1.md`](docs/results/hiacc_false_alarm_v1.md) ·
+[`shortcut_floor_v2.md`](docs/results/shortcut_floor_v2.md)
 
 ### Week 10 — the three systems, each number beside its own floor
 
@@ -517,7 +556,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–10
+## Progress — Weeks 1–12
 
 Only completed work is listed. The full 12-week plan lives in the team drive,
 outside this repo.
@@ -536,9 +575,12 @@ outside this repo.
 
 | **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 over the channel, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
 
-**Open before the results freeze:** fund the Twilio account and re-verify the phone
-demo on real numbers (trial credit exhausted, PSTN leg unproven since week 10);
-seed-repeat the phone-line adapter; the results freeze meeting (W9-T5), then the paper.
+| **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
+
+**Open:** fund the Twilio account and re-verify the phone demo on real numbers (trial
+credit exhausted, PSTN leg unproven since week 10); two laptop CPU scores (S1 on the
+clean English sample, the deployed adapter on the clean RVC set); confirm the
+augmentation lead on a second unseen tool; submit the paper.
 
 ---
 
@@ -586,6 +628,15 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/results/demo_clips_live_check.json`](docs/results/demo_clips_live_check.json) | **Live-path check of every demo clip** — replayed through the browser call path rather than scored offline, because the two disagree. |
 | [`docs/results/carrier_effect_v1.md`](docs/results/carrier_effect_v1.md) | **What a carrier does to the scores** — the codec was the obvious explanation for that disagreement and it is wrong: Opus leaves both genuine clips at zero low windows. A withdrawn explanation, recorded. |
 | [`docs/results/interpretability_v1.md`](docs/results/interpretability_v1.md) | **What the detector responds to** — layer, band and phase probes for S1 and S2, and the evasion finding that turned out to be a shuffle bug. |
+| [`docs/external_review_response.md`](docs/external_review_response.md) | **The external review** — the six comments, what we checked, what changed, and what is still open |
+| [`docs/results/shortcut_floor_v2.md`](docs/results/shortcut_floor_v2.md) | **Matched shortcut floors** — each detector's floor fitted on its own training data, and the paired speaker-level test |
+| [`docs/results/seed_stability_v1.md`](docs/results/seed_stability_v1.md) | **Five training seeds** — the deployed Tortoise number was a good draw; S3 XTTS-only holds in every seed |
+| [`docs/results/variants_v1.md`](docs/results/variants_v1.md) | **Changes aimed at the unseen tool** — the dev-only selection, and the exploratory augmentation lead |
+| [`docs/results/tradeoff_v1.md`](docs/results/tradeoff_v1.md) | **Phone line vs clean** — every adapter in the condition it was not trained in |
+| [`docs/results/english_channel_v1.md`](docs/results/english_channel_v1.md) | **English over the phone line** — 2.30% clean, 24.20% over the line |
+| [`docs/results/hiacc_false_alarm_v1.md`](docs/results/hiacc_false_alarm_v1.md) | **New speakers talking freely** — 54% of genuine HiACC speech called fake |
+| [`docs/results/encoder_ablation_v1.md`](docs/results/encoder_ablation_v1.md) | **XLSR-53 against wav2vec2-base** — the larger encoder does not carry over |
+| [`docs/references_verification.md`](docs/references_verification.md) | Where every one of the 38 references was checked |
 | `docs/W<week>_<member>_<work>.md` | **Per-member weekly records** — what each of us did that week, the numbers we got, and the limitations we know about. One per person per week, e.g. [`docs/W9_krishna_cm02_gate_cm01_recovery.md`](docs/W9_krishna_cm02_gate_cm01_recovery.md) |
 
 ---
