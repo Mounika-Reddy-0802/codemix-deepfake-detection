@@ -1,0 +1,27 @@
+{
+  "checkpoint": "/kaggle/working/codemix-deepfake-detection/checkpoints/review/s3xtts_s42/best.pt",
+  "manifest": "data/manifests/codemix_eval_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.014635217113665389,
+    "eer_ci_low": 0.01054260441822391,
+    "eer_ci_high": 0.01895539513443343,
+    "auc": 0.9993582375478928,
+    "auc_ci_low": 0.9990752369835397,
+    "auc_ci_high": 0.9995802409938839,
+    "f1": 0.9815521628498728,
+    "threshold": 0.9932453036308289,
+    "clips": 3966,
+    "bonafide": 1566,
+    "spoof": 2400,
+    "score_std": 0.488238
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2400,
+      "eer": 0.014635
+    }
+  ]
+}

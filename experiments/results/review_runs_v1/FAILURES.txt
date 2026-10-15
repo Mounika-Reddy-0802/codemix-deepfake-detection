@@ -1,0 +1,43 @@
+== training deployed_crop_layers_s1234 (exit 1)
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 458, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 453, in main
+    result = train(cfg)
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 224, in train
+    model.load_state_dict(state["model"] if "model" in state else state)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 2639, in load_state_dict
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: Error(s) in loading state_dict for Detector:
+	Missing key(s) in state_dict: "encoder.layer_mix.logits". 
+device=cuda (Tesla T4, 14.6 GiB)
+
+== training deployed_crop_aug_layers_s1234 (exit 1)
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 458, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 453, in main
+    result = train(cfg)
+  File "/kaggle/working/codemix-deepfake-detection/src/training/train.py", line 224, in train
+    model.load_state_dict(state["model"] if "model" in state else state)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 2639, in load_state_dict
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: Error(s) in loading state_dict for Detector:
+	Missing key(s) in state_dict: "encoder.layer_mix.logits". 
+device=cuda (Tesla T4, 14.6 GiB)
