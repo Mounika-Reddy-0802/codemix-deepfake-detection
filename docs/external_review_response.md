@@ -27,10 +27,20 @@ on CM04 on two machines.
 **Done.** Speaker-level paired bootstrap implemented (`src/training/floor_compare.py`)
 and applied to all eight main-table systems (`docs/results/shortcut_floor_v2.md`).
 
-**Planned.** Retrain the deployed model, the XTTS-only channel model and S3 XTTS-only
-channel with seeds 2025, 7, 42, 99 (published recipe unchanged); report mean ± sd
-across the five seeds alongside the speaker-level intervals. About 20 T4-minutes per
-S2 seed, 45 per S3 seed.
+**Done (Mounika, `docs/results/seed_stability_v1.md`).** Five seeds each for the
+deployed model, S2 XTTS-only and S3 XTTS-only, phone line, published configs
+unchanged (`notebooks/kaggle_w12_review_runs.ipynb`; `src/reporting/seeds.py`). The
+deployed seed-1234 re-run reproduces the published run (CM04 30.14 vs 30.99).
+- Deployed: eval pool 3.27 ± 1.17 (beats floor in 3 of 5 seeds), **CM04 35.59 ± 3.35
+  (0 of 5)**, RVC 5.33 ± 1.27 (5 of 5). The published 30.99 on Tortoise was a
+  favourable draw.
+- S3 XTTS-only: **CM04 19.72 ± 5.36, below its floor in every seed (3 of 5
+  significant)**, but worse than its RVC floor in 4 of 5.
+- Seed spread on CM04 is 3-5 points for every system.
+
+**Done in the paper.** `results.tex`: a seed table (`tab:seeds`, `sec:seeds`), and
+Findings 1, 3, 5 and the summary quote seed means. Abstract, introduction and
+conclusion now state the Tortoise result from the seeds, not the single run.
 
 ## 2. Generalisation to unseen tools (Tortoise)
 
@@ -58,9 +68,24 @@ configs train exactly as before:
   systems, a second G.711 pass at a random 5-30 dB SNR (`src/data/augment.py`);
 - `layer_weighting` — a learned mix of every encoder layer (`LayerWeightedSum`).
 
-**Planned.** Train the deployed recipe with these options, select on dev only, then
-score CM04/RVC once; combine with 5 seeds (comment 1). Score fusion of the deployed
-model with S3 XTTS-only, weights set on dev.
+**Done (Krishna, `docs/results/variants_v1.md`).** The deployed recipe trained with
+four variants (crop; crop + augment; crop + layer mix; all three), chosen by the rule
+fixed in advance (dev EER only, ties within 0.5 points to fewer changes). The
+published recipe stays: no variant improves dev EER. The two layer-mix variants first
+crashed (strict load of the Stage-1 checkpoint, fixed in `load_initial_weights`) and
+were re-run.
+
+**Exploratory.** Crop + augment + layer mix, singled out after seeing its CM04 score
+(26.43), was retrained with four more seeds: **CM04 26.63 ± 1.66 against 35.59 ± 3.35
+for the published recipe**, every variant seed below every recipe seed (exact
+Mann-Whitney p = 0.008; 0.016 on the four seeds trained after the choice). RVC rises
+5.33 → 7.72; against the Tortoise floor it stays inconclusive in every seed. Its dev
+EER equals the recipe's, so the in-domain dev set cannot see unseen-tool gains.
+Reported in the paper as a lead to confirm on a second unseen tool
+(`results.tex`, `sec:variants`; conclusion, future work).
+
+**Not done.** Score fusion of the deployed model with S3 XTTS-only: it would need
+weights set on a dev set that, as above, cannot see the unseen tool.
 
 ## 3. More speakers and speaking styles
 
@@ -77,11 +102,20 @@ lectures), no spontaneous speech, no per-speaker results.
 (`experiments/results/floor_v2/per_speaker_eer.csv`). The deployed model's CM04 EER
 ranges 6.4-45.5% across speakers (median 28.1%).
 
-**Planned.** (a) Score HiACC adult speech (24 speakers, spontaneous; evaluation-only
-use is permitted) as a false-alarm test. (b) Add the existing CM01 XTTS clones of the
-13 RVC-train speakers to training (8 → 21 cloned voices, no new generation), subject to
-`config_guard`. (c) A new frozen speaker pool from unused MUCS speakers for a larger
-unseen-speaker test.
+**Done (new speakers, new style).** HiACC adult speech, 24 speakers no model has heard,
+talking spontaneously, scored over the phone line as a false-alarm test (evaluation
+only; the child partition untouched). The deployed model calls **54.37%** [44.43,
+64.15] of their genuine speech fake, against 0.89% for the read lectures of the
+evaluation pool; every speaker is above 10% (13.9-89.5%), and clip length does not
+explain it (`docs/results/hiacc_false_alarm_v1.md`, Lahari). The data chapter now
+states who each model hears (21 speakers for the deployed model) and who it is tested
+on (51 unseen speakers), with a speaker table (`dataset.tex`, `sec:data-speakers`).
+
+**Planned.** (b) Add the existing CM01 XTTS clones of the 13 RVC-train speakers to
+training (8 → 21 cloned voices, no new generation), subject to `config_guard`. (c) A
+new frozen speaker pool from unused MUCS speakers for a larger unseen-speaker test.
+(d) The HiACC test on the Kaggle variant models, to see whether augmentation lowers
+the false alarms.
 
 ## 4. Hinglish phone-line vs clean-English trade-off
 
@@ -95,8 +129,25 @@ model catches 77.4% of English fakes against 93.5% for S1
 (`classification_metrics_v1.md`). Not yet measured: channel models on clean Hinglish
 after normalisation, and English over the phone line.
 
-**Planned.** Score those two missing conditions (about 1 T4-hour plus about 50 minutes
-per model for English); add a trade-off table and a deployment paragraph.
+**Done.** Both missing conditions measured on the laptop CPU.
+- *Other condition* (Mounika, `docs/results/tradeoff_v1.md`): all four S2 adapters on
+  the three Hinglish sets in the condition they were not trained in, 11 of 12 cells.
+  Training over the phone line costs little on clean audio (deployed, evaluation pool:
+  2.75% → 6.71%); clean training costs a lot over the line (1.99% → 22.97%). Tortoise
+  is harder over the line whatever the training condition.
+- *English over the phone line* (Lahari, `docs/results/english_channel_v1.md`): a fixed
+  6,004-clip ASVspoof sample (all 13 attacks, all 67 speakers) through the same G.711
+  chain. The deployed model goes from 2.30% to **24.20%**, flagging 7.45% of genuine
+  English clips at its threshold; S1, never trained on phone audio, holds 6.50%.
+
+**Done in the paper.** `results.tex` has a new subsection, "The deployment trade-off"
+(`sec:tradeoff`), with the other-condition table and a deployment paragraph: the
+deployed model suits Hindi-English calls but should not judge English calls; the
+summary now says "clean English".
+
+**Still to do.** Two cells stopped when the laptop ran out of memory (the deployed
+adapter on the clean RVC set, about 2 minutes; S1 on the clean English sample, about
+17 minutes).
 
 ## 5. Interpreting the shortcut floor
 
@@ -121,8 +172,8 @@ abstract, introduction (a new "matched shortcut floors" contribution) and conclu
 no longer say the deployed model *loses* to the Tortoise floor: it is below its
 matched floor (30.99% vs 37.79%) but inconclusive at the speaker level.
 
-**Still to do.** Regenerate the two floor figures (`systems_s2_s3.png`,
-`ablation_rvc.png`), which still draw the old floors.
+**Done.** Both floor figures (`systems_s2_s3.png`, `ablation_rvc.png`) were redrawn
+with the matched floor per bar (`src/reporting/figures.py`).
 
 ## 6. Bibliography and positioning
 

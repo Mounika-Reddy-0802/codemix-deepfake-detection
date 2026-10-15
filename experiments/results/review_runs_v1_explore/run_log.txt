@@ -1,0 +1,712 @@
+
+$ /usr/bin/python3 -m src.training.train --config configs/review_deployed_crop_aug_layers_s2025.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+device=cuda (Tesla T4, 14.6 GiB)
+initialised from checkpoints/baseline/best.pt
+lora: r=8 alpha=16.0 on 48 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 1,082,384/95,454,096 (1.13%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 5 epochs
+  epoch 1/5 step 25/1785  loss 0.7304  0.78 steps/s  eta 38 min
+  epoch 1/5 step 50/1785  loss 0.6969  1.36 steps/s  eta 21 min
+  epoch 1/5 step 75/1785  loss 0.6738  1.79 steps/s  eta 16 min
+  epoch 1/5 step 100/1785  loss 0.6681  2.15 steps/s  eta 13 min
+  epoch 1/5 step 125/1785  loss 0.6273  2.44 steps/s  eta 11 min
+  epoch 1/5 step 150/1785  loss 0.6274  2.69 steps/s  eta 10 min
+  epoch 1/5 step 175/1785  loss 0.5809  2.89 steps/s  eta 9 min
+  epoch 1/5 step 200/1785  loss 0.5172  3.07 steps/s  eta 9 min
+  epoch 1/5 step 225/1785  loss 0.3945  3.22 steps/s  eta 8 min
+  epoch 1/5 step 250/1785  loss 0.3824  3.35 steps/s  eta 8 min
+  epoch 1/5 step 275/1785  loss 0.4614  3.47 steps/s  eta 7 min
+  epoch 1/5 step 300/1785  loss 0.3790  3.58 steps/s  eta 7 min
+  epoch 1/5 step 325/1785  loss 0.4091  3.67 steps/s  eta 7 min
+  epoch 1/5 step 350/1785  loss 0.3830  3.75 steps/s  eta 6 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.1561  score std 0.3135  (1.7 min elapsed)
+  epoch 2/5 step 375/1785  loss 0.3263  3.45 steps/s  eta 7 min
+  epoch 2/5 step 400/1785  loss 0.2995  3.53 steps/s  eta 7 min
+  epoch 2/5 step 425/1785  loss 0.2677  3.60 steps/s  eta 6 min
+  epoch 2/5 step 450/1785  loss 0.3087  3.66 steps/s  eta 6 min
+  epoch 2/5 step 475/1785  loss 0.2101  3.72 steps/s  eta 6 min
+  epoch 2/5 step 500/1785  loss 0.2994  3.78 steps/s  eta 6 min
+  epoch 2/5 step 525/1785  loss 0.2781  3.83 steps/s  eta 5 min
+  epoch 2/5 step 550/1785  loss 0.2227  3.87 steps/s  eta 5 min
+  epoch 2/5 step 575/1785  loss 0.2221  3.92 steps/s  eta 5 min
+  epoch 2/5 step 600/1785  loss 0.2176  3.96 steps/s  eta 5 min
+  epoch 2/5 step 625/1785  loss 0.2507  3.99 steps/s  eta 5 min
+  epoch 2/5 step 650/1785  loss 0.1967  4.03 steps/s  eta 5 min
+  epoch 2/5 step 675/1785  loss 0.1633  4.06 steps/s  eta 5 min
+  epoch 2/5 step 700/1785  loss 0.2661  4.09 steps/s  eta 4 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.1228  score std 0.2996  (3.1 min elapsed)
+  epoch 3/5 step 725/1785  loss 0.1262  3.88 steps/s  eta 5 min
+  epoch 3/5 step 750/1785  loss 0.1108  3.91 steps/s  eta 4 min
+  epoch 3/5 step 775/1785  loss 0.1394  3.94 steps/s  eta 4 min
+  epoch 3/5 step 800/1785  loss 0.1262  3.97 steps/s  eta 4 min
+  epoch 3/5 step 825/1785  loss 0.1138  3.99 steps/s  eta 4 min
+  epoch 3/5 step 850/1785  loss 0.2142  4.02 steps/s  eta 4 min
+  epoch 3/5 step 875/1785  loss 0.1213  4.04 steps/s  eta 4 min
+  epoch 3/5 step 900/1785  loss 0.1454  4.07 steps/s  eta 4 min
+  epoch 3/5 step 925/1785  loss 0.1877  4.09 steps/s  eta 4 min
+  epoch 3/5 step 950/1785  loss 0.0859  4.11 steps/s  eta 3 min
+  epoch 3/5 step 975/1785  loss 0.1088  4.13 steps/s  eta 3 min
+  epoch 3/5 step 1000/1785  loss 0.1322  4.15 steps/s  eta 3 min
+  epoch 3/5 step 1025/1785  loss 0.1301  4.17 steps/s  eta 3 min
+  epoch 3/5 step 1050/1785  loss 0.1405  4.18 steps/s  eta 3 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.0794  score std 0.4168  (4.4 min elapsed)
+  epoch 4/5 step 1075/1785  loss 0.1349  4.02 steps/s  eta 3 min
+  epoch 4/5 step 1100/1785  loss 0.1031  4.04 steps/s  eta 3 min
+  epoch 4/5 step 1125/1785  loss 0.0973  4.06 steps/s  eta 3 min
+  epoch 4/5 step 1150/1785  loss 0.0415  4.08 steps/s  eta 3 min
+  epoch 4/5 step 1175/1785  loss 0.0830  4.09 steps/s  eta 2 min
+  epoch 4/5 step 1200/1785  loss 0.0534  4.11 steps/s  eta 2 min
+  epoch 4/5 step 1225/1785  loss 0.0947  4.12 steps/s  eta 2 min
+  epoch 4/5 step 1250/1785  loss 0.1074  4.14 steps/s  eta 2 min
+  epoch 4/5 step 1275/1785  loss 0.0590  4.15 steps/s  eta 2 min
+  epoch 4/5 step 1300/1785  loss 0.0895  4.16 steps/s  eta 2 min
+  epoch 4/5 step 1325/1785  loss 0.0794  4.18 steps/s  eta 2 min
+  epoch 4/5 step 1350/1785  loss 0.0950  4.19 steps/s  eta 2 min
+  epoch 4/5 step 1375/1785  loss 0.0678  4.20 steps/s  eta 2 min
+  epoch 4/5 step 1400/1785  loss 0.1018  4.21 steps/s  eta 2 min
+  epoch 4/5 step 1425/1785  loss 0.0819  4.22 steps/s  eta 1 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.0534  score std 0.4632  (5.8 min elapsed)
+  epoch 5/5 step 1450/1785  loss 0.1650  4.09 steps/s  eta 1 min
+  epoch 5/5 step 1475/1785  loss 0.1161  4.11 steps/s  eta 1 min
+  epoch 5/5 step 1500/1785  loss 0.0825  4.12 steps/s  eta 1 min
+  epoch 5/5 step 1525/1785  loss 0.1099  4.13 steps/s  eta 1 min
+  epoch 5/5 step 1550/1785  loss 0.0352  4.14 steps/s  eta 1 min
+  epoch 5/5 step 1575/1785  loss 0.0879  4.15 steps/s  eta 1 min
+  epoch 5/5 step 1600/1785  loss 0.0321  4.16 steps/s  eta 1 min
+  epoch 5/5 step 1625/1785  loss 0.0576  4.17 steps/s  eta 1 min
+  epoch 5/5 step 1650/1785  loss 0.0444  4.18 steps/s  eta 1 min
+  epoch 5/5 step 1675/1785  loss 0.0230  4.19 steps/s  eta 0 min
+  epoch 5/5 step 1700/1785  loss 0.0614  4.20 steps/s  eta 0 min
+  epoch 5/5 step 1725/1785  loss 0.0652  4.21 steps/s  eta 0 min
+  epoch 5/5 step 1750/1785  loss 0.0689  4.22 steps/s  eta 0 min
+  epoch 5/5 step 1775/1785  loss 0.0242  4.23 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.0593  score std 0.4742  (7.2 min elapsed)
+done: best dev EER = 0.0534
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s2025/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s2025__eval_pool_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s2025__eval_pool.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.019161877394636012,
+  "eer_ci_low": 0.014625383562418777,
+  "eer_ci_high": 0.023934123979944513,
+  "auc": 0.9980103235419328,
+  "auc_ci_low": 0.9973507620764518,
+  "auc_ci_high": 0.9987437899497777,
+  "f1": 0.9758576874205845,
+  "threshold": 0.6969494223594666,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.475496
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips      eer
+xtts_v2         2400 0.019162
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s2025__eval_pool.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s2025__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s2025/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s2025__cm04_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s2025__cm04.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.2707479351057126,
+  "eer_ci_low": 0.24540274484820665,
+  "eer_ci_high": 0.2999579165015479,
+  "auc": 0.8092224508803337,
+  "auc_ci_low": 0.7886991536665355,
+  "auc_ci_high": 0.8306502949734812,
+  "f1": 0.8064971751412431,
+  "threshold": 0.9882594347000122,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.210456
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.270748
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s2025__cm04.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s2025__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s2025/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s2025__rvc_test_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s2025__rvc_test.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+
+=== pooled ===
+{
+  "eer": 0.05976977876198634,
+  "eer_ci_low": 0.04205987461887815,
+  "eer_ci_high": 0.08558336148458925,
+  "auc": 0.9636283869889486,
+  "auc_ci_low": 0.9431794697408388,
+  "auc_ci_high": 0.980069946622899,
+  "f1": 0.9388429752066115,
+  "threshold": 0.9352410435676575,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.460749
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips     eer
+   rvc          317 0.05977
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s2025__rvc_test.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s2025__rvc_test_scores.csv
+
+$ /usr/bin/python3 -m src.training.train --config configs/review_deployed_crop_aug_layers_s7.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+device=cuda (Tesla T4, 14.6 GiB)
+initialised from checkpoints/baseline/best.pt
+lora: r=8 alpha=16.0 on 48 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 1,082,384/95,454,096 (1.13%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 5 epochs
+  epoch 1/5 step 25/1785  loss 0.7127  3.21 steps/s  eta 9 min
+  epoch 1/5 step 50/1785  loss 0.6874  3.95 steps/s  eta 7 min
+  epoch 1/5 step 75/1785  loss 0.6704  4.27 steps/s  eta 7 min
+  epoch 1/5 step 100/1785  loss 0.6668  4.45 steps/s  eta 6 min
+  epoch 1/5 step 125/1785  loss 0.6022  4.56 steps/s  eta 6 min
+  epoch 1/5 step 150/1785  loss 0.5939  4.64 steps/s  eta 6 min
+  epoch 1/5 step 175/1785  loss 0.6047  4.70 steps/s  eta 6 min
+  epoch 1/5 step 200/1785  loss 0.4944  4.74 steps/s  eta 6 min
+  epoch 1/5 step 225/1785  loss 0.4317  4.77 steps/s  eta 5 min
+  epoch 1/5 step 250/1785  loss 0.4243  4.80 steps/s  eta 5 min
+  epoch 1/5 step 275/1785  loss 0.4056  4.82 steps/s  eta 5 min
+  epoch 1/5 step 300/1785  loss 0.3455  4.84 steps/s  eta 5 min
+  epoch 1/5 step 325/1785  loss 0.2742  4.85 steps/s  eta 5 min
+  epoch 1/5 step 350/1785  loss 0.3195  4.86 steps/s  eta 5 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.2037  score std 0.3292  (1.4 min elapsed)
+  epoch 2/5 step 375/1785  loss 0.3175  4.24 steps/s  eta 6 min
+  epoch 2/5 step 400/1785  loss 0.3095  4.28 steps/s  eta 5 min
+  epoch 2/5 step 425/1785  loss 0.3808  4.32 steps/s  eta 5 min
+  epoch 2/5 step 450/1785  loss 0.3062  4.35 steps/s  eta 5 min
+  epoch 2/5 step 475/1785  loss 0.1951  4.38 steps/s  eta 5 min
+  epoch 2/5 step 500/1785  loss 0.1635  4.41 steps/s  eta 5 min
+  epoch 2/5 step 525/1785  loss 0.2147  4.43 steps/s  eta 5 min
+  epoch 2/5 step 550/1785  loss 0.2391  4.45 steps/s  eta 5 min
+  epoch 2/5 step 575/1785  loss 0.1676  4.47 steps/s  eta 5 min
+  epoch 2/5 step 600/1785  loss 0.2013  4.49 steps/s  eta 4 min
+  epoch 2/5 step 625/1785  loss 0.1615  4.51 steps/s  eta 4 min
+  epoch 2/5 step 650/1785  loss 0.1486  4.52 steps/s  eta 4 min
+  epoch 2/5 step 675/1785  loss 0.1143  4.54 steps/s  eta 4 min
+  epoch 2/5 step 700/1785  loss 0.1157  4.55 steps/s  eta 4 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.1243  score std 0.4127  (2.8 min elapsed)
+  epoch 3/5 step 725/1785  loss 0.1530  4.25 steps/s  eta 4 min
+  epoch 3/5 step 750/1785  loss 0.0784  4.27 steps/s  eta 4 min
+  epoch 3/5 step 775/1785  loss 0.1170  4.29 steps/s  eta 4 min
+  epoch 3/5 step 800/1785  loss 0.0863  4.31 steps/s  eta 4 min
+  epoch 3/5 step 825/1785  loss 0.1838  4.32 steps/s  eta 4 min
+  epoch 3/5 step 850/1785  loss 0.1524  4.34 steps/s  eta 4 min
+  epoch 3/5 step 875/1785  loss 0.1019  4.35 steps/s  eta 3 min
+  epoch 3/5 step 900/1785  loss 0.0899  4.37 steps/s  eta 3 min
+  epoch 3/5 step 925/1785  loss 0.0821  4.38 steps/s  eta 3 min
+  epoch 3/5 step 950/1785  loss 0.0570  4.39 steps/s  eta 3 min
+  epoch 3/5 step 975/1785  loss 0.0924  4.41 steps/s  eta 3 min
+  epoch 3/5 step 1000/1785  loss 0.0587  4.42 steps/s  eta 3 min
+  epoch 3/5 step 1025/1785  loss 0.1055  4.43 steps/s  eta 3 min
+  epoch 3/5 step 1050/1785  loss 0.0882  4.44 steps/s  eta 3 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.0751  score std 0.3915  (4.2 min elapsed)
+  epoch 4/5 step 1075/1785  loss 0.1068  4.24 steps/s  eta 3 min
+  epoch 4/5 step 1100/1785  loss 0.0588  4.25 steps/s  eta 3 min
+  epoch 4/5 step 1125/1785  loss 0.0577  4.27 steps/s  eta 3 min
+  epoch 4/5 step 1150/1785  loss 0.0788  4.28 steps/s  eta 2 min
+  epoch 4/5 step 1175/1785  loss 0.0666  4.29 steps/s  eta 2 min
+  epoch 4/5 step 1200/1785  loss 0.1887  4.30 steps/s  eta 2 min
+  epoch 4/5 step 1225/1785  loss 0.1193  4.31 steps/s  eta 2 min
+  epoch 4/5 step 1250/1785  loss 0.0581  4.33 steps/s  eta 2 min
+  epoch 4/5 step 1275/1785  loss 0.0719  4.34 steps/s  eta 2 min
+  epoch 4/5 step 1300/1785  loss 0.0944  4.35 steps/s  eta 2 min
+  epoch 4/5 step 1325/1785  loss 0.1296  4.36 steps/s  eta 2 min
+  epoch 4/5 step 1350/1785  loss 0.0489  4.36 steps/s  eta 2 min
+  epoch 4/5 step 1375/1785  loss 0.0813  4.37 steps/s  eta 2 min
+  epoch 4/5 step 1400/1785  loss 0.1038  4.38 steps/s  eta 1 min
+  epoch 4/5 step 1425/1785  loss 0.0265  4.39 steps/s  eta 1 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.0809  score std 0.3010  (5.6 min elapsed)
+  epoch 5/5 step 1450/1785  loss 0.0364  4.25 steps/s  eta 1 min
+  epoch 5/5 step 1475/1785  loss 0.0940  4.26 steps/s  eta 1 min
+  epoch 5/5 step 1500/1785  loss 0.0762  4.27 steps/s  eta 1 min
+  epoch 5/5 step 1525/1785  loss 0.0983  4.28 steps/s  eta 1 min
+  epoch 5/5 step 1550/1785  loss 0.0396  4.29 steps/s  eta 1 min
+  epoch 5/5 step 1575/1785  loss 0.0404  4.29 steps/s  eta 1 min
+  epoch 5/5 step 1600/1785  loss 0.0456  4.30 steps/s  eta 1 min
+  epoch 5/5 step 1625/1785  loss 0.0523  4.31 steps/s  eta 1 min
+  epoch 5/5 step 1650/1785  loss 0.0157  4.32 steps/s  eta 1 min
+  epoch 5/5 step 1675/1785  loss 0.0408  4.33 steps/s  eta 0 min
+  epoch 5/5 step 1700/1785  loss 0.0780  4.34 steps/s  eta 0 min
+  epoch 5/5 step 1725/1785  loss 0.0458  4.34 steps/s  eta 0 min
+  epoch 5/5 step 1750/1785  loss 0.0420  4.35 steps/s  eta 0 min
+  epoch 5/5 step 1775/1785  loss 0.0342  4.36 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.0751  score std 0.4703  (7.0 min elapsed)
+done: best dev EER = 0.0751
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s7/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s7__eval_pool_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s7__eval_pool.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.025479725415070244,
+  "eer_ci_low": 0.020716905778603006,
+  "eer_ci_high": 0.029799524087211815,
+  "auc": 0.998083226905066,
+  "auc_ci_low": 0.9974330401570835,
+  "auc_ci_high": 0.9986605408436812,
+  "f1": 0.9679670155407549,
+  "threshold": 0.9286941289901733,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.478386
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips     eer
+xtts_v2         2400 0.02548
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s7__eval_pool.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s7__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s7/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s7__cm04_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s7__cm04.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.28810224921503347,
+  "eer_ci_low": 0.2624070233565789,
+  "eer_ci_high": 0.30950014961847244,
+  "auc": 0.7994089745520253,
+  "auc_ci_low": 0.7799932754834481,
+  "auc_ci_high": 0.8189628194824535,
+  "f1": 0.7927479559189478,
+  "threshold": 0.9940286874771118,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.170289
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.288102
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s7__cm04.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s7__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s7/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s7__rvc_test_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s7__rvc_test.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+
+=== pooled ===
+{
+  "eer": 0.08886602460985649,
+  "eer_ci_low": 0.06934913565442893,
+  "eer_ci_high": 0.11641199035669568,
+  "auc": 0.9426431570810788,
+  "auc_ci_low": 0.9223175663785752,
+  "auc_ci_high": 0.9619470208932621,
+  "f1": 0.9090909090909091,
+  "threshold": 0.9888113737106323,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.459669
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips      eer
+   rvc          317 0.088866
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s7__rvc_test.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s7__rvc_test_scores.csv
+
+$ /usr/bin/python3 -m src.training.train --config configs/review_deployed_crop_aug_layers_s42.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+device=cuda (Tesla T4, 14.6 GiB)
+initialised from checkpoints/baseline/best.pt
+lora: r=8 alpha=16.0 on 48 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 1,082,384/95,454,096 (1.13%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 5 epochs
+  epoch 1/5 step 25/1785  loss 0.7138  3.22 steps/s  eta 9 min
+  epoch 1/5 step 50/1785  loss 0.6959  3.94 steps/s  eta 7 min
+  epoch 1/5 step 75/1785  loss 0.6830  4.27 steps/s  eta 7 min
+  epoch 1/5 step 100/1785  loss 0.6710  4.45 steps/s  eta 6 min
+  epoch 1/5 step 125/1785  loss 0.6287  4.57 steps/s  eta 6 min
+  epoch 1/5 step 150/1785  loss 0.6191  4.65 steps/s  eta 6 min
+  epoch 1/5 step 175/1785  loss 0.5814  4.71 steps/s  eta 6 min
+  epoch 1/5 step 200/1785  loss 0.5106  4.75 steps/s  eta 6 min
+  epoch 1/5 step 225/1785  loss 0.4573  4.78 steps/s  eta 5 min
+  epoch 1/5 step 250/1785  loss 0.3863  4.81 steps/s  eta 5 min
+  epoch 1/5 step 275/1785  loss 0.3005  4.83 steps/s  eta 5 min
+  epoch 1/5 step 300/1785  loss 0.3675  4.84 steps/s  eta 5 min
+  epoch 1/5 step 325/1785  loss 0.2649  4.86 steps/s  eta 5 min
+  epoch 1/5 step 350/1785  loss 0.2555  4.87 steps/s  eta 5 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.2037  score std 0.3783  (1.4 min elapsed)
+  epoch 2/5 step 375/1785  loss 0.3287  4.24 steps/s  eta 6 min
+  epoch 2/5 step 400/1785  loss 0.2416  4.29 steps/s  eta 5 min
+  epoch 2/5 step 425/1785  loss 0.1632  4.32 steps/s  eta 5 min
+  epoch 2/5 step 450/1785  loss 0.2624  4.35 steps/s  eta 5 min
+  epoch 2/5 step 475/1785  loss 0.1777  4.38 steps/s  eta 5 min
+  epoch 2/5 step 500/1785  loss 0.2311  4.41 steps/s  eta 5 min
+  epoch 2/5 step 525/1785  loss 0.1626  4.43 steps/s  eta 5 min
+  epoch 2/5 step 550/1785  loss 0.1647  4.46 steps/s  eta 5 min
+  epoch 2/5 step 575/1785  loss 0.1732  4.48 steps/s  eta 5 min
+  epoch 2/5 step 600/1785  loss 0.0894  4.49 steps/s  eta 4 min
+  epoch 2/5 step 625/1785  loss 0.1468  4.51 steps/s  eta 4 min
+  epoch 2/5 step 650/1785  loss 0.1501  4.53 steps/s  eta 4 min
+  epoch 2/5 step 675/1785  loss 0.0893  4.54 steps/s  eta 4 min
+  epoch 2/5 step 700/1785  loss 0.1545  4.55 steps/s  eta 4 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.1185  score std 0.4236  (2.8 min elapsed)
+  epoch 3/5 step 725/1785  loss 0.1254  4.25 steps/s  eta 4 min
+  epoch 3/5 step 750/1785  loss 0.1745  4.27 steps/s  eta 4 min
+  epoch 3/5 step 775/1785  loss 0.0815  4.29 steps/s  eta 4 min
+  epoch 3/5 step 800/1785  loss 0.0800  4.31 steps/s  eta 4 min
+  epoch 3/5 step 825/1785  loss 0.0596  4.32 steps/s  eta 4 min
+  epoch 3/5 step 850/1785  loss 0.0749  4.34 steps/s  eta 4 min
+  epoch 3/5 step 875/1785  loss 0.1303  4.35 steps/s  eta 3 min
+  epoch 3/5 step 900/1785  loss 0.1261  4.37 steps/s  eta 3 min
+  epoch 3/5 step 925/1785  loss 0.0355  4.38 steps/s  eta 3 min
+  epoch 3/5 step 950/1785  loss 0.0741  4.39 steps/s  eta 3 min
+  epoch 3/5 step 975/1785  loss 0.1696  4.41 steps/s  eta 3 min
+  epoch 3/5 step 1000/1785  loss 0.0772  4.42 steps/s  eta 3 min
+  epoch 3/5 step 1025/1785  loss 0.1039  4.43 steps/s  eta 3 min
+  epoch 3/5 step 1050/1785  loss 0.0890  4.44 steps/s  eta 3 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.0751  score std 0.3933  (4.2 min elapsed)
+  epoch 4/5 step 1075/1785  loss 0.0379  4.24 steps/s  eta 3 min
+  epoch 4/5 step 1100/1785  loss 0.0700  4.26 steps/s  eta 3 min
+  epoch 4/5 step 1125/1785  loss 0.1040  4.27 steps/s  eta 3 min
+  epoch 4/5 step 1150/1785  loss 0.0921  4.28 steps/s  eta 2 min
+  epoch 4/5 step 1175/1785  loss 0.0389  4.29 steps/s  eta 2 min
+  epoch 4/5 step 1200/1785  loss 0.0390  4.31 steps/s  eta 2 min
+  epoch 4/5 step 1225/1785  loss 0.0644  4.32 steps/s  eta 2 min
+  epoch 4/5 step 1250/1785  loss 0.0446  4.33 steps/s  eta 2 min
+  epoch 4/5 step 1275/1785  loss 0.0550  4.34 steps/s  eta 2 min
+  epoch 4/5 step 1300/1785  loss 0.0732  4.35 steps/s  eta 2 min
+  epoch 4/5 step 1325/1785  loss 0.0180  4.36 steps/s  eta 2 min
+  epoch 4/5 step 1350/1785  loss 0.0379  4.37 steps/s  eta 2 min
+  epoch 4/5 step 1375/1785  loss 0.0497  4.38 steps/s  eta 2 min
+  epoch 4/5 step 1400/1785  loss 0.0290  4.39 steps/s  eta 1 min
+  epoch 4/5 step 1425/1785  loss 0.0886  4.39 steps/s  eta 1 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.0709  score std 0.3335  (5.6 min elapsed)
+  epoch 5/5 step 1450/1785  loss 0.0227  4.25 steps/s  eta 1 min
+  epoch 5/5 step 1475/1785  loss 0.0377  4.26 steps/s  eta 1 min
+  epoch 5/5 step 1500/1785  loss 0.0304  4.27 steps/s  eta 1 min
+  epoch 5/5 step 1525/1785  loss 0.0630  4.28 steps/s  eta 1 min
+  epoch 5/5 step 1550/1785  loss 0.0646  4.29 steps/s  eta 1 min
+  epoch 5/5 step 1575/1785  loss 0.0463  4.30 steps/s  eta 1 min
+  epoch 5/5 step 1600/1785  loss 0.0603  4.30 steps/s  eta 1 min
+  epoch 5/5 step 1625/1785  loss 0.0385  4.31 steps/s  eta 1 min
+  epoch 5/5 step 1650/1785  loss 0.0564  4.32 steps/s  eta 1 min
+  epoch 5/5 step 1675/1785  loss 0.0353  4.33 steps/s  eta 0 min
+  epoch 5/5 step 1700/1785  loss 0.0971  4.34 steps/s  eta 0 min
+  epoch 5/5 step 1725/1785  loss 0.0787  4.34 steps/s  eta 0 min
+  epoch 5/5 step 1750/1785  loss 0.0255  4.35 steps/s  eta 0 min
+  epoch 5/5 step 1775/1785  loss 0.0440  4.36 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.0751  score std 0.4655  (7.0 min elapsed)
+done: best dev EER = 0.0709
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s42/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s42__eval_pool_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s42__eval_pool.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.025479725415070244,
+  "eer_ci_low": 0.02068691561860417,
+  "eer_ci_high": 0.030283555816551098,
+  "auc": 0.998060211792252,
+  "auc_ci_low": 0.9974617508862021,
+  "auc_ci_high": 0.9986000414131898,
+  "f1": 0.9679670155407549,
+  "threshold": 0.9850425720214844,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.480571
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips     eer
+xtts_v2         2400 0.02548
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s42__eval_pool.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s42__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s42/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s42__cm04_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s42__cm04.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.24186869447372383,
+  "eer_ci_low": 0.21787093809886546,
+  "eer_ci_high": 0.263250720244238,
+  "auc": 0.8500462893250124,
+  "auc_ci_low": 0.8299196922389319,
+  "auc_ci_high": 0.868766330918631,
+  "f1": 0.8293193717277487,
+  "threshold": 0.997584342956543,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.162242
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.241869
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s42__cm04.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s42__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s42/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s42__rvc_test_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s42__rvc_test.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+
+=== pooled ===
+{
+  "eer": 0.07270144358326196,
+  "eer_ci_low": 0.05004917188719201,
+  "eer_ci_high": 0.09047062262496347,
+  "auc": 0.9641715586938809,
+  "auc_ci_low": 0.9475081727818111,
+  "auc_ci_high": 0.97980371036162,
+  "f1": 0.9256198347107437,
+  "threshold": 0.9957927465438843,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.440869
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips      eer
+   rvc          317 0.072701
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s42__rvc_test.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s42__rvc_test_scores.csv
+
+$ /usr/bin/python3 -m src.training.train --config configs/review_deployed_crop_aug_layers_s99.yaml --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+device=cuda (Tesla T4, 14.6 GiB)
+initialised from checkpoints/baseline/best.pt
+lora: r=8 alpha=16.0 on 48 layers ('q_proj', 'k_proj', 'v_proj', 'out_proj'); trainable 1,082,384/95,454,096 (1.13%)
+class weights: spoof 0.872, bonafide 1.173 (from 1637 spoof / 1217 bonafide)
+training: 2854 train / 506 dev clips, batch 8, 357 steps/epoch x 5 epochs
+  epoch 1/5 step 25/1785  loss 0.7206  3.23 steps/s  eta 9 min
+  epoch 1/5 step 50/1785  loss 0.6926  3.97 steps/s  eta 7 min
+  epoch 1/5 step 75/1785  loss 0.6789  4.29 steps/s  eta 7 min
+  epoch 1/5 step 100/1785  loss 0.6506  4.46 steps/s  eta 6 min
+  epoch 1/5 step 125/1785  loss 0.6453  4.58 steps/s  eta 6 min
+  epoch 1/5 step 150/1785  loss 0.5970  4.66 steps/s  eta 6 min
+  epoch 1/5 step 175/1785  loss 0.5646  4.71 steps/s  eta 6 min
+  epoch 1/5 step 200/1785  loss 0.4675  4.76 steps/s  eta 6 min
+  epoch 1/5 step 225/1785  loss 0.4003  4.79 steps/s  eta 5 min
+  epoch 1/5 step 250/1785  loss 0.3869  4.81 steps/s  eta 5 min
+  epoch 1/5 step 275/1785  loss 0.3145  4.83 steps/s  eta 5 min
+  epoch 1/5 step 300/1785  loss 0.3540  4.85 steps/s  eta 5 min
+  epoch 1/5 step 325/1785  loss 0.3648  4.86 steps/s  eta 5 min
+  epoch 1/5 step 350/1785  loss 0.3523  4.87 steps/s  eta 5 min
+  evaluating on 506 dev clips ...
+  epoch 1: dev EER 0.1243  score std 0.3783  (1.4 min elapsed)
+  epoch 2/5 step 375/1785  loss 0.2961  4.24 steps/s  eta 6 min
+  epoch 2/5 step 400/1785  loss 0.3152  4.28 steps/s  eta 5 min
+  epoch 2/5 step 425/1785  loss 0.2309  4.32 steps/s  eta 5 min
+  epoch 2/5 step 450/1785  loss 0.2523  4.35 steps/s  eta 5 min
+  epoch 2/5 step 475/1785  loss 0.2063  4.38 steps/s  eta 5 min
+  epoch 2/5 step 500/1785  loss 0.2431  4.40 steps/s  eta 5 min
+  epoch 2/5 step 525/1785  loss 0.3241  4.42 steps/s  eta 5 min
+  epoch 2/5 step 550/1785  loss 0.2390  4.45 steps/s  eta 5 min
+  epoch 2/5 step 575/1785  loss 0.1583  4.47 steps/s  eta 5 min
+  epoch 2/5 step 600/1785  loss 0.2015  4.48 steps/s  eta 4 min
+  epoch 2/5 step 625/1785  loss 0.1825  4.50 steps/s  eta 4 min
+  epoch 2/5 step 650/1785  loss 0.1670  4.52 steps/s  eta 4 min
+  epoch 2/5 step 675/1785  loss 0.1055  4.53 steps/s  eta 4 min
+  epoch 2/5 step 700/1785  loss 0.1674  4.55 steps/s  eta 4 min
+  evaluating on 506 dev clips ...
+  epoch 2: dev EER 0.1069  score std 0.4400  (2.8 min elapsed)
+  epoch 3/5 step 725/1785  loss 0.1434  4.24 steps/s  eta 4 min
+  epoch 3/5 step 750/1785  loss 0.1749  4.26 steps/s  eta 4 min
+  epoch 3/5 step 775/1785  loss 0.1608  4.28 steps/s  eta 4 min
+  epoch 3/5 step 800/1785  loss 0.1753  4.30 steps/s  eta 4 min
+  epoch 3/5 step 825/1785  loss 0.1943  4.32 steps/s  eta 4 min
+  epoch 3/5 step 850/1785  loss 0.0649  4.33 steps/s  eta 4 min
+  epoch 3/5 step 875/1785  loss 0.0651  4.35 steps/s  eta 3 min
+  epoch 3/5 step 900/1785  loss 0.1628  4.36 steps/s  eta 3 min
+  epoch 3/5 step 925/1785  loss 0.1307  4.37 steps/s  eta 3 min
+  epoch 3/5 step 950/1785  loss 0.0830  4.39 steps/s  eta 3 min
+  epoch 3/5 step 975/1785  loss 0.0787  4.40 steps/s  eta 3 min
+  epoch 3/5 step 1000/1785  loss 0.0829  4.41 steps/s  eta 3 min
+  epoch 3/5 step 1025/1785  loss 0.1370  4.42 steps/s  eta 3 min
+  epoch 3/5 step 1050/1785  loss 0.0590  4.43 steps/s  eta 3 min
+  evaluating on 506 dev clips ...
+  epoch 3: dev EER 0.0794  score std 0.4117  (4.2 min elapsed)
+  epoch 4/5 step 1075/1785  loss 0.1042  4.24 steps/s  eta 3 min
+  epoch 4/5 step 1100/1785  loss 0.0741  4.25 steps/s  eta 3 min
+  epoch 4/5 step 1125/1785  loss 0.0987  4.26 steps/s  eta 3 min
+  epoch 4/5 step 1150/1785  loss 0.0999  4.28 steps/s  eta 2 min
+  epoch 4/5 step 1175/1785  loss 0.0481  4.29 steps/s  eta 2 min
+  epoch 4/5 step 1200/1785  loss 0.0719  4.30 steps/s  eta 2 min
+  epoch 4/5 step 1225/1785  loss 0.0474  4.31 steps/s  eta 2 min
+  epoch 4/5 step 1250/1785  loss 0.0845  4.32 steps/s  eta 2 min
+  epoch 4/5 step 1275/1785  loss 0.1385  4.33 steps/s  eta 2 min
+  epoch 4/5 step 1300/1785  loss 0.0584  4.34 steps/s  eta 2 min
+  epoch 4/5 step 1325/1785  loss 0.0995  4.35 steps/s  eta 2 min
+  epoch 4/5 step 1350/1785  loss 0.1170  4.36 steps/s  eta 2 min
+  epoch 4/5 step 1375/1785  loss 0.1233  4.37 steps/s  eta 2 min
+  epoch 4/5 step 1400/1785  loss 0.0533  4.38 steps/s  eta 1 min
+  epoch 4/5 step 1425/1785  loss 0.0709  4.39 steps/s  eta 1 min
+  evaluating on 506 dev clips ...
+  epoch 4: dev EER 0.0651  score std 0.4678  (5.6 min elapsed)
+  epoch 5/5 step 1450/1785  loss 0.0689  4.24 steps/s  eta 1 min
+  epoch 5/5 step 1475/1785  loss 0.0654  4.25 steps/s  eta 1 min
+  epoch 5/5 step 1500/1785  loss 0.0478  4.26 steps/s  eta 1 min
+  epoch 5/5 step 1525/1785  loss 0.0874  4.27 steps/s  eta 1 min
+  epoch 5/5 step 1550/1785  loss 0.0351  4.28 steps/s  eta 1 min
+  epoch 5/5 step 1575/1785  loss 0.0292  4.29 steps/s  eta 1 min
+  epoch 5/5 step 1600/1785  loss 0.0778  4.30 steps/s  eta 1 min
+  epoch 5/5 step 1625/1785  loss 0.0298  4.30 steps/s  eta 1 min
+  epoch 5/5 step 1650/1785  loss 0.1072  4.31 steps/s  eta 1 min
+  epoch 5/5 step 1675/1785  loss 0.0506  4.32 steps/s  eta 0 min
+  epoch 5/5 step 1700/1785  loss 0.0230  4.33 steps/s  eta 0 min
+  epoch 5/5 step 1725/1785  loss 0.0684  4.34 steps/s  eta 0 min
+  epoch 5/5 step 1750/1785  loss 0.0481  4.34 steps/s  eta 0 min
+  epoch 5/5 step 1775/1785  loss 0.0372  4.35 steps/s  eta 0 min
+  evaluating on 506 dev clips ...
+  epoch 5: dev EER 0.0693  score std 0.4614  (7.0 min elapsed)
+done: best dev EER = 0.0651
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s99/best.pt --manifest data/manifests/codemix_eval_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s99__eval_pool_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s99__eval_pool.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/3966 clips
+  scored 3200/3966 clips
+
+=== pooled ===
+{
+  "eer": 0.028742816091954025,
+  "eer_ci_low": 0.02397954826179047,
+  "eer_ci_high": 0.034795672577965904,
+  "auc": 0.9962507982120051,
+  "auc_ci_low": 0.9953302105816445,
+  "auc_ci_high": 0.9971713531326806,
+  "f1": 0.9638783269961976,
+  "threshold": 0.2619328498840332,
+  "clips": 3966,
+  "bonafide": 1566,
+  "spoof": 2400,
+  "score_std": 0.476018
+}
+
+=== per attack (worst first) ===
+ attack  spoof_clips      eer
+xtts_v2         2400 0.028743
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s99__eval_pool.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s99__eval_pool_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s99/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s99__cm04_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s99__cm04.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+  scored 1600/2024 clips
+
+=== pooled ===
+{
+  "eer": 0.26664882017991487,
+  "eer_ci_low": 0.2381814504506865,
+  "eer_ci_high": 0.2863794906425193,
+  "auc": 0.811919640616373,
+  "auc_ci_low": 0.7945864533329692,
+  "auc_ci_high": 0.8325794086506257,
+  "f1": 0.8095909732016925,
+  "threshold": 0.989503026008606,
+  "clips": 2024,
+  "bonafide": 1566,
+  "spoof": 458,
+  "score_std": 0.262688
+}
+
+=== per attack (worst first) ===
+  attack  spoof_clips      eer
+tortoise          458 0.266649
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s99__cm04.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s99__cm04_scores.csv
+
+$ /usr/bin/python3 -m src.training.evaluate --checkpoint /kaggle/working/codemix-deepfake-detection/checkpoints/review/deployed_crop_aug_layers_s99/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --encoder wav2vec2-base --data-root /kaggle/input/datasets/saikrishnareddy9/codemix-bundle-normalised/channel --device cuda --batch-size 32 --num-workers 4 --max-seconds 4.0 --scores-out /kaggle/working/review_results/deployed_crop_aug_layers_s99__rvc_test_scores.csv --out /kaggle/working/review_results/deployed_crop_aug_layers_s99__rvc_test.json
+/usr/local/lib/python3.13/dist-packages/transformers/configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+  lora checkpoint: r=8 alpha=16.0 restored on 48 layers ('k_proj', 'out_proj', 'q_proj', 'v_proj')
+
+=== pooled ===
+{
+  "eer": 0.09209894081517539,
+  "eer_ci_low": 0.06772849537462773,
+  "eer_ci_high": 0.11793430788392412,
+  "auc": 0.9449934192658825,
+  "auc_ci_low": 0.9232726507316217,
+  "auc_ci_high": 0.9650050056915304,
+  "f1": 0.905785123966942,
+  "threshold": 0.8769434690475464,
+  "clips": 619,
+  "bonafide": 302,
+  "spoof": 317,
+  "score_std": 0.481613
+}
+
+=== per attack (worst first) ===
+attack  spoof_clips      eer
+   rvc          317 0.092099
+
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s99__rvc_test.json
+wrote /kaggle/working/review_results/deployed_crop_aug_layers_s99__rvc_test_scores.csv

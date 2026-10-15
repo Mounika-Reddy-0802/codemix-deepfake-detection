@@ -57,8 +57,9 @@ conditions, which fails it.
     (Section~\ref{sec:gap}).
   \item \textbf{A cheap closure.} Low-rank adapters~\cite{hu2022lora} over a frozen
     wav2vec~2.0 encoder~\cite{baevski2020wav2vec}, training \textbf{1.13\% of the
-    parameters}, bring channel-matched code-mixed error to \textbf{2.75\% EER} while
-    retaining 2.42\% on English (Section~\ref{sec:systems}).
+    parameters}, bring channel-matched code-mixed error to \textbf{2.75\% EER}
+    (3.27\% $\pm$ 1.17 over five training seeds) while retaining 2.42\% on clean
+    English (Section~\ref{sec:systems}).
   \item \textbf{Matched shortcut floors.} Every detector is compared with a floor of
     eight cheap signal statistics fitted on its own training data and scored on its
     own clips, by a paired bootstrap over speakers. A floor fitted on the unseen tool
@@ -67,10 +68,13 @@ conditions, which fails it.
     overstated several of our own results (Section~\ref{sec:floor}).
   \item \textbf{An honest generalisation result.} Against a cloning tool no model was
     ever allowed to see, the adapters generalise on clean audio (5.44\% EER against a
-    29.49\% floor). Over the telephone channel the deployed model's 30.99\% is below
-    its 37.79\% floor but \emph{not significantly so} at the speaker level; only full
-    fine-tuning on a single attack family clears the floor (13.71\%). We report the
-    weak result as prominently as the strong one.
+    29.49\% floor). Over the telephone channel the deployed model averages 35.59\%
+    across five training seeds against a 37.79\% floor and beats it in \emph{no} seed
+    at the speaker level; full fine-tuning on a single attack family stays below its
+    floor in every seed (19.72\%). Randomising the recording cues during training
+    lowers the deployed recipe to 26.63\% over five seeds, which we report as
+    exploratory (Section~\ref{sec:variants}). We report the weak result as
+    prominently as the strong one.
   \item \textbf{Adaptation beats full fine-tuning where it matters.} Training the
     whole encoder on the same data reaches the lowest seen-tool error in the study
     (0.83\%) and collapses to chance on English. The adapters keep both.

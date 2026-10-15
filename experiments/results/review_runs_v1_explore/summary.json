@@ -1,0 +1,106 @@
+{
+  "mode": "full",
+  "commit": "518dc04f451c9342440bf79a5a7a88e973c53045",
+  "branch": "week12-krishna-paper-chapters",
+  "blocks": [
+    "explore_seeds"
+  ],
+  "seeds": [
+    2025,
+    7,
+    42,
+    99
+  ],
+  "variants": {
+    "crop": {
+      "crop_per_epoch": true
+    },
+    "crop_aug": {
+      "crop_per_epoch": true,
+      "augment": "channel_v1"
+    },
+    "crop_layers": {
+      "crop_per_epoch": true,
+      "layer_weighting": true
+    },
+    "crop_aug_layers": {
+      "crop_per_epoch": true,
+      "augment": "channel_v1",
+      "layer_weighting": true
+    }
+  },
+  "tie": 0.005,
+  "explore": "crop_aug_layers",
+  "chosen_variant": null,
+  "runs": [
+    {
+      "name": "deployed_crop_aug_layers_s2025",
+      "block": "explore_seeds",
+      "system": "deployed",
+      "seed": 2025,
+      "options": {
+        "crop_per_epoch": true,
+        "augment": "channel_v1",
+        "layer_weighting": true
+      },
+      "dev_eer": 0.0534,
+      "status": "ok",
+      "eval_pool": 0.019161877394636012,
+      "cm04": 0.2707479351057126,
+      "rvc_test": 0.05976977876198634,
+      "minutes": 10.9
+    },
+    {
+      "name": "deployed_crop_aug_layers_s7",
+      "block": "explore_seeds",
+      "system": "deployed",
+      "seed": 7,
+      "options": {
+        "crop_per_epoch": true,
+        "augment": "channel_v1",
+        "layer_weighting": true
+      },
+      "dev_eer": 0.0751,
+      "status": "ok",
+      "eval_pool": 0.025479725415070244,
+      "cm04": 0.28810224921503347,
+      "rvc_test": 0.08886602460985649,
+      "minutes": 10.3
+    },
+    {
+      "name": "deployed_crop_aug_layers_s42",
+      "block": "explore_seeds",
+      "system": "deployed",
+      "seed": 42,
+      "options": {
+        "crop_per_epoch": true,
+        "augment": "channel_v1",
+        "layer_weighting": true
+      },
+      "dev_eer": 0.0709,
+      "status": "ok",
+      "eval_pool": 0.025479725415070244,
+      "cm04": 0.24186869447372383,
+      "rvc_test": 0.07270144358326196,
+      "minutes": 10.3
+    },
+    {
+      "name": "deployed_crop_aug_layers_s99",
+      "block": "explore_seeds",
+      "system": "deployed",
+      "seed": 99,
+      "options": {
+        "crop_per_epoch": true,
+        "augment": "channel_v1",
+        "layer_weighting": true
+      },
+      "dev_eer": 0.0651,
+      "status": "ok",
+      "eval_pool": 0.028742816091954025,
+      "cm04": 0.26664882017991487,
+      "rvc_test": 0.09209894081517539,
+      "minutes": 10.3
+    }
+  ],
+  "failures": []
+}

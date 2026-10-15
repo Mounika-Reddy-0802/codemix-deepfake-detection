@@ -1,0 +1,15 @@
+STATUS: FINISHED - every block ran.
+RUN HEALTH: every step ran without error.
+mode: full   commit: 518dc04f451c9342440bf79a5a7a88e973c53045
+
+EER (%) per run
+run                                   status     dev  eval_pool       cm04   rvc_test
+deployed_crop_aug_layers_s2025            ok    5.34       1.92      27.07       5.98
+deployed_crop_aug_layers_s7               ok    7.51       2.55      28.81       8.89
+deployed_crop_aug_layers_s42              ok    7.09       2.55      24.19       7.27
+deployed_crop_aug_layers_s99              ok    6.51       2.87      26.66       9.21
+
+EXPLORATORY: crop_aug_layers, seed 1234 (earlier run) + new seeds, not a selection  (5 seeds)
+  eval_pool mean   2.65  sd  0.53  min   1.92  max   3.38
+  cm04      mean  26.63  sd  1.66  min  24.19  max  28.81
+  rvc_test  mean   7.72  sd  1.33  min   5.98  max   9.21

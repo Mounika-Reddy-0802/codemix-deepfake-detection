@@ -263,6 +263,61 @@ single-run difference of that size between two systems is not evidence.
 % src/reporting/seeds.py; experiments/results/seeds_v1.json;
 % docs/results/seed_stability_v1.md
 
+\subsection{Changes aimed at the unseen tool}
+\label{sec:variants}
+
+We tried three changes to the deployed recipe, each switched on without altering
+anything else. The first draws a fresh random crop of every clip in every epoch; the
+published recipe reused one crop throughout. The second randomises, on every
+training clip, the recording cues the shortcut floor relies on: level ($\pm$6~dB),
+spectral tilt ($\pm$3~dB per octave) and coloured noise (10--40~dB SNR), plus a
+second G.711 pass at a random 5--30~dB SNR. The third replaces the last encoder layer
+with a learned weighting of all of them, since the decision forms by layer~3
+(Sec.~\ref{sec:probe}). The rule for choosing was fixed before any run: the lowest
+dev EER wins, dev EERs within half a point tie, and a tie goes to the candidate with
+fewer changes. The test sets were scored for every candidate but not consulted.
+
+\begin{table}[t]
+\centering
+\caption{The deployed recipe and its variants, seed 1234, phone-line condition. EER
+(\%). The candidate is chosen on dev EER alone.}
+\label{tab:variants}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Candidate & Dev & Eval pool & CM04 & RVC \\
+\midrule
+Published recipe (chosen)     & 5.50 & 2.57 & 30.14 & 5.33 \\
++ crop                        & 9.10 & 4.59 & 32.58 & 6.62 \\
++ crop + augment              & 5.34 & 3.38 & 29.49 & 7.59 \\
++ crop + layer mix            & 9.10 & 3.38 & 30.78 & 7.92 \\
++ crop + augment + layer mix  & 9.10 & 3.38 & 26.43 & 7.27 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under the rule the published recipe stays (Table~\ref{tab:variants}). Crop with
+augmentation is lowest on dev, at 5.34\%, but within half a point of the recipe's
+5.50\%, and the two layer-mix variants are worse on dev. None of the changes improves
+the deployed model on its own validation data.
+
+\textbf{An exploratory result.} One variant, crop with augmentation and the layer
+mix, had the lowest single-run Tortoise error (26.43\%), below every seed of the
+published recipe. Because it was singled out after a test score had been seen, what
+follows is exploratory. Retrained with four further seeds, it averages 26.63\%
+$\pm$ 1.66 on Tortoise against 35.59\% $\pm$ 3.35 for the published recipe, and all
+five of its seeds fall below all five of the recipe's (exact Mann--Whitney
+$p = 0.008$; $p = 0.016$ on the four seeds trained after the choice). The gain has a
+price: RVC rises from 5.33\% to 7.72\% ($p = 0.03$), still below its floor in every
+seed. Against the Tortoise floor the variant remains inconclusive in every seed, at
+$-$9.0 to $-$13.6 points with speaker intervals that reach zero. Its dev EER is no
+better than the recipe's (7.11\% against 6.96\%, averaged over seeds): the in-domain
+dev set does not see unseen-tool generalisation, so a rule that selects on it cannot
+find this kind of improvement. We report the variant as a lead to be confirmed on a
+second unseen tool, not as a validated result.
+% src/reporting/variants.py; experiments/results/variants_v1.json;
+% docs/results/variants_v1.md
+
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
 

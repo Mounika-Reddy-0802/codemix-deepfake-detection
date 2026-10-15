@@ -1,0 +1,35 @@
+[
+  {
+    "name": "deployed_crop_layers_s1234",
+    "block": "variants",
+    "system": "deployed",
+    "seed": 1234,
+    "options": {
+      "crop_per_epoch": true,
+      "layer_weighting": true
+    },
+    "dev_eer": 0.091,
+    "status": "ok",
+    "eval_pool": 0.03379709450830141,
+    "cm04": 0.3078254055892966,
+    "rvc_test": 0.07916727599389976,
+    "minutes": 11.2
+  },
+  {
+    "name": "deployed_crop_aug_layers_s1234",
+    "block": "variants",
+    "system": "deployed",
+    "seed": 1234,
+    "options": {
+      "crop_per_epoch": true,
+      "augment": "channel_v1",
+      "layer_weighting": true
+    },
+    "dev_eer": 0.091,
+    "status": "ok",
+    "eval_pool": 0.03379709450830141,
+    "cm04": 0.26427997791497265,
+    "rvc_test": 0.07270144358326196,
+    "minutes": 11.3
+  }
+]
