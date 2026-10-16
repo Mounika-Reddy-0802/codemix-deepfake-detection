@@ -20,6 +20,8 @@ from src.data.spoof_generation import (
 )
 
 TORTOISE_SR = 24_000
+#: Pools whose speakers may be cloned by the held-out tool: evaluation-only, always.
+HELDOUT_POOLS = ("eval", "eval_ext")
 
 
 def build_heldout_jobs(
@@ -28,8 +30,11 @@ def build_heldout_jobs(
     out_dir: str,
     language: str = "hi",
     n_target: int | None = None,
+    pool: str = "eval",
 ) -> list[CloneJob]:
-    """Build Tortoise clone jobs. Every job is ``tool=tortoise`` and ``pool='eval'``."""
+    """Build Tortoise clone jobs. Every job is ``tool=tortoise`` and an evaluation-only pool."""
+    if pool not in HELDOUT_POOLS:
+        raise ValueError(f"held-out clones must come from {HELDOUT_POOLS}, not {pool!r}")
     jobs: list[CloneJob] = []
     for i, (speaker, text) in enumerate(transcripts):
         if speaker not in speaker_refs:
@@ -41,7 +46,7 @@ def build_heldout_jobs(
                 reference_wav=speaker_refs[speaker],
                 transcript=text,
                 output_path=out,
-                pool="eval",  # held-out is always eval-only
+                pool=pool,  # held-out is always evaluation-only
                 language=language,
                 tool=HELD_OUT_TOOL,
                 seed=i,
@@ -55,7 +60,7 @@ def build_heldout_jobs(
 def _assert_heldout(job: CloneJob) -> None:
     """Firewall: refuse to generate anything that isn't the eval-only held-out tool."""
     assert job.tool == HELD_OUT_TOOL, "heldout driver only generates the held-out tool"
-    assert job.pool == "eval", "held-out clones must be eval-only (never in training)"
+    assert job.pool in HELDOUT_POOLS, "held-out clones must be eval-only (never in training)"
 
 
 def load_tortoise():

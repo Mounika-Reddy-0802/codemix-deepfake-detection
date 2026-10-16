@@ -78,8 +78,9 @@ def check_rows(
     source = rows["source"].astype(str).str.lower()
     speaker = rows["speaker"].astype(str)
 
-    if (tool == bm.HELD_OUT_TOOL).any():
-        problems.append(f"{int((tool == bm.HELD_OUT_TOOL).sum())} rows of the held-out tool")
+    held_out = tool.isin(bm.HELD_OUT_TOOLS)
+    if held_out.any():
+        problems.append(f"{int(held_out.sum())} rows of a held-out tool")
     bad_sources = sorted(set(source) & EVAL_ONLY)
     if bad_sources:
         problems.append(f"evaluation-only corpus in training: {bad_sources}")
