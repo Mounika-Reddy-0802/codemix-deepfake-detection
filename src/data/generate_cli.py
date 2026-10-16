@@ -35,6 +35,9 @@ def main() -> None:
     parser.add_argument("--shard", type=int, default=0)
     parser.add_argument("--num-shards", type=int, default=1)
     args = parser.parse_args()
+    # Launched from a notebook, this process inherits Jupyter's inline plotting backend,
+    # which does not exist in the tool environments; IndicF5 imports matplotlib.
+    os.environ["MPLBACKEND"] = "Agg"
 
     table = pd.read_csv(os.path.join(args.pack, "generation_jobs.csv"))
     if "pool" in table and set(table["pool"].astype(str)) != {args.pool}:
