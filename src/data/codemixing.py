@@ -143,6 +143,8 @@ def control_manifest(
             "condition": "clean",
             "split": "eval",
             "utt_id": chosen["utt_id"],
+            "start_seconds": chosen["start_seconds"],
+            "end_seconds": chosen["end_seconds"],
             "language_condition": chosen["condition"],
             "cmi": chosen["cmi"].round(2),
             "english_share": chosen["english_share"].round(3),

@@ -67,3 +67,13 @@ def test_control_set_is_deterministic():
     a = cm.control_manifest(_index(rows), {"s1"}, seed=7)
     b = cm.control_manifest(_index(rows), {"s1"}, seed=7)
     assert a.equals(b)
+
+
+def test_control_rows_carry_their_span():
+    rows = [["e0", "s1", "mucs2021", "a.wav", 12.5, 15.0, 2.5, "plain english words here"]]
+    rows += [["h0", "s1", "mucs2021", "a.wav", 40.0, 43.0, 3.0, f"{HI} {HI2} {HI}"]]
+    manifest = cm.control_manifest(_index(rows), {"s1"})
+    assert manifest.set_index("utt_id").loc["e0", ["start_seconds", "end_seconds"]].tolist() == [
+        12.5,
+        15.0,
+    ]
