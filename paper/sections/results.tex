@@ -362,6 +362,49 @@ second unseen tool, not as a validated result.
 % src/reporting/variants.py; experiments/results/variants_v1.json;
 % docs/results/variants_v1.md
 
+\subsection{New speakers and a second unseen tool}
+\label{sec:res-new}
+
+The original test pool has 15 speakers and one unseen tool. Section~\ref{sec:data-extension}
+adds 60 speakers no model has heard, cloned with the seen tool (CM05) and with Tortoise
+(CM06), and a second unseen generator, IndicF5 (CM07), on 54 test speakers.
+Table~\ref{tab:new} scores every system in its own training condition.
+
+\begin{table}[t]
+\centering
+\caption{EER (\%) on the week-13 sets, each system in its training condition; 95\%
+speaker-bootstrap intervals. New speakers: 60 speakers, 2{,}400 genuine clips.
+IndicF5: 54 speakers, 651 all-Hindi genuine clips.}
+\label{tab:new}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+System, audio & XTTS (seen) & Tortoise & IndicF5 \\
+\midrule
+S1, channel & 44.8 {\scriptsize[40.8, 48.8]} & 52.7 {\scriptsize[48.7, 57.8]} & 51.3 {\scriptsize[46.1, 56.5]} \\
+S2 XTTS, clean & 7.2 {\scriptsize[4.3, 10.0]} & 13.5 {\scriptsize[10.4, 17.5]} & 37.0 {\scriptsize[33.9, 41.4]} \\
+S2 XTTS, channel & 7.4 {\scriptsize[5.5, 9.5]} & 29.7 {\scriptsize[25.6, 33.2]} & 43.9 {\scriptsize[39.9, 47.9]} \\
+S2 XTTS+RVC, clean & 10.2 {\scriptsize[5.9, 14.1]} & 26.1 {\scriptsize[21.4, 30.0]} & 34.4 {\scriptsize[30.1, 38.6]} \\
+Deployed S2, channel & 9.4 {\scriptsize[6.6, 12.5]} & 29.4 {\scriptsize[25.4, 33.3]} & 30.6 {\scriptsize[26.7, 34.9]} \\
+\bottomrule
+\end{tabular}
+% docs/results/new_speakers_v1.md; experiments/results/ext_scoring_v1/
+\end{table}
+
+\textbf{The seen tool transfers to new people.} Over the channel the deployed model
+reaches 9.4\% EER on 60 new speakers, against 2.75\% on the original 15; the median
+speaker sits at 2.9\% and the worst at 17.1\%, so the rise comes from a wider spread of
+voices rather than from a few speakers failing. S1 stays at 44.8\%.
+
+\textbf{Both unseen tools stay hard over the channel.} Tortoise on the new speakers
+lands where it did on the original pool: 29.4\% for the deployed model and 29.7\% for
+the XTTS-only channel adapter. IndicF5, a newer generator, is no easier, at 30.6\%
+for the deployed model, which is the best system on it; the clean adapters reach
+34.4--37.0\% on clean IndicF5. On clean audio the XTTS-only adapter generalises to
+Tortoise on new speakers as it did on the original ones (13.5\%), but not to IndicF5
+(37.0\%). One unseen tool can be generalised to on clean audio; neither survives the
+telephone channel, and the two unseen tools behave alike over it.
+
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
 
