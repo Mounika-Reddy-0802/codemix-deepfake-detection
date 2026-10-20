@@ -142,7 +142,28 @@ S3, clean              & \textbf{0.83} & \textit{21.39} & \textit{8.24} & 50.90 
 
 \subsection{New speakers and unseen tools}
 
-% NEW-SPEAKERS-TABLE: filled from docs/results/new_speakers_v1.md
+On 60 further speakers no model has heard (Table~\ref{tab:new}), the deployed model
+reaches 9.4\% on the seen tool over the channel, with a median speaker at 2.9\% and
+the worst at 17.1\%. Both unseen tools stay near 30\%: Tortoise at 29.4\% and the
+newer IndicF5 at 30.6\%, while S1 stays at 44.8--52.7\%.
+
+\begin{table}[t]
+\centering
+\caption{EER (\%) on 60 new speakers (XTTS seen, Tortoise unseen) and on IndicF5
+(unseen, 54 speakers), each system in its training condition.}
+\label{tab:new}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+System, audio & XTTS & Tortoise & IndicF5 \\
+\midrule
+S1, channel          & 44.8 & 52.7 & 51.3 \\
+S2 XTTS, clean       & 7.2  & 13.5 & 37.0 \\
+Deployed S2, channel & 9.4  & 29.4 & 30.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 On clean audio the adapter generalises to the held-out Tortoise attack (5.44\% against
 a 29.49\% floor, XTTS-only training). Over the channel the deployed model averages
