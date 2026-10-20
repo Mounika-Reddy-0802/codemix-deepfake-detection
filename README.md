@@ -1,9 +1,9 @@
-# Quantifying and Closing the Code-Mixing Generalisation Gap in Audio Deepfake Detection
+# Recording Domain, Not Code-Mixing: Closing the Generalisation Gap of Audio Deepfake Detection on Hindi–English Telephone Speech
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%2012%20of%2012-green)
-![Tests](https://img.shields.io/badge/tests-922%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-week%2013-green)
+![Tests](https://img.shields.io/badge/tests-971%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -94,6 +94,43 @@ Every number below comes from a real run on real data and is reproducible from
 [Reproduce](#reproduce). **Start with the week-10 summary**: it supersedes the
 pre-normalisation numbers in sections 1–5, which are kept as the record of how we
 got here.
+
+### Week 13 — is it the code-mixing? New speakers, a second unseen tool, a real codec
+
+**The gap is the recording, not the language mix.** A language-controlled set holds
+speaker and recording fixed: 183 unseen speakers, each with all-English, all-Hindi and
+mixed clips from the same lectures. The English-only S1 rejects their genuine English
+as often as their mixed speech, and the Code-Mixing Index does not predict its score
+([language_control_v1](docs/results/language_control_v1.md),
+[cmi_bands_v1](docs/results/cmi_bands_v1.md)).
+
+| False alarms (%) | English | Hindi | Mixed |
+|---|---|---|---|
+| S1, clean | 84.3 | 85.2 | 78.1 |
+| Deployed S2, phone line | 4.3 | 4.1 | 2.3 |
+
+**New speakers and new tools** ([new_speakers_v1](docs/results/new_speakers_v1.md),
+[floor_new_sets_v1](docs/results/floor_new_sets_v1.md)). Four clone sets were made on
+Kaggle: XTTS and Tortoise for 60 new test speakers, IndicF5 (a recent Hindi TTS, never
+in training) for 54 test speakers, and XTTS for 227 extra adaptation speakers.
+
+| EER (%), deployed S2 | XTTS (seen) | Tortoise | IndicF5 |
+|---|---|---|---|
+| simulated G.711 line | **9.4** | 29.4 | 30.6 |
+| real AMR-NB codec | 23.7 | 37.0 | 47.0 |
+
+- The seen tool transfers to 60 new people (median speaker 2.9%).
+- Both unseen tools stay near 30% over the phone line; on IndicF5 no system clears its
+  matched floor. IndicF5 is also the most natural tool: predicted MOS 3.07 against 3.10
+  for genuine speech ([naturalness_v1](docs/results/naturalness_v1.md)).
+- A real mobile codec (AMR-NB) costs the deployed model most of its channel gain; an
+  adapter trained on clean audio holds better there (12.6% on XTTS)
+  ([amr_channel_v1](docs/results/amr_channel_v1.md)).
+
+**Queued on Kaggle:** the deployed recipe retrained on 248 genuine speakers instead of
+21, five seeds against the published recipe (`notebooks/kaggle_w13_overfit_fix.ipynb`),
+and the AASIST baseline zero-shot and fine-tuned on the same data
+(`notebooks/kaggle_w13_aasist_baseline.ipynb`).
 
 ### Week 12 — five training seeds, and what the external review changed
 
