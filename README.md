@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2013-green)
-![Tests](https://img.shields.io/badge/tests-971%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-975%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -129,8 +129,9 @@ in training) for 54 test speakers, and XTTS for 227 extra adaptation speakers.
 
 **Queued on Kaggle:** the deployed recipe retrained on 248 genuine speakers instead of
 21, five seeds against the published recipe (`notebooks/kaggle_w13_overfit_fix.ipynb`),
-and the AASIST baseline zero-shot and fine-tuned on the same data
-(`notebooks/kaggle_w13_aasist_baseline.ipynb`).
+the AASIST baseline zero-shot and fine-tuned on the same data
+(`notebooks/kaggle_w13_aasist_baseline.ipynb`), and the deployed recipe trained on
+G.711 and AMR-NB together, three seeds (`notebooks/kaggle_w13_mixcodec.ipynb`).
 
 ### Week 12 — five training seeds, and what the external review changed
 
