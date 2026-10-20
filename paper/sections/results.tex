@@ -54,7 +54,51 @@ In a deployment this is the more damaging error: nearly every genuine caller wou
 be flagged. The model's notion of genuine speech is tied to the recording conditions
 and language of its training data rather than to properties of synthesis. Because
 ASVspoof is studio read speech and MUCS is lecture audio, this gap combines language
-shift with recording-domain shift, and we do not claim it isolates code-mixing.
+shift with recording-domain shift; the next subsection separates the two.
+
+\subsection{Code-mixing or recording domain?}
+\label{sec:res-language}
+
+The language-controlled set (Section~\ref{sec:data-control}) holds the speaker and the
+recording fixed and changes only the language. If code-mixing were what fooled S1, its
+false alarms would be highest on the mixed clips. They are not
+(Table~\ref{tab:language}). On clean audio S1 rejects 84.3\% of genuine all-English
+clips, 85.2\% of all-Hindi and 78.1\% of mixed; within the same speakers, mixed speech
+is rejected 9.5 points \emph{less} often than English [$-$15.6, $-$3.5]. Over the
+channel the three conditions are 43.1, 53.2 and 41.2\%, and the mixed-minus-English
+difference ($-$5.2 [$-$13.4, +2.9]) contains zero. The adapted systems keep false
+alarms at 2--5\% in every condition, with no condition singled out. S1 rejects English
+lecture speech by the same English speakers almost exactly as often as it rejects their
+code-mixed speech: the failure follows the recording, not the language mix.
+
+\begin{table}[t]
+\centering
+\caption{False alarms (\%) on the language-controlled genuine set: 183 unseen speakers,
+each in three language conditions from the same recordings. Last column: within-speaker
+difference mixed $-$ English (points), 95\% speaker-bootstrap interval.}
+\label{tab:language}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Model, audio & English & Hindi & Mixed & Mixed $-$ English \\
+\midrule
+S1, clean          & 84.3 & 85.2 & 78.1 & $-$9.5 [$-$15.6, $-$3.5] \\
+S1, channel        & 43.1 & 53.2 & 41.2 & $-$5.2 [$-$13.4, +2.9] \\
+S2 (clean), clean  & 5.2  & 2.9  & 2.3  & $-$3.3 [$-$6.3, $-$0.6] \\
+Deployed S2, channel & 4.3 & 4.1 & 2.3  & $-$2.6 [$-$5.8, +0.5] \\
+\bottomrule
+\end{tabular}
+% docs/results/language_control_v1.md
+\end{table}
+
+The evaluation pool tells the same story at the level of single clips. Grouping its
+genuine clips by Code-Mixing Index, S1 rejects 94.5, 95.2, 95.1 and 93.5\% in the
+bands 0--10, 10--25, 25--40 and 40--50 on clean audio, and the rank correlation
+between a clip's CMI and its score is $-$0.01; over the channel it is +0.13, so more
+mixing makes a clip look, if anything, slightly \emph{more} genuine
+(\texttt{docs/results/cmi\_bands\_v1.md}). The gap this paper closes is therefore a
+recording-domain gap that code-mixed telephone speech happens to carry, which is why
+adaptation on in-domain audio closes it.
 
 \subsection{Shortcut floors}
 \label{sec:floors}
