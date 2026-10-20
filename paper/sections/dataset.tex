@@ -137,6 +137,12 @@ Four further attack sets were made the same way, each from a committed job table
     1{,}816 (96.9\%), used only for training.
 \end{itemize}
 
+Predicted naturalness separates the tools. UTMOS~\cite{saeki2022utmos}, a predictor of
+the mean opinion score, gives IndicF5 clones 3.07 [2.99, 3.15] against 3.10 [3.01, 3.18]
+for the same speakers' genuine all-Hindi speech, a difference within noise; XTTS-v2 sits
+half a point below its genuine speech (2.66 against 3.17) and Tortoise lower still
+(2.48), on 200 clean clips per set. The newest unseen tool is also the most natural.
+
 Genuine counterparts come from the same speakers: 2{,}400 clips of the new test
 speakers, 651 all-Hindi clips of the IndicF5 speakers and 3{,}405 clips of the extra
 adaptation speakers. Every clip passes through the same level normalisation and
@@ -165,6 +171,12 @@ It was validated by measurement rather than assumed. Energy above 4~kHz falls fr
 0.185\% to 0.0001\% of total energy, and the measured SNR matches the requested one.
 Clean and channel copies of every evaluation set are retained separately, so the
 channel effect stays separable from the language effect throughout the results.
+
+G.711 is the fixed-line codec and nearly transparent; mobile calls are carried by AMR-NB,
+which models the voice and discards the rest. As a check on the simulation, the
+new-speaker, IndicF5 and CM04 sets are also passed through the reference AMR-NB
+encoder at 12.2~kbit/s and decoded back, with no added noise, so that condition isolates
+a real mobile codec.
 
 \subsection{Exclusions and ethics}
 
