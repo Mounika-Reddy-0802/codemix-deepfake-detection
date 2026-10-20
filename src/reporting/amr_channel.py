@@ -45,7 +45,9 @@ def analyse(ext_dir: str, amr_dir: str, n_boot: int = 1000) -> list[dict]:
             for column, (stem, tool, _) in ATTACKS.items():
                 path = score_path(model, stem, condition, ext_dir, amr_dir)
                 if path.is_file():
-                    row[column] = attack_eer(pd.read_csv(path), tool, n_boot)
+                    scores = pd.read_csv(path)
+                    if (scores["tool"] == tool).any():  # an attack with no clips is skipped
+                        row[column] = attack_eer(scores, tool, n_boot)
             if len(row) > 3:
                 rows.append(row)
     return rows
