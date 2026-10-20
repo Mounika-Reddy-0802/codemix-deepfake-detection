@@ -33,6 +33,15 @@ this model rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--Englis
 a 256-fold rise in the false-alarm rate on real speech. It has not become a weaker
 detector of clones so much as a system that has stopped recognising real speakers.
 
+Is it the code-mixing? A language-controlled test settles this. For 183 speakers
+never used in training or testing, we take all-English, all-Hindi and mixed clips from
+the \emph{same} lecture recordings, so only the language changes. The English-trained
+detector rejects their genuine English as often as their mixed speech (84.3\% and
+78.1\% on clean audio), and no amount of mixing, measured by the Code-Mixing Index,
+predicts its score (Section~\ref{sec:res-language}). The gap is a recording-domain gap
+that code-mixed telephone speech carries, not a property of the language mix, and
+that is why adapting on in-domain audio can close it.
+
 \subsection{Measuring against a floor, not against zero}
 
 A low error rate on a code-mixed test set is easy to obtain for the wrong reason. If
@@ -54,7 +63,9 @@ conditions, which fails it.
     speech at 41.67--48.21\% EER clean and 44.15--58.42\% over the channel, far above
     every shortcut floor, with the failure characterised as a
     rejection of genuine speech rather than a loss of sensitivity to clones
-    (Section~\ref{sec:gap}).
+    (Section~\ref{sec:gap}), and traced on a language-controlled set of 183 unseen
+    speakers to the recording domain rather than to code-mixing
+    (Section~\ref{sec:res-language}).
   \item \textbf{A cheap closure.} Low-rank adapters~\cite{hu2022lora} over a frozen
     wav2vec~2.0 encoder~\cite{baevski2020wav2vec}, training \textbf{1.13\% of the
     parameters}, bring channel-matched code-mixed error to \textbf{2.75\% EER}
