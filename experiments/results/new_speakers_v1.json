@@ -1,0 +1,472 @@
+[
+  {
+    "model": "S1 (English only)",
+    "tag": "s1",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.4441172316384181,
+      "ci_low": 0.40480660024567344,
+      "ci_high": 0.4949026460521125,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.4291666666666667,
+        "min": 0.029166666666666667,
+        "max": 0.9708333333333333,
+        "above_20pct": 51
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.4727364864864865,
+      "ci_low": 0.43189835823350015,
+      "ci_high": 0.5158352187028659,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.5,
+        "min": 0.025,
+        "max": 1.0,
+        "above_20pct": 59
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4978973559250758,
+      "ci_low": 0.45384974043107307,
+      "ci_high": 0.5447350625790794,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "above_20pct": 51
+      }
+    }
+  },
+  {
+    "model": "S1 (English only)",
+    "tag": "s1",
+    "condition": "channel",
+    "new XTTS (CM05)": {
+      "eer": 0.4479696327683616,
+      "ci_low": 0.40802610884851914,
+      "ci_high": 0.4878327722683704,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.4291666666666667,
+        "min": 0.1,
+        "max": 0.9,
+        "above_20pct": 50
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.5270551801801802,
+      "ci_low": 0.48699962448930545,
+      "ci_high": 0.5775403606014271,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.5,
+        "min": 0.0125,
+        "max": 1.0,
+        "above_20pct": 59
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.5131824102141777,
+      "ci_low": 0.46089242597457525,
+      "ci_high": 0.5653842109166429,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.5,
+        "min": 0.1,
+        "max": 0.8694444444444445,
+        "above_20pct": 50
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS, trained clean",
+    "tag": "s2_clean",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.07240819209039548,
+      "ci_low": 0.04259031287357741,
+      "ci_high": 0.0999154094934961,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.31767241379310346,
+        "above_20pct": 1
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.13506756756756758,
+      "ci_low": 0.10439854275146707,
+      "ci_high": 0.17507525734814558,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.0125,
+        "min": 0.0,
+        "max": 0.32916666666666666,
+        "above_20pct": 14
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.370461063120207,
+      "ci_low": 0.3390479283157003,
+      "ci_high": 0.41400373446948335,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.37424242424242427,
+        "min": 0.0,
+        "max": 0.6583333333333333,
+        "above_20pct": 43
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS, trained clean",
+    "tag": "s2_clean",
+    "condition": "channel",
+    "new XTTS (CM05)": {
+      "eer": 0.2520303672316384,
+      "ci_low": 0.2172094559582194,
+      "ci_high": 0.29471431999818753,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.17083333333333334,
+        "min": 0.0,
+        "max": 0.6,
+        "above_20pct": 22
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.2973986486486486,
+      "ci_low": 0.25435299635506003,
+      "ci_high": 0.33627180125368733,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.25,
+        "min": 0.0,
+        "max": 0.6208333333333333,
+        "above_20pct": 41
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4978973559250758,
+      "ci_low": 0.45329837265078826,
+      "ci_high": 0.5348559927769302,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.4861111111111111,
+        "min": 0.05,
+        "max": 0.8285714285714285,
+        "above_20pct": 50
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS, trained phone line",
+    "tag": "s2_channel",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.24846045197740113,
+      "ci_low": 0.20025021882033994,
+      "ci_high": 0.29492791338473096,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.13154761904761902,
+        "min": 0.0,
+        "max": 0.7,
+        "above_20pct": 23
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.3108220720720721,
+      "ci_low": 0.2744756725928256,
+      "ci_high": 0.35749901081508834,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.25,
+        "min": 0.0,
+        "max": 0.9625,
+        "above_20pct": 45
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.47496977449142297,
+      "ci_low": 0.4270011257586215,
+      "ci_high": 0.5275140754334086,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "above_20pct": 47
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS, trained phone line",
+    "tag": "s2_channel",
+    "condition": "channel",
+    "new XTTS (CM05)": {
+      "eer": 0.07388064971751412,
+      "ci_low": 0.055438558079624695,
+      "ci_high": 0.09480673901725115,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.029166666666666667,
+        "min": 0.0,
+        "max": 0.2,
+        "above_20pct": 0
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.2973986486486486,
+      "ci_low": 0.2555107764715388,
+      "ci_high": 0.33195121746984635,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.25,
+        "min": 0.0,
+        "max": 0.7125,
+        "above_20pct": 41
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4392438074211654,
+      "ci_low": 0.39907080907222864,
+      "ci_high": 0.4794357119664649,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.4,
+        "min": 0.0,
+        "max": 0.788888888888889,
+        "above_20pct": 48
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS+RVC, trained clean",
+    "tag": "s2_rvc_clean",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.10217161016949153,
+      "ci_low": 0.05869401446864537,
+      "ci_high": 0.14104644379969733,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.32916666666666666,
+        "above_20pct": 2
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.2612556306306306,
+      "ci_low": 0.21422619047619046,
+      "ci_high": 0.3004325485799701,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.1875,
+        "min": 0.0,
+        "max": 0.6875,
+        "above_20pct": 27
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.3440962426918517,
+      "ci_low": 0.30135914701670113,
+      "ci_high": 0.38648577476756635,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.275,
+        "min": 0.0,
+        "max": 1.0,
+        "above_20pct": 32
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS+RVC, trained clean",
+    "tag": "s2_rvc_clean",
+    "condition": "channel",
+    "new XTTS (CM05)": {
+      "eer": 0.27408898305084745,
+      "ci_low": 0.23100940768250475,
+      "ci_high": 0.3134881571739533,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.17083333333333334,
+        "min": 0.0,
+        "max": 0.7708333333333334,
+        "above_20pct": 23
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.3376689189189189,
+      "ci_low": 0.30046532849941404,
+      "ci_high": 0.37943611973689434,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.25,
+        "min": 0.0,
+        "max": 0.7375,
+        "above_20pct": 46
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.44860495406306766,
+      "ci_low": 0.41199881616024964,
+      "ci_high": 0.49193630848215913,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.41875,
+        "min": 0.0,
+        "max": 0.8,
+        "above_20pct": 47
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS+RVC, trained phone line (deployed)",
+    "tag": "deployed_s2",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.2225494350282486,
+      "ci_low": 0.17127432624158234,
+      "ci_high": 0.27176473475717233,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.1,
+        "min": 0.0,
+        "max": 0.6291666666666667,
+        "above_20pct": 15
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.30711148648648645,
+      "ci_low": 0.26499460103320815,
+      "ci_high": 0.3545431393733601,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.25,
+        "min": 0.0,
+        "max": 0.975,
+        "above_20pct": 40
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4197534649822151,
+      "ci_low": 0.37673432339594765,
+      "ci_high": 0.46493645872306577,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.3416666666666667,
+        "min": 0.0,
+        "max": 1.0,
+        "above_20pct": 40
+      }
+    }
+  },
+  {
+    "model": "S2 LoRA, XTTS+RVC, trained phone line (deployed)",
+    "tag": "deployed_s2",
+    "condition": "channel",
+    "new XTTS (CM05)": {
+      "eer": 0.09425847457627118,
+      "ci_low": 0.06577358010297978,
+      "ci_high": 0.12486419721417841,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.029166666666666667,
+        "min": 0.0,
+        "max": 0.17083333333333334,
+        "above_20pct": 0
+      }
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.29368806306306305,
+      "ci_low": 0.254008578648581,
+      "ci_high": 0.33333522727272724,
+      "spoof_clips": 222,
+      "genuine_clips": 2400,
+      "per_speaker": {
+        "speakers": 60,
+        "median": 0.25,
+        "min": 0.0,
+        "max": 0.7375,
+        "above_20pct": 42
+      }
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.305883606969097,
+      "ci_low": 0.2665203622511298,
+      "ci_high": 0.34883141517589683,
+      "spoof_clips": 526,
+      "genuine_clips": 651,
+      "per_speaker": {
+        "speakers": 54,
+        "median": 0.27083333333333337,
+        "min": 0.0,
+        "max": 0.6515151515151515,
+        "above_20pct": 31
+      }
+    }
+  }
+]
