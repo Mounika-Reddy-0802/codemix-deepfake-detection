@@ -13,6 +13,14 @@ error to 2.75\% EER while retaining 2.42\% on clean English. Full fine-tuning on
 data is better on the tool it saw (0.83\%) and collapses to chance on English; the
 adapters keep both, which is what a deployment needs.
 
+The gap is not caused by code-mixing. Holding speaker and recording fixed, the
+English-trained detector rejects 183 unseen speakers' genuine English as often as
+their mixed speech, and the Code-Mixing Index does not predict its score; what it
+fails on is the recording domain that code-mixed telephone speech brings with it. The
+closure holds on people the model has never heard: on 60 further unseen speakers the
+deployed model reaches 9.4\% EER on the seen tool over the channel, with a median
+speaker at 2.9\%.
+
 The detector runs on a live call. It scores four-second windows of the caller's
 speech, escalates only when consecutive windows agree, and warns the callee --- never
 the caller --- about ten seconds into the speech, using the same operating point the
@@ -30,7 +38,10 @@ per-speaker error ranges from 6.4\% to 45.5\%, and the published single run
 there in every seed (19.72\% against 33.64\%), and adding RVC to its training removes
 that. Randomising recording cues during training brings the deployed recipe to
 26.63\% over five seeds, but that variant was chosen after a test score had been seen
-and still does not clear the floor. We therefore have no conclusive evidence that the
+and still does not clear the floor. A second unseen generator confirms the picture
+rather than softening it: IndicF5, a recent flow-matching TTS, sits at 30.6\% over the
+channel for the deployed model, about where Tortoise does (29.4\% on the new
+speakers). We therefore have no conclusive evidence that the
 deployed model detects an unseen tool on a real phone line. This is the sharpest
 limitation of the work and it constrains every deployment claim made here.
 

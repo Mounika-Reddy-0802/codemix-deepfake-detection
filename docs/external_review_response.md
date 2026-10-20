@@ -87,6 +87,16 @@ Reported in the paper as a lead to confirm on a second unseen tool
 **Not done.** Score fusion of the deployed model with S3 XTTS-only: it would need
 weights set on a dev set that, as above, cannot see the unseen tool.
 
+**Done (week 13, a second unseen tool).** IndicF5, a recent flow-matching Hindi TTS,
+cloned 54 test speakers (CM07, 526 clips, never in training). Over the phone line the
+deployed model scores 30.6% on it, about where Tortoise is on the new speakers
+(29.4%), and no system clears its matched IndicF5 floor
+(`docs/results/new_speakers_v1.md`, `floor_new_sets_v1.md`). The augmentation lead
+could not be checked on it: those variants' checkpoints were not kept.
+
+**Running (week 13).** The AASIST baseline (published weights zero-shot, and fine-tuned
+on the same data as S2) on every new set: `notebooks/kaggle_w13_aasist_baseline.ipynb`.
+
 ## 3. More speakers and speaking styles
 
 > Expand the Hinglish adaptation dataset beyond the current 10-speaker pool and
@@ -111,11 +121,17 @@ explain it (`docs/results/hiacc_false_alarm_v1.md`, Lahari). The data chapter no
 states who each model hears (21 speakers for the deployed model) and who it is tested
 on (51 unseen speakers), with a speaker table (`dataset.tex`, `sec:data-speakers`).
 
-**Planned.** (b) Add the existing CM01 XTTS clones of the 13 RVC-train speakers to
-training (8 → 21 cloned voices, no new generation), subject to `config_guard`. (c) A
-new frozen speaker pool from unused MUCS speakers for a larger unseen-speaker test.
-(d) The HiACC test on the Kaggle variant models, to see whether augmentation lowers
-the false alarms.
+**Done (week 13, more unseen speakers).** Three new frozen pools from the 470 unused
+MUCS speakers: 60 new test speakers, 183 language-control speakers and 227 extra
+adaptation speakers (`src/data/speaker_pools_ext.py`). On the 60 new speakers the
+deployed model reaches 9.4% EER on the seen tool over the phone line (median speaker
+2.9%, worst 17.1%; `docs/results/new_speakers_v1.md`).
+
+**Running (week 13, more training speakers).** The deployed recipe retrained on 248
+genuine speakers instead of 21 (the 227 extra speakers and their CM08 XTTS clones),
+five seeds each against the published recipe: `notebooks/kaggle_w13_overfit_fix.ipynb`.
+
+**Not done.** (d) The HiACC test on the Kaggle variant models.
 
 ## 4. Hinglish phone-line vs clean-English trade-off
 
@@ -176,6 +192,16 @@ matched floor (30.99% vs 37.79%) but inconclusive at the speaker level.
 
 **Done.** Both floor figures (`systems_s2_s3.png`, `ablation_rvc.png`) were redrawn
 with the matched floor per bar (`src/reporting/figures.py`).
+
+**Done (week 13, the recording-domain question itself).** A language-controlled set
+holds speaker and recording fixed and changes only the language (183 unseen speakers,
+all-English / all-Hindi / mixed clips from the same lectures). S1 rejects genuine
+English as often as mixed speech (84.3% vs 78.1% clean; within speakers mixed is
+9.5 points lower), and the Code-Mixing Index does not predict its score on the
+evaluation pool (`language_control_v1.md`, `cmi_bands_v1.md`). The gap is a
+recording-domain gap. The matched floors on the new sets also show the limit of the
+floor itself: fitted on the training recordings, the Tortoise floor lands at 40-58% on
+new speakers, so beating it there is a weak bar (`floor_new_sets_v1.md`).
 
 ## 6. Bibliography and positioning
 

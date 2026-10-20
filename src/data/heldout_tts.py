@@ -67,7 +67,7 @@ def load_tortoise(kv_cache: bool = True):
     """Load Tortoise-TTS (lazy import). Gated before the model is fetched.
 
     ``kv_cache`` reuses attention keys and values while sampling. It changes nothing
-    about what is generated, only how fast: tortoise-tts 3.0.0 ships with it off, and
+    about the audio it produces, only how fast: tortoise-tts 3.0.0 ships with it off, and
     the week-13 run without it took about 11 minutes per clip on a T4.
     """
     from src.data.ethics_gate import require_signoff

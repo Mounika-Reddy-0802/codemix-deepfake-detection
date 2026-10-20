@@ -76,10 +76,32 @@ def analyse(scores_dir: str = SCORES, n_boot: int = 1000) -> list[dict]:
             for column, (scoring_set, tool) in ATTACKS.items():
                 path = Path(scores_dir) / f"{tag}__{scoring_set}_{cond}_scores.csv"
                 if path.is_file():
-                    row[column] = attack_eer(pd.read_csv(path), tool, n_boot)
+                    scores = pd.read_csv(path)
+                    if (scores["tool"] == tool).any():
+                        row[column] = attack_eer(scores, tool, n_boot)
+                        row[column]["per_speaker"] = per_speaker(scores, tool)
             if len(row) > 3:
                 rows.append(row)
     return rows
+
+
+def per_speaker(scores: pd.DataFrame, tool: str) -> dict:
+    """EER of one attack computed separately for every speaker; the spread over speakers."""
+    genuine = scores["label"].str.lower() == "bonafide"
+    part = scores[genuine | (scores["tool"] == tool)]
+    values = []
+    for _, group in part.groupby(part["speaker"].astype(str)):
+        labels = (group["label"].str.lower() == "bonafide").to_numpy().astype(int)
+        if labels.min() != labels.max():
+            values.append(eer(group["score"].to_numpy(dtype=float), labels))
+    v = np.asarray(values)
+    return {
+        "speakers": int(len(v)),
+        "median": float(np.median(v)),
+        "min": float(v.min()),
+        "max": float(v.max()),
+        "above_20pct": int((v > 0.20).sum()),
+    }
 
 
 def markdown(rows: list[dict]) -> str:
@@ -106,6 +128,23 @@ def markdown(rows: list[dict]) -> str:
             )
         audio = "phone line" if row["condition"] == "channel" else "clean"
         lines.append(f"| {row['model']} | {audio} | " + " | ".join(cells) + " |")
+    lines += [
+        "",
+        "Per-speaker spread (each speaker's EER on their own clips):",
+        "",
+        "| Model | Audio | Attack | Speakers | Median | Min | Max | Above 20% |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for row in rows:
+        audio = "phone line" if row["condition"] == "channel" else "clean"
+        for column in ATTACKS:
+            s = (row.get(column) or {}).get("per_speaker")
+            if s:
+                lines.append(
+                    f"| {row['model']} | {audio} | {column} | {s['speakers']} | "
+                    f"{100 * s['median']:.1f} | {100 * s['min']:.1f} | {100 * s['max']:.1f} | "
+                    f"{s['above_20pct']} |"
+                )
     return "\n".join(lines) + "\n"
 
 
