@@ -1,0 +1,329 @@
+{
+  "n_boot": 1000,
+  "results": [
+    {
+      "eer_a": 0.07240819209039548,
+      "eer_a_ci": [
+        0.04259031287357741,
+        0.0999154094934961
+      ],
+      "eer_b": 0.16785663841807907,
+      "eer_b_ci": [
+        0.12834569539699286,
+        0.202733324976928
+      ],
+      "diff": -0.0954484463276836,
+      "diff_ci": [
+        -0.14042888669277906,
+        -0.04862301760409114
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, clean",
+      "test_set": "new_xtts",
+      "condition": "clean",
+      "clips": 4170,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.13506756756756758,
+      "eer_a_ci": [
+        0.10439854275146708,
+        0.17507525734814558
+      ],
+      "eer_b": 0.405411036036036,
+      "eer_b_ci": [
+        0.36573158448922494,
+        0.4538928894927536
+      ],
+      "diff": -0.27034346846846846,
+      "diff_ci": [
+        -0.33333854166666665,
+        -0.21349906156943335
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, clean",
+      "test_set": "new_tortoise",
+      "condition": "clean",
+      "clips": 2622,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.370461063120207,
+      "eer_a_ci": [
+        0.3390479283157003,
+        0.41400373446948335
+      ],
+      "eer_b": 0.3423776231945004,
+      "eer_b_ci": [
+        0.2880589342144937,
+        0.3964414667073763
+      ],
+      "diff": 0.02808343992570661,
+      "diff_ci": [
+        -0.030835452163403873,
+        0.09380515204581474
+      ],
+      "p_value": 0.33,
+      "n_speakers": 75,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, clean",
+      "test_set": "cm07",
+      "condition": "clean",
+      "clips": 1177,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train.csv"
+    },
+    {
+      "eer_a": 0.07388064971751412,
+      "eer_a_ci": [
+        0.055438558079624695,
+        0.09480673901725115
+      ],
+      "eer_b": 0.35203036723163844,
+      "eer_b_ci": [
+        0.309797426507804,
+        0.3903909650700199
+      ],
+      "diff": -0.2781497175141243,
+      "diff_ci": [
+        -0.31595596424053485,
+        -0.2388971355710543
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, channel",
+      "test_set": "new_xtts",
+      "condition": "channel",
+      "clips": 4170,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.2973986486486486,
+      "eer_a_ci": [
+        0.2555107764715388,
+        0.33195121746984635
+      ],
+      "eer_b": 0.5045439189189189,
+      "eer_b_ci": [
+        0.468662548333732,
+        0.5507946484180369
+      ],
+      "diff": -0.2071452702702703,
+      "diff_ci": [
+        -0.2641283474277661,
+        -0.17038499292654286
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, channel",
+      "test_set": "new_tortoise",
+      "condition": "channel",
+      "clips": 2622,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.4392438074211654,
+      "eer_a_ci": [
+        0.39907080907222864,
+        0.4794357119664649
+      ],
+      "eer_b": 0.33989095454200324,
+      "eer_b_ci": [
+        0.29151774481961407,
+        0.38567052774820987
+      ],
+      "diff": 0.09935285287916218,
+      "diff_ci": [
+        0.033279898928430335,
+        0.16542856497032868
+      ],
+      "p_value": 0.001,
+      "n_speakers": 75,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS, channel",
+      "test_set": "cm07",
+      "condition": "channel",
+      "clips": 1177,
+      "verdict": "worse than floor",
+      "floor_fit_on": "codemix_adapt_train_channel20.csv"
+    },
+    {
+      "eer_a": 0.10217161016949153,
+      "eer_a_ci": [
+        0.058694014468645375,
+        0.14104644379969733
+      ],
+      "eer_b": 0.21295550847457628,
+      "eer_b_ci": [
+        0.17182089287524072,
+        0.25561085536669814
+      ],
+      "diff": -0.11078389830508475,
+      "diff_ci": [
+        -0.16425872629747712,
+        -0.05915388927173218
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, clean",
+      "test_set": "new_xtts",
+      "condition": "clean",
+      "clips": 4170,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.2612556306306306,
+      "eer_a_ci": [
+        0.21422619047619046,
+        0.3004325485799701
+      ],
+      "eer_b": 0.4510585585585586,
+      "eer_b_ci": [
+        0.40889508572567784,
+        0.4975989503328213
+      ],
+      "diff": -0.18980292792792797,
+      "diff_ci": [
+        -0.25135318130630624,
+        -0.13688921827240097
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, clean",
+      "test_set": "new_tortoise",
+      "condition": "clean",
+      "clips": 2622,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.3440962426918517,
+      "eer_a_ci": [
+        0.30135914701670113,
+        0.38648577476756635
+      ],
+      "eer_b": 0.3406590036971492,
+      "eer_b_ci": [
+        0.28296123828868397,
+        0.3909019980148107
+      ],
+      "diff": 0.003437238994702496,
+      "diff_ci": [
+        -0.05704620934192053,
+        0.0737530533479929
+      ],
+      "p_value": 0.854,
+      "n_speakers": 75,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, clean",
+      "test_set": "cm07",
+      "condition": "clean",
+      "clips": 1177,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_rvc.csv"
+    },
+    {
+      "eer_a": 0.09425847457627118,
+      "eer_a_ci": [
+        0.06577358010297979,
+        0.12486419721417841
+      ],
+      "eer_b": 0.3803213276836158,
+      "eer_b_ci": [
+        0.336384031285073,
+        0.42354430991495334
+      ],
+      "diff": -0.28606285310734464,
+      "diff_ci": [
+        -0.3304768906323153,
+        -0.2444521734860235
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "test_set": "new_xtts",
+      "condition": "channel",
+      "clips": 4170,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.29368806306306305,
+      "eer_a_ci": [
+        0.254008578648581,
+        0.33333522727272724
+      ],
+      "eer_b": 0.5811655405405405,
+      "eer_b_ci": [
+        0.5456396281897927,
+        0.6236610609810075
+      ],
+      "diff": -0.2874774774774774,
+      "diff_ci": [
+        -0.3390303877392079,
+        -0.2380551287047077
+      ],
+      "p_value": 0.001,
+      "n_speakers": 60,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "test_set": "new_tortoise",
+      "condition": "channel",
+      "clips": 2622,
+      "verdict": "beats floor",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    },
+    {
+      "eer_a": 0.305883606969097,
+      "eer_a_ci": [
+        0.2665203622511298,
+        0.34883141517589683
+      ],
+      "eer_b": 0.35938129698095356,
+      "eer_b_ci": [
+        0.3074614871436445,
+        0.4054350702535744
+      ],
+      "diff": -0.05349769001185656,
+      "diff_ci": [
+        -0.11175844403855306,
+        0.015249555985554417
+      ],
+      "p_value": 0.154,
+      "n_speakers": 75,
+      "n_boot_used": 1000,
+      "n_boot_skipped": 0,
+      "system": "S2 LoRA, XTTS+RVC, channel (deployed)",
+      "test_set": "cm07",
+      "condition": "channel",
+      "clips": 1177,
+      "verdict": "inconclusive",
+      "floor_fit_on": "codemix_adapt_train_rvc_channel20.csv"
+    }
+  ]
+}
