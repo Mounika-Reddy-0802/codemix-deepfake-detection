@@ -64,4 +64,8 @@ instead of saying the confound cannot be separated.
 
 UTMOS was trained on English speech, so its absolute values on Hindi-English audio are
 indicative; the comparison between sets of the same speakers is what the report claims.
-The AMR-NB check covers three models; adding AMR-NB to training is the obvious next step.
+The AMR-NB check covers three models. The direct fix, training on both codecs, is built:
+`src/data/codec_mix.py` stacks every deployed training clip over G.711 and through AMR-NB
+(5,708 clips; AMR-NB copies live in `clips/amr/` so the two never collide), and
+`notebooks/kaggle_w13_mixcodec.ipynb` compares that recipe with the deployed one over
+three seeds on both codecs. It is queued on Kaggle.
