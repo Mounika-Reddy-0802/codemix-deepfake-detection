@@ -1,0 +1,182 @@
+{
+  "s1__clean": {
+    "name": "S1 (English only), clean audio",
+    "conditions": [
+      {
+        "condition": "all English",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.8428246013667426,
+        "ci_low": 0.791661995515695,
+        "ci_high": 0.8916266420361249
+      },
+      {
+        "condition": "all Hindi",
+        "clips": 412,
+        "speakers": 183,
+        "false_alarm_rate": 0.8519417475728155,
+        "ci_low": 0.8119607843137255,
+        "ci_high": 0.8870608306314652
+      },
+      {
+        "condition": "mixed",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.7813211845102506,
+        "ci_low": 0.7236408198398104,
+        "ci_high": 0.8355128792369456
+      }
+    ],
+    "paired": [
+      {
+        "comparison": "mixed - all English",
+        "speakers": 183,
+        "mean_difference": -0.094672131147541,
+        "ci_low": -0.155787795992714,
+        "ci_high": -0.035149134790528266
+      },
+      {
+        "comparison": "all Hindi - all English",
+        "speakers": 183,
+        "mean_difference": -0.025396825396825393,
+        "ci_low": -0.08363453031485818,
+        "ci_high": 0.03185239396304955
+      }
+    ]
+  },
+  "s1__channel": {
+    "name": "S1 (English only), phone line",
+    "conditions": [
+      {
+        "condition": "all English",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.4305239179954442,
+        "ci_low": 0.3739651137277847,
+        "ci_high": 0.49074180747567847
+      },
+      {
+        "condition": "all Hindi",
+        "clips": 412,
+        "speakers": 183,
+        "false_alarm_rate": 0.5315533980582524,
+        "ci_low": 0.475634769780703,
+        "ci_high": 0.5901456514232154
+      },
+      {
+        "condition": "mixed",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.4123006833712984,
+        "ci_low": 0.35210939295446336,
+        "ci_high": 0.47458113046182554
+      }
+    ],
+    "paired": [
+      {
+        "comparison": "mixed - all English",
+        "speakers": 183,
+        "mean_difference": -0.05211473408194719,
+        "ci_low": -0.1336312359468097,
+        "ci_high": 0.02851157949518587
+      },
+      {
+        "comparison": "all Hindi - all English",
+        "speakers": 183,
+        "mean_difference": 0.03497534645075629,
+        "ci_low": -0.042336432541350576,
+        "ci_high": 0.11019945521994697
+      }
+    ]
+  },
+  "s2_rvc_clean__clean": {
+    "name": "S2 trained clean, clean audio",
+    "conditions": [
+      {
+        "condition": "all English",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.05239179954441914,
+        "ci_low": 0.023404255319148935,
+        "ci_high": 0.08530805687203792
+      },
+      {
+        "condition": "all Hindi",
+        "clips": 412,
+        "speakers": 183,
+        "false_alarm_rate": 0.02912621359223301,
+        "ci_low": 0.009069271049277499,
+        "ci_high": 0.05699512633379691
+      },
+      {
+        "condition": "mixed",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.022779043280182234,
+        "ci_low": 0.004807117224880383,
+        "ci_high": 0.045459734329597316
+      }
+    ],
+    "paired": [
+      {
+        "comparison": "mixed - all English",
+        "speakers": 183,
+        "mean_difference": -0.03266078184110971,
+        "ci_low": -0.06278058007566203,
+        "ci_high": -0.005884825556956703
+      },
+      {
+        "comparison": "all Hindi - all English",
+        "speakers": 183,
+        "mean_difference": -0.025192657979543225,
+        "ci_low": -0.05969034608378872,
+        "ci_high": 0.0068715846994535194
+      }
+    ]
+  },
+  "deployed_s2__channel": {
+    "name": "deployed S2, phone line",
+    "conditions": [
+      {
+        "condition": "all English",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.04328018223234624,
+        "ci_low": 0.02127659574468085,
+        "ci_high": 0.0699312538477324
+      },
+      {
+        "condition": "all Hindi",
+        "clips": 412,
+        "speakers": 183,
+        "false_alarm_rate": 0.0412621359223301,
+        "ci_low": 0.02045905318649199,
+        "ci_high": 0.06699010926230091
+      },
+      {
+        "condition": "mixed",
+        "clips": 439,
+        "speakers": 183,
+        "false_alarm_rate": 0.022779043280182234,
+        "ci_low": 0.010393934306977786,
+        "ci_high": 0.03826561126843082
+      }
+    ],
+    "paired": [
+      {
+        "comparison": "mixed - all English",
+        "speakers": 183,
+        "mean_difference": -0.02574377656344869,
+        "ci_low": -0.057985731633272614,
+        "ci_high": 0.004857316332726168
+      },
+      {
+        "comparison": "all Hindi - all English",
+        "speakers": 183,
+        "mean_difference": -0.012698412698412697,
+        "ci_low": -0.04853109549830861,
+        "ci_high": 0.021983476450689543
+      }
+    ]
+  }
+}
