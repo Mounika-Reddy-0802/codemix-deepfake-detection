@@ -17,7 +17,7 @@ with a `CHECKSUMS.sha256` file, everything needed to audit a number in the paper
 The archive takes only files git tracks, from an allowlist of folders and file types,
 and refuses any audio, model weight, archive or secret.
 
-**Not published: the audio and the weights.** The generated clones are cloned speech
+**Not published: the audio and the weights.** The clones are cloned speech
 of identifiable people (`docs/datasheet.md`), so they stay private; their metadata and
 checksums are in the archive. The genuine audio is MUCS 2021 (CC BY-SA 4.0) and HiACC
 (CC BY 4.0), downloadable from their publishers, and the project's bundling code

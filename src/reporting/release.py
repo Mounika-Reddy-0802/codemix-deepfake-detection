@@ -1,6 +1,6 @@
 """Build the metadata release: everything needed to audit every number, and no audio.
 
-The generated clones are cloned speech of identifiable people, so the audio is never
+The clones are cloned speech of identifiable people, so their audio is never
 published (``docs/datasheet.md``). What can be published, and is enough to check every
 table in the paper, is collected here into one archive:
 
@@ -41,7 +41,7 @@ README = """# Metadata release
 
 Clip lists, generation job tables, configurations, per-clip scores and result
 summaries behind every table of the paper. No audio and no model weights are
-included: the generated clones are cloned speech of identifiable people.
+included: the clones are cloned speech of identifiable people.
 
 Manifest paths are written as ${DATA_ROOT}/clips/<name>.wav; the genuine audio is
 MUCS 2021 (CC BY-SA 4.0) and HiACC (CC BY 4.0), and the bundles are rebuilt from

@@ -51,12 +51,12 @@ encoder~\cite{baevski2020wav2vec}, confirmed on new speakers and five seeds;
 
 Genuine code-mixed speech is MUCS 2021~\cite{diwan2021mucs} (520 speakers, 89.5~h of
 lectures); English is ASVspoof 2019 LA. MUCS speakers are split into frozen,
-disjoint pools before any audio is generated: training (25), adaptation (10),
+disjoint pools before any audio is cloned: training (25), adaptation (10),
 evaluation (15), and, for the extension, new test speakers (60), language control
 (183) and extra adaptation speakers (227). A test fails the build if any speaker,
 held-out tool or excluded file crosses a boundary.
 
-Attacks are generated from committed job tables and quality-screened: XTTS-v2 clones
+Attacks are made from committed job tables and quality-screened: XTTS-v2 clones
 for training and test, RVC~\cite{rvc2023} conversions (training uses a
 speaker-held-out half), and two tools never used in training, Tortoise-TTS and
 IndicF5~\cite{ai4bharat2025indicf5,chen2024f5tts}, a flow-matching Indian-language
