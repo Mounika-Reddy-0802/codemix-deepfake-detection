@@ -1,0 +1,116 @@
+{
+  "S1 (English only), clean audio": {
+    "genuine_clips": 1566,
+    "spearman_cmi_score": -0.010839902211812993,
+    "bands": [
+      {
+        "band": "0-10",
+        "clips": 476,
+        "speakers": 15,
+        "false_alarm_rate": 0.9453781512605042,
+        "ci_low": 0.8834635521142583,
+        "ci_high": 0.9854196797520661
+      },
+      {
+        "band": "10-25",
+        "clips": 524,
+        "speakers": 15,
+        "false_alarm_rate": 0.9522900763358778,
+        "ci_low": 0.9105291009683029,
+        "ci_high": 0.9798397238268319
+      },
+      {
+        "band": "25-40",
+        "clips": 365,
+        "speakers": 15,
+        "false_alarm_rate": 0.9506849315068493,
+        "ci_low": 0.9061197636949516,
+        "ci_high": 0.9797106345475911
+      },
+      {
+        "band": "40-50",
+        "clips": 201,
+        "speakers": 15,
+        "false_alarm_rate": 0.9353233830845771,
+        "ci_low": 0.8533983380565829,
+        "ci_high": 0.9841269841269841
+      }
+    ]
+  },
+  "S1 (English only), phone line": {
+    "genuine_clips": 1566,
+    "spearman_cmi_score": 0.13330121117686827,
+    "bands": [
+      {
+        "band": "0-10",
+        "clips": 476,
+        "speakers": 15,
+        "false_alarm_rate": 0.5441176470588235,
+        "ci_low": 0.4176695286894705,
+        "ci_high": 0.6647960924693052
+      },
+      {
+        "band": "10-25",
+        "clips": 524,
+        "speakers": 15,
+        "false_alarm_rate": 0.42938931297709926,
+        "ci_low": 0.3301781690377695,
+        "ci_high": 0.5355257316802486
+      },
+      {
+        "band": "25-40",
+        "clips": 365,
+        "speakers": 15,
+        "false_alarm_rate": 0.3863013698630137,
+        "ci_low": 0.27866575591985426,
+        "ci_high": 0.4939263224707277
+      },
+      {
+        "band": "40-50",
+        "clips": 201,
+        "speakers": 15,
+        "false_alarm_rate": 0.4079601990049751,
+        "ci_low": 0.2631392310563643,
+        "ci_high": 0.5286912067633679
+      }
+    ]
+  },
+  "deployed S2, phone line": {
+    "genuine_clips": 1566,
+    "spearman_cmi_score": 0.09599903245690918,
+    "bands": [
+      {
+        "band": "0-10",
+        "clips": 476,
+        "speakers": 15,
+        "false_alarm_rate": 0.012605042016806723,
+        "ci_low": 0.0044941300952284985,
+        "ci_high": 0.021367775138558986
+      },
+      {
+        "band": "10-25",
+        "clips": 524,
+        "speakers": 15,
+        "false_alarm_rate": 0.007633587786259542,
+        "ci_low": 0.0018281535648994515,
+        "ci_high": 0.01422782310563319
+      },
+      {
+        "band": "25-40",
+        "clips": 365,
+        "speakers": 15,
+        "false_alarm_rate": 0.005479452054794521,
+        "ci_low": 0.0,
+        "ci_high": 0.014752554782975118
+      },
+      {
+        "band": "40-50",
+        "clips": 201,
+        "speakers": 15,
+        "false_alarm_rate": 0.009950248756218905,
+        "ci_low": 0.0,
+        "ci_high": 0.030303030303030304
+      }
+    ]
+  }
+}
