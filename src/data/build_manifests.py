@@ -26,6 +26,8 @@ MANIFEST_COLUMNS = [
 
 TRAINING_SPLITS = {"train", "dev"}
 HELD_OUT_TOOL = "tortoise"
+#: Every evaluation-only generator. IndicF5 is the second held-out tool (week 13).
+HELD_OUT_TOOLS = {"tortoise", "indicf5"}
 EVAL_ONLY_SOURCES = {"indicsynth", "indictts_deepfake", "indicvoices"}
 
 
@@ -125,9 +127,11 @@ def check_speaker_disjoint(df: pd.DataFrame) -> None:
 
 
 def check_no_heldout_tool_in_training(df: pd.DataFrame) -> None:
-    bad = df[(df["split"].isin(TRAINING_SPLITS)) & (df["tool"].str.lower() == HELD_OUT_TOOL)]
+    bad = df[(df["split"].isin(TRAINING_SPLITS)) & (df["tool"].str.lower().isin(HELD_OUT_TOOLS))]
     if len(bad):
-        raise LeakageError(f"{HELD_OUT_TOOL} (held-out attack) found in training: {len(bad)} rows")
+        raise LeakageError(
+            f"held-out attack ({sorted(HELD_OUT_TOOLS)}) found in training: {len(bad)} rows"
+        )
 
 
 def check_no_eval_only_sources_in_training(df: pd.DataFrame) -> None:

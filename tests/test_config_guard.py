@@ -85,3 +85,8 @@ def test_a_config_whose_manifest_is_absent_is_unverifiable_not_passed(tmp_path):
     (tmp_path / "configs/train_x.yaml").write_text("train_manifest: data/absent.csv\n")
     report = cg.check_config("configs/train_x.yaml", root=str(tmp_path))
     assert report.rows == 0 and report.unverifiable
+
+
+def test_indicf5_is_rejected_like_tortoise():
+    problems = cg.check_rows(_rows(tool="indicf5"), S3, set(), set())
+    assert any("held-out tool" in p for p in problems)
