@@ -405,6 +405,18 @@ Tortoise on new speakers as it did on the original ones (13.5\%), but not to Ind
 (37.0\%). One unseen tool can be generalised to on clean audio; neither survives the
 telephone channel, and the two unseen tools behave alike over it.
 
+\textbf{Against the matched floors.} With each system's floor fitted on its own
+training data and paired clip by clip (\texttt{docs/results/floor\_new\_sets\_v1.md}),
+every S2 system is below its floor on the new speakers for both XTTS and Tortoise; the
+deployed model by 28.6 [$-$33.1, $-$24.5] and 28.8 [$-$33.9, $-$23.8] points. That
+result is weaker than it looks: the Tortoise floors land at 40--58\%, near or past
+chance, because the recording cues that separate the training clips do not carry to
+the new speakers' recordings. On IndicF5 the floors stay informative (34.0--35.9\%)
+and no system clears one: the deployed model is inconclusive ($-$5.4 [$-$11.2, +1.5]),
+the clean adapters are level with theirs, and the XTTS-only channel adapter is worse
+than its floor (+9.9 [+3.3, +16.5]). The second unseen tool therefore confirms the
+paper's weakest result rather than relieving it.
+
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
 
