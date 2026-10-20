@@ -417,6 +417,16 @@ the clean adapters are level with theirs, and the XTTS-only channel adapter is w
 than its floor (+9.9 [+3.3, +16.5]). The second unseen tool therefore confirms the
 paper's weakest result rather than relieving it.
 
+\textbf{A real mobile codec undoes much of the channel training.} Passing the same sets
+through the reference AMR-NB codec at 12.2~kbit/s instead of the simulated G.711 line,
+the deployed model rises from 9.4\% to 23.7\% {\scriptsize[19.6, 27.4]} on new-speaker
+XTTS, from 29.4\% to 37.0\% on Tortoise, from 30.6\% to 47.0\% on IndicF5, and to
+40.6\% on CM04. The clean-trained adapter holds better on AMR-NB (12.6\% on XTTS) than
+the channel-trained one, because AMR-NB keeps the voice band and adds no noise, so it
+sounds closer to clean audio than to the noisy G.711 render. Training over the channel
+taught the deployed model one telephone chain, not telephone audio in general; a service
+on mobile networks needs real codecs in training (\texttt{docs/results/amr\_channel\_v1.md}).
+
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
 
