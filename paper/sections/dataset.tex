@@ -35,6 +35,13 @@ The 520 MUCS speakers are divided once into three disjoint pools --- 25 for trai
 single clip was cloned. This ordering is the point: a pool drawn after seeing which
 speakers clone well would quietly select for them.
 
+The original study used 50 of the 520 speakers. For the extension experiments the
+remaining speakers with enough clips were carved, again before any of their audio was
+scored or cloned, into three further pools whose membership is committed and hashed:
+\emph{new test speakers} (60), \emph{language control} (183, evaluation only) and
+\emph{extra adaptation} speakers (227). The two evaluation pools are added to the
+leakage checks, so no configuration can train on them.
+
 Disjointness is enforced mechanically rather than by discipline.
 \texttt{tests/test\_splits.py} fails the build if a speaker crosses a pool boundary,
 if a held-out tool reaches a training manifest, or if any excluded identifier appears
@@ -60,11 +67,16 @@ Set & Clips & Speakers \\
 \midrule
 Training, XTTS only                & 2{,}154 & 8 \\
 Training, XTTS + RVC (deployed)    & 2{,}854 & 21 \\
+Training, extended (Sec.~\ref{sec:data-extension}) & 8{,}018 & 248 \\
 Development                        & 506     & 2 \\
 \midrule
 Evaluation pool / CM04 (read)      & 3{,}966 / 2{,}024 & 15 \\
 RVC test (read)                    & 619     & 12 \\
 HiACC adult (spontaneous, genuine) & 3{,}318 & 24 \\
+\midrule
+New test speakers (CM05 + CM06)    & 4{,}392 & 60 \\
+IndicF5 test (CM07)                & 1{,}177 & 54 \\
+Language control (genuine)         & 1{,}290 & 183 \\
 \bottomrule
 \end{tabular}
 % docs/results/hiacc_false_alarm_v1.md; experiments/results/floor_v2/per_speaker_eer.csv
@@ -107,6 +119,43 @@ of the tool.
 The held-out attack is held out completely. No model in this study is trained on
 Tortoise audio, and no training manifest may contain it.
 
+\subsection{Extension: new speakers, a second unseen tool, more training voices}
+\label{sec:data-extension}
+
+Four further attack sets were generated the same way, each from a committed job table:
+
+\begin{itemize}
+  \item \textbf{CM05}, XTTS-v2 clones of the 60 new test speakers: 1{,}770 of 1{,}800
+    clips pass screening (98.3\%). It tests the seen tool on unseen people.
+  \item \textbf{CM06}, Tortoise clones of the same 60 speakers: 222 of 240 (92.5\%).
+  \item \textbf{CM07}, clones by IndicF5~\cite{ai4bharat2025indicf5}, a flow-matching
+    Indian-language TTS built on F5-TTS~\cite{chen2024f5tts}, from all-Hindi references
+    and all-Hindi sentences of other speakers: 526 of 610 (86.2\%); most rejections
+    stall at two to six characters a second. Like Tortoise it never enters training;
+    it is the second unseen tool and the most recent generator in the study.
+  \item \textbf{CM08}, XTTS-v2 clones of the 227 extra adaptation speakers: 1{,}759 of
+    1{,}816 (96.9\%), used only for training.
+\end{itemize}
+
+Genuine counterparts come from the same speakers: 2{,}400 clips of the new test
+speakers, 651 all-Hindi clips of the IndicF5 speakers and 3{,}405 clips of the extra
+adaptation speakers. Every clip passes through the same level normalisation and
+telephone channel as the original sets. With CM08 and the extra genuine clips, an
+extended training set grows from 21 to 248 genuine speakers (8{,}018 clips) without
+touching any test pool.
+
+\subsection{A language-controlled test set}
+\label{sec:data-control}
+
+To separate the language from the recording, each genuine clip of the 183 control
+speakers is tagged word by word from its transcript, where MUCS writes Hindi in
+Devanagari and English in Latin script. A clip is \emph{all English} or \emph{all
+Hindi} when every tagged word is in one language (at least three words), and
+\emph{mixed} when its Code-Mixing Index~\cite{das2014cmi} is at least 20. Every
+speaker with an all-English clip contributes all of them plus equally many all-Hindi
+and mixed clips from the same lecture recordings: 439, 412 and 439 clips. Speaker,
+recording and channel are held fixed; only the language changes.
+
 \subsection{The telephone channel}
 
 The channel condition is a simulated narrowband chain: resample to 8~kHz, G.711
@@ -142,9 +191,10 @@ Any future release of the code-mixed spoof set must satisfy the strictest of the
 
 \subsection{What the composition cannot tell us}
 
-The gap this paper measures is \emph{English studio speech to Hindi--English lecture
-speech}, because that is what the two corpora are. Language and recording domain move
-together, and the design cannot separate them on its own. The channel-matched columns
-isolate one of the two confounds; a monolingual-Hindi column would isolate the other
-and has not been built. Readers should take the headline gap as the combination of
-both effects, not as a measurement of code-mixing alone.
+The headline gap is \emph{English studio speech to Hindi--English lecture speech},
+because that is what the two corpora are, and language and recording domain move
+together across them. The language-controlled set (Section~\ref{sec:data-control})
+separates the two within MUCS, and Section~\ref{sec:res-language} shows the gap
+follows the recording rather than the language mix. It cannot speak for other
+recording conditions: all of its clips are read lectures, and spontaneous speech
+(HiACC) still differs in both style and recording.
