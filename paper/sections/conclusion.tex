@@ -55,16 +55,21 @@ sound like, not genuine Hindi--English speech in general.
 the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only
 S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio.
 
-\textbf{The attacks are ours, and they are not hard.} We generated the code-mixed
-attacks because no benchmark provides them, which means our numbers are against
-attacks of our own construction, screened by our own quality checks. The team rated
-the seen attack 1.5 out of 5 for sounding human. Detector numbers against easy fakes
-are optimistic.
+\textbf{The attacks are ours, and most are not hard.} We made the code-mixed attacks
+because no benchmark provides them, so our numbers are against attacks of our own
+construction, screened by our own quality checks. The team rated the seen attack 1.5
+out of 5 for sounding human, and a MOS predictor puts it half a point below the
+genuine speech of the same speakers. The exception is IndicF5, whose predicted
+naturalness is level with genuine speech --- and it is the tool no system detects
+reliably over the channel. Detector numbers against easy fakes are optimistic.
 
-\textbf{The telephone leg is simulated, not carried.} The channel condition is an
-8~kHz G.711 render with additive noise, validated by measurement and by ear, and the
-live system is implemented against a real telephony carrier --- but the carrier leg
-has not been exercised on live numbers. The protocol this work was designed around
+\textbf{The telephone leg is simulated, and a real codec hurts.} The channel condition
+is an 8~kHz G.711 render with additive noise, validated by measurement and by ear. Through
+the reference AMR-NB mobile codec instead, the deployed model's error on new speakers
+with the seen tool rises from 9.4\% to 23.7\%, while an adapter trained on clean audio
+holds better (12.6\%): channel training fitted one chain, not telephone audio in
+general. The live system is implemented against a real telephony carrier, but the
+carrier leg has not been exercised on live numbers. The protocol this work was designed around
 is the telephone network, and that is the one leg not yet demonstrated end to end.
 
 \textbf{One live-call behaviour is unexplained.} A genuine caller occasionally loses

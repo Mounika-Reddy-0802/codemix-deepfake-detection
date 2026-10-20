@@ -169,7 +169,14 @@ On clean audio the adapter generalises to the held-out Tortoise attack (5.44\% a
 a 29.49\% floor, XTTS-only training). Over the channel the deployed model averages
 35.59\% $\pm$ 3.35 across five seeds against a 37.79\% floor and beats it in no seed;
 randomising recording cues during training lowers this to 26.63\% $\pm$ 1.66, an
-exploratory result.
+exploratory result. IndicF5 is also the most natural tool: its predicted MOS
+(UTMOS~\cite{saeki2022utmos}) is 3.07 against 3.10 for the same speakers' genuine
+speech, where XTTS sits at 2.66 against 3.17.
+
+The simulated channel flatters the model. Through the reference AMR-NB mobile codec at
+12.2~kbit/s, the deployed model's error on new speakers rises from 9.4\% to 23.7\% on
+XTTS and to 37.0\% on Tortoise, while an adapter trained on clean audio holds at 12.6\%
+on XTTS: channel training fitted one telephone chain.
 
 % OVERFIT-FIX and AASIST: added from the week-13 Kaggle runs.
 
