@@ -34,7 +34,7 @@ def test_render_band_limits_and_rewrites_manifest(tmp_path):
     except Exception as exc:  # an ffmpeg build without the AMR encoder
         pytest.skip(f"AMR-NB encoder unavailable: {exc}")
     assert out["condition"].iloc[0] == "amr_nb_12k2"
-    audio, sr = sf.read(tmp_path / "out" / "clips" / "a.wav")
+    audio, sr = sf.read(tmp_path / "out" / "clips" / "amr" / "a.wav")
     spectrum = np.abs(np.fft.rfft(audio)) ** 2
     freqs = np.fft.rfftfreq(len(audio), 1 / sr)
     assert sr == 16_000 and spectrum[freqs > 4000].sum() / spectrum.sum() < 0.01

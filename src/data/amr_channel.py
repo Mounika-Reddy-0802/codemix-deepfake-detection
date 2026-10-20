@@ -74,11 +74,16 @@ def encode_decode(src: str, dst: str, bitrate: str = DEFAULT_BITRATE) -> None:
         )
 
 
+#: AMR-NB copies keep their clip's name, so they live in their own folder under the data
+#: root; otherwise a copy and its G.711 twin would collide in a shared root.
+SUBDIR = "amr"
+
+
 def render(
     manifest: pd.DataFrame, out_dir: str, data_root: str, bitrate: str = DEFAULT_BITRATE
 ) -> pd.DataFrame:
-    """Every clip of ``manifest`` through AMR-NB into ``out_dir/clips``; new manifest."""
-    clips = Path(out_dir) / "clips"
+    """Every clip of ``manifest`` through AMR-NB into ``out_dir/clips/amr``; new manifest."""
+    clips = Path(out_dir) / "clips" / SUBDIR
     clips.mkdir(parents=True, exist_ok=True)
     out = manifest.copy()
     names = []
@@ -90,7 +95,7 @@ def render(
             partial = target.with_suffix(".part.wav")
             encode_decode(source, str(partial), bitrate)
             partial.replace(target)
-        names.append(f"{DATA_ROOT_TOKEN}/clips/{name}")
+        names.append(f"{DATA_ROOT_TOKEN}/clips/{SUBDIR}/{name}")
         if (i + 1) % 500 == 0:
             print(f"  {i + 1}/{len(manifest)} clips", flush=True)
     out["filepath"] = names
