@@ -8,7 +8,8 @@
 
 \begin{document}
 
-\title{Quantifying and Closing the Code-Mixing Generalisation Gap in Audio Deepfake Detection}
+\title{Recording Domain, Not Code-Mixing: Closing the Generalisation Gap of
+Audio Deepfake Detection on Hindi--English Telephone Speech}
 % \author{...}
 
 \maketitle
@@ -21,11 +22,15 @@ wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\% equal error rate
 English and 48.21\% on clean code-mixed speech, rising to 58.42\% over a simulated
 narrowband channel, where its AUC falls below chance. The failure is a rejection of
 genuine speakers rather than a loss of sensitivity to clones: at a fixed threshold it
-rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English. Low-rank
+rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English. A
+language-controlled test on 183 unseen speakers, holding speaker and recording fixed,
+shows this is not caused by code-mixing: genuine English is rejected as often as mixed
+speech, and the Code-Mixing Index does not predict the score. Low-rank
 adaptation of the frozen encoder, training 1.13\% of the parameters on
 speaker-disjoint code-mixed speech and clones generated for this study, reduces
 channel-matched error to 2.75\% (3.27\% averaged over five training seeds) while
-retaining 2.42\% on clean English; fine-tuning the
+retaining 2.42\% on clean English, and reaches 9.4\% on 60 further unseen speakers;
+fine-tuning the
 whole encoder on identical data is better on the tool it saw (0.83\%) and collapses
 to chance on English. Every result is compared, by a paired test over speakers, with
 a shortcut floor: the error rate eight cheap signal statistics reach when trained on
@@ -33,7 +38,8 @@ the same data and scored on the same clips. Against a cloning tool no model was
 allowed to see, the adapted system generalises on clean audio (5.44\% against a
 29.49\% floor); over the channel the deployed model averages 35.59\% across five
 training seeds against a 37.79\% floor and beats it in none, while full fine-tuning on
-a single attack family stays below its floor in every seed (19.72\%). Randomising
+a single attack family stays below its floor in every seed (19.72\%). A second unseen
+generator, IndicF5, is no easier (30.6\%). Randomising
 recording cues during training lowers the deployed recipe's unseen-tool error to
 26.63\% over five seeds, an exploratory result that does not yet clear the floor. The
 detector runs on live calls

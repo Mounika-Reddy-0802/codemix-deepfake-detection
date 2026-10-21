@@ -1,0 +1,236 @@
+[
+  {
+    "model": "S1 (English only)",
+    "tag": "s1",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.4441172316384181,
+      "ci_low": 0.40480660024567344,
+      "ci_high": 0.4949026460521125,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.4727364864864865,
+      "ci_low": 0.43189835823350015,
+      "ci_high": 0.5158352187028659,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4978973559250758,
+      "ci_low": 0.45384974043107307,
+      "ci_high": 0.5447350625790794,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "S1 (English only)",
+    "tag": "s1",
+    "condition": "G.711",
+    "new XTTS (CM05)": {
+      "eer": 0.4479696327683616,
+      "ci_low": 0.40802610884851914,
+      "ci_high": 0.4878327722683704,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.5270551801801802,
+      "ci_low": 0.48699962448930545,
+      "ci_high": 0.5775403606014271,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.5131824102141777,
+      "ci_low": 0.46089242597457525,
+      "ci_high": 0.5653842109166429,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "S1 (English only)",
+    "tag": "s1",
+    "condition": "AMR-NB",
+    "new XTTS (CM05)": {
+      "eer": 0.3978283898305085,
+      "ci_low": 0.3541240180566519,
+      "ci_high": 0.4399535333906532,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.47294481981981984,
+      "ci_low": 0.4372148098210318,
+      "ci_high": 0.5260187218468468,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4978973559250758,
+      "ci_low": 0.46094820035068695,
+      "ci_high": 0.5325065841276971,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "S2 trained clean",
+    "tag": "s2_rvc_clean",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.10217161016949153,
+      "ci_low": 0.05869401446864537,
+      "ci_high": 0.14104644379969733,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.2612556306306306,
+      "ci_low": 0.21422619047619046,
+      "ci_high": 0.3004325485799701,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.3440962426918517,
+      "ci_low": 0.30135914701670113,
+      "ci_high": 0.38648577476756635,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "S2 trained clean",
+    "tag": "s2_rvc_clean",
+    "condition": "G.711",
+    "new XTTS (CM05)": {
+      "eer": 0.27408898305084745,
+      "ci_low": 0.23100940768250475,
+      "ci_high": 0.3134881571739533,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.3376689189189189,
+      "ci_low": 0.30046532849941404,
+      "ci_high": 0.37943611973689434,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.44860495406306766,
+      "ci_low": 0.41199881616024964,
+      "ci_high": 0.49193630848215913,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "S2 trained clean",
+    "tag": "s2_rvc_clean",
+    "condition": "AMR-NB",
+    "new XTTS (CM05)": {
+      "eer": 0.12591101694915252,
+      "ci_low": 0.09779263516840915,
+      "ci_high": 0.149875465185592,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.3558445945945946,
+      "ci_low": 0.3019918219744229,
+      "ci_high": 0.3982882314983515,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.39759393270370824,
+      "ci_low": 0.3428065650542079,
+      "ci_high": 0.44702077291143727,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "Deployed S2 (trained on G.711)",
+    "tag": "deployed_s2",
+    "condition": "clean",
+    "new XTTS (CM05)": {
+      "eer": 0.2225494350282486,
+      "ci_low": 0.17127432624158234,
+      "ci_high": 0.27176473475717233,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.30711148648648645,
+      "ci_low": 0.26499460103320815,
+      "ci_high": 0.3545431393733601,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4197534649822151,
+      "ci_low": 0.37673432339594765,
+      "ci_high": 0.46493645872306577,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "Deployed S2 (trained on G.711)",
+    "tag": "deployed_s2",
+    "condition": "G.711",
+    "new XTTS (CM05)": {
+      "eer": 0.09425847457627118,
+      "ci_low": 0.06577358010297978,
+      "ci_high": 0.12486419721417841,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.29368806306306305,
+      "ci_low": 0.254008578648581,
+      "ci_high": 0.33333522727272724,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.305883606969097,
+      "ci_low": 0.2665203622511298,
+      "ci_high": 0.34883141517589683,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  },
+  {
+    "model": "Deployed S2 (trained on G.711)",
+    "tag": "deployed_s2",
+    "condition": "AMR-NB",
+    "new XTTS (CM05)": {
+      "eer": 0.23739406779661015,
+      "ci_low": 0.19595957234761477,
+      "ci_high": 0.2742769069860618,
+      "spoof_clips": 1770,
+      "genuine_clips": 2400
+    },
+    "new Tortoise (CM06)": {
+      "eer": 0.3703096846846847,
+      "ci_low": 0.32033212015610457,
+      "ci_high": 0.41788679396496453,
+      "spoof_clips": 222,
+      "genuine_clips": 2400
+    },
+    "IndicF5 (CM07)": {
+      "eer": 0.4698139159993692,
+      "ci_low": 0.4139970291766403,
+      "ci_high": 0.5252514280011328,
+      "spoof_clips": 526,
+      "genuine_clips": 651
+    }
+  }
+]

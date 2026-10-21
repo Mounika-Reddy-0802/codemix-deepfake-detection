@@ -31,6 +31,8 @@ import pandas as pd
 #: Manifest paths are written with this token so they resolve against whatever
 #: DATA_ROOT the reading machine sets (``src.utils.paths.resolve`` expands it).
 DATA_ROOT_TOKEN = "${DATA_ROOT}"
+#: Longest audio a bundle will write as one clip; anything longer is a missed span.
+MAX_CLIP_SECONDS = 60.0
 
 
 def clip_name(row: dict) -> str:
@@ -127,6 +129,14 @@ def build(
                     # through. Requiring a span here is what made the first run
                     # drop every spoof row.
                     audio, sample_rate = load_wav(str(row["filepath"]), target_sr=target_sr)
+                seconds = len(audio) / sample_rate
+                if seconds > MAX_CLIP_SECONDS:
+                    # A whole lecture where a clip was meant: the span never reached
+                    # this row. Writing it once filled a disk with 20 GB of recordings.
+                    raise ValueError(
+                        f"{seconds:.0f} s is a whole recording, not a clip; "
+                        "give the row start_seconds/end_seconds"
+                    )
                 if target_dbfs is not None:
                     audio = rms_normalize(audio, target_dbfs)
                 save_wav(str(target), audio, sample_rate)

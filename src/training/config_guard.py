@@ -10,7 +10,9 @@ to the rows it would really train on:
 1. no held-out tool (Tortoise), no evaluation-only corpus (IndicSynth,
    IndicTTS-Deepfake, IndicVoices, HiACC), no child audio;
 2. no eval-pool speaker in training -- measured on the frozen pools, not on the
-   config's own split column, which a mistake could set either way;
+   config's own split column, which a mistake could set either way. The extension
+   pools' evaluation-only speakers (``eval_ext``, ``control`` in
+   ``speaker_pools_ext.csv``) count as eval speakers too;
 3. code-mixed rows only in a Stage-3 run: either LoRA adaptation or a config that
    declares ``system: s3_native``;
 4. an S3 native run starts from the pretrained encoder (no ``init_from``), because
@@ -30,6 +32,7 @@ import pandas as pd
 from src.data import build_manifests as bm
 
 POOLS = "data/manifests/speaker_pools.csv"
+POOLS_EXT = "data/manifests/speaker_pools_ext.csv"
 RVC_TEST = "data/manifests/rvc_holdout_test.csv"
 EVAL_ONLY = bm.EVAL_ONLY_SOURCES | {"hiacc"}
 S3_NATIVE = "s3_native"
@@ -75,8 +78,9 @@ def check_rows(
     source = rows["source"].astype(str).str.lower()
     speaker = rows["speaker"].astype(str)
 
-    if (tool == bm.HELD_OUT_TOOL).any():
-        problems.append(f"{int((tool == bm.HELD_OUT_TOOL).sum())} rows of the held-out tool")
+    held_out = tool.isin(bm.HELD_OUT_TOOLS)
+    if held_out.any():
+        problems.append(f"{int(held_out.sum())} rows of a held-out tool")
     bad_sources = sorted(set(source) & EVAL_ONLY)
     if bad_sources:
         problems.append(f"evaluation-only corpus in training: {bad_sources}")
@@ -116,8 +120,11 @@ def check_config(path: str, root: str = ".") -> ConfigReport:
     if rows is None:
         return report
 
+    from src.data.speaker_pools_ext import evaluation_only_speakers
+
     pools = pd.read_csv(base / POOLS)
     eval_speakers = set(pools.loc[pools["pool"] == "eval", "speaker"].astype(str))
+    eval_speakers |= evaluation_only_speakers(str(base / POOLS_EXT))
     rvc_test = pd.read_csv(base / RVC_TEST) if (base / RVC_TEST).is_file() else None
     rvc_test_speakers = set(rvc_test["speaker"].astype(str)) if rvc_test is not None else set()
 

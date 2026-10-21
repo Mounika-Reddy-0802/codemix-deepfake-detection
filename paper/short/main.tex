@@ -1,0 +1,189 @@
+% Four-page conference version (owner SK). Every number is taken from the long paper
+% (paper/main.tex) and its sources; nothing here is measured only here.
+\documentclass[conference]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{url}
+
+\begin{document}
+
+\title{Recording Domain, Not Code-Mixing: Closing the Generalisation Gap of\\
+Audio Deepfake Detection on Hindi--English Telephone Speech}
+
+\maketitle
+
+\begin{abstract}
+A wav2vec~2.0 deepfake detector trained on English ASVspoof 2019 LA reaches 0.85\%
+equal error rate (EER) on English and 48.21\% on clean Hindi--English code-mixed
+speech, 58.42\% over a narrowband telephone channel. It fails by rejecting genuine
+speakers. On a language-controlled set of 183 unseen speakers, holding speaker and
+recording fixed, it rejects genuine English as often as code-mixed speech, and the
+Code-Mixing Index does not predict its score: the gap follows the recording domain,
+not the language mix. Low-rank adaptation of 1.13\% of the encoder on
+speaker-disjoint in-domain speech brings channel-matched error to 2.75\% (3.27\% over
+five seeds) and keeps English at 2.42\%; on 60 further unseen speakers it reaches
+9.4\% on the seen cloning tool over the channel. Every result is tested, by a paired
+bootstrap over speakers, against a shortcut floor of eight signal statistics fitted on
+the same training data. Unseen tools remain the open problem: over the channel the
+deployed model averages 35.59\% on Tortoise across five seeds, not below its floor.
+\end{abstract}
+
+\section{Introduction}
+
+Zero-shot voice cloning needs seconds of a person's speech~\cite{casanova2024xtts,
+betker2023tortoise}, and its criminal use is the telephone call. Detectors built on
+self-supervised speech representations reach below 1\% EER on English
+benchmarks~\cite{todisco2019asvspoof,tak2022wav2vec}. In India, everyday speech is
+\emph{code-mixed}, Hindi and English inside one utterance, and arrives over a
+narrowband channel. We ask what happens to such a detector there, why, and what it
+costs to fix. Our contributions:
+(i) a measured gap, characterised as a rejection of genuine speech;
+(ii) a language-controlled test showing the gap follows the recording domain rather
+than code-mixing;
+(iii) closure by low-rank adapters~\cite{hu2022lora} on a frozen
+encoder~\cite{baevski2020wav2vec}, confirmed on new speakers and five seeds;
+(iv) matched shortcut floors with a paired speaker bootstrap for every claim; and
+(v) an honest account of unseen-tool generalisation, including two unseen generators.
+
+\section{Data and attacks}
+
+Genuine code-mixed speech is MUCS 2021~\cite{diwan2021mucs} (520 speakers, 89.5~h of
+lectures); English is ASVspoof 2019 LA. MUCS speakers are split into frozen,
+disjoint pools before any audio is cloned: training (25), adaptation (10),
+evaluation (15), and, for the extension, new test speakers (60), language control
+(183) and extra adaptation speakers (227). A test fails the build if any speaker,
+held-out tool or excluded file crosses a boundary.
+
+Attacks are made from committed job tables and quality-screened: XTTS-v2 clones
+for training and test, RVC~\cite{rvc2023} conversions (training uses a
+speaker-held-out half), and two tools never used in training, Tortoise-TTS and
+IndicF5~\cite{ai4bharat2025indicf5,chen2024f5tts}, a flow-matching Indian-language
+TTS. All audio is level-normalised; the channel condition is 8~kHz G.711 $\mu$-law at
+20~dB SNR~\cite{itu1988g711}. The language-controlled set tags each word of a
+transcript by script (Devanagari or Latin) and takes, per control speaker, equal
+numbers of all-English, all-Hindi and mixed (CMI $\geq$ 20~\cite{das2014cmi}) clips
+from the same recordings: 439, 412 and 439 clips.
+
+\section{Systems and evaluation}
+
+\textbf{S1} fine-tunes wav2vec~2.0 base on ASVspoof 2019 LA. \textbf{S2} adds LoRA
+adapters (rank 8, 1.13\% of parameters) to S1's frozen encoder and trains them on
+code-mixed genuine speech and clones of 21 speakers; the \emph{deployed} S2 uses XTTS
+and RVC attacks, trained over the channel. \textbf{S3} fine-tunes the whole
+pretrained encoder on the same data.
+
+A low EER on code-mixed sets can come from loudness, bandwidth or room differences.
+Every detector is therefore paired with a \textbf{shortcut floor}: a logistic
+regression on eight signal statistics, fitted on the detector's own training manifest
+and scored on the same clips. The difference in EER gets a 95\% interval from a
+bootstrap that resamples whole speakers; a result counts as learning beyond the
+shortcut only if the whole interval is below zero.
+
+\section{Results}
+
+\subsection{The gap, and where it comes from}
+
+S1 reaches 0.85\% EER on English, but 41.67--48.21\% on clean code-mixed sets and
+44.15--58.42\% over the channel, where its AUC falls below 0.5. At a fixed threshold
+it rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English speech.
+
+Table~\ref{tab:lang} holds speaker and recording fixed. S1 rejects the control
+speakers' genuine English as often as their mixed speech; within speakers, mixed
+speech is rejected 9.5 points \emph{less} often than English on clean audio
+[$-$15.6, $-$3.5]. Over the evaluation pool's genuine clips, S1 rejects 93.5--95.2\%
+in every CMI band and the rank correlation of CMI with its score is $-$0.01. The gap
+is a recording-domain gap that code-mixed telephone speech carries.
+
+\begin{table}[t]
+\centering
+\caption{False alarms (\%) on the language-controlled genuine set (183 unseen
+speakers). $\Delta$: within-speaker mixed $-$ English, 95\% speaker-bootstrap CI.}
+\label{tab:lang}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Model, audio & Eng. & Hin. & Mixed & $\Delta$ \\
+\midrule
+S1, clean            & 84.3 & 85.2 & 78.1 & $-$9.5 [$-$15.6, $-$3.5] \\
+S1, channel          & 43.1 & 53.2 & 41.2 & $-$5.2 [$-$13.4, +2.9] \\
+Deployed S2, channel & 4.3  & 4.1  & 2.3  & $-$2.6 [$-$5.8, +0.5] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Closing it}
+
+Table~\ref{tab:main} gives the deployed S2 and S3 in their training condition. The
+deployed adapter reaches 2.75\% EER over the channel on unseen speakers, 7.21 points
+below its matched floor [$-$12.92, $-$1.10], and 3.27\% $\pm$ 1.17 over five training
+seeds; it keeps English at 2.42\%. S3 is better on the seen tool (0.83\% clean) but
+collapses to chance on English (50.90--56.42\%): each model learns its own training
+domain's notion of genuine speech, and only adaptation keeps both.
+
+\begin{table}[t]
+\centering
+\caption{EER (\%), original test sets, XTTS + RVC training. Bold: below the matched
+floor at the speaker level; italic: inconclusive.}
+\label{tab:main}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+System, condition & Eval & Tortoise & RVC & Eng. \\
+\midrule
+S2 (deployed), channel & \textbf{2.75} & \textit{30.99} & \textbf{5.01} & 2.42 \\
+S2, clean              & \textbf{1.99} & \textbf{12.01} & \textbf{5.01} & 3.75 \\
+S3, channel            & \textbf{1.79} & \textit{31.67} & \textbf{5.98} & 52.25 \\
+S3, clean              & \textbf{0.83} & \textit{21.39} & \textit{8.24} & 50.90 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{New speakers and unseen tools}
+
+On 60 further speakers no model has heard (Table~\ref{tab:new}), the deployed model
+reaches 9.4\% on the seen tool over the channel, with a median speaker at 2.9\% and
+the worst at 17.1\%. Both unseen tools stay near 30\%: Tortoise at 29.4\% and the
+newer IndicF5 at 30.6\%, while S1 stays at 44.8--52.7\%.
+
+\begin{table}[t]
+\centering
+\caption{EER (\%) on 60 new speakers (XTTS seen, Tortoise unseen) and on IndicF5
+(unseen, 54 speakers), each system in its training condition.}
+\label{tab:new}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+System, audio & XTTS & Tortoise & IndicF5 \\
+\midrule
+S1, channel          & 44.8 & 52.7 & 51.3 \\
+S2 XTTS, clean       & 7.2  & 13.5 & 37.0 \\
+Deployed S2, channel & 9.4  & 29.4 & 30.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+On clean audio the adapter generalises to the held-out Tortoise attack (5.44\% against
+a 29.49\% floor, XTTS-only training). Over the channel the deployed model averages
+35.59\% $\pm$ 3.35 across five seeds against a 37.79\% floor and beats it in no seed;
+randomising recording cues during training lowers this to 26.63\% $\pm$ 1.66, an
+exploratory result.
+
+% OVERFIT-FIX and AASIST: added from the week-13 Kaggle runs.
+
+\section{Conclusion}
+
+An English-trained detector fails on Hindi--English telephone speech by rejecting
+genuine speakers, and a language-controlled test shows the cause is the recording
+domain rather than code-mixing. A 1\% low-rank adapter trained on in-domain speech
+closes the gap on unseen speakers and keeps English. Generalising to unseen
+generators over a telephone line remains open, and we report it against matched
+floors rather than against zero. Code, manifests, configurations and per-clip scores
+are released; the cloned audio is not.
+
+\bibliographystyle{IEEEtran}
+\bibliography{../refs}
+
+\end{document}

@@ -58,6 +58,13 @@ data/manifests/asvspoof_eval.csv
 # `python -m src.data.stratified_subset --manifest data/manifests/asvspoof_eval.csv --out data/manifests/asvspoof_eval_subset6k.csv`.
 # Its portable _norm and _channel20 versions ARE committed.
 data/manifests/asvspoof_eval_subset6k.csv
+# The language-control source list has the same absolute paths; it rebuilds from
+# clip_index.csv + speaker_pools_ext.csv: `python -m src.data.codemixing`.
+data/manifests/mucs_language_control_source.csv
+# The extension sets' source lists, likewise rebuilt by `python -m src.data.extension_sets`.
+data/manifests/eval_ext_genuine_source.csv
+data/manifests/adapt_ext_genuine_source.csv
+data/manifests/indicf5_genuine_source.csv
 
 checkpoints/**
 !checkpoints/**/
