@@ -19,7 +19,11 @@ their mixed speech, and the Code-Mixing Index does not predict its score; what i
 fails on is the recording domain that code-mixed telephone speech brings with it. The
 closure holds on people the model has never heard: on 60 further unseen speakers the
 deployed model reaches 9.4\% EER on the seen tool over the channel, with a median
-speaker at 2.9\%.
+speaker at 2.9\%. The largest single gain came from hearing more people: trained on 248
+genuine speakers instead of 21, the same recipe is better in every one of five seeds on
+new speakers (0.91\% against 10.75\%), on both unseen tools (Tortoise 13.59\% against
+29.82\% on new speakers, IndicF5 27.25\% against 35.40\%) and in false alarms (0.47\%
+against 3.40\%), with no unseen-tool audio in training.
 
 The detector runs on a live call. It scores four-second windows of the caller's
 speech, escalates only when consecutive windows agree, and warns the callee --- never
@@ -55,16 +59,21 @@ sound like, not genuine Hindi--English speech in general.
 the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only
 S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio.
 
-\textbf{The attacks are ours, and they are not hard.} We generated the code-mixed
-attacks because no benchmark provides them, which means our numbers are against
-attacks of our own construction, screened by our own quality checks. The team rated
-the seen attack 1.5 out of 5 for sounding human. Detector numbers against easy fakes
-are optimistic.
+\textbf{The attacks are ours, and most are not hard.} We made the code-mixed attacks
+because no benchmark provides them, so our numbers are against attacks of our own
+construction, screened by our own quality checks. The team rated the seen attack 1.5
+out of 5 for sounding human, and a MOS predictor puts it half a point below the
+genuine speech of the same speakers. The exception is IndicF5, whose predicted
+naturalness is level with genuine speech --- and it is the tool no system detects
+reliably over the channel. Detector numbers against easy fakes are optimistic.
 
-\textbf{The telephone leg is simulated, not carried.} The channel condition is an
-8~kHz G.711 render with additive noise, validated by measurement and by ear, and the
-live system is implemented against a real telephony carrier --- but the carrier leg
-has not been exercised on live numbers. The protocol this work was designed around
+\textbf{The telephone leg is simulated, and a real codec hurts.} The channel condition
+is an 8~kHz G.711 render with additive noise, validated by measurement and by ear. Through
+the reference AMR-NB mobile codec instead, the deployed model's error on new speakers
+with the seen tool rises from 9.4\% to 23.7\%, while an adapter trained on clean audio
+holds better (12.6\%): channel training fitted one chain, not telephone audio in
+general. The live system is implemented against a real telephony carrier, but the
+carrier leg has not been exercised on live numbers. The protocol this work was designed around
 is the telephone network, and that is the one leg not yet demonstrated end to end.
 
 \textbf{One live-call behaviour is unexplained.} A genuine caller occasionally loses

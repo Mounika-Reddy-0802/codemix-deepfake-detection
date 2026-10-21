@@ -29,8 +29,11 @@ speech, and the Code-Mixing Index does not predict the score. Low-rank
 adaptation of the frozen encoder, training 1.13\% of the parameters on
 speaker-disjoint code-mixed speech and clones generated for this study, reduces
 channel-matched error to 2.75\% (3.27\% averaged over five training seeds) while
-retaining 2.42\% on clean English, and reaches 9.4\% on 60 further unseen speakers;
-fine-tuning the
+retaining 2.42\% on clean English. Hearing more voices matters more than any other
+change we tried: the same recipe trained on 248 genuine speakers instead of 21 is better
+in every one of five seeds on new speakers (0.91\% against 10.75\%), on two unseen
+cloning tools (Tortoise 13.59\% against 29.82\%, IndicF5 27.25\% against 35.40\%) and
+in false alarms (0.47\% against 3.40\%); fine-tuning the
 whole encoder on identical data is better on the tool it saw (0.83\%) and collapses
 to chance on English. Every result is compared, by a paired test over speakers, with
 a shortcut floor: the error rate eight cheap signal statistics reach when trained on
