@@ -72,8 +72,10 @@ is an 8~kHz G.711 render with additive noise, validated by measurement and by ea
 the reference AMR-NB mobile codec instead, the deployed model's error on new speakers
 with the seen tool rises from 9.4\% to 23.7\%, while an adapter trained on clean audio
 holds better (12.6\%): channel training fitted one chain, not telephone audio in
-general. The live system is implemented against a real telephony carrier, but the
-carrier leg has not been exercised on live numbers. The protocol this work was designed around
+general. Training on G.711 and AMR-NB together closes most of that loss (new-speaker
+XTTS 7.59\% on AMR-NB against 22.37\%, three seeds). The live system is implemented
+against a real telephony carrier, but the carrier leg has not been exercised on live
+numbers. The protocol this work was designed around
 is the telephone network, and that is the one leg not yet demonstrated end to end.
 
 \textbf{One live-call behaviour is unexplained.} A genuine caller occasionally loses

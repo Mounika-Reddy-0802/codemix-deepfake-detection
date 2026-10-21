@@ -1,0 +1,1119 @@
+{
+  "checkpoint": "/kaggle/temp/codemix-deepfake-detection/checkpoints/w13/deployed_s7/best.pt",
+  "manifest": "data/manifests/mucs_language_control_channel20.csv",
+  "summary": {
+    "threshold": 0.5,
+    "clips": 1290,
+    "speakers": 183,
+    "false_alarm_rate": 0.050387596899224806,
+    "false_alarm_ci": [
+      0.029457561906014666,
+      0.0765725549599477
+    ],
+    "median_score": 0.998629629611969,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.0,
+    "per_speaker_max": 1.0,
+    "speakers_above_10pct": 26
+  },
+  "per_speaker": [
+    {
+      "speaker": "165823",
+      "clips": 3,
+      "false_alarms": 3,
+      "false_alarm_rate": 1.0
+    },
+    {
+      "speaker": "607455",
+      "clips": 3,
+      "false_alarms": 3,
+      "false_alarm_rate": 1.0
+    },
+    {
+      "speaker": "419175",
+      "clips": 3,
+      "false_alarms": 3,
+      "false_alarm_rate": 1.0
+    },
+    {
+      "speaker": "539098",
+      "clips": 3,
+      "false_alarms": 3,
+      "false_alarm_rate": 1.0
+    },
+    {
+      "speaker": "571913",
+      "clips": 3,
+      "false_alarms": 3,
+      "false_alarm_rate": 1.0
+    },
+    {
+      "speaker": "673704",
+      "clips": 15,
+      "false_alarms": 11,
+      "false_alarm_rate": 0.7333333333333333
+    },
+    {
+      "speaker": "396164",
+      "clips": 3,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.6666666666666666
+    },
+    {
+      "speaker": "384885",
+      "clips": 3,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.6666666666666666
+    },
+    {
+      "speaker": "677495",
+      "clips": 3,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.6666666666666666
+    },
+    {
+      "speaker": "993563",
+      "clips": 6,
+      "false_alarms": 4,
+      "false_alarm_rate": 0.6666666666666666
+    },
+    {
+      "speaker": "271324",
+      "clips": 7,
+      "false_alarms": 3,
+      "false_alarm_rate": 0.42857142857142855
+    },
+    {
+      "speaker": "848232",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "472901",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "518692",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "726751",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "367739",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "415128",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "461782",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "124018",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "186802",
+      "clips": 6,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "920338",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "772743",
+      "clips": 3,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.3333333333333333
+    },
+    {
+      "speaker": "223996",
+      "clips": 15,
+      "false_alarms": 4,
+      "false_alarm_rate": 0.26666666666666666
+    },
+    {
+      "speaker": "982951",
+      "clips": 15,
+      "false_alarms": 4,
+      "false_alarm_rate": 0.26666666666666666
+    },
+    {
+      "speaker": "550273",
+      "clips": 6,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.16666666666666666
+    },
+    {
+      "speaker": "512483",
+      "clips": 6,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.16666666666666666
+    },
+    {
+      "speaker": "802769",
+      "clips": 13,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.07692307692307693
+    },
+    {
+      "speaker": "591683",
+      "clips": 21,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.047619047619047616
+    },
+    {
+      "speaker": "321235",
+      "clips": 24,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.041666666666666664
+    },
+    {
+      "speaker": "254595",
+      "clips": 27,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.037037037037037035
+    },
+    {
+      "speaker": "216105",
+      "clips": 24,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "250146",
+      "clips": 15,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "208711",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "205934",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "180696",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "233807",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "244699",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "246662",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "223874",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "118960",
+      "clips": 24,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "109686",
+      "clips": 5,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "106884",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "126437",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "134136",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "156870",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "158925",
+      "clips": 15,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "121257",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "160573",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "175258",
+      "clips": 15,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "177090",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "176388",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "106319",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "100051",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "102503",
+      "clips": 11,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "104662",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "366535",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "359899",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "355302",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "353395",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "353135",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "349227",
+      "clips": 19,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "336458",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "332425",
+      "clips": 10,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "323270",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "320706",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "317381",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "295460",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "292072",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "292250",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "286444",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "284288",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "219922",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "278951",
+      "clips": 18,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "277289",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "275027",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "270891",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "262104",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "255117",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "467403",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "427132",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "420389",
+      "clips": 15,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "418386",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "451648",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "452035",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "463627",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "394895",
+      "clips": 12,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "394720",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "502032",
+      "clips": 12,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "499411",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "491848",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "486594",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "479665",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "483445",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "524881",
+      "clips": 12,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "516832",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "533956",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "533769",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "541637",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "535652",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "548661",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "530237",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "518517",
+      "clips": 5,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "522401",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "557816",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "556303",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "548977",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "576814",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "577852",
+      "clips": 15,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "582014",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "590304",
+      "clips": 15,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "427411",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "472349",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "477597",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "398648",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "396461",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "399287",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "391623",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "382422",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "367317",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "655800",
+      "clips": 21,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "648590",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "617567",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "616477",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "604593",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "603426",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "597487",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "593250",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "559236",
+      "clips": 30,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "681725",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "709615",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "690231",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "665639",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "663038",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "667354",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "658158",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "729654",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "731149",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "734095",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "733165",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "736704",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "739673",
+      "clips": 12,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "747425",
+      "clips": 12,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "736630",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "750299",
+      "clips": 12,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "758447",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "768596",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "700300",
+      "clips": 18,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "716782",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "726277",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "727902",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "662206",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "779395",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "778313",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "775679",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "769934",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "765783",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "802880",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "791503",
+      "clips": 18,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "790133",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "827265",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "837603",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "843836",
+      "clips": 18,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "845204",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "868590",
+      "clips": 17,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "805009",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "811724",
+      "clips": 6,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "795525",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "900301",
+      "clips": 23,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "890036",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "875401",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "901907",
+      "clips": 39,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "927363",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "947382",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "909194",
+      "clips": 18,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "924751",
+      "clips": 22,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "955357",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "954992",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "955636",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "962959",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "977448",
+      "clips": 9,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "972262",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "980386",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "991078",
+      "clips": 3,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    }
+  ]
+}

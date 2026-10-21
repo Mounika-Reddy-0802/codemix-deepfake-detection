@@ -427,6 +427,14 @@ sounds closer to clean audio than to the noisy G.711 render. Training over the c
 taught the deployed model one telephone chain, not telephone audio in general; a service
 on mobile networks needs real codecs in training (\texttt{docs/results/amr\_channel\_v1.md}).
 
+Training on both does it. The deployed recipe trained on every clip over G.711 and again
+through AMR-NB, three seeds against the deployed recipe, is better on AMR-NB in every seed:
+new-speaker XTTS 7.59\% against 22.37\%, Tortoise 19.52\% against 36.48\%, IndicF5
+28.01\% against 46.13\% and CM04 14.92\% against 36.76\%, while over G.711 it is level
+or better (IndicF5 27.10\% against 31.24\%; \texttt{experiments/results/mixcodec\_v1/}).
+Three seeds cannot reach significance (the smallest exact two-sided $p$ is 0.25 paired,
+0.10 unpaired), but the gaps are four to twenty standard deviations wide.
+
 \subsection{More genuine speakers}
 \label{sec:res-speakers}
 
