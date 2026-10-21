@@ -1,0 +1,25 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: 2169ef2aa7c62bdabfc6e873aeb200e5a61c8b33
+
+EER (%) per run, phone line; control_fa = genuine clips called fake (%)
+run                  status    dev    eval_pool         cm04     rvc_test     new_xtts new_tortoise         cm07   control_fa
+ext_s1234                ok   0.00         1.16        27.66         5.65         0.91        15.30        27.78         0.47
+deployed_s1234           ok   8.68         3.13        32.34         5.98        11.70        31.99        35.52         1.86
+ext_s2025                ok   0.00         1.34        27.96         3.71         1.30        18.48        28.12         0.08
+deployed_s2025           ok   4.76         3.65        37.14         6.30        10.07        28.83        33.30         2.64
+ext_s7                   ok   0.58         1.08        23.57         8.56         0.67        10.80        27.02         0.31
+deployed_s7              ok   7.51         3.00        34.73         5.65        10.84        27.47        34.24         3.57
+ext_s42                  ok   0.00         1.41        19.49         6.95         0.50        10.26        26.50         1.09
+deployed_s42             ok   8.09         3.25        30.14         6.30        11.58        30.17        36.70         2.87
+ext_s99                  ok   0.43         0.63        23.75         7.59         1.18        13.07        26.84         0.39
+deployed_s99             ok   6.93         4.09        32.96         4.68         9.54        30.63        37.22         6.05
+
+MEAN +/- SD over seeds, and the paired difference ext - deployed (same seeds)
+  eval_pool     ext   1.12 +/-  0.31 (n=5)   deployed   3.42 +/-  0.44 (n=5)   diff  -2.30 (n=5, ext better in 5)
+  cm04          ext  24.48 +/-  3.48 (n=5)   deployed  33.46 +/-  2.63 (n=5)   diff  -8.98 (n=5, ext better in 5)
+  rvc_test      ext   6.49 +/-  1.88 (n=5)   deployed   5.78 +/-  0.67 (n=5)   diff  +0.71 (n=5, ext better in 2)
+  new_xtts      ext   0.91 +/-  0.33 (n=5)   deployed  10.75 +/-  0.94 (n=5)   diff  -9.84 (n=5, ext better in 5)
+  new_tortoise  ext  13.59 +/-  3.39 (n=5)   deployed  29.82 +/-  1.73 (n=5)   diff -16.23 (n=5, ext better in 5)
+  cm07          ext  27.25 +/-  0.68 (n=5)   deployed  35.40 +/-  1.64 (n=5)   diff  -8.14 (n=5, ext better in 5)
+  control_fa    ext   0.47 +/-  0.38 (n=5)   deployed   3.40 +/-  1.60 (n=5)   diff  -2.93 (n=5, ext better in 5)

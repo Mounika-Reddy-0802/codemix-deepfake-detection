@@ -1,0 +1,27 @@
+{
+  "checkpoint": "/kaggle/temp/codemix-deepfake-detection/checkpoints/w13/ext_s42/best.pt",
+  "manifest": "data/manifests/score_cm07_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.26500178140678565,
+    "eer_ci_low": 0.23532633256907282,
+    "eer_ci_high": 0.28896474039894515,
+    "auc": 0.803262602722924,
+    "auc_ci_low": 0.7788031526176897,
+    "auc_ci_high": 0.8282236820407779,
+    "f1": 0.7539432176656151,
+    "threshold": 0.9999252557754517,
+    "clips": 1177,
+    "bonafide": 651,
+    "spoof": 526,
+    "score_std": 0.24988
+  },
+  "per_attack": [
+    {
+      "attack": "indicf5",
+      "spoof_clips": 526,
+      "eer": 0.265002
+    }
+  ]
+}
