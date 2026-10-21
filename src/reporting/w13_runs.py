@@ -32,6 +32,7 @@ from pathlib import Path
 import numpy as np
 
 from src.reporting.seeds import mean_interval
+from src.reporting.variants import mann_whitney_exact
 
 FIELDS = {
     "eval_pool": "Original test pool (XTTS)",
@@ -98,6 +99,8 @@ def compare(rows_a: list[dict], rows_b: list[dict], fields=FIELDS) -> dict:
             "b": mean_interval(list(b.values())),
             "paired_seeds": common,
         }
+        if len(a) > 1 and len(b) > 1:
+            entry["p_mann_whitney"] = mann_whitney_exact(list(a.values()), list(b.values()))
         if diffs:
             entry.update(
                 diff_mean=float(np.mean(diffs)),
@@ -175,7 +178,8 @@ def markdown(report: dict) -> str:
         "",
         "EER (%) mean ± sd over training seeds (false alarms: % of genuine clips called fake).",
         "Difference: first minus second over the seeds both have; negative favours the first.",
-        "p: exact two-sided sign-flip test over the paired seeds. Built by",
+        "p paired: exact sign-flip test over paired seeds (minimum 0.0625 with five seeds);",
+        "p MWU: exact Mann-Whitney test, unpaired (minimum 0.008 with five each). Built by",
         "`src/reporting/w13_runs.py`.",
         "",
     ]
@@ -195,15 +199,17 @@ def markdown(report: dict) -> str:
         lines += [
             f"## {title}",
             "",
-            f"| Set | {a_name} | {b_name} | Difference | {a_name} better | p |",
-            "|---|---|---|---|---|---|",
+            f"| Set | {a_name} | {b_name} | Difference | {a_name} better | p paired | p MWU |",
+            "|---|---|---|---|---|---|---|",
         ]
         for field, e in table.items():
             diff = "-" if "diff_mean" not in e else f"{100 * e['diff_mean']:+.2f}"
             better = "-" if "a_better" not in e else f"{e['a_better']}/{len(e['paired_seeds'])}"
             p = "-" if "p_sign_flip" not in e else f"{e['p_sign_flip']:.3f}"
+            mwu = "-" if "p_mann_whitney" not in e else f"{e['p_mann_whitney']:.3f}"
             lines.append(
-                f"| {FIELDS[field]} | {_cell(e['a'])} | {_cell(e['b'])} | {diff} | {better} | {p} |"
+                f"| {FIELDS[field]} | {_cell(e['a'])} | {_cell(e['b'])} | {diff} | {better} "
+                f"| {p} | {mwu} |"
             )
         lines.append("")
     return "\n".join(lines)
