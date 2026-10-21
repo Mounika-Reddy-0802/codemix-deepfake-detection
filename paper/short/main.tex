@@ -178,7 +178,14 @@ The simulated channel flatters the model. Through the reference AMR-NB mobile co
 XTTS and to 37.0\% on Tortoise, while an adapter trained on clean audio holds at 12.6\%
 on XTTS: channel training fitted one telephone chain.
 
-% OVERFIT-FIX and AASIST: added from the week-13 Kaggle runs.
+\textbf{More voices.} Retrained on 248 genuine speakers instead of 21, changing only the
+training manifest, the deployed recipe is better in all five seeds on new speakers
+(0.91\% against 10.75\%), on Tortoise (13.59\% against 29.82\% on new speakers), on
+IndicF5 (27.25\% against 35.40\%) and in false alarms (0.47\% against 3.40\%; exact
+Mann--Whitney $p = 0.008$ for each). No unseen-tool audio entered training: the gain
+comes from a broader notion of genuine speech.
+
+% AASIST: added from the week-13 Kaggle run.
 
 \section{Conclusion}
 
