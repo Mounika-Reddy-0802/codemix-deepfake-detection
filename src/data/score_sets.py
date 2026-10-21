@@ -12,6 +12,7 @@ genuine pool is enough:
 * ``score_ext``: the 60 new test speakers (``eval_ext_genuine``) + CM05 (XTTS) + CM06
   (Tortoise);
 * ``score_cm07``: the IndicF5 speakers' all-Hindi genuine clips + CM07 (IndicF5).
+* ``score_cm09``: the same genuine clips + CM09 (Chatterbox, same speakers and sentences).
 
 A spoof speaker missing from the genuine set is an error, not a warning: the EER
 would then compare different people. CM08 is training data and never enters a
@@ -32,6 +33,7 @@ TRAINING_ATTACKS = {"cm08"}
 SETS = {
     "score_ext": ("eval_ext_genuine", ("cm05", "cm06")),
     "score_cm07": ("indicf5_genuine", ("cm07",)),
+    "score_cm09": ("indicf5_genuine", ("cm09",)),
 }
 CONDITIONS = {"": "clean", "_channel20": "channel"}
 

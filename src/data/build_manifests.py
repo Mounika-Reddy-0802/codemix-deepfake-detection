@@ -27,7 +27,7 @@ MANIFEST_COLUMNS = [
 TRAINING_SPLITS = {"train", "dev"}
 HELD_OUT_TOOL = "tortoise"
 #: Every evaluation-only generator. IndicF5 is the second held-out tool (week 13).
-HELD_OUT_TOOLS = {"tortoise", "indicf5"}
+HELD_OUT_TOOLS = {"tortoise", "indicf5", "chatterbox"}
 EVAL_ONLY_SOURCES = {"indicsynth", "indictts_deepfake", "indicvoices"}
 
 
