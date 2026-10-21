@@ -1,0 +1,27 @@
+{
+  "checkpoint": "D:\\dfdata\\gen_results\\run1\\ext_s1234_best.pt",
+  "manifest": "data/manifests/score_cm07_amr.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.42052151413736105,
+    "eer_ci_low": 0.39093073117901883,
+    "eer_ci_high": 0.45373026768446273,
+    "auc": 0.5920972706511772,
+    "auc_ci_low": 0.5614316032465427,
+    "auc_ci_high": 0.6225169024115365,
+    "f1": 0.6036829463570856,
+    "threshold": 0.9809417724609375,
+    "clips": 1177,
+    "bonafide": 651,
+    "spoof": 526,
+    "score_std": 0.467257
+  },
+  "per_attack": [
+    {
+      "attack": "indicf5",
+      "spoof_clips": 526,
+      "eer": 0.420522
+    }
+  ]
+}

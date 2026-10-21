@@ -478,6 +478,15 @@ clones by the \emph{seen} tool only; no Tortoise or IndicF5 audio entered traini
 the unseen-tool gains come from a broader notion of genuine speech, not from exposure to
 the attacks.
 
+\textbf{Spontaneous speech does not improve.} The added speakers read lectures, like the
+original ones. On the 24 spontaneous HiACC speakers, the seed-1234 model trained on 248
+speakers falsely flags 46.0\% [38.8, 53.3] of genuine clips over the channel, against
+38.5\% [28.2, 48.7] for the deployed recipe retrained in the same run: the intervals
+overlap and the point estimate is not better. (The published deployed checkpoint scored
+54.4\%, so two trainings of one recipe differ by that much; one seed each here.) More
+read voices do not teach the detector what spontaneous speech sounds like. That needs
+spontaneous training data, which the dataset rules keep HiACC from supplying.
+
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
 
