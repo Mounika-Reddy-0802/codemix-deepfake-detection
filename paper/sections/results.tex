@@ -54,7 +54,51 @@ In a deployment this is the more damaging error: nearly every genuine caller wou
 be flagged. The model's notion of genuine speech is tied to the recording conditions
 and language of its training data rather than to properties of synthesis. Because
 ASVspoof is studio read speech and MUCS is lecture audio, this gap combines language
-shift with recording-domain shift, and we do not claim it isolates code-mixing.
+shift with recording-domain shift; the next subsection separates the two.
+
+\subsection{Code-mixing or recording domain?}
+\label{sec:res-language}
+
+The language-controlled set (Section~\ref{sec:data-control}) holds the speaker and the
+recording fixed and changes only the language. If code-mixing were what fooled S1, its
+false alarms would be highest on the mixed clips. They are not
+(Table~\ref{tab:language}). On clean audio S1 rejects 84.3\% of genuine all-English
+clips, 85.2\% of all-Hindi and 78.1\% of mixed; within the same speakers, mixed speech
+is rejected 9.5 points \emph{less} often than English [$-$15.6, $-$3.5]. Over the
+channel the three conditions are 43.1, 53.2 and 41.2\%, and the mixed-minus-English
+difference ($-$5.2 [$-$13.4, +2.9]) contains zero. The adapted systems keep false
+alarms at 2--5\% in every condition, with no condition singled out. S1 rejects English
+lecture speech by the same English speakers almost exactly as often as it rejects their
+code-mixed speech: the failure follows the recording, not the language mix.
+
+\begin{table}[t]
+\centering
+\caption{False alarms (\%) on the language-controlled genuine set: 183 unseen speakers,
+each in three language conditions from the same recordings. Last column: within-speaker
+difference mixed $-$ English (points), 95\% speaker-bootstrap interval.}
+\label{tab:language}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Model, audio & English & Hindi & Mixed & Mixed $-$ English \\
+\midrule
+S1, clean          & 84.3 & 85.2 & 78.1 & $-$9.5 [$-$15.6, $-$3.5] \\
+S1, channel        & 43.1 & 53.2 & 41.2 & $-$5.2 [$-$13.4, +2.9] \\
+S2 (clean), clean  & 5.2  & 2.9  & 2.3  & $-$3.3 [$-$6.3, $-$0.6] \\
+Deployed S2, channel & 4.3 & 4.1 & 2.3  & $-$2.6 [$-$5.8, +0.5] \\
+\bottomrule
+\end{tabular}
+% docs/results/language_control_v1.md
+\end{table}
+
+The evaluation pool tells the same story at the level of single clips. Grouping its
+genuine clips by Code-Mixing Index, S1 rejects 94.5, 95.2, 95.1 and 93.5\% in the
+bands 0--10, 10--25, 25--40 and 40--50 on clean audio, and the rank correlation
+between a clip's CMI and its score is $-$0.01; over the channel it is +0.13, so more
+mixing makes a clip look, if anything, slightly \emph{more} genuine
+(\texttt{docs/results/cmi\_bands\_v1.md}). The gap this paper closes is therefore a
+recording-domain gap that code-mixed telephone speech happens to carry, which is why
+adaptation on in-domain audio closes it.
 
 \subsection{Shortcut floors}
 \label{sec:floors}
@@ -317,6 +361,114 @@ find this kind of improvement. We report the variant as a lead to be confirmed o
 second unseen tool, not as a validated result.
 % src/reporting/variants.py; experiments/results/variants_v1.json;
 % docs/results/variants_v1.md
+
+\subsection{New speakers and a second unseen tool}
+\label{sec:res-new}
+
+The original test pool has 15 speakers and one unseen tool. Section~\ref{sec:data-extension}
+adds 60 speakers no model has heard, cloned with the seen tool (CM05) and with Tortoise
+(CM06), and a second unseen generator, IndicF5 (CM07), on 54 test speakers.
+Table~\ref{tab:new} scores every system in its own training condition.
+
+\begin{table}[t]
+\centering
+\caption{EER (\%) on the week-13 sets, each system in its training condition; 95\%
+speaker-bootstrap intervals. New speakers: 60 speakers, 2{,}400 genuine clips.
+IndicF5: 54 speakers, 651 all-Hindi genuine clips.}
+\label{tab:new}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+System, audio & XTTS (seen) & Tortoise & IndicF5 \\
+\midrule
+S1, channel & 44.8 {\scriptsize[40.8, 48.8]} & 52.7 {\scriptsize[48.7, 57.8]} & 51.3 {\scriptsize[46.1, 56.5]} \\
+S2 XTTS, clean & 7.2 {\scriptsize[4.3, 10.0]} & 13.5 {\scriptsize[10.4, 17.5]} & 37.0 {\scriptsize[33.9, 41.4]} \\
+S2 XTTS, channel & 7.4 {\scriptsize[5.5, 9.5]} & 29.7 {\scriptsize[25.6, 33.2]} & 43.9 {\scriptsize[39.9, 47.9]} \\
+S2 XTTS+RVC, clean & 10.2 {\scriptsize[5.9, 14.1]} & 26.1 {\scriptsize[21.4, 30.0]} & 34.4 {\scriptsize[30.1, 38.6]} \\
+Deployed S2, channel & 9.4 {\scriptsize[6.6, 12.5]} & 29.4 {\scriptsize[25.4, 33.3]} & 30.6 {\scriptsize[26.7, 34.9]} \\
+\bottomrule
+\end{tabular}
+% docs/results/new_speakers_v1.md; experiments/results/ext_scoring_v1/
+\end{table}
+
+\textbf{The seen tool transfers to new people.} Over the channel the deployed model
+reaches 9.4\% EER on 60 new speakers, against 2.75\% on the original 15; the median
+speaker sits at 2.9\% and the worst at 17.1\%, so the rise comes from a wider spread of
+voices rather than from a few speakers failing. S1 stays at 44.8\%.
+
+\textbf{Both unseen tools stay hard over the channel.} Tortoise on the new speakers
+lands where it did on the original pool: 29.4\% for the deployed model and 29.7\% for
+the XTTS-only channel adapter. IndicF5, a newer generator, is no easier, at 30.6\%
+for the deployed model, which is the best system on it; the clean adapters reach
+34.4--37.0\% on clean IndicF5. On clean audio the XTTS-only adapter generalises to
+Tortoise on new speakers as it did on the original ones (13.5\%), but not to IndicF5
+(37.0\%). One unseen tool can be generalised to on clean audio; neither survives the
+telephone channel, and the two unseen tools behave alike over it.
+
+\textbf{Against the matched floors.} With each system's floor fitted on its own
+training data and paired clip by clip (\texttt{docs/results/floor\_new\_sets\_v1.md}),
+every S2 system is below its floor on the new speakers for both XTTS and Tortoise; the
+deployed model by 28.6 [$-$33.1, $-$24.5] and 28.8 [$-$33.9, $-$23.8] points. That
+result is weaker than it looks: the Tortoise floors land at 40--58\%, near or past
+chance, because the recording cues that separate the training clips do not carry to
+the new speakers' recordings. On IndicF5 the floors stay informative (34.0--35.9\%)
+and no system clears one: the deployed model is inconclusive ($-$5.4 [$-$11.2, +1.5]),
+the clean adapters are level with theirs, and the XTTS-only channel adapter is worse
+than its floor (+9.9 [+3.3, +16.5]). The second unseen tool therefore confirms the
+paper's weakest result rather than relieving it.
+
+\textbf{A real mobile codec undoes much of the channel training.} Passing the same sets
+through the reference AMR-NB codec at 12.2~kbit/s instead of the simulated G.711 line,
+the deployed model rises from 9.4\% to 23.7\% {\scriptsize[19.6, 27.4]} on new-speaker
+XTTS, from 29.4\% to 37.0\% on Tortoise, from 30.6\% to 47.0\% on IndicF5, and to
+40.6\% on CM04. The clean-trained adapter holds better on AMR-NB (12.6\% on XTTS) than
+the channel-trained one, because AMR-NB keeps the voice band and adds no noise, so it
+sounds closer to clean audio than to the noisy G.711 render. Training over the channel
+taught the deployed model one telephone chain, not telephone audio in general; a service
+on mobile networks needs real codecs in training (\texttt{docs/results/amr\_channel\_v1.md}).
+
+\subsection{More genuine speakers}
+\label{sec:res-speakers}
+
+The deployed S2 adapts on 21 genuine speakers. We retrained the same recipe, changing
+only the training manifest, on 248: the 227 extra adaptation speakers
+(Section~\ref{sec:data-extension}) and their CM08 clones. Both recipes were trained with
+the same five seeds and scored on every set over the channel (Table~\ref{tab:speakers248}).
+
+\begin{table}[t]
+\centering
+\caption{The deployed recipe trained on 21 against 248 genuine speakers: EER (\%) and
+false alarms over the channel, mean $\pm$ sd over five seeds. Every seed of the
+248-speaker recipe beats every seed of the 21-speaker recipe on each starred row
+(exact Mann--Whitney $p = 0.008$, the smallest possible for five against five).}
+\label{tab:speakers248}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Set & 21 speakers & 248 speakers \\
+\midrule
+New speakers, XTTS$^*$       & 10.75 $\pm$ 0.94 & \textbf{0.91} $\pm$ 0.33 \\
+New speakers, Tortoise$^*$   & 29.82 $\pm$ 1.73 & \textbf{13.59} $\pm$ 3.39 \\
+CM04 Tortoise$^*$            & 33.46 $\pm$ 2.63 & \textbf{24.48} $\pm$ 3.48 \\
+IndicF5$^*$                  & 35.40 $\pm$ 1.64 & \textbf{27.25} $\pm$ 0.68 \\
+Original test pool$^*$       & 3.42 $\pm$ 0.44  & \textbf{1.12} $\pm$ 0.31 \\
+RVC test half                & 5.78 $\pm$ 0.67  & 6.49 $\pm$ 1.88 \\
+False alarms, control$^*$    & 3.40 $\pm$ 1.60  & \textbf{0.47} $\pm$ 0.38 \\
+\bottomrule
+\end{tabular}
+% docs/results/w13_runs_v1.md; experiments/results/overfit_fix_v1/
+\end{table}
+
+\textbf{Voices, not attacks, were the bottleneck.} Hearing 248 genuine speakers instead
+of 21 improves six of seven sets in every seed. The seen tool on new people falls from
+10.75\% to 0.91\%, so the earlier rise on new speakers was the model having heard too
+few voices. The unseen tools improve as much: Tortoise on the new speakers from 29.82\%
+to 13.59\%, CM04 from 33.46\% to 24.48\%, IndicF5 from 35.40\% to 27.25\%, and genuine
+callers are called fake seven times less often (0.47\% against 3.40\%). Only RVC, whose
+training conversions are unchanged, stays level. The added data are genuine speech and
+clones by the \emph{seen} tool only; no Tortoise or IndicF5 audio entered training, so
+the unseen-tool gains come from a broader notion of genuine speech, not from exposure to
+the attacks.
 
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
