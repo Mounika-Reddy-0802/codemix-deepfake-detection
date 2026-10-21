@@ -28,6 +28,11 @@ def build(manifests_dir: str) -> pd.DataFrame:
     mdir = Path(manifests_dir)
     g711 = pd.read_csv(mdir / f"{G711}.csv", dtype={"speaker": str})
     amr = pd.read_csv(mdir / f"{AMR}.csv", dtype={"speaker": str})
+    return stack(g711, amr)
+
+
+def stack(g711: pd.DataFrame, amr: pd.DataFrame) -> pd.DataFrame:
+    """Two codec halves of one manifest, after checking they hold the same clips."""
 
     def names(frame: pd.DataFrame) -> list[str]:  # utt_id is empty for some clips; names never are
         return sorted(frame["filepath"].map(lambda p: Path(str(p)).name))
