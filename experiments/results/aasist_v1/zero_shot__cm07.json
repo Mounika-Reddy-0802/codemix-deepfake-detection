@@ -1,0 +1,26 @@
+{
+  "model": "aasist",
+  "weights": "third_party/aasist/AASIST.pth",
+  "manifest": "data/manifests/score_cm07_channel20.csv",
+  "pooled": {
+    "eer": 0.5471897577870839,
+    "eer_ci_low": 0.5156161390338857,
+    "eer_ci_high": 0.5718564309023213,
+    "auc": 0.448581591351124,
+    "auc_ci_low": 0.4171513785083878,
+    "auc_ci_high": 0.478231878722935,
+    "f1": 0.4781199351701783,
+    "threshold": -4.049177169799805,
+    "clips": 1177,
+    "bonafide": 651,
+    "spoof": 526,
+    "score_std": 3.758214
+  },
+  "per_attack": [
+    {
+      "attack": "indicf5",
+      "spoof_clips": 526,
+      "eer": 0.54719
+    }
+  ]
+}

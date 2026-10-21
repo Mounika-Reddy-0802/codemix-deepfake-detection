@@ -1,0 +1,151 @@
+{
+  "mode": "in progress",
+  "commit": "2169ef2aa7c62bdabfc6e873aeb200e5a61c8b33",
+  "branch": "week13-mounika-overfit-fix",
+  "seeds": [
+    1234,
+    2025,
+    7,
+    42,
+    99
+  ],
+  "epochs": 15,
+  "train_sets": {
+    "s2data": [
+      "data/manifests/codemix_adapt_train_rvc_channel20.csv",
+      "data/manifests/codemix_adapt_dev_channel20.csv"
+    ],
+    "extdata": [
+      "data/manifests/codemix_adapt_train_ext_rvc_channel20.csv",
+      "data/manifests/codemix_adapt_dev_channel20.csv"
+    ]
+  },
+  "runs": [
+    {
+      "name": "zero_shot",
+      "data": null,
+      "seed": null,
+      "dev_eer": null,
+      "status": "ok",
+      "eval_pool": 0.4291427203065134,
+      "cm04": 0.5241415561021042,
+      "rvc_test": 0.46688219441368795,
+      "new_xtts": 0.462814,
+      "new_tortoise": 0.540479,
+      "cm07": 0.5471897577870839,
+      "control_fa": 0.8232558139534883,
+      "minutes": 10.3
+    },
+    {
+      "name": "s2data_s1234",
+      "data": "s2data",
+      "seed": 1234,
+      "dev_eer": 0.0376,
+      "status": "ok",
+      "eval_pool": 0.022952586206896552,
+      "cm04": 0.2551238936572471,
+      "rvc_test": 0.05976977876198634,
+      "new_xtts": 0.128782,
+      "new_tortoise": 0.2658,
+      "cm07": 0.2718762593961907,
+      "control_fa": 0.08449612403100776,
+      "minutes": 58.2
+    },
+    {
+      "name": "extdata_s1234",
+      "data": "extdata",
+      "seed": 1234,
+      "dev_eer": 0.0058,
+      "status": "ok",
+      "eval_pool": 0.029270434227330777,
+      "cm04": 0.17008259577149804,
+      "rvc_test": 0.13893705475588608,
+      "new_xtts": 0.018697,
+      "new_tortoise": 0.111931,
+      "cm07": 0.2812374060380929,
+      "control_fa": 0.03178294573643411,
+      "minutes": 147.7
+    },
+    {
+      "name": "s2data_s2025",
+      "data": "s2data",
+      "seed": 2025,
+      "dev_eer": 0.0651,
+      "status": "ok",
+      "eval_pool": 0.06633061941251597,
+      "cm04": 0.29962717573770126,
+      "rvc_test": 0.06623561117262415,
+      "new_xtts": 0.152521,
+      "new_tortoise": 0.283559,
+      "cm07": 0.2718762593961907,
+      "control_fa": 0.11317829457364341,
+      "minutes": 57.7
+    },
+    {
+      "name": "extdata_s2025",
+      "data": "extdata",
+      "seed": 2025,
+      "dev_eer": 0.0101,
+      "status": "ok",
+      "eval_pool": 0.013371647509578545,
+      "cm04": 0.16124579631581587,
+      "rvc_test": 0.1324712223452483,
+      "new_xtts": 0.015127,
+      "new_tortoise": 0.080957,
+      "cm07": 0.25066729745988914,
+      "control_fa": 0.017054263565891473,
+      "minutes": 147.2
+    },
+    {
+      "name": "s2data_s7",
+      "data": "s2data",
+      "seed": 7,
+      "dev_eer": 0.0376,
+      "status": "ok",
+      "eval_pool": 0.028006864623243935,
+      "cm04": 0.23808886434996962,
+      "rvc_test": 0.06623561117262415,
+      "new_xtts": 0.133824,
+      "new_tortoise": 0.256712,
+      "cm07": 0.2854426941879413,
+      "control_fa": 0.08992248062015504,
+      "minutes": 57.8
+    },
+    {
+      "name": "extdata_s7",
+      "data": "extdata",
+      "seed": 7,
+      "dev_eer": 0.0159,
+      "status": "ok",
+      "eval_pool": 0.01610712005108557,
+      "cm04": 0.17040188057354147,
+      "rvc_test": 0.1324712223452483,
+      "new_xtts": 0.020378,
+      "new_tortoise": 0.094589,
+      "cm07": 0.2600284441017914,
+      "control_fa": 0.018604651162790697,
+      "minutes": 147.4
+    },
+    {
+      "name": "s2data_s42",
+      "data": "s2data",
+      "seed": 42,
+      "dev_eer": 0.0593,
+      "status": "ok",
+      "eval_pool": 0.043378033205619414,
+      "cm04": 0.3884483037472045,
+      "rvc_test": 0.07593435978858086,
+      "new_xtts": 0.148669,
+      "new_tortoise": 0.270343,
+      "cm07": 0.2565912051070888,
+      "control_fa": 0.47364341085271316,
+      "minutes": 57.9
+    }
+  ],
+  "failures": [
+    {
+      "where": "time limit",
+      "detail": "stopped before extdata_s42; finished runs are kept"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "model": "aasist",
+  "weights": "third_party/aasist/AASIST.pth",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "pooled": {
+    "eer": 0.46688219441368795,
+    "eer_ci_low": 0.4313553592517642,
+    "eer_ci_high": 0.49757711942648086,
+    "auc": 0.5347212066768338,
+    "auc_ci_low": 0.4926488092774402,
+    "auc_ci_high": 0.5746041419065663,
+    "f1": 0.5270049099836334,
+    "threshold": -5.4174041748046875,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 3.30115
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.466882
+    }
+  ]
+}

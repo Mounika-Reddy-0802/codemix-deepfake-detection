@@ -185,7 +185,13 @@ IndicF5 (27.25\% against 35.40\%) and in false alarms (0.47\% against 3.40\%; ex
 Mann--Whitney $p = 0.008$ for each). No unseen-tool audio entered training: the gain
 comes from a broader notion of genuine speech.
 
-% AASIST: added from the week-13 Kaggle run.
+\textbf{An outside baseline.} AASIST~\cite{jung2022aasist}, scored with its published
+weights, rejects 82.3\% of genuine Hindi--English speech, the same failure as S1. Fine-tuned
+on our 248 speakers it gains as much as the adapter and is better on Tortoise (CM04
+16.7\% against 24.5\%) but worse on the seen tool (1.8\% against 0.9\% on new
+speakers), RVC (13.5\% against 6.5\%) and false alarms (2.3\% against 0.5\%): the
+voices matter more than the architecture.
+
 
 \section{Conclusion}
 
