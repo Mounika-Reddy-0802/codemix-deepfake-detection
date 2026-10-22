@@ -192,6 +192,13 @@ on our 248 speakers it gains as much as the adapter and is better on Tortoise (C
 speakers), RVC (13.5\% against 6.5\%) and false alarms (2.3\% against 0.5\%): the
 voices matter more than the architecture.
 
+\textbf{A stronger baseline.} SSL-AASIST~\cite{tak2022wav2vec} (XLS-R 300M, about three
+times our encoder) rejects 73.1\% of genuine Hindi--English speech zero-shot, but
+fine-tuned on the 248 speakers it is better than our adapter on every set (new-speaker
+Tortoise 0.5\% against 13.6\%, CM04 1.1\% against 24.5\%, false alarms 0.2\% against
+0.5\%). It has two or three seeds and was run only over the simulated phone line, so we
+treat it as indicative: a larger encoder is the clearest next step.
+
 
 \section{Conclusion}
 
