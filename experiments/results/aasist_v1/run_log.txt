@@ -1,0 +1,291 @@
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights third_party/aasist/AASIST.pth --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/zero_shot__eval_pool_scores.csv --out /kaggle/temp/aasist_results/zero_shot__eval_pool.json
+{"pooled": {"eer": 0.4291427203065134, "eer_ci_low": 0.4124917677484994, "eer_ci_high": 0.44759732320221257, "auc": 0.5975469614729673, "auc_ci_low": 0.5789538788644091, "auc_ci_high": 0.6162456691468631, "f1": 0.5123209169054442, "threshold": -5.517749786376953, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 3.039736}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights third_party/aasist/AASIST.pth --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/zero_shot__cm04_scores.csv --out /kaggle/temp/aasist_results/zero_shot__cm04.json
+{"pooled": {"eer": 0.5241415561021042, "eer_ci_low": 0.5030514055981139, "eer_ci_high": 0.5476995892030836, "auc": 0.46902379717467807, "auc_ci_low": 0.4421999997045426, "auc_ci_high": 0.4941351687351977, "f1": 0.5840846726773814, "threshold": -4.840518951416016, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 3.218573}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights third_party/aasist/AASIST.pth --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/zero_shot__rvc_test_scores.csv --out /kaggle/temp/aasist_results/zero_shot__rvc_test.json
+{"pooled": {"eer": 0.46688219441368795, "eer_ci_low": 0.4313553592517642, "eer_ci_high": 0.49757711942648086, "auc": 0.5347212066768338, "auc_ci_low": 0.4926488092774402, "auc_ci_high": 0.5746041419065663, "f1": 0.5270049099836334, "threshold": -5.4174041748046875, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 3.30115}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights third_party/aasist/AASIST.pth --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/zero_shot__new_speakers_scores.csv --out /kaggle/temp/aasist_results/zero_shot__new_speakers.json
+{"pooled": {"eer": 0.47382279116465864, "eer_ci_low": 0.458091320208415, "eer_ci_high": 0.4893217948776977, "auc": 0.5521000669344043, "auc_ci_low": 0.5336324647368855, "auc_ci_high": 0.56762040715776, "f1": 0.548296071196006, "threshold": -5.035401344299316, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 3.388733}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights third_party/aasist/AASIST.pth --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/zero_shot__cm07_scores.csv --out /kaggle/temp/aasist_results/zero_shot__cm07.json
+{"pooled": {"eer": 0.5471897577870839, "eer_ci_low": 0.5156161390338857, "eer_ci_high": 0.5718564309023213, "auc": 0.448581591351124, "auc_ci_low": 0.4171513785083878, "auc_ci_high": 0.478231878722935, "f1": 0.4781199351701783, "threshold": -4.049177169799805, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 3.758214}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights third_party/aasist/AASIST.pth --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/zero_shot__control_scores.csv --out /kaggle/temp/aasist_results/zero_shot__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.8232558139534883, "false_alarm_ci": [0.7908551221103653, 0.8524161834141395], "median_score": -4.237117767333984, "per_speaker_min": 0.0, "per_speaker_median": 0.9583333333333334, "per_speaker_max": 1.0, "speakers_above_10pct": 181}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/s2data_s1234 --epochs 15 --seed 1234 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 2.0318  dev EER 0.1995
+epoch 2/15  loss 0.4369  dev EER 0.0868
+epoch 3/15  loss 0.3041  dev EER 0.0809
+epoch 4/15  loss 0.2714  dev EER 0.0809
+epoch 5/15  loss 0.2039  dev EER 0.0852
+epoch 6/15  loss 0.1413  dev EER 0.0809
+epoch 7/15  loss 0.1379  dev EER 0.0476
+epoch 8/15  loss 0.1230  dev EER 0.0809
+epoch 9/15  loss 0.1643  dev EER 0.0693
+epoch 10/15  loss 0.0968  dev EER 0.0492
+epoch 11/15  loss 0.0873  dev EER 0.0476
+epoch 12/15  loss 0.0887  dev EER 0.0434
+epoch 13/15  loss 0.0967  dev EER 0.0434
+epoch 14/15  loss 0.0811  dev EER 0.0376
+epoch 15/15  loss 0.0979  dev EER 0.0434
+best dev EER = 0.0376
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s1234/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s1234__eval_pool_scores.csv --out /kaggle/temp/aasist_results/s2data_s1234__eval_pool.json
+{"pooled": {"eer": 0.022952586206896552, "eer_ci_low": 0.0188716255640052, "eer_ci_high": 0.02779474745948191, "auc": 0.9972222222222222, "auc_ci_low": 0.9962974507319441, "auc_ci_high": 0.9979584454487271, "f1": 0.9711202792764202, "threshold": 2.7936856746673584, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 7.714214}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s1234/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s1234__cm04_scores.csv --out /kaggle/temp/aasist_results/s2data_s1234__cm04.json
+{"pooled": {"eer": 0.2551238936572471, "eer_ci_low": 0.2311882264893927, "eer_ci_high": 0.27457331433008725, "auc": 0.8331311661005985, "auc_ci_low": 0.81363565697509, "auc_ci_high": 0.8538274090158143, "f1": 0.8189473684210526, "threshold": 7.2828779220581055, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 4.197642}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s1234/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s1234__rvc_test_scores.csv --out /kaggle/temp/aasist_results/s2data_s1234__rvc_test.json
+{"pooled": {"eer": 0.05976977876198634, "eer_ci_low": 0.041921432772412816, "eer_ci_high": 0.08074475776107165, "auc": 0.9839242066559425, "auc_ci_low": 0.9745138026394904, "auc_ci_high": 0.9909303016730378, "f1": 0.9388429752066115, "threshold": 5.509904384613037, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 7.516699}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s1234/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s1234__new_speakers_scores.csv --out /kaggle/temp/aasist_results/s2data_s1234__new_speakers.json
+{"pooled": {"eer": 0.14959086345381528, "eer_ci_low": 0.1400269129299497, "eer_ci_high": 0.15960818914311622, "auc": 0.9280835843373494, "auc_ci_low": 0.9196012035215809, "auc_ci_high": 0.9354058993114486, "f1": 0.8613631567841317, "threshold": 1.5505404472351074, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 6.045496}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s1234/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s1234__cm07_scores.csv --out /kaggle/temp/aasist_results/s2data_s1234__cm07.json
+{"pooled": {"eer": 0.2718762593961907, "eer_ci_low": 0.243825309459511, "eer_ci_high": 0.29910737997867254, "auc": 0.8079847908745247, "auc_ci_low": 0.7862535966519631, "auc_ci_high": 0.8350853202339912, "f1": 0.7476340694006309, "threshold": 5.45805549621582, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 5.808485}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s1234/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s1234__control_scores.csv --out /kaggle/temp/aasist_results/s2data_s1234__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.08449612403100776, "false_alarm_ci": [0.048915141453636825, 0.125009110787172], "median_score": 6.742788314819336, "per_speaker_min": 0.0, "per_speaker_median": 0.0, "per_speaker_max": 1.0, "speakers_above_10pct": 34}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_ext_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/extdata_s1234 --epochs 15 --seed 1234 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 1.1837  dev EER 0.1127
+epoch 2/15  loss 0.3583  dev EER 0.1344
+epoch 3/15  loss 0.2865  dev EER 0.0651
+epoch 4/15  loss 0.2244  dev EER 0.1069
+epoch 5/15  loss 0.1909  dev EER 0.1127
+epoch 6/15  loss 0.1761  dev EER 0.0418
+epoch 7/15  loss 0.1555  dev EER 0.0259
+epoch 8/15  loss 0.1267  dev EER 0.0058
+epoch 9/15  loss 0.1233  dev EER 0.0101
+epoch 10/15  loss 0.1140  dev EER 0.0318
+epoch 11/15  loss 0.0937  dev EER 0.0159
+epoch 12/15  loss 0.0931  dev EER 0.0101
+epoch 13/15  loss 0.0911  dev EER 0.0116
+epoch 14/15  loss 0.0780  dev EER 0.0101
+epoch 15/15  loss 0.0837  dev EER 0.0101
+best dev EER = 0.0058
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s1234/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s1234__eval_pool_scores.csv --out /kaggle/temp/aasist_results/extdata_s1234__eval_pool.json
+{"pooled": {"eer": 0.029270434227330777, "eer_ci_low": 0.024713507695053025, "eer_ci_high": 0.03506187758506982, "auc": 0.9965807258407833, "auc_ci_low": 0.9956073932686352, "auc_ci_high": 0.9973876485369617, "f1": 0.9632446134347274, "threshold": -0.1840481162071228, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 8.376163}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s1234/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s1234__cm04_scores.csv --out /kaggle/temp/aasist_results/extdata_s1234__cm04.json
+{"pooled": {"eer": 0.17008259577149804, "eer_ci_low": 0.15036961377827496, "eer_ci_high": 0.18736127981383355, "auc": 0.917858756211414, "auc_ci_low": 0.9056974937050263, "auc_ci_high": 0.9315670037414852, "f1": 0.8831521739130435, "threshold": 3.3774309158325195, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 4.185455}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s1234/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s1234__rvc_test_scores.csv --out /kaggle/temp/aasist_results/extdata_s1234__rvc_test.json
+{"pooled": {"eer": 0.13893705475588608, "eer_ci_low": 0.10985473669172272, "eer_ci_high": 0.17773463357256283, "auc": 0.9308605093279295, "auc_ci_low": 0.9081416267224576, "auc_ci_high": 0.949727528969621, "f1": 0.858085808580858, "threshold": 2.992313861846924, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 7.684145}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s1234/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s1234__new_speakers_scores.csv --out /kaggle/temp/aasist_results/extdata_s1234__new_speakers.json
+{"pooled": {"eer": 0.03870230923694779, "eer_ci_low": 0.034598031262171536, "eer_ci_high": 0.04486964083252193, "auc": 0.9931385960508702, "auc_ci_low": 0.9911726131127256, "auc_ci_high": 0.9948947176062323, "f1": 0.9644648829431438, "threshold": 0.41822129487991333, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 7.522714}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s1234/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s1234__cm07_scores.csv --out /kaggle/temp/aasist_results/extdata_s1234__cm07.json
+{"pooled": {"eer": 0.2812374060380929, "eer_ci_low": 0.2591501520529155, "eer_ci_high": 0.30673488219480766, "auc": 0.8044336586590971, "auc_ci_low": 0.7782391782209073, "auc_ci_high": 0.8294380187726398, "f1": 0.7387529597474347, "threshold": 4.579953193664551, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 5.780109}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s1234/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s1234__control_scores.csv --out /kaggle/temp/aasist_results/extdata_s1234__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.03178294573643411, "false_alarm_ci": [0.022988065691503405, 0.04225478885916761], "median_score": 6.840409278869629, "per_speaker_min": 0.0, "per_speaker_median": 0.0, "per_speaker_max": 0.3333333333333333, "speakers_above_10pct": 24}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/s2data_s2025 --epochs 15 --seed 2025 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 1.8534  dev EER 0.1386
+epoch 2/15  loss 0.4395  dev EER 0.1185
+epoch 3/15  loss 0.3036  dev EER 0.1026
+epoch 4/15  loss 0.2163  dev EER 0.1243
+epoch 5/15  loss 0.2059  dev EER 0.0651
+epoch 6/15  loss 0.1413  dev EER 0.0968
+epoch 7/15  loss 0.1493  dev EER 0.1127
+epoch 8/15  loss 0.1114  dev EER 0.0651
+epoch 9/15  loss 0.1015  dev EER 0.0809
+epoch 10/15  loss 0.1282  dev EER 0.0868
+epoch 11/15  loss 0.1040  dev EER 0.1170
+epoch 12/15  loss 0.1034  dev EER 0.0809
+epoch 13/15  loss 0.1064  dev EER 0.0751
+epoch 14/15  loss 0.0990  dev EER 0.0794
+epoch 15/15  loss 0.0800  dev EER 0.0809
+best dev EER = 0.0651
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s2025/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s2025__eval_pool_scores.csv --out /kaggle/temp/aasist_results/s2data_s2025__eval_pool.json
+{"pooled": {"eer": 0.06633061941251597, "eer_ci_low": 0.05799607700993303, "eer_ci_high": 0.07390104692579276, "auc": 0.9860892933163048, "auc_ci_low": 0.9827972676437229, "auc_ci_high": 0.9880226803197154, "f1": 0.9174772513335425, "threshold": 3.0127995014190674, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 6.719032}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s2025/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s2025__cm04_scores.csv --out /kaggle/temp/aasist_results/s2data_s2025__cm04.json
+{"pooled": {"eer": 0.29962717573770126, "eer_ci_low": 0.2736613564179121, "eer_ci_high": 0.31822187247314315, "auc": 0.7951251206032113, "auc_ci_low": 0.7752955518441081, "auc_ci_high": 0.8158607234497809, "f1": 0.7831368345837799, "threshold": 7.447327613830566, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 4.524449}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s2025/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s2025__rvc_test_scores.csv --out /kaggle/temp/aasist_results/s2data_s2025__rvc_test.json
+{"pooled": {"eer": 0.06623561117262415, "eer_ci_low": 0.04677433081305617, "eer_ci_high": 0.09053660761447613, "auc": 0.9843002486055111, "auc_ci_low": 0.976191943791253, "auc_ci_high": 0.9907669263457595, "f1": 0.9322314049586777, "threshold": 4.903894901275635, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 6.796442}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s2025/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s2025__new_speakers_scores.csv --out /kaggle/temp/aasist_results/s2data_s2025__new_speakers.json
+{"pooled": {"eer": 0.16871234939759036, "eer_ci_low": 0.1561983927305608, "eer_ci_high": 0.1796413622705797, "auc": 0.9163014558232931, "auc_ci_low": 0.9067122792625042, "auc_ci_high": 0.924452721477227, "f1": 0.8433734939759037, "threshold": 0.7560425996780396, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 5.245407}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s2025/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s2025__cm07_scores.csv --out /kaggle/temp/aasist_results/s2data_s2025__cm07.json
+{"pooled": {"eer": 0.2718762593961907, "eer_ci_low": 0.24306829478506375, "eer_ci_high": 0.3033095794563142, "auc": 0.7991420044038712, "auc_ci_low": 0.7744587989500978, "auc_ci_high": 0.824604456829947, "f1": 0.7476340694006309, "threshold": 3.6552741527557373, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 5.350923}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s2025/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s2025__control_scores.csv --out /kaggle/temp/aasist_results/s2data_s2025__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.11317829457364341, "false_alarm_ci": [0.07797072812153849, 0.15735641227380015], "median_score": 4.3979339599609375, "per_speaker_min": 0.0, "per_speaker_median": 0.0, "per_speaker_max": 1.0, "speakers_above_10pct": 52}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_ext_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/extdata_s2025 --epochs 15 --seed 2025 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 1.1690  dev EER 0.1243
+epoch 2/15  loss 0.3862  dev EER 0.1185
+epoch 3/15  loss 0.2795  dev EER 0.1561
+epoch 4/15  loss 0.2280  dev EER 0.0593
+epoch 5/15  loss 0.1907  dev EER 0.0868
+epoch 6/15  loss 0.1713  dev EER 0.0651
+epoch 7/15  loss 0.1535  dev EER 0.1286
+epoch 8/15  loss 0.1397  dev EER 0.0159
+epoch 9/15  loss 0.1175  dev EER 0.0275
+epoch 10/15  loss 0.1155  dev EER 0.0217
+epoch 11/15  loss 0.1022  dev EER 0.0376
+epoch 12/15  loss 0.1019  dev EER 0.0101
+epoch 13/15  loss 0.0903  dev EER 0.0116
+epoch 14/15  loss 0.0873  dev EER 0.0101
+epoch 15/15  loss 0.0877  dev EER 0.0259
+best dev EER = 0.0101
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s2025/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s2025__eval_pool_scores.csv --out /kaggle/temp/aasist_results/extdata_s2025__eval_pool.json
+{"pooled": {"eer": 0.013371647509578545, "eer_ci_low": 0.010049200281982824, "eer_ci_high": 0.016897126166663053, "auc": 0.9993912303107706, "auc_ci_low": 0.9991799715594787, "auc_ci_high": 0.9996146656133034, "f1": 0.9831371301304487, "threshold": 0.8381901383399963, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 8.21979}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s2025/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s2025__cm04_scores.csv --out /kaggle/temp/aasist_results/extdata_s2025__cm04.json
+{"pooled": {"eer": 0.16124579631581587, "eer_ci_low": 0.13911689344563646, "eer_ci_high": 0.1768708562707739, "auc": 0.9321443111534965, "auc_ci_low": 0.9212864472043, "auc_ci_high": 0.9436404132683411, "f1": 0.889641164522681, "threshold": 4.718970775604248, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 4.118265}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s2025/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s2025__rvc_test_scores.csv --out /kaggle/temp/aasist_results/extdata_s2025__rvc_test.json
+{"pooled": {"eer": 0.1324712223452483, "eer_ci_low": 0.10016313244855635, "eer_ci_high": 0.15998438870906134, "auc": 0.9426744939102095, "auc_ci_low": 0.9217196747241199, "auc_ci_high": 0.9612899482553123, "f1": 0.8646864686468646, "threshold": 4.878777980804443, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 8.125473}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s2025/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s2025__new_speakers_scores.csv --out /kaggle/temp/aasist_results/extdata_s2025__new_speakers.json
+{"pooled": {"eer": 0.027555220883534137, "eer_ci_low": 0.022302605107778754, "eer_ci_high": 0.03416122475111239, "auc": 0.9963658801874163, "auc_ci_low": 0.9952137604197752, "auc_ci_high": 0.997406274873543, "f1": 0.9747337648778451, "threshold": 0.918202817440033, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 7.67064}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s2025/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s2025__cm07_scores.csv --out /kaggle/temp/aasist_results/extdata_s2025__cm07.json
+{"pooled": {"eer": 0.25066729745988914, "eer_ci_low": 0.22267746746437447, "eer_ci_high": 0.27693929850539767, "auc": 0.8413263011570383, "auc_ci_low": 0.8159844675128748, "auc_ci_high": 0.8640885799968416, "f1": 0.7678992918961447, "threshold": 5.192625045776367, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 5.512553}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s2025/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s2025__control_scores.csv --out /kaggle/temp/aasist_results/extdata_s2025__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.017054263565891473, "false_alarm_ci": [0.009962534495465313, 0.025258010050652892], "median_score": 7.073568344116211, "per_speaker_min": 0.0, "per_speaker_median": 0.0, "per_speaker_max": 0.3333333333333333, "speakers_above_10pct": 12}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/s2data_s7 --epochs 15 --seed 7 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 1.8864  dev EER 0.1445
+epoch 2/15  loss 0.4816  dev EER 0.1561
+epoch 3/15  loss 0.2831  dev EER 0.0910
+epoch 4/15  loss 0.2635  dev EER 0.1170
+epoch 5/15  loss 0.1819  dev EER 0.1386
+epoch 6/15  loss 0.1590  dev EER 0.0534
+epoch 7/15  loss 0.1281  dev EER 0.0651
+epoch 8/15  loss 0.1573  dev EER 0.0492
+epoch 9/15  loss 0.1082  dev EER 0.0434
+epoch 10/15  loss 0.0824  dev EER 0.0376
+epoch 11/15  loss 0.0987  dev EER 0.0434
+epoch 12/15  loss 0.1154  dev EER 0.0476
+epoch 13/15  loss 0.0858  dev EER 0.0534
+epoch 14/15  loss 0.0819  dev EER 0.0534
+epoch 15/15  loss 0.0910  dev EER 0.0534
+best dev EER = 0.0376
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s7/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s7__eval_pool_scores.csv --out /kaggle/temp/aasist_results/s2data_s7__eval_pool.json
+{"pooled": {"eer": 0.028006864623243935, "eer_ci_low": 0.022931866269534244, "eer_ci_high": 0.03326073951171533, "auc": 0.996071466581524, "auc_ci_low": 0.995013199922445, "auc_ci_high": 0.997026206640055, "f1": 0.9648177496038035, "threshold": 2.394110679626465, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 7.90482}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s7/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s7__cm04_scores.csv --out /kaggle/temp/aasist_results/s2data_s7__cm04.json
+{"pooled": {"eer": 0.23808886434996962, "eer_ci_low": 0.21727529747307858, "eer_ci_high": 0.26382441457188227, "auc": 0.85611130630706, "auc_ci_low": 0.8404376580029066, "auc_ci_high": 0.8744129695588563, "f1": 0.8319386331938633, "threshold": 6.392610549926758, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 4.334212}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s7/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s7__rvc_test_scores.csv --out /kaggle/temp/aasist_results/s2data_s7__rvc_test.json
+{"pooled": {"eer": 0.06623561117262415, "eer_ci_low": 0.04360718252540837, "eer_ci_high": 0.09047823742700989, "auc": 0.9830885578791234, "auc_ci_low": 0.9736946434619362, "auc_ci_high": 0.9897504867641899, "f1": 0.9322314049586777, "threshold": 4.34863805770874, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 7.642161}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s7/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s7__new_speakers_scores.csv --out /kaggle/temp/aasist_results/s2data_s7__new_speakers.json
+{"pooled": {"eer": 0.1461671686746988, "eer_ci_low": 0.13592239356007965, "eer_ci_high": 0.15665772978414277, "auc": 0.9309799615127176, "auc_ci_low": 0.9233036764710487, "auc_ci_high": 0.9381837563995623, "f1": 0.8645569620253165, "threshold": 1.5962556600570679, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 5.961865}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s7/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s7__cm07_scores.csv --out /kaggle/temp/aasist_results/s2data_s7__cm07.json
+{"pooled": {"eer": 0.2854426941879413, "eer_ci_low": 0.2589535118194524, "eer_ci_high": 0.31617078036488944, "auc": 0.79630489507222, "auc_ci_low": 0.7730413674393565, "auc_ci_high": 0.8226844977148896, "f1": 0.7345971563981043, "threshold": 5.235847473144531, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 6.081455}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s7/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s7__control_scores.csv --out /kaggle/temp/aasist_results/s2data_s7__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.08992248062015504, "false_alarm_ci": [0.055963624383778686, 0.13112756550112947], "median_score": 6.60943078994751, "per_speaker_min": 0.0, "per_speaker_median": 0.0, "per_speaker_max": 1.0, "speakers_above_10pct": 37}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_ext_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/extdata_s7 --epochs 15 --seed 7 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 1.1403  dev EER 0.2153
+epoch 2/15  loss 0.3714  dev EER 0.1026
+epoch 3/15  loss 0.2691  dev EER 0.0868
+epoch 4/15  loss 0.2154  dev EER 0.0651
+epoch 5/15  loss 0.1740  dev EER 0.1894
+epoch 6/15  loss 0.1781  dev EER 0.0275
+epoch 7/15  loss 0.1665  dev EER 0.0318
+epoch 8/15  loss 0.1371  dev EER 0.0318
+epoch 9/15  loss 0.1324  dev EER 0.0693
+epoch 10/15  loss 0.1213  dev EER 0.0174
+epoch 11/15  loss 0.1061  dev EER 0.0275
+epoch 12/15  loss 0.0972  dev EER 0.0159
+epoch 13/15  loss 0.1006  dev EER 0.0159
+epoch 14/15  loss 0.0984  dev EER 0.0159
+epoch 15/15  loss 0.0819  dev EER 0.0159
+best dev EER = 0.0159
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s7/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s7__eval_pool_scores.csv --out /kaggle/temp/aasist_results/extdata_s7__eval_pool.json
+{"pooled": {"eer": 0.01610712005108557, "eer_ci_low": 0.012094832316854143, "eer_ci_high": 0.019205055561936843, "auc": 0.9990376223925075, "auc_ci_low": 0.9986985563915838, "auc_ci_high": 0.9993867153507087, "f1": 0.9796567069294342, "threshold": 1.3460938930511475, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 8.367312}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s7/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s7__cm04_scores.csv --out /kaggle/temp/aasist_results/extdata_s7__cm04.json
+{"pooled": {"eer": 0.17040188057354147, "eer_ci_low": 0.1483129993049247, "eer_ci_high": 0.1869148335853964, "auc": 0.9208508312558907, "auc_ci_low": 0.9084063808240801, "auc_ci_high": 0.934593145203749, "f1": 0.8827726809378186, "threshold": 5.117096424102783, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 4.19607}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s7/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s7__rvc_test_scores.csv --out /kaggle/temp/aasist_results/extdata_s7__rvc_test.json
+{"pooled": {"eer": 0.1324712223452483, "eer_ci_low": 0.10015943870703255, "eer_ci_high": 0.16797457033370217, "auc": 0.9383917939290116, "auc_ci_low": 0.9183654418800579, "auc_ci_high": 0.957369806631996, "f1": 0.8646864686468646, "threshold": 4.88156270980835, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 8.288812}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s7/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s7__new_speakers_scores.csv --out /kaggle/temp/aasist_results/extdata_s7__new_speakers.json
+{"pooled": {"eer": 0.03256526104417671, "eer_ci_low": 0.027525716105156237, "eer_ci_high": 0.03892146758738397, "auc": 0.9948211596385542, "auc_ci_low": 0.9932472584119821, "auc_ci_high": 0.9962985523515181, "f1": 0.9701274284520578, "threshold": 1.1877877712249756, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 7.823733}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s7/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s7__cm07_scores.csv --out /kaggle/temp/aasist_results/extdata_s7__cm07.json
+{"pooled": {"eer": 0.2600284441017914, "eer_ci_low": 0.23863675108014878, "eer_ci_high": 0.2888988135227747, "auc": 0.8246161214393767, "auc_ci_low": 0.797854048336889, "auc_ci_high": 0.845375980988362, "f1": 0.7590551181102361, "threshold": 5.587822437286377, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 5.728557}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/extdata_s7/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/extdata_s7__control_scores.csv --out /kaggle/temp/aasist_results/extdata_s7__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.018604651162790697, "false_alarm_ci": [0.010750701838021083, 0.027231770530276582], "median_score": 7.7082133293151855, "per_speaker_min": 0.0, "per_speaker_median": 0.0, "per_speaker_max": 0.3333333333333333, "speakers_above_10pct": 15}}
+
+$ /usr/bin/python3 -m src.baselines.aasist train --train-manifest data/manifests/codemix_adapt_train_rvc_channel20.csv --dev-manifest data/manifests/codemix_adapt_dev_channel20.csv --data-root /kaggle/temp/root_channel --out-dir /kaggle/temp/aasist_ckpt/s2data_s42 --epochs 15 --seed 42 --device cuda --num-workers 4
+/kaggle/temp/codemix-deepfake-detection/src/baselines/aasist.py:197: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  total += float(loss) * len(labels)
+epoch 1/15  loss 1.8791  dev EER 0.1619
+epoch 2/15  loss 0.4111  dev EER 0.1069
+epoch 3/15  loss 0.3056  dev EER 0.0593
+epoch 4/15  loss 0.2550  dev EER 0.0693
+epoch 5/15  loss 0.2005  dev EER 0.0693
+epoch 6/15  loss 0.1485  dev EER 0.0751
+epoch 7/15  loss 0.1418  dev EER 0.1069
+epoch 8/15  loss 0.1180  dev EER 0.1127
+epoch 9/15  loss 0.1264  dev EER 0.0593
+epoch 10/15  loss 0.1281  dev EER 0.0593
+epoch 11/15  loss 0.0948  dev EER 0.0635
+epoch 12/15  loss 0.0923  dev EER 0.0693
+epoch 13/15  loss 0.1094  dev EER 0.0651
+epoch 14/15  loss 0.0994  dev EER 0.0651
+epoch 15/15  loss 0.0725  dev EER 0.0651
+best dev EER = 0.0593
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s42/best.pt --manifest data/manifests/codemix_eval_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s42__eval_pool_scores.csv --out /kaggle/temp/aasist_results/s2data_s42__eval_pool.json
+{"pooled": {"eer": 0.043378033205619414, "eer_ci_low": 0.037822735924255405, "eer_ci_high": 0.04869830700738294, "auc": 0.9881353767560664, "auc_ci_low": 0.9850179020889103, "auc_ci_high": 0.9909868601302765, "f1": 0.9457070707070707, "threshold": -1.8667864799499512, "clips": 3966, "bonafide": 1566, "spoof": 2400, "score_std": 6.05881}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s42/best.pt --manifest data/manifests/score_cm04_norm_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s42__cm04_scores.csv --out /kaggle/temp/aasist_results/s2data_s42__cm04.json
+{"pooled": {"eer": 0.3884483037472045, "eer_ci_low": 0.3572492119154486, "eer_ci_high": 0.41104859335038363, "auc": 0.6894195430183986, "auc_ci_low": 0.6636752052308695, "auc_ci_high": 0.7226636263139669, "f1": 0.7091043671354552, "threshold": 2.1404175758361816, "clips": 2024, "bonafide": 1566, "spoof": 458, "score_std": 3.990378}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s42/best.pt --manifest data/manifests/rvc_holdout_test_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s42__rvc_test_scores.csv --out /kaggle/temp/aasist_results/s2data_s42__rvc_test.json
+{"pooled": {"eer": 0.07593435978858086, "eer_ci_low": 0.05654090766247253, "eer_ci_high": 0.10172790682282444, "auc": 0.9709820962249567, "auc_ci_low": 0.9574494299776218, "auc_ci_high": 0.9817149451835351, "f1": 0.9223140495867769, "threshold": -0.5755628347396851, "clips": 619, "bonafide": 302, "spoof": 317, "score_std": 5.486933}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s42/best.pt --manifest data/manifests/score_ext_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s42__new_speakers_scores.csv --out /kaggle/temp/aasist_results/s2data_s42__new_speakers.json
+{"pooled": {"eer": 0.160070281124498, "eer_ci_low": 0.1475655576456685, "eer_ci_high": 0.1701343511373705, "auc": 0.90777359437751, "auc_ci_low": 0.8980204055894998, "auc_ci_high": 0.916765899333951, "f1": 0.8515311510031679, "threshold": -2.2390236854553223, "clips": 4392, "bonafide": 2400, "spoof": 1992, "score_std": 4.238772}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s42/best.pt --manifest data/manifests/score_cm07_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s42__cm07_scores.csv --out /kaggle/temp/aasist_results/s2data_s42__cm07.json
+{"pooled": {"eer": 0.2565912051070888, "eer_ci_low": 0.2267909150789168, "eer_ci_high": 0.2855945620171441, "auc": 0.8112964552925304, "auc_ci_low": 0.7850748574491854, "auc_ci_high": 0.8376090663360386, "f1": 0.7622047244094489, "threshold": -0.47849515080451965, "clips": 1177, "bonafide": 651, "spoof": 526, "score_std": 4.430281}}
+
+$ /usr/bin/python3 -m src.baselines.aasist score --weights /kaggle/temp/aasist_ckpt/s2data_s42/best.pt --manifest data/manifests/mucs_language_control_channel20.csv --data-root /kaggle/temp/root_channel --device cuda --batch-size 32 --num-workers 4 --scores-out /kaggle/temp/aasist_results/s2data_s42__control_scores.csv --out /kaggle/temp/aasist_results/s2data_s42__control.json
+{"summary": {"threshold": 0.0, "clips": 1290, "speakers": 183, "false_alarm_rate": 0.47364341085271316, "false_alarm_ci": [0.42744537206627764, 0.5203465557957957], "median_score": 0.14840644598007202, "per_speaker_min": 0.0, "per_speaker_median": 0.4444444444444444, "per_speaker_max": 1.0, "speakers_above_10pct": 152}}

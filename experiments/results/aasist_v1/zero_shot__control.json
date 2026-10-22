@@ -1,0 +1,20 @@
+{
+  "model": "aasist",
+  "weights": "third_party/aasist/AASIST.pth",
+  "manifest": "data/manifests/mucs_language_control_channel20.csv",
+  "summary": {
+    "threshold": 0.0,
+    "clips": 1290,
+    "speakers": 183,
+    "false_alarm_rate": 0.8232558139534883,
+    "false_alarm_ci": [
+      0.7908551221103653,
+      0.8524161834141395
+    ],
+    "median_score": -4.237117767333984,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.9583333333333334,
+    "per_speaker_max": 1.0,
+    "speakers_above_10pct": 181
+  }
+}

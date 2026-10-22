@@ -1,0 +1,26 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/temp/ssl_ckpt/s2data_s2025/best.pt",
+  "manifest": "data/manifests/score_cm07_channel20.csv",
+  "pooled": {
+    "eer": 0.2200971888816854,
+    "eer_ci_low": 0.19885036815872031,
+    "eer_ci_high": 0.24813622993119777,
+    "auc": 0.8457652164263227,
+    "auc_ci_low": 0.8196828560095423,
+    "auc_ci_high": 0.866754474400601,
+    "f1": 0.7968627450980392,
+    "threshold": 5.334597110748291,
+    "clips": 1177,
+    "bonafide": 651,
+    "spoof": 526,
+    "score_std": 3.474136
+  },
+  "per_attack": [
+    {
+      "attack": "indicf5",
+      "spoof_clips": 526,
+      "eer": 0.220097
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "model": "aasist",
+  "weights": "third_party/aasist/AASIST.pth",
+  "manifest": "data/manifests/score_cm04_norm_channel20.csv",
+  "pooled": {
+    "eer": 0.5241415561021042,
+    "eer_ci_low": 0.5030514055981139,
+    "eer_ci_high": 0.5476995892030836,
+    "auc": 0.46902379717467807,
+    "auc_ci_low": 0.4421999997045426,
+    "auc_ci_high": 0.4941351687351977,
+    "f1": 0.5840846726773814,
+    "threshold": -4.840518951416016,
+    "clips": 2024,
+    "bonafide": 1566,
+    "spoof": 458,
+    "score_std": 3.218573
+  },
+  "per_attack": [
+    {
+      "attack": "tortoise",
+      "spoof_clips": 458,
+      "eer": 0.524142
+    }
+  ]
+}

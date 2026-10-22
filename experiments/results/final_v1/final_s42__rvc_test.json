@@ -1,0 +1,27 @@
+{
+  "checkpoint": "/kaggle/temp/codemix-deepfake-detection/checkpoints/w13/final_s42/best.pt",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.0985647732258132,
+    "eer_ci_low": 0.07261692420809772,
+    "eer_ci_high": 0.12274534421427077,
+    "auc": 0.952012868991163,
+    "auc_ci_low": 0.9320964757056129,
+    "auc_ci_high": 0.9701659240632952,
+    "f1": 0.8991735537190083,
+    "threshold": 0.9991098046302795,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 0.448041
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.098565
+    }
+  ]
+}

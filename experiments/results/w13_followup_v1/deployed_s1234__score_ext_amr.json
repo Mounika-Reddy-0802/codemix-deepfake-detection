@@ -1,0 +1,32 @@
+{
+  "checkpoint": "D:\\dfdata\\gen_results\\run1\\deployed_s1234_best.pt",
+  "manifest": "data/manifests/score_ext_amr.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.2504593373493976,
+    "eer_ci_low": 0.2360834639200469,
+    "eer_ci_high": 0.26554228326982016,
+    "auc": 0.8356285558902276,
+    "auc_ci_low": 0.8208320794059039,
+    "auc_ci_high": 0.8467890287076713,
+    "f1": 0.7658578118348233,
+    "threshold": 0.0008038220112212002,
+    "clips": 4392,
+    "bonafide": 2400,
+    "spoof": 1992,
+    "score_std": 0.468365
+  },
+  "per_attack": [
+    {
+      "attack": "tortoise",
+      "spoof_clips": 222,
+      "eer": 0.378356
+    },
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 1770,
+      "eer": 0.234032
+    }
+  ]
+}

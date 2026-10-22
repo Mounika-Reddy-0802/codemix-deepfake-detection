@@ -1,0 +1,20 @@
+{
+  "model": "aasist",
+  "weights": "/kaggle/temp/aasist_ckpt/s2data_s2025/best.pt",
+  "manifest": "data/manifests/mucs_language_control_channel20.csv",
+  "summary": {
+    "threshold": 0.0,
+    "clips": 1290,
+    "speakers": 183,
+    "false_alarm_rate": 0.11317829457364341,
+    "false_alarm_ci": [
+      0.07797072812153849,
+      0.15735641227380015
+    ],
+    "median_score": 4.3979339599609375,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.0,
+    "per_speaker_max": 1.0,
+    "speakers_above_10pct": 52
+  }
+}

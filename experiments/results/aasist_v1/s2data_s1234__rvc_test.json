@@ -1,0 +1,26 @@
+{
+  "model": "aasist",
+  "weights": "/kaggle/temp/aasist_ckpt/s2data_s1234/best.pt",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "pooled": {
+    "eer": 0.05976977876198634,
+    "eer_ci_low": 0.041921432772412816,
+    "eer_ci_high": 0.08074475776107165,
+    "auc": 0.9839242066559425,
+    "auc_ci_low": 0.9745138026394904,
+    "auc_ci_high": 0.9909303016730378,
+    "f1": 0.9388429752066115,
+    "threshold": 5.509904384613037,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 7.516699
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.05977
+    }
+  ]
+}
