@@ -100,3 +100,23 @@ def test_ssl_training_path_runs_with_rawboost(tmp_path, monkeypatch):
         log=lambda m: None,
     )
     assert 0.0 <= best <= 1.0 and (tmp_path / "ckpt" / "best.pt").is_file()
+
+
+def test_a_saved_state_dict_loads_into_a_fresh_network():
+    """The fine-tuned checkpoint holds the folded weight; a fresh network must accept it."""
+    from torch.nn.utils.parametrizations import weight_norm
+
+    from src.baselines.ssl_aasist_model import fold_weight_norm
+
+    def fresh():
+        return torch.nn.Sequential(weight_norm(torch.nn.Conv1d(4, 4, 3, groups=2)))
+
+    trained = fresh()
+    fold_weight_norm(trained[0])
+    state = trained.state_dict()
+    assert "0.weight" in state
+    again = fresh()
+    fold_weight_norm(again[0])
+    again.load_state_dict(state)
+    x = torch.randn(1, 4, 8)
+    assert torch.allclose(trained(x), again(x))

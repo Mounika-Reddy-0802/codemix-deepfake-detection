@@ -80,6 +80,7 @@ def build(weights: str | None = WEIGHTS, device: str = "cpu", kind: str = "aasis
         if "ssl_model.model.mask_emb" in state:  # published fairseq naming
             return ssl.load_ssl_aasist(state, device).to(device)
         model = ssl.Model(None, device)
+        ssl.fold_weight_norm(model.ssl_model.model.encoder.pos_conv_embed.conv)
         model.load_state_dict(state)
         return model.to(device)
 

@@ -655,6 +655,23 @@ def _rename(key: str):
     return None  # mask_emb, the pre-training heads (quantizer, project_q, final_proj) and the weight-norm pair
 
 
+def fold_weight_norm(conv) -> None:
+    """Replace the weight-norm pair of a convolution by one plain ``weight`` tensor.
+
+    Our fine-tuned checkpoints store the folded weight, so a freshly built network must be
+    folded the same way before such a state dict is loaded into it.
+    """
+    try:  # recent torch/transformers register weight norm as a parametrization
+        from torch.nn.utils import parametrize
+
+        if parametrize.is_parametrized(conv, "weight"):
+            parametrize.remove_parametrizations(conv, "weight", leave_parametrized=True)
+    except Exception:
+        pass
+    if hasattr(conv, "weight_g"):
+        torch.nn.utils.remove_weight_norm(conv)
+
+
 def load_ssl_aasist(path_or_state, device: str = "cpu") -> "Model":
     """The published SSL-AASIST checkpoint (fairseq naming) loaded into this network.
 
@@ -681,15 +698,7 @@ def load_ssl_aasist(path_or_state, device: str = "cpu") -> "Model":
     hf["encoder.pos_conv_embed.conv.weight"] = g * v / v.norm(dim=(0, 1), keepdim=True)
     ssl = model.ssl_model.model
     conv = ssl.encoder.pos_conv_embed.conv
-    try:  # recent torch/transformers register weight norm as a parametrization
-        from torch.nn.utils import parametrize
-
-        if parametrize.is_parametrized(conv, "weight"):
-            parametrize.remove_parametrizations(conv, "weight", leave_parametrized=True)
-    except Exception:
-        pass
-    if hasattr(conv, "weight_g"):
-        torch.nn.utils.remove_weight_norm(conv)
+    fold_weight_norm(conv)
     missing, unexpected = ssl.load_state_dict(hf, strict=False)
     if missing or unexpected:
         raise ValueError(
