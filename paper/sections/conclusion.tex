@@ -50,7 +50,11 @@ rather than softening it: IndicF5, a recent flow-matching TTS, sits at 30.6\% ov
 channel for the deployed model, about where Tortoise does (29.4\% on the new
 speakers). We therefore have no conclusive evidence that the
 deployed model detects an unseen tool on a real phone line. This is the sharpest
-limitation of the work and it constrains every deployment claim made here.
+limitation of the work and it constrains every deployment claim made here. The final recipe
+(248 speakers, both telephone codecs) lowers these errors a great deal --- new-speaker
+Tortoise over the channel from 30.8\% to 8.8\%, and over the real AMR-NB codec from
+36.3\% to 6.0\%, in all five seeds --- but we have not measured its shortcut floor, and
+a third unseen tool, Chatterbox, stays at 32.0\% (one seed), so the claim stays open.
 
 \textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
 lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model

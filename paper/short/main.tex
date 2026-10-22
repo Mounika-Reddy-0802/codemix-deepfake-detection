@@ -192,6 +192,13 @@ on our 248 speakers it gains as much as the adapter and is better on Tortoise (C
 speakers), RVC (13.5\% against 6.5\%) and false alarms (2.3\% against 0.5\%): the
 voices matter more than the architecture.
 
+\textbf{The final recipe.} Training on 248 speakers in both telephone codecs (simulated
+G.711 and real AMR-NB) beats the deployed adapter on ten of eleven sets (in every one of
+five seeds on nine of them): new-speaker Tortoise 8.8\% against 30.8\% over the simulated line and 6.0\%
+against 36.3\% over AMR-NB. Voice-conversion error rises (8.5\% against 6.1\%), its
+shortcut floor is not yet measured, and Chatterbox, a third unseen tool, stays at 32.0\%
+(one seed).
+
 \textbf{A stronger baseline.} SSL-AASIST~\cite{tak2022wav2vec} (XLS-R 300M, about three
 times our encoder) rejects 73.1\% of genuine Hindi--English speech zero-shot, but
 fine-tuned on the 248 speakers it is better than our adapter on every set (new-speaker

@@ -35,7 +35,13 @@ in every one of five seeds on new speakers (0.91\% against 10.75\%), on two unse
 cloning tools (Tortoise 13.59\% against 29.82\%, IndicF5 27.25\% against 35.40\%) and
 in false alarms (0.47\% against 3.40\%); fine-tuning the
 whole encoder on identical data is better on the tool it saw (0.83\%) and collapses
-to chance on English. Every result is compared, by a paired test over speakers, with
+to chance on English. Training the 248-speaker recipe on real AMR-NB telephone audio as well (the final recipe)
+cuts error over that codec on new-speaker Tortoise from 36.3\% to 6.0\% and on IndicF5 from 46.5\% to 21.3\%
+(better in every one of five seeds), at the price of voice-conversion clips (8.5\% against
+6.1\%); its shortcut floor is not yet measured. A third unseen generator, Chatterbox, is the
+hardest (32.0\% over the phone line, one seed), and an outside detector with a larger
+encoder, SSL-AASIST, is better than ours on the same data (new-speaker Tortoise 0.5\%
+against 13.6\%). Every result is compared, by a paired test over speakers, with
 a shortcut floor: the error rate eight cheap signal statistics reach when trained on
 the same data and scored on the same clips. Against a cloning tool no model was
 allowed to see, the adapted system generalises on clean audio (5.44\% against a

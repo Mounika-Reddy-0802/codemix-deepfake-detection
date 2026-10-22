@@ -487,6 +487,62 @@ overlap and the point estimate is not better. (The published deployed checkpoint
 read voices do not teach the detector what spontaneous speech sounds like. That needs
 spontaneous training data, which the dataset rules keep HiACC from supplying.
 
+\subsection{The final recipe}
+\label{sec:res-final}
+
+The two largest gains so far came separately: more genuine speakers
+(Sec.~\ref{sec:data-extension}) and real AMR-NB audio in training next to the simulated
+G.711 line. The final recipe uses both: the adapter is trained on the 248-speaker set,
+every clip in both codecs (16{,}036 clips), with the same dev set and the same five seeds
+as the deployed adapter (Table~\ref{tab:final}).
+
+\begin{table}[t]
+\centering
+\caption{The final recipe against the deployed adapter (21 speakers, G.711 only): EER
+(\%) mean $\pm$ sd over five paired seeds; last line, genuine clips called fake. The final
+recipe is better in every seed except on RVC (worse in all five) and false alarms (better
+in four of five).}
+\label{tab:final}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Test set (phone line) & Final & Deployed \\
+\midrule
+Original test pool & 1.1 $\pm$ 0.2 & 3.5 $\pm$ 0.8 \\
+New speakers, XTTS (seen tool) & 0.9 $\pm$ 0.3 & 12.0 $\pm$ 1.9 \\
+New speakers, Tortoise & 8.8 $\pm$ 1.4 & 30.8 $\pm$ 2.1 \\
+CM04, Tortoise & 17.7 $\pm$ 2.3 & 36.2 $\pm$ 5.5 \\
+CM07, IndicF5 & 21.7 $\pm$ 3.7 & 34.9 $\pm$ 1.4 \\
+RVC test half (worse in all five) & 8.5 $\pm$ 1.9 & 6.1 $\pm$ 0.7 \\
+Genuine called fake & 0.5 $\pm$ 0.7 & 2.4 $\pm$ 1.2 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Real AMR-NB codec}} \\
+New speakers, XTTS & 0.7 $\pm$ 0.2 & 23.2 $\pm$ 0.9 \\
+New speakers, Tortoise & 6.0 $\pm$ 1.2 & 36.3 $\pm$ 2.3 \\
+CM04, Tortoise & 6.9 $\pm$ 2.1 & 37.9 $\pm$ 3.8 \\
+CM07, IndicF5 & 21.3 $\pm$ 2.3 & 46.5 $\pm$ 1.2 \\
+\bottomrule
+\end{tabular}
+% docs/results/final_recipe_v1.md; experiments/results/final_v1/
+\end{table}
+
+\textbf{Better on ten of eleven sets, in every seed on nine of them.} Over the simulated line the new
+speakers' seen tool falls from 12.0\% to 0.9\%, new-speaker Tortoise from 30.8\% to 8.8\%
+and CM04 from 36.2\% to 17.7\%; over the real AMR-NB codec, where the deployed adapter is
+near chance (36--47\% on the unseen tools), the final recipe reaches 6.0--6.9\% on both
+Tortoise sets. No unseen-tool audio entered training.
+
+\textbf{RVC is the exception.} Error on the voice-conversion half rises from 6.1\% to
+8.5\%, in all five seeds. We have not isolated the cause. The added speakers have XTTS
+clones but no RVC conversions, so the share of conversion audio falls, which may explain
+it. We report it as a cost of the larger set.
+
+\textbf{What we have not shown.} The five seeds make the direction certain, but with five
+paired seeds the smallest possible exact $p$ is $0.0625$ per set, and we have not yet
+measured the shortcut floor for this recipe, so we do not claim it clears one. IndicF5
+(21.7\%) and, below, Chatterbox stay hard.
+
 \subsection{An outside baseline}
 \label{sec:res-aasist}
 
