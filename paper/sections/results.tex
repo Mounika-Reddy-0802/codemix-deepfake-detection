@@ -427,6 +427,14 @@ sounds closer to clean audio than to the noisy G.711 render. Training over the c
 taught the deployed model one telephone chain, not telephone audio in general; a service
 on mobile networks needs real codecs in training (\texttt{docs/results/amr\_channel\_v1.md}).
 
+Training on both does it. The deployed recipe trained on every clip over G.711 and again
+through AMR-NB, three seeds against the deployed recipe, is better on AMR-NB in every seed:
+new-speaker XTTS 7.59\% against 22.37\%, Tortoise 19.52\% against 36.48\%, IndicF5
+28.01\% against 46.13\% and CM04 14.92\% against 36.76\%, while over G.711 it is level
+or better (IndicF5 27.10\% against 31.24\%; \texttt{experiments/results/mixcodec\_v1/}).
+Three seeds cannot reach significance (the smallest exact two-sided $p$ is 0.25 paired,
+0.10 unpaired), but the gaps are four to twenty standard deviations wide.
+
 \subsection{More genuine speakers}
 \label{sec:res-speakers}
 
@@ -526,6 +534,48 @@ identification step that sends English calls to S1, or English telephone audio i
 adaptation data. We have tested neither.
 % src/reporting/tradeoff.py; experiments/results/tradeoff_v1.json;
 % experiments/results/cross_condition_v1/; docs/results/tradeoff_v1.md
+
+\subsection{A third unseen tool}
+\label{sec:res-chatterbox}
+
+Chatterbox (CM09) is a third generator family none of our training data resembles: XTTS-v2
+is an autoregressive decoder, Tortoise adds diffusion, IndicF5 uses flow matching, and
+Chatterbox is a recent multilingual cloner. We scored the same models on its 525 clips
+against the 651 genuine all-Hindi clips of the same speakers (Table~\ref{tab:chatterbox}).
+
+\begin{table}[t]
+\centering
+\caption{EER (\%) on Chatterbox (CM09) with 95\% bootstrap intervals. The 248-speaker
+adapter is trained over both telephone codecs and is one seed (1234); the others are the
+models of the earlier tables.}
+\label{tab:chatterbox}
+\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Detector & Phone line & Clean \\
+\midrule
+S1, English only             & 55.0 [52.9, 57.7] & 61.1 [58.7, 63.9] \\
+Adapter, 21 speakers         & 35.8 [33.4, 38.8] & 48.0 [44.9, 50.3] \\
+Adapter, 248 speakers, 2 codecs & 32.0 [30.0, 34.9] & 49.0 [45.8, 52.2] \\
+\bottomrule
+\end{tabular}
+% experiments/results/cm09_v1/
+\end{table}
+
+\textbf{It is the hardest unseen tool.} The best detector reaches 32.0\% over the phone
+line, against 9.0\% for the same model (seed 1234) on new-speaker Tortoise and 25.7\% on IndicF5, and
+clean audio is near chance for both adapters (48--49\%). The English-only S1 is at 55.0\%.
+
+\textbf{The added voices help little here.} The 248-speaker adapter is 3.8 points better
+than the 21-speaker one over the phone line (the intervals overlap, and it is one seed), far
+less than the 11 to 22 points it gained on XTTS and Tortoise. Training on more genuine
+speakers closed the gap for tools that resemble the training clones; it did not carry over
+to a generator of a different family.
+
+\textbf{The watermark did not help.} Chatterbox marks its output, yet no detector found
+it: the scores are worse than for IndicF5, so the watermark does not appear to be a
+shortcut they use. We report this as a limit: a tool we did not train on can still defeat the detector,
+and we have not tried to detect the watermark itself.
 
 \subsection{What the detector responds to}
 \label{sec:probe}

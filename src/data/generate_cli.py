@@ -1,4 +1,4 @@
-"""One entry point for the week-13 generation runs: XTTS, Tortoise and IndicF5.
+"""One entry point for the week-13 generation runs: XTTS, Tortoise, IndicF5, Chatterbox.
 
 ``python -m src.data.generate_cli --tool xtts_v2 --pack <dir> --out <dir> --pool eval_ext
 --shard 0 --num-shards 2`` generates every job in ``<pack>/generation_jobs.csv`` whose
@@ -16,7 +16,7 @@ import os
 
 import pandas as pd
 
-TOOLS = ("xtts_v2", "tortoise", "indicf5")
+TOOLS = ("xtts_v2", "tortoise", "indicf5", "chatterbox")
 
 
 def shard(jobs: pd.DataFrame, index: int, count: int) -> pd.DataFrame:
@@ -55,6 +55,10 @@ def main() -> None:
 
         model = load_indicf5(token=os.environ.get("HF_TOKEN"))
         written = generate_jobs(jobs, args.pack, args.out, model)
+    elif args.tool == "chatterbox":
+        from src.data.chatterbox_generation import generate_jobs, load_chatterbox
+
+        written = generate_jobs(jobs, args.pack, args.out, load_chatterbox())
     elif args.tool == "tortoise":
         from src.data.heldout_tts import build_heldout_jobs, generate_heldout_batch, load_tortoise
 

@@ -1,0 +1,27 @@
+{
+  "checkpoint": "C:/Users/kuchu/codemix-deepfake-detection/final_s1234_best.zip",
+  "manifest": "data/manifests/score_cm09.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.48976958525345626,
+    "eer_ci_low": 0.45833760341825913,
+    "eer_ci_high": 0.5222452448409913,
+    "auc": 0.5308053543998245,
+    "auc_ci_low": 0.49316824222942646,
+    "auc_ci_high": 0.5655945215494215,
+    "f1": 0.535483870967742,
+    "threshold": 0.9999798536300659,
+    "clips": 1176,
+    "bonafide": 651,
+    "spoof": 525,
+    "score_std": 0.028757
+  },
+  "per_attack": [
+    {
+      "attack": "chatterbox",
+      "spoof_clips": 525,
+      "eer": 0.48977
+    }
+  ]
+}
