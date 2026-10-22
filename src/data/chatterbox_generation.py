@@ -35,6 +35,12 @@ def load_chatterbox(device: str = "cuda"):
     from src.data.ethics_gate import require_signoff
 
     require_signoff(action="loading Chatterbox")
+    import os
+
+    # Chatterbox passes HF_TOKEN straight to the download; an empty value is sent as
+    # "Bearer " and refused, so a blank token is removed (the model is public).
+    if not os.environ.get("HF_TOKEN", "").strip():
+        os.environ.pop("HF_TOKEN", None)
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 
     return ChatterboxMultilingualTTS.from_pretrained(device=device)
