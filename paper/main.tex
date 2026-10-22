@@ -16,44 +16,23 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 
 \begin{abstract}
 Audio deepfake detectors report error rates below one percent on English
-benchmarks. We ask what those numbers mean for the speech most exposed to voice
-fraud: Hindi--English code-mixed conversation carried over a telephone line. A
-wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\% equal error rate on
-English and 48.21\% on clean code-mixed speech, rising to 58.42\% over a simulated
-narrowband channel, where its AUC falls below chance. The failure is a rejection of
-genuine speakers rather than a loss of sensitivity to clones: at a fixed threshold it
-rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English. A
-language-controlled test on 183 unseen speakers, holding speaker and recording fixed,
-shows this is not caused by code-mixing: genuine English is rejected as often as mixed
-speech, and the Code-Mixing Index does not predict the score. Low-rank
-adaptation of the frozen encoder, training 1.13\% of the parameters on
-speaker-disjoint code-mixed speech and clones generated for this study, reduces
-channel-matched error to 2.75\% (3.27\% averaged over five training seeds) while
-retaining 2.42\% on clean English. Hearing more voices matters more than any other
-change we tried: the same recipe trained on 248 genuine speakers instead of 21 is better
-in every one of five seeds on new speakers (0.91\% against 10.75\%), on two unseen
-cloning tools (Tortoise 13.59\% against 29.82\%, IndicF5 27.25\% against 35.40\%) and
-in false alarms (0.47\% against 3.40\%); fine-tuning the
-whole encoder on identical data is better on the tool it saw (0.83\%) and collapses
-to chance on English. Training the 248-speaker recipe on real AMR-NB telephone audio as well (the final recipe)
-cuts error over that codec on new-speaker Tortoise from 36.3\% to 6.0\% and on IndicF5 from 46.5\% to 21.3\%
-(better in every one of five seeds), at the price of voice-conversion clips (8.5\% against
-6.1\%); its shortcut floor is not yet measured. A third unseen generator, Chatterbox, is the
-hardest (32.0\% over the phone line, one seed), and an outside detector with a larger
-encoder, SSL-AASIST, is better than ours on the same data (new-speaker Tortoise 0.5\%
-against 13.6\%). Every result is compared, by a paired test over speakers, with
-a shortcut floor: the error rate eight cheap signal statistics reach when trained on
-the same data and scored on the same clips. Against a cloning tool no model was
-allowed to see, the adapted system generalises on clean audio (5.44\% against a
-29.49\% floor); over the channel the deployed model averages 35.59\% across five
-training seeds against a 37.79\% floor and beats it in none, while full fine-tuning on
-a single attack family stays below its floor in every seed (19.72\%). A second unseen
-generator, IndicF5, is no easier (30.6\%). Randomising
-recording cues during training lowers the deployed recipe's unseen-tool error to
-26.63\% over five seeds, an exploratory result that does not yet clear the floor. The
-detector runs on live calls
-and warns the callee, and only the callee, about ten seconds into the speech, using
-the windowing and operating point the evaluation reports.
+benchmarks. We ask what that means for Hindi--English code-mixed speech over a telephone
+line, where voice fraud happens. A wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches
+0.85\% equal error rate (EER) on English, but 48.21\% on clean code-mixed speech and
+58.42\% over a simulated narrowband channel: it rejects genuine speakers (94.8\% of
+genuine Hindi--English speech) rather than missing clones. A language-controlled test on
+183 unseen speakers shows code-mixing is not the cause, since genuine English is rejected
+as often as mixed speech. Low-rank adaptation of the encoder (1.13\% of the parameters) on
+speaker-disjoint code-mixed speech and clones lowers channel-matched error to 2.75\%. The
+largest further gains come from more genuine voices and real codec audio: with 248
+speakers and both simulated G.711 and real AMR-NB audio, error on unseen Tortoise clones
+over AMR-NB falls from 36.3\% to 6.0\% (five seeds, no unseen-tool audio in training).
+The limits are measured too. A third unseen generator, Chatterbox, stays at 32.0\% EER
+(one seed); spontaneous speech is rejected; over the simulated channel the earlier
+deployed model beats a shortcut floor of cheap signal statistics in no seed, and the floor
+for the final recipe is not yet measured. An outside detector with a larger encoder,
+SSL-AASIST, is better than ours on the same data. The detector runs on live calls and
+warns the callee about ten seconds into the speech.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.
