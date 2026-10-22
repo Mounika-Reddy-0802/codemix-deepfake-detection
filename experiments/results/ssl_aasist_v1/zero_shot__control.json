@@ -1,0 +1,20 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/input/datasets/vyacheslavberezhnoy/baseline-model/LA_model.pth",
+  "manifest": "data/manifests/mucs_language_control_channel20.csv",
+  "summary": {
+    "threshold": 0.0,
+    "clips": 1290,
+    "speakers": 183,
+    "false_alarm_rate": 0.7310077519379845,
+    "false_alarm_ci": [
+      0.6954340170411599,
+      0.7648233691280815
+    ],
+    "median_score": -6.048253536224365,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.7777777777777778,
+    "per_speaker_max": 1.0,
+    "speakers_above_10pct": 180
+  }
+}

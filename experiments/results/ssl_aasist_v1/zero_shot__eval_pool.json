@@ -1,0 +1,26 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/input/datasets/vyacheslavberezhnoy/baseline-model/LA_model.pth",
+  "manifest": "data/manifests/codemix_eval_channel20.csv",
+  "pooled": {
+    "eer": 0.27384818007662837,
+    "eer_ci_low": 0.2612227555324076,
+    "eer_ci_high": 0.2912234812743593,
+    "auc": 0.8100319284802043,
+    "auc_ci_low": 0.7963699147752404,
+    "auc_ci_high": 0.8226880161743096,
+    "f1": 0.6767857142857143,
+    "threshold": -7.095778465270996,
+    "clips": 3966,
+    "bonafide": 1566,
+    "spoof": 2400,
+    "score_std": 8.331347
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 2400,
+      "eer": 0.273848
+    }
+  ]
+}

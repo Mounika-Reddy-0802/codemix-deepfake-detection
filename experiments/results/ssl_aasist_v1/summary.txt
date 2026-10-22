@@ -1,0 +1,30 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: cf3fa23744075ce9a1e4cafb40ddb7d0516943e5
+
+SSL-AASIST EER (%) per run, phone line; control_fa = genuine clips called fake (%)
+run                    status    dev    eval_pool         cm04     rvc_test     new_xtts new_tortoise         cm07   control_fa
+zero_shot                  ok      -        27.38        29.05        44.10        22.66        32.88        53.02        73.10
+s2data_s1234               ok   0.58         1.03         7.86         3.71         2.16         8.55        24.89         3.64
+extdata_s1234              ok   0.00         0.45         0.88         4.68         0.12         0.45        17.16         0.08
+s2data_s2025               ok   1.01         0.58         2.62         1.29         3.00         8.55        22.01         5.89
+extdata_s2025              ok   0.00         0.13         1.33         5.01         0.00         0.54        15.80         0.39
+s2data_s7                  ok   0.43         0.78         4.42         2.91         1.03         6.30        25.24         1.55
+
+MEAN +/- SD over seeds
+  fine-tuned on s2data:
+    eval_pool       0.80 +/-  0.23 (n=3)
+    cm04            4.96 +/-  2.66 (n=3)
+    rvc_test        2.64 +/-  1.23 (n=3)
+    new_xtts        2.06 +/-  0.99 (n=3)
+    new_tortoise    7.80 +/-  1.30 (n=3)
+    cm07           24.05 +/-  1.77 (n=3)
+    control_fa      3.70 +/-  2.17 (n=3)
+  fine-tuned on extdata:
+    eval_pool       0.29 +/-  0.23 (n=2)
+    cm04            1.10 +/-  0.31 (n=2)
+    rvc_test        4.85 +/-  0.23 (n=2)
+    new_xtts        0.06 +/-  0.08 (n=2)
+    new_tortoise    0.50 +/-  0.06 (n=2)
+    cm07           16.48 +/-  0.96 (n=2)
+    control_fa      0.23 +/-  0.22 (n=2)
