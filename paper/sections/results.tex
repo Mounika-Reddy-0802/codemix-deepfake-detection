@@ -637,10 +637,66 @@ against 13.6\%, CM04 1.1\% against 24.5\%, IndicF5 16.5\% against 27.3\%, and fa
 part the full fine-tuning, not the training recipe. The recipe still does what it did for
 the adapter: SSL-AASIST on 21 speakers is 24.1\% on IndicF5 and 5.0\% on CM04, and the added
 voices cut CM04 to 1.1\%, so the voices help it as much. Two caveats: SSL-AASIST has fewer
-seeds (two or three) and we ran it only over the simulated G.711 line, not the real AMR-NB
-codec or the spontaneous HiACC set, so the comparison is indicative. What it does not
+seeds (two or three) and this table is over the simulated G.711 line only; the next
+subsection adds the real AMR-NB codec and Chatterbox, and the spontaneous HiACC set was not
+run, so the comparison is indicative. What it does not
 change is the main finding: more genuine speakers, not more attack tools, closes most of the
 gap.
+
+\subsection{The larger encoder on the final recipe}
+\label{sec:res-finalssl}
+
+The comparison above used the G.711-only training sets. We trained SSL-AASIST on exactly
+the data of the final recipe (248 speakers, both telephone codecs, 16{,}036 clips), with the
+same recipe as before (whole network, RawBoost, three epochs, three seeds), and scored it on
+everything the adapter was scored on, plus the real AMR-NB codec and Chatterbox
+(Table~\ref{tab:finalssl}).
+
+\begin{table}[t]
+\centering
+\caption{SSL-AASIST against the adapter, both trained on the final-recipe data: EER (\%)
+mean $\pm$ sd; SSL-AASIST over three seeds, the adapter over five (Chatterbox: one seed).
+AMR-NB is the real mobile codec.}
+\label{tab:finalssl}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Test set & SSL-AASIST & Adapter \\
+\midrule
+New speakers, XTTS (seen tool) & 0.04 $\pm$ 0.04 & 0.94 $\pm$ 0.34 \\
+New speakers, Tortoise & 0.48 $\pm$ 0.04 & 8.81 $\pm$ 1.43 \\
+CM04, Tortoise & 1.33 $\pm$ 0.38 & 17.73 $\pm$ 2.27 \\
+CM07, IndicF5 & 16.54 $\pm$ 3.34 & 21.68 $\pm$ 3.74 \\
+RVC test half & 5.11 $\pm$ 0.67 & 8.53 $\pm$ 1.91 \\
+Genuine called fake & 0.41 $\pm$ 0.40 & 0.51 $\pm$ 0.67 \\
+Chatterbox (CM09) & 11.85 $\pm$ 3.20 & 31.98 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Real AMR-NB codec}} \\
+New speakers, XTTS & 0.08 $\pm$ 0.07 & 0.69 $\pm$ 0.24 \\
+New speakers, Tortoise & 0.55 $\pm$ 0.29 & 6.04 $\pm$ 1.17 \\
+CM04, Tortoise & 1.31 $\pm$ 0.41 & 6.90 $\pm$ 2.06 \\
+CM07, IndicF5 & 21.55 $\pm$ 7.42 & 21.32 $\pm$ 2.27 \\
+\bottomrule
+\end{tabular}
+% docs/results/final_ssl_v1.md; experiments/results/final_ssl_v1/
+\end{table}
+
+\textbf{The larger encoder is better on ten of twelve sets.} Over the real AMR-NB codec,
+error on new-speaker Tortoise is 0.55\% against 6.04\% for the adapter, and on Chatterbox,
+the hardest tool, 11.85\% against 31.98\%. The two exceptions are level: false alarms
+(0.41\% against 0.51\%) and IndicF5 over AMR-NB (21.55\% against 21.32\%, with a seed
+spread of 7.4 points).
+
+\textbf{IndicF5 remains hard for both.} It is the one tool that neither encoder brings
+below 16\% on average, and the larger encoder's three seeds range from 13.5\% to 28.1\% over
+the codec. We have not tested why; IndicF5's clones are the most natural of the tools we
+used (Sec.~\ref{sec:data-extension}), which may make them the hardest.
+
+\textbf{What we have not shown.} The larger encoder has about three times the parameters and
+we have not measured what it costs on a live call; the adapter is what runs there. We have
+no shortcut floor for either system trained on the final data, and the spontaneous HiACC set
+was not run. Three seeds is the least that supports a spread, not a test.
 
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}

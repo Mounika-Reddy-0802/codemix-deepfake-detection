@@ -26,13 +26,14 @@ as often as mixed speech. Low-rank adaptation of the encoder (1.13\% of the para
 speaker-disjoint code-mixed speech and clones lowers channel-matched error to 2.75\%. The
 largest further gains come from more genuine voices and real codec audio: with 248
 speakers and both simulated G.711 and real AMR-NB audio, error on unseen Tortoise clones
-over AMR-NB falls from 36.3\% to 6.0\% (five seeds, no unseen-tool audio in training).
-The limits are measured too. A third unseen generator, Chatterbox, stays at 32.0\% EER
-(one seed); spontaneous speech is rejected; over the simulated channel the earlier
-deployed model beats a shortcut floor of cheap signal statistics in no seed, and the floor
-for the final recipe is not yet measured. An outside detector with a larger encoder,
-SSL-AASIST, is better than ours on the same data. The detector runs on live calls and
-warns the callee about ten seconds into the speech.
+over AMR-NB falls from 36.3\% to 6.0\% (five seeds, no unseen-tool audio in training). A
+larger encoder (SSL-AASIST) trained the same way is far better still: 0.6\% on unseen
+Tortoise over AMR-NB and 11.9\% on a third unseen generator, Chatterbox (three seeds), but
+IndicF5 stays at 16.5\% over G.711 and 21.6\% over AMR-NB. The limits are measured too:
+spontaneous speech is rejected; over the simulated channel the earlier deployed model beats
+a shortcut floor of cheap signal statistics in no seed, the floors of the final systems are
+not yet measured, and the larger encoder's cost on live calls is untested. The detector
+runs on live calls and warns the callee about ten seconds into the speech.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.

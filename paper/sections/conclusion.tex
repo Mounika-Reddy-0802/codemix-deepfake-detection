@@ -26,7 +26,7 @@ new speakers (0.91\% against 10.75\%), on both unseen tools (Tortoise 13.59\% ag
 against 3.40\%), with no unseen-tool audio in training. An established detector, AASIST, shows the same
 gap zero-shot (82.3\% of genuine speech rejected) and gains as much from the added
 voices; fine-tuned on them it is better than our adapter on Tortoise and worse on the seen
-tool, RVC and false alarms, so the voices matter more than the architecture. A larger encoder, SSL-AASIST, is stronger still once it is fine-tuned on the same voices (new-speaker Tortoise 0.5\% against 13.6\%), so a bigger encoder is the clearest next step for the deployed system; it was not tested over the real AMR-NB codec.
+tool, RVC and false alarms, so the voices matter more than the architecture. A larger encoder, SSL-AASIST, is stronger still: trained on the final-recipe data it reaches 0.55\% on new-speaker Tortoise over the real AMR-NB codec (the adapter: 6.04\%) and 11.85\% on Chatterbox (31.98\%), over three seeds. It is the system to deploy if its cost on a live call is acceptable, which we have not measured; IndicF5 stays at 16--22\% for both.
 
 The detector runs on a live call. It scores four-second windows of the caller's
 speech, escalates only when consecutive windows agree, and warns the callee --- never
@@ -54,7 +54,7 @@ limitation of the work and it constrains every deployment claim made here. The f
 (248 speakers, both telephone codecs) lowers these errors a great deal --- new-speaker
 Tortoise over the channel from 30.8\% to 8.8\%, and over the real AMR-NB codec from
 36.3\% to 6.0\%, in all five seeds --- but we have not measured its shortcut floor, and
-a third unseen tool, Chatterbox, stays at 32.0\% (one seed), so the claim stays open.
+a third unseen tool, Chatterbox, stays at 32.0\% (one seed); the larger encoder lowers it to 11.9\%, but neither system has a measured floor on the final data, so the claim stays open.
 
 \textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
 lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model
