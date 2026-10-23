@@ -45,3 +45,19 @@ def test_analyse_reads_zips_and_writes_tables(tmp_path):
     assert report["run2_aasist_s2data_vs_deployed"]["eval_pool"]["diff_mean"] == pytest.approx(0.1)
     text = w.markdown(report)
     assert "AASIST zero-shot" in text and "Run 1: extended recipe" in text
+
+
+def test_analyse_ssl_pools_the_two_ssl_runs_and_pairs_by_seed(tmp_path):
+    adapter = [_row("final", seed, 0.2) for seed in (1, 2, 3, 4, 5)]
+    run7 = [_row("final", seed, 0.1, key="data") for seed in (1, 2, 3)]
+    run8 = [_row("final", seed, 0.1, key="data") for seed in (4, 5)]
+    for name, rows in (("a.zip", adapter), ("b.zip", run7), ("c.zip", run8)):
+        with zipfile.ZipFile(tmp_path / name, "w") as zf:
+            zf.writestr("x/runs.json", json.dumps(rows))
+    report = w.analyse_ssl(
+        str(tmp_path / "a.zip"), str(tmp_path / "b.zip"), str(tmp_path / "c.zip")
+    )
+    entry = report["run7_ssl_vs_final"]["eval_pool"]
+    assert entry["paired_seeds"] == [1, 2, 3, 4, 5]
+    assert entry["diff_mean"] == pytest.approx(-0.1) and entry["a_better"] == 5
+    assert "SSL-AASIST vs the adapter" in w.markdown(report)
