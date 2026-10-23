@@ -201,9 +201,10 @@ shortcut floor is not yet measured, and Chatterbox, a third unseen tool, stays a
 
 \textbf{A larger encoder.} SSL-AASIST~\cite{tak2022wav2vec} (XLS-R 300M, about three times
 our encoder) rejects 73.1\% of genuine Hindi--English speech zero-shot. Trained on the
-final-recipe data it is better than the adapter on ten of twelve sets over three seeds:
-new-speaker Tortoise over AMR-NB 0.55\% against 6.04\%, Chatterbox 11.85\% against 31.98\%,
-CM04 1.33\% against 17.73\%. IndicF5 stays at 16.5--21.6\% for both, and we have not measured
+final-recipe data it is better than the adapter in every one of five seeds on eight of
+eleven sets (exact $p = 0.008$ on seven): new-speaker Tortoise over AMR-NB 0.51\% against
+6.04\%, Chatterbox 12.86\% against 31.98\% (one adapter seed), CM04 1.75\% against 17.73\%.
+IndicF5 stays at 15.8--21.8\% for both, and we have not measured
 its cost on a live call or a shortcut floor for either system on the final data.
 
 
