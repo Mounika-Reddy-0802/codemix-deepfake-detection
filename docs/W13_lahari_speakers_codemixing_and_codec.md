@@ -60,12 +60,48 @@ the extended training set, the language-controlled set, the AMR-NB check and the
 naturalness, and its closing limits paragraph points to the language-control result
 instead of saying the confound cannot be separated.
 
+### Two codecs in training
+
+The two-codec recipe (`src/data/codec_mix.py`, run 3) answered the AMR-NB loss: over three
+seeds it reaches 7.59% on new-speaker XTTS through AMR-NB against 22.37% for the deployed
+recipe, better in every seed (`docs/results/w13_runs_v1.md`). Mounika's final recipe
+combines it with the 248 speakers.
+
+### A third unseen tool: Chatterbox
+
+`src/data/chatterbox_generation.py` clones the IndicF5 speakers' voices with Chatterbox
+Multilingual (Resemble AI, MIT licence) from the same references and sentences as CM07, so
+the two sets pair clip for clip. It is registered as held out, so `config_guard` and
+`test_splits` refuse it in any training manifest. The Kaggle notebook failed twice before it
+ran: first on the wrong code branch and a dataset path, then because an empty Hugging Face
+token was sent as `Bearer ` and refused; the token is now dropped when blank, in the
+loader itself, with the tests unchanged. 525 of 610 clips pass screening (86.1%; 78 of the
+85 rejections stall at five characters a second or less). Chatterbox marks its output with
+an imperceptible watermark; we keep the clips as generated and say so in the paper.
+
+Scored on the laptop, it is the hardest tool: the English-only S1 sits at 55.0% EER over
+the phone line, the deployed adapter at 35.8% and the final recipe at 32.0% (one seed).
+The larger encoder, trained on the final data, reaches 12.9% over five seeds. The data
+chapter lists CM09 with the other sets, and the results chapter has its own subsection.
+
+### The shortcut floor for the final systems
+
+The adapter (run 4) and the larger encoder (runs 7 and 8) both train on
+`codemix_adapt_train_final.csv`, so one floor serves both. `src/training/floor_final.py`
+fits the eight statistics of `floor_compare` on that set and scores them on exactly each
+detector's clips, with the same speaker-level paired bootstrap, for every seed. The clips
+sit in several bundle folders on the laptop, so each path is found by name, first folder
+first, the rule the Kaggle runs used; features are cached clip by clip, which let the run
+survive three out-of-memory stops and resume. Every seed of both systems beats the floor on
+all eleven sets, unseen tools included: new-speaker Tortoise 8.8% for the adapter against a
+floor of 36.5%, Chatterbox 12.9% for the larger encoder against 39.5%. On CM04 over either
+codec and new-speaker Tortoise over AMR-NB the floor is above chance (54.6-71.4%), so the
+report flags those rows as a weak bar (`docs/results/floor_final_v1.md`).
+
 ## What is still open
 
 UTMOS was trained on English speech, so its absolute values on Hindi-English audio are
 indicative; the comparison between sets of the same speakers is what the report claims.
-The AMR-NB check covers three models. The direct fix, training on both codecs, is built:
-`src/data/codec_mix.py` stacks every deployed training clip over G.711 and through AMR-NB
-(5,708 clips; AMR-NB copies live in `clips/amr/` so the two never collide), and
-`notebooks/kaggle_w13_mixcodec.ipynb` compares that recipe with the deployed one over
-three seeds on both codecs. It is queued on Kaggle.
+The final recipe's adapter was scored on Chatterbox with one seed only (the other four
+checkpoints stayed on Kaggle). Spontaneous speech (HiACC) has not been scored with the
+final systems.
