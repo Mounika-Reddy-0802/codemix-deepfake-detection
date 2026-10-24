@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2013-green)
-![Tests](https://img.shields.io/badge/tests-975%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-993%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -95,6 +95,36 @@ Every number below comes from a real run on real data and is reproducible from
 pre-normalisation numbers in sections 1–5, which are kept as the record of how we
 got here.
 
+### Week 13 — the final recipe, a larger encoder, and a third unseen tool
+
+**More voices and a real codec close most of the gap.** The final recipe trains the same
+LoRA adapter on 248 genuine speakers instead of 21, every clip over both the simulated
+G.711 line and the real AMR-NB mobile codec. Five seeds, paired with the deployed recipe
+([final_recipe_v1](docs/results/final_recipe_v1.md)); no unseen-tool audio in training.
+
+| EER (%), five seeds | Deployed S2 | Final recipe | Larger encoder (SSL-AASIST) |
+|---|---|---|---|
+| New speakers, Tortoise, G.711 | 30.8 | 8.8 | **0.7** |
+| New speakers, Tortoise, AMR-NB | 36.3 | 6.0 | **0.5** |
+| CM04 Tortoise, G.711 | 36.2 | 17.7 | **1.8** |
+| IndicF5, G.711 | 34.9 | 21.7 | **15.8** |
+| Chatterbox (third unseen tool) | 35.8 (one seed) | 32.0 (one seed) | **12.9** |
+| RVC test half | 6.1 | 8.5 | **5.2** |
+| Genuine called fake | 2.4 | 0.5 | **0.3** |
+
+- **Both final systems beat their shortcut floor in every seed on every set**, unseen
+  tools included (new-speaker Tortoise 8.8% against a floor of 36.5%). Three of those
+  floors are above chance, and the report marks them as weak bars
+  ([floor_final_v1](docs/results/floor_final_v1.md)).
+- **The larger encoder** (XLS-R 300M, about three times our encoder) is better than the
+  adapter in every seed on eight of eleven sets (exact p = 0.008 on seven)
+  ([ssl_vs_adapter_v1](docs/results/ssl_vs_adapter_v1.md)). Its cost on a live call is not
+  measured; the live system still runs the deployed S2.
+- **Chatterbox** (CM09, 525 clips) is the hardest tool; IndicF5 stays at 15.8-21.8% for
+  both final systems ([chatterbox scores](experiments/results/cm09_v1)).
+- **Outside baselines zero-shot fail the same way:** AASIST rejects 82.3% and SSL-AASIST
+  73.1% of genuine Hindi-English speech ([w13_runs_v1](docs/results/w13_runs_v1.md)).
+
 ### Week 13 — is it the code-mixing? New speakers, a second unseen tool, a real codec
 
 **The gap is the recording, not the language mix.** A language-controlled set holds
@@ -127,11 +157,10 @@ in training) for 54 test speakers, and XTTS for 227 extra adaptation speakers.
   adapter trained on clean audio holds better there (12.6% on XTTS)
   ([amr_channel_v1](docs/results/amr_channel_v1.md)).
 
-**Queued on Kaggle:** the deployed recipe retrained on 248 genuine speakers instead of
-21, five seeds against the published recipe (`notebooks/kaggle_w13_overfit_fix.ipynb`),
-the AASIST baseline zero-shot and fine-tuned on the same data
-(`notebooks/kaggle_w13_aasist_baseline.ipynb`), and the deployed recipe trained on
-G.711 and AMR-NB together, three seeds (`notebooks/kaggle_w13_mixcodec.ipynb`).
+These three runs led to the final recipe above: 248 speakers beat 21 in every seed
+(`notebooks/kaggle_w13_overfit_fix.ipynb`), and training on G.711 and AMR-NB together
+recovers the codec loss (new-speaker XTTS over AMR-NB 7.59% against 22.37%,
+`notebooks/kaggle_w13_mixcodec.ipynb`).
 
 ### Week 12 — five training seeds, and what the external review changed
 
@@ -480,7 +509,7 @@ codemix-deepfake-detection/
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
 │   ├── inference/       # streaming inference, ONNX export, predict
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 752 tests — firewalls, anti-leakage, live-call server, Twilio stream
+├── tests/               # 993 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs (notebooks hold no logic)
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
@@ -594,7 +623,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–12
+## Progress — Weeks 1–13
 
 Only completed work is listed. The full 12-week plan lives in the team drive,
 outside this repo.
@@ -607,17 +636,17 @@ outside this repo.
 | **4** | ✅ ASVspoof 2019 LA downloaded + verified, CM protocols checked against published figures | ✅ Stage-1 scaffolding: SSL encoder, attentive pooling, AMP loop | ✅ Stage-1 baseline trained + evaluated on Kaggle GPU (71,237 clips) |
 | **5** | ✅ Channel bundle renderer through the verified G.711 chain | ✅ **Low-level cue gate run — and it FAILS**; root cause traced to bundle normalisation | — |
 | **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4; ✅ **CM02 RVC generation** — 12 voice models, 1,500 conversions, archived + hash-verified; pitch measured, **P-019 corrected (P-021)** |
-
 | **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ✅ **CM04 generated** — the held-out Tortoise attack, 500/500 clips over 15 eval-pool speakers, 91.6% QA pass, archived + metadata committed ([W4-T3](docs/W4T3_cm04_heldout_tortoise.md)) |
 | **10** | — | ✅ **Normalised retrain**: 4 LoRA adapters with and without RVC, per-set shortcut floors, RVC ablation (P-026, P-027); ✅ **S3 native training** scored beside S2 and on English — seen-tool ceiling, English at chance (P-028, P-030) | ✅ **Live detection system**: streaming scorer, verdict ladder, alerts, web demo, receiver dashboard, WebRTC calls, Twilio Media Streams + receiver-only warning + SMS; ✅ **demo threshold calibrated** on dev calls through the live path, validated on held-out calls (P-029, P-031) |
-
 | **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 over the channel, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
-
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
+| **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
 
 **Open:** fund the Twilio account and re-verify the phone demo on real numbers (trial
-credit exhausted, PSTN leg unproven since week 10); confirm the augmentation lead on
-a second unseen tool; submit the paper.
+credit exhausted, PSTN leg unproven since week 10); spontaneous speech is still rejected
+(54.4% false alarms on HiACC for the deployed model, not yet scored with the final
+systems); measure the larger encoder's cost on a live call before deploying it; compile
+the paper and submit it.
 
 ---
 

@@ -94,8 +94,36 @@ deployed model scores 30.6% on it, about where Tortoise is on the new speakers
 (`docs/results/new_speakers_v1.md`, `floor_new_sets_v1.md`). The augmentation lead
 could not be checked on it: those variants' checkpoints were not kept.
 
-**Running (week 13).** The AASIST baseline (published weights zero-shot, and fine-tuned
-on the same data as S2) on every new set: `notebooks/kaggle_w13_aasist_baseline.ipynb`.
+**Done (week 13, the final recipe).** The two largest gains, more genuine speakers
+(comment 3) and real AMR-NB audio next to the simulated G.711 line, combined: the adapter
+trained on 248 speakers over both codecs (16,036 clips), five seeds paired with the
+deployed recipe. Better on ten of eleven sets; new-speaker Tortoise falls from 30.8% to
+8.8% over the simulated line and from 36.3% to 6.0% over AMR-NB, CM04 from 36.2% to
+17.7%, in every seed. RVC is worse in all five seeds (6.1% to 8.5%). No unseen-tool audio
+entered training (`docs/results/final_recipe_v1.md`).
+
+**Done (week 13, the floor for the final systems).** One floor, fitted on the final
+training set and scored on each detector's own clips, speaker-level paired test per seed:
+every seed of the final adapter and of the larger encoder beats it on all eleven sets,
+unseen tools included (new-speaker Tortoise 8.8% against a floor of 36.5%). On CM04 over
+either codec and Tortoise over AMR-NB the floor itself is above chance (54.6-71.4%), and
+the report says those rows are a weak bar (`docs/results/floor_final_v1.md`,
+`src/training/floor_final.py`). This is the answer to the comment as asked: the deployed
+recipe never cleared its Tortoise floor over the channel; the final recipe does in every
+seed.
+
+**Done (week 13, outside baselines).** AASIST zero-shot rejects 82.3% of genuine
+Hindi-English speech; fine-tuned on our data it gains as much as our adapter
+(`docs/results/w13_runs_v1.md`). SSL-AASIST (XLS-R 300M front end, ported without fairseq)
+zero-shot rejects 73.1%; trained on the final-recipe data with the same five seeds as the
+adapter it is better in every seed on eight of eleven sets (exact Mann-Whitney p = 0.008
+on seven): new-speaker Tortoise over AMR-NB 0.51% against 6.04%
+(`docs/results/ssl_vs_adapter_v1.md`).
+
+**Done (week 13, a third unseen tool).** Chatterbox Multilingual cloned the IndicF5
+speakers from the same references and sentences (CM09, 525 clips, held out). It is the
+hardest tool: 35.8% for the deployed adapter, 32.0% for the final recipe (one seed), 12.9%
+for the larger encoder over five seeds. IndicF5 stays at 15.8-21.8% for both final systems.
 
 ## 3. More speakers and speaking styles
 
@@ -127,11 +155,16 @@ adaptation speakers (`src/data/speaker_pools_ext.py`). On the 60 new speakers th
 deployed model reaches 9.4% EER on the seen tool over the phone line (median speaker
 2.9%, worst 17.1%; `docs/results/new_speakers_v1.md`).
 
-**Running (week 13, more training speakers).** The deployed recipe retrained on 248
-genuine speakers instead of 21 (the 227 extra speakers and their CM08 XTTS clones),
-five seeds each against the published recipe: `notebooks/kaggle_w13_overfit_fix.ipynb`.
+**Done (week 13, more training speakers).** The deployed recipe retrained on 248
+genuine speakers instead of 21 (the 227 extra speakers and their CM08 XTTS clones) is
+better in every one of five seeds on new speakers (0.91% against 10.75%), on both unseen
+tools (Tortoise 13.59% against 29.82%, IndicF5 27.25% against 35.40%) and in false alarms
+(0.47% against 3.40%) (`docs/results/w13_runs_v1.md`). It is the base of the final recipe
+under comment 2.
 
-**Not done.** (d) The HiACC test on the Kaggle variant models.
+**Not done.** The spontaneous HiACC set has not been scored with the final systems,
+and it remains the clearest limit: the deployed model calls 54.4% of that genuine speech
+fake.
 
 ## 4. Hinglish phone-line vs clean-English trade-off
 

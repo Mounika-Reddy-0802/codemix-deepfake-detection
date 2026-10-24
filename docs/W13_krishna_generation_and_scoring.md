@@ -78,7 +78,11 @@ comments 2, 3 and 5.
 
 ## What is still open
 
-The overfit-fix and AASIST runs (Mounika's notebooks) are queued on Kaggle; their
-results go into the results chapter and the short paper when they land. The short
-paper has not been compiled on this machine (no LaTeX here), so its page count is
-still to be checked.
+The runs that were queued when I wrote this have landed, and Mounika's and Lahari's
+records carry them: 248 training speakers beat 21 in every seed, the final recipe (248
+speakers over both telephone codecs) and the larger encoder beat their shortcut floors in
+every seed, and Chatterbox became the third unseen tool. Two things stay with me. The
+live call system still runs the deployed S2; moving it to the final recipe, or to the
+larger encoder, needs its real-time cost measured on the call path first. The four-page
+version has not been compiled here (no LaTeX on this machine), so its page count is still
+to be checked in Overleaf.
