@@ -50,6 +50,17 @@ pip install -r requirements.txt
    uvicorn live_call.server:app --host 0.0.0.0 --port 8000
    ```
 
+   To run the **final recipe** instead (248 speakers, both telephone codecs: no warnings on
+   genuine new speakers and every Tortoise call caught on 60 s test calls), point both
+   variables at it; its threshold was chosen on the dev set by the same rule
+   ([live_final_recipe_v1](../docs/results/live_final_recipe_v1.md)). The pills then read
+   **final_s1234_best.pt** and **threshold: 0.687**.
+
+   ```bash
+   set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
+   set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
+   ```
+
 4. Open <http://localhost:8000>. The status pills at the top must read
    **model: lora_norm_rvc_channel_best.pt**, **threshold: 0.500** and
    **Twilio: dry run** (or **live**).

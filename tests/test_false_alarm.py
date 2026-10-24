@@ -70,3 +70,22 @@ def test_inputs_without_genuine_rows_or_columns_are_refused():
         fa.summarise(pd.DataFrame({"speaker": ["a"], "label": ["spoof"], "score": [0.2]}))
     with pytest.raises(ValueError, match="missing columns"):
         fa.summarise(pd.DataFrame({"score": [0.2]}))
+
+
+def test_paired_comparison_finds_a_drop_on_the_same_clips():
+    worse = _scores({"a": 0.6, "b": 0.6, "c": 0.6}, seed=1)
+    worse["filepath"] = [f"clip{i}" for i in range(len(worse))]
+    better = worse.copy()
+    better["score"] = np.where(np.arange(len(better)) % 2 == 0, 0.9, better["score"])
+    out = fa.compare_paired(better, worse, n_boot=300)
+    assert out["difference"] < 0 and out["difference_ci"][1] < 0
+    assert out["speakers_lower"] == 3 and out["clips"] == len(worse)
+    same = fa.compare_paired(worse, worse, n_boot=200)
+    assert same["difference"] == 0.0 and same["speakers_lower"] == 0
+
+
+def test_paired_comparison_refuses_different_clips():
+    a = _scores({"a": 0.5})
+    a["filepath"] = [f"clip{i}" for i in range(len(a))]
+    with pytest.raises(ValueError, match="different clips"):
+        fa.compare_paired(a, a.iloc[:-1])
