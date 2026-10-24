@@ -63,8 +63,11 @@ recipe is not the model that runs on live calls, and none of it has met a real p
 \textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
 lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model
 calls 54.37\% of genuine clips fake, against 0.89\% for the read lectures, and every
-speaker is above 10\%. Adaptation taught the model what genuine lecture recordings
-sound like, not genuine Hindi--English speech in general.
+speaker is above 10\%. Neither more read voices nor the real codec changes this: single
+models of the deployed and 248-speaker recipes call 38.5--54.4\% of that speech fake, and
+the final recipe 43.9\%.
+Adaptation taught the model what genuine lecture recordings sound like, not genuine
+Hindi--English speech in general.
 
 \textbf{The deployed model is for Hindi--English calls only.} English passed through
 the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only

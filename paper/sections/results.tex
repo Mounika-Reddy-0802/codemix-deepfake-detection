@@ -484,8 +484,14 @@ speakers falsely flags 46.0\% [38.8, 53.3] of genuine clips over the channel, ag
 38.5\% [28.2, 48.7] for the deployed recipe retrained in the same run: the intervals
 overlap and the point estimate is not better. (The published deployed checkpoint scored
 54.4\%, so two trainings of one recipe differ by that much; one seed each here.) More
-read voices do not teach the detector what spontaneous speech sounds like. That needs
-spontaneous training data, which the dataset rules keep HiACC from supplying.
+read voices do not teach the detector what spontaneous speech sounds like, and neither
+does the real codec: the final recipe's seed-1234 model calls 43.9\% [36.5, 51.2] of the
+same clips fake. That is 10.5 points below the published deployed checkpoint on identical
+clips (paired speaker bootstrap $[-17.1, -3.8]$; 16 of 24 speakers lower), but it lies
+inside the 38.5--54.4\% spread of single trainings, so with one seed it is not evidence
+that the recipe helps. Spontaneous speech needs spontaneous training data, which the
+dataset rules keep HiACC from supplying
+(\texttt{docs/results/hiacc\_final\_v1.md}).
 
 \subsection{The final recipe}
 \label{sec:res-final}
