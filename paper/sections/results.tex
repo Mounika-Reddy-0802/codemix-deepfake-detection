@@ -805,11 +805,22 @@ through. S1, which never heard telephone audio, goes only from 0.51\% to 6.50\%
 Hindi--English speech sounds like over a phone line, and English over the same line
 no longer matches it.
 
+\textbf{The final recipe trades English the other way.} On the same 6{,}004 clips its
+seed-1234 model reaches 13.44\% {\scriptsize[12.40, 14.52]} on clean English and
+25.95\% {\scriptsize[24.90, 27.05]} over the phone line, against 2.30\% and 24.20\% for
+the deployed model. The error is of the opposite kind: it calls almost no genuine English
+fake (0.20\% clean, 0.90\% over the line, against 7.45\% for the deployed model) but at
+the operating point lets most English fakes through (it catches 26\% clean, 23\% over the
+line). Training on 248 Hindi--English voices and on real codec audio moved the model's
+idea of genuine speech towards anything telephone-like; English clones now pass as
+genuine (\texttt{docs/results/english\_final\_v1.md}). One seed; the larger encoder was
+not scored on English.
+
 For deployment this means the channel-trained XTTS + RVC adapter is the right model
 for a Hindi--English telephone service, which is how we use it, but it should not be
-trusted with English calls. A service that takes both needs either a language
-identification step that sends English calls to S1, or English telephone audio in the
-adaptation data. We have tested neither.
+trusted with English calls, and neither should the final recipe. A service that takes
+both needs either a language identification step that sends English calls to S1, or English
+telephone audio in the adaptation data. We have tested neither.
 % src/reporting/tradeoff.py; experiments/results/tradeoff_v1.json;
 % experiments/results/cross_condition_v1/; docs/results/tradeoff_v1.md
 

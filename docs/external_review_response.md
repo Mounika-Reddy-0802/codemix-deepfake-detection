@@ -195,6 +195,13 @@ after normalisation, and English over the phone line.
 deployed model suits Hindi-English calls but should not judge English calls; the
 summary now says "clean English".
 
+**Done (week 14, the final recipe on English).** Its seed-1234 model scores 13.44% EER on
+clean English and 25.95% over the phone line (deployed: 2.30% and 24.20%). The error is the
+opposite kind: it calls 0.20% of genuine English fake (0.90% over the line, against 7.45%
+for the deployed model) but catches only 26% of English fakes at the operating point. The
+final recipe is better on Hindi-English and worse at catching English clones, which the
+paper now states (`docs/results/english_final_v1.md`).
+
 **Completed late.** The last two cells first stopped when the laptop ran out of
 memory and completed on 13 October: the deployed adapter on the clean RVC set
 (13.89%, against 5.01% in its own condition) and S1 on the clean English sample

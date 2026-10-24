@@ -68,7 +68,9 @@ sound like, not genuine Hindi--English speech in general.
 
 \textbf{The deployed model is for Hindi--English calls only.} English passed through
 the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only
-S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio.
+S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio. The final
+recipe fails English the other way: it rarely rejects a genuine English speaker but lets
+most English clones through (13.44\% EER on clean English, one seed).
 
 \textbf{The attacks are ours, and most are not hard.} We made the code-mixed attacks
 because no benchmark provides them, so our numbers are against attacks of our own
