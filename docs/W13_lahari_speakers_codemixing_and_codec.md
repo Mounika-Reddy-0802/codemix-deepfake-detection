@@ -103,5 +103,7 @@ report flags those rows as a weak bar (`docs/results/floor_final_v1.md`).
 UTMOS was trained on English speech, so its absolute values on Hindi-English audio are
 indicative; the comparison between sets of the same speakers is what the report claims.
 The final recipe's adapter was scored on Chatterbox with one seed only (the other four
-checkpoints stayed on Kaggle). Spontaneous speech (HiACC) has not been scored with the
-final systems.
+checkpoints stayed on Kaggle). Spontaneous speech is the clearest limit: the final recipe's
+seed-1234 model calls 43.9% of HiACC's genuine clips fake, inside the 38.5-54.4% spread of
+single trainings of the other recipes (`docs/results/hiacc_final_v1.md`); fixing it needs
+spontaneous training data.
