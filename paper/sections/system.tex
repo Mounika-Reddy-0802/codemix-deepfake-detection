@@ -140,6 +140,49 @@ alert message carries its severity in one field and its delivery channel in anot
 and the interface read the channel. Every unit test passed, the ladder escalated
 correctly, the message was dispatched --- and no warning was ever displayed.
 
+\subsection{What a caller meets}
+\label{sec:system-calls}
+
+Clip-level EER is not what a caller experiences. We replayed test clips through the live
+scoring path (4\,s windows every 2\,s, smoothed, through the escalation ladder) and
+stitched clips of one label into 60\,s calls. The final recipe's operating point was
+chosen on the dev set by the rule used for the deployed model (the most sensitive setting
+whose genuine 60\,s dev calls raise at most 5\% warnings): a threshold of 0.687, a warning
+after three fake-leaning windows; the same rule reproduces the deployed model's published
+threshold exactly (Table~\ref{tab:calls}).
+
+\begin{table}[t]
+\centering
+\caption{60\,s calls through the live path: share of genuine calls warned and of fake calls
+caught (reaching at least a warning). Counts are small (6--41 calls per cell).}
+\label{tab:calls}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{Genuine warned} & \multicolumn{2}{c}{Fakes caught} \\
+Test calls & Deployed & Final & Deployed & Final \\
+\midrule
+Evaluation pool (XTTS) & 0\% & 0\% & 100\% & 100\% \\
+CM04 (Tortoise) & 0\% & 0\% & 33\% & 100\% \\
+RVC test half & 0\% & 0\% & 100\% & 100\% \\
+60 new speakers & 44\% & 0\% & 100\% & 100\% \\
+IndicF5 & 0\% & 0\% & 67\% & 50\% \\
+Chatterbox & 0\% & 0\% & 33\% & 17\% \\
+HiACC, spontaneous & 100\% & 100\% & --- & --- \\
+\bottomrule
+\end{tabular}
+% docs/results/live_final_recipe_v1.md
+\end{table}
+
+On read speech the final recipe is the better live model: it no longer warns genuine new
+speakers (44\% of their calls to none) and it catches every Tortoise call (33\% to 100\%),
+while catching fewer IndicF5 and Chatterbox calls. Spontaneous speech is worse at the call
+level than per clip: one short clip is rarely warned (2.8\% final, 8.6\% deployed), but over
+a minute its fake-leaning windows add up and every genuine spontaneous call raises a
+warning with either model. Neither system should be put in front of spontaneous callers
+before it has heard spontaneous genuine speech in training.
+
 \subsection{Deployment status}
 
 The WebRTC carrier is verified end to end against the deployed checkpoint. Each
