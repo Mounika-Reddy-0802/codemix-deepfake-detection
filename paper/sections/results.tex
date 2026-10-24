@@ -703,7 +703,20 @@ The comparison above used the G.711-only training sets. We trained SSL-AASIST on
 the data of the final recipe (248 speakers, both telephone codecs, 16{,}036 clips), with the
 same recipe as before (whole network, RawBoost, three epochs) and the five seeds of the
 adapter (1234, 2025, 7, 42, 99), and scored it on everything the adapter was scored on, plus
-Chatterbox (Table~\ref{tab:finalssl}).
+Chatterbox (Table~\ref{tab:finalssl}). Fig.~\ref{fig:overview} sets every main system
+against every attack tool on both telephone channels.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/final_overview.pdf}
+\caption{EER of the four main systems on every attack tool, over the simulated G.711 line
+(left) and the real AMR-NB codec (right; S1 was not scored there). Bars are means over
+five training seeds with one standard deviation; S1 and Chatterbox for both adapters are one
+model each. The black tick is the shortcut floor fitted on the final training data, which
+belongs to the two final systems; the dashed line is chance. Hatching repeats the colour
+for greyscale print.}
+\label{fig:overview}
+\end{figure*}
 
 \begin{table}[t]
 \centering
