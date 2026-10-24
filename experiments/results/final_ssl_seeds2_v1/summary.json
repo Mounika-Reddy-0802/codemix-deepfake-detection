@@ -1,0 +1,59 @@
+{
+  "mode": "full",
+  "commit": "4079a8cb4f03cbe2b8160b33ae9467e650fd5f6b",
+  "branch": "week13-mounika-overfit-fix",
+  "seeds": [
+    42,
+    99
+  ],
+  "epochs": 3,
+  "train_sets": {
+    "final": [
+      "data/manifests/codemix_adapt_train_final.csv",
+      "data/manifests/codemix_adapt_dev_channel20.csv"
+    ]
+  },
+  "runs": [
+    {
+      "name": "final_s42",
+      "data": "final",
+      "seed": 42,
+      "dev_eer": 0.0,
+      "status": "ok",
+      "eval_pool": 0.0012635696040868456,
+      "cm04": 0.019723156374263136,
+      "rvc_test": 0.07270144358326196,
+      "new_xtts": 0.0,
+      "new_tortoise": 0.013423,
+      "cm07": 0.15208249373587285,
+      "control_fa": 0.0007751937984496124,
+      "new_xtts_amr": 0.0,
+      "new_tortoise_amr": 0.004544,
+      "cm07_amr": 0.24723005846518664,
+      "cm04_amr": 0.01293591438147981,
+      "cm09": 0.18282642089093704,
+      "minutes": 166.0
+    },
+    {
+      "name": "final_s99",
+      "data": "final",
+      "seed": 99,
+      "dev_eer": 0.0,
+      "status": "ok",
+      "eval_pool": 0.0032630906768837805,
+      "cm04": 0.028240671027901867,
+      "rvc_test": 0.032329162053189045,
+      "new_xtts": 0.0,
+      "new_tortoise": 0.008671,
+      "cm07": 0.14100272759661941,
+      "control_fa": 0.0015503875968992248,
+      "new_xtts_amr": 0.0,
+      "new_tortoise_amr": 0.004544,
+      "cm07_amr": 0.19373236845333006,
+      "cm04_amr": 0.015624041448465482,
+      "cm09": 0.10460829493087558,
+      "minutes": 164.7
+    }
+  ],
+  "failures": []
+}

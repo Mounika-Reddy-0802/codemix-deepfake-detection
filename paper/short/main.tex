@@ -192,12 +192,21 @@ on our 248 speakers it gains as much as the adapter and is better on Tortoise (C
 speakers), RVC (13.5\% against 6.5\%) and false alarms (2.3\% against 0.5\%): the
 voices matter more than the architecture.
 
-\textbf{A stronger baseline.} SSL-AASIST~\cite{tak2022wav2vec} (XLS-R 300M, about three
-times our encoder) rejects 73.1\% of genuine Hindi--English speech zero-shot, but
-fine-tuned on the 248 speakers it is better than our adapter on every set (new-speaker
-Tortoise 0.5\% against 13.6\%, CM04 1.1\% against 24.5\%, false alarms 0.2\% against
-0.5\%). It has two or three seeds and was run only over the simulated phone line, so we
-treat it as indicative: a larger encoder is the clearest next step.
+\textbf{The final recipe.} Training on 248 speakers in both telephone codecs (simulated
+G.711 and real AMR-NB) beats the deployed adapter on ten of eleven sets (in every one of
+five seeds on nine of them): new-speaker Tortoise 8.8\% against 30.8\% over the simulated line and 6.0\%
+against 36.3\% over AMR-NB. It beats its shortcut floor in every seed on every set
+(new-speaker Tortoise 8.8\% against 36.5\%; three floors are above chance, so weak bars).
+Voice-conversion error rises (8.5\% against 6.1\%), and Chatterbox, a third unseen tool,
+stays at 32.0\% (one seed).
+
+\textbf{A larger encoder.} SSL-AASIST~\cite{tak2022wav2vec} (XLS-R 300M, about three times
+our encoder) rejects 73.1\% of genuine Hindi--English speech zero-shot. Trained on the
+final-recipe data it is better than the adapter in every one of five seeds on eight of
+eleven sets (exact $p = 0.008$ on seven): new-speaker Tortoise over AMR-NB 0.51\% against
+6.04\%, Chatterbox 12.86\% against 31.98\% (one adapter seed), CM04 1.75\% against 17.73\%.
+It beats the same floor in every seed. IndicF5 stays at 15.8--21.8\% for both, and we
+have not measured the larger encoder's cost on a live call.
 
 
 \section{Conclusion}
