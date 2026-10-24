@@ -15,25 +15,23 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 \maketitle
 
 \begin{abstract}
-Audio deepfake detectors report error rates below one percent on English
-benchmarks. We ask what that means for Hindi--English code-mixed speech over a telephone
-line, where voice fraud happens. A wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches
-0.85\% equal error rate (EER) on English, but 48.21\% on clean code-mixed speech and
-58.42\% over a simulated narrowband channel: it rejects genuine speakers (94.8\% of
-genuine Hindi--English speech) rather than missing clones. A language-controlled test on
-183 unseen speakers shows code-mixing is not the cause, since genuine English is rejected
-as often as mixed speech. Low-rank adaptation of the encoder (1.13\% of the parameters) on
-speaker-disjoint code-mixed speech and clones lowers channel-matched error to 2.75\%. The
-largest further gains come from more genuine voices and real codec audio: with 248
-speakers and both simulated G.711 and real AMR-NB audio, error on unseen Tortoise clones
-over AMR-NB falls from 36.3\% to 6.0\% (five seeds, no unseen-tool audio in training). A
-larger encoder (SSL-AASIST) trained the same way is far better still (five seeds each,
-exact tests): 0.5\% on unseen Tortoise over AMR-NB and 12.9\% on a third unseen generator,
-Chatterbox, but IndicF5 stays at 15.8\% over G.711 and 21.8\% over AMR-NB. The limits are measured too:
-spontaneous speech is rejected; over the simulated channel the earlier deployed model beats
-a shortcut floor of cheap signal statistics in no seed, the floors of the final systems are
-not yet measured, and the larger encoder's cost on live calls is untested. The detector
-runs on live calls and warns the callee about ten seconds into the speech.
+Audio deepfake detectors report error rates below one percent on English benchmarks.
+We ask what that means for Hindi--English code-mixed speech over a telephone line, where
+voice fraud happens. A wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\%
+equal error rate (EER) on English but 58.42\% over a simulated narrowband channel, because
+it rejects genuine speakers (94.8\% of genuine Hindi--English speech). A language-controlled
+test on 183 unseen speakers shows code-mixing is not the cause: genuine English is rejected
+as often as mixed speech. Low-rank adaptation of the encoder (1.13\% of the parameters)
+lowers channel-matched error to 2.75\%. The largest further gains come from more genuine
+voices and real codec audio: trained on 248 speakers over both simulated G.711 and real
+AMR-NB, error on unseen Tortoise clones over AMR-NB falls from 36.3\% to 6.0\% over five
+seeds, with no unseen-tool audio in training. A larger encoder (SSL-AASIST) trained the
+same way reaches 0.5\% there and 12.9\% on a third unseen generator, Chatterbox, while
+IndicF5 stays at 15.8--21.8\%. Both final systems beat a shortcut floor of cheap signal
+statistics in every seed on every test set, where the deployed model never did on the
+unseen tool over the channel; three of those floors are above chance and so weak bars. Spontaneous speech is still
+rejected. The detector runs on live calls and warns the callee about ten seconds into the
+speech.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.

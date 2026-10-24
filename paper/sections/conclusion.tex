@@ -53,8 +53,12 @@ deployed model detects an unseen tool on a real phone line. This is the sharpest
 limitation of the work and it constrains every deployment claim made here. The final recipe
 (248 speakers, both telephone codecs) lowers these errors a great deal --- new-speaker
 Tortoise over the channel from 30.8\% to 8.8\%, and over the real AMR-NB codec from
-36.3\% to 6.0\%, in all five seeds --- but we have not measured its shortcut floor, and
-a third unseen tool, Chatterbox, stays at 32.0\% (one seed); the larger encoder lowers it to 12.9\%, but neither system has a measured floor on the final data, so the claim stays open.
+36.3\% to 6.0\%, in all five seeds --- and it beats its shortcut floor at the speaker
+level in every seed, on new-speaker Tortoise over the channel (8.8\% against 36.5\%) as on
+every other set. A third unseen tool, Chatterbox, stays at 32.0\% for the adapter (one
+seed); the larger encoder lowers it to 12.9\%. The limitation narrows rather than
+disappears: the floors on CM04 and over AMR-NB are above chance and so weak bars, the final
+recipe is not the model that runs on live calls, and none of it has met a real phone call.
 
 \textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
 lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model

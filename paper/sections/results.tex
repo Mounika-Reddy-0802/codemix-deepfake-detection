@@ -538,10 +538,63 @@ Tortoise sets. No unseen-tool audio entered training.
 clones but no RVC conversions, so the share of conversion audio falls, which may explain
 it. We report it as a cost of the larger set.
 
-\textbf{What we have not shown.} The five seeds make the direction certain, but with five
-paired seeds the smallest possible exact $p$ is $0.0625$ per set, and we have not yet
-measured the shortcut floor for this recipe, so we do not claim it clears one. IndicF5
-(21.7\%) and, below, Chatterbox stay hard.
+\textbf{Against its shortcut floor.} Both systems trained on the final data share one
+floor: the eight statistics fitted on the final training set and scored on each detector's
+own clips, with the speaker-level paired test of Sec.~\ref{sec:floors}. Every one of
+the five adapter seeds beats it on all eleven sets. On the unseen tools the floor is
+informative and the margin is wide: new-speaker Tortoise 8.8\% against a floor of 36.5\%,
+IndicF5 21.7\% against 38.8\% (21.3\% against 37.8\% over AMR-NB). The deployed recipe
+beat its Tortoise floor over the channel in no seed. On three sets, CM04 over either codec
+and new-speaker Tortoise over AMR-NB, the floor is above chance (54.6--71.4\%): the cheap
+statistics rank genuine and fake the wrong way round on those recordings, so beating it
+there shows only that the detector does not lean on those cues
+(\texttt{docs/results/floor\_final\_v1.md}).
+
+\textbf{What we have not shown.} With five paired seeds the smallest possible exact $p$ is
+$0.0625$ per set, so the comparison with the deployed recipe rests on the direction being
+the same in every seed. IndicF5 (21.7\%) and, below, Chatterbox stay hard.
+
+\subsection{A third unseen tool}
+\label{sec:res-chatterbox}
+
+Chatterbox (CM09) is a third generator family none of our training data resembles: XTTS-v2
+is an autoregressive decoder, Tortoise adds diffusion, IndicF5 uses flow matching, and
+Chatterbox is a recent multilingual cloner. We scored the same models on its 525 clips
+against the 651 genuine all-Hindi clips of the same speakers (Table~\ref{tab:chatterbox}).
+
+\begin{table}[t]
+\centering
+\caption{EER (\%) on Chatterbox (CM09) with 95\% bootstrap intervals. The 248-speaker
+adapter is trained over both telephone codecs and is one seed (1234); the others are the
+models of the earlier tables.}
+\label{tab:chatterbox}
+\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Detector & Phone line & Clean \\
+\midrule
+S1, English only             & 55.0 [52.9, 57.7] & 61.1 [58.7, 63.9] \\
+Adapter, 21 speakers         & 35.8 [33.4, 38.8] & 48.0 [44.9, 50.3] \\
+Adapter, 248 speakers, 2 codecs & 32.0 [30.0, 34.9] & 49.0 [45.8, 52.2] \\
+\bottomrule
+\end{tabular}
+% experiments/results/cm09_v1/
+\end{table}
+
+\textbf{It is the hardest unseen tool.} The best detector reaches 32.0\% over the phone
+line, against 9.0\% for the same model (seed 1234) on new-speaker Tortoise and 25.7\% on IndicF5, and
+clean audio is near chance for both adapters (48--49\%). The English-only S1 is at 55.0\%.
+
+\textbf{The added voices help little here.} The 248-speaker adapter is 3.8 points better
+than the 21-speaker one over the phone line (the intervals overlap, and it is one seed), far
+less than the 11 to 22 points it gained on XTTS and Tortoise. Training on more genuine
+speakers closed the gap for tools that resemble the training clones; it did not carry over
+to a generator of a different family.
+
+\textbf{The watermark did not help.} Chatterbox marks its output, yet no detector found
+it: the scores are worse than for IndicF5, so the watermark does not appear to be a
+shortcut they use. We report this as a limit: a tool we did not train on can still defeat the detector,
+and we have not tried to detect the watermark itself.
 
 \subsection{An outside baseline}
 \label{sec:res-aasist}
@@ -699,9 +752,9 @@ why; IndicF5's clones are the most natural of the tools we used
 (Sec.~\ref{sec:data-extension}), which may make them the hardest.
 
 \textbf{What we have not shown.} The larger encoder has about three times the parameters and
-we have not measured what it costs on a live call; the adapter is what runs there. We have
-no shortcut floor for either system trained on the final data, and the spontaneous HiACC set
-was not run.
+we have not measured what it costs on a live call; the adapter is what runs there. Against
+the same floor as the adapter, every one of its seeds is below it on every set, Chatterbox
+included (12.9\% against 39.5\%); the spontaneous HiACC set was not run.
 
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}
@@ -760,48 +813,6 @@ adaptation data. We have tested neither.
 % src/reporting/tradeoff.py; experiments/results/tradeoff_v1.json;
 % experiments/results/cross_condition_v1/; docs/results/tradeoff_v1.md
 
-\subsection{A third unseen tool}
-\label{sec:res-chatterbox}
-
-Chatterbox (CM09) is a third generator family none of our training data resembles: XTTS-v2
-is an autoregressive decoder, Tortoise adds diffusion, IndicF5 uses flow matching, and
-Chatterbox is a recent multilingual cloner. We scored the same models on its 525 clips
-against the 651 genuine all-Hindi clips of the same speakers (Table~\ref{tab:chatterbox}).
-
-\begin{table}[t]
-\centering
-\caption{EER (\%) on Chatterbox (CM09) with 95\% bootstrap intervals. The 248-speaker
-adapter is trained over both telephone codecs and is one seed (1234); the others are the
-models of the earlier tables.}
-\label{tab:chatterbox}
-\footnotesize
-\begin{tabular}{@{}lrr@{}}
-\toprule
-Detector & Phone line & Clean \\
-\midrule
-S1, English only             & 55.0 [52.9, 57.7] & 61.1 [58.7, 63.9] \\
-Adapter, 21 speakers         & 35.8 [33.4, 38.8] & 48.0 [44.9, 50.3] \\
-Adapter, 248 speakers, 2 codecs & 32.0 [30.0, 34.9] & 49.0 [45.8, 52.2] \\
-\bottomrule
-\end{tabular}
-% experiments/results/cm09_v1/
-\end{table}
-
-\textbf{It is the hardest unseen tool.} The best detector reaches 32.0\% over the phone
-line, against 9.0\% for the same model (seed 1234) on new-speaker Tortoise and 25.7\% on IndicF5, and
-clean audio is near chance for both adapters (48--49\%). The English-only S1 is at 55.0\%.
-
-\textbf{The added voices help little here.} The 248-speaker adapter is 3.8 points better
-than the 21-speaker one over the phone line (the intervals overlap, and it is one seed), far
-less than the 11 to 22 points it gained on XTTS and Tortoise. Training on more genuine
-speakers closed the gap for tools that resemble the training clones; it did not carry over
-to a generator of a different family.
-
-\textbf{The watermark did not help.} Chatterbox marks its output, yet no detector found
-it: the scores are worse than for IndicF5, so the watermark does not appear to be a
-shortcut they use. We report this as a limit: a tool we did not train on can still defeat the detector,
-and we have not tried to detect the watermark itself.
-
 \subsection{What the detector responds to}
 \label{sec:probe}
 
@@ -844,9 +855,15 @@ single vocal-cord pulse, rather than what is being said or in which language.
 % docs/results/interpretability_v1.md
 
 \subsection{Summary}
-The best all-round system is S2 trained on XTTS and RVC in the channel condition. It
-beats its floor on the seen tool (2.75\%) and on RVC (5.01\%) at the speaker level,
-keeps clean English at 2.42\%, and on the unseen tool over the channel is
-inconclusive against its floor (35.59\% over five seeds, against 37.79\%). It is the model used in the
-live call system of Sec.~\ref{sec:system}, for Hindi--English calls only: English over
-the same channel rises to 24.20\% (Sec.~\ref{sec:tradeoff}).
+Three systems matter. The deployed S2, trained on XTTS and RVC over the channel with 21
+genuine speakers, is the model in the live call system of Sec.~\ref{sec:system}: it beats
+its floor on the seen tool (2.75\%) and on RVC (5.01\%), keeps clean English at 2.42\%, and
+on the unseen tool over the channel is inconclusive against its floor (35.59\% over five
+seeds, against 37.79\%). The final recipe trains the same adapter on 248 genuine speakers
+over both telephone codecs: it is better on ten of eleven sets, reaches 8.8\% on unseen
+Tortoise over the simulated line and 6.0\% over the real AMR-NB codec, and beats its floor
+in every seed on every set, at a cost on RVC (8.5\% against 6.1\%). SSL-AASIST, a larger
+encoder trained on the same data, is better still on eight of eleven sets. IndicF5 and
+Chatterbox remain the hardest attacks. The live system runs the deployed S2, for
+Hindi--English calls only: English over the same channel rises to 24.20\%
+(Sec.~\ref{sec:tradeoff}).
