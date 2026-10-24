@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2013-green)
-![Tests](https://img.shields.io/badge/tests-995%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-997%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -94,6 +94,31 @@ Every number below comes from a real run on real data and is reproducible from
 [Reproduce](#reproduce). **Start with the week-10 summary**: it supersedes the
 pre-normalisation numbers in sections 1–5, which are kept as the record of how we
 got here.
+
+### Week 14 — what a caller meets
+
+**Whole calls, not clips.** Test clips replayed through the live scoring path and stitched
+into 60 s calls, with the final recipe's operating point chosen on the dev set only
+([live_final_recipe_v1](docs/results/live_final_recipe_v1.md)):
+
+| 60 s calls | Deployed S2 | Final recipe |
+|---|---|---|
+| Genuine read speech, 60 new speakers: warned | 44% | **0%** |
+| Tortoise (CM04) calls caught | 33% | **100%** |
+| XTTS and RVC calls caught | 100% | 100% |
+| IndicF5 / Chatterbox calls caught | 67% / 33% | 50% / 17% |
+| **Genuine spontaneous calls (HiACC): warned** | **100%** | **100%** |
+
+- **The final recipe runs in the live system**: `DFD_CHECKPOINT` at its checkpoint and
+  `DFD_THRESHOLD_FILE=configs/threshold_final.yaml` ([live_call/README](live_call/README.md)).
+- **English**: the final recipe rarely calls genuine English fake but catches only 26% of
+  English fakes (13.44% EER clean) ([english_final_v1](docs/results/english_final_v1.md)).
+- **The larger encoder can run live** (1.14 s per 2 s window hop on two CPU threads, 69 ms on
+  a GPU), and one of its trainings calls only 5.8% of spontaneous speech fake, another 46.7%:
+  a lead, not a fix ([encoder_spontaneous_v1](docs/results/encoder_spontaneous_v1.md)).
+- **One overview figure** of every main system against every attack tool, both channels:
+  `paper/figures/final_overview.pdf`. **Model card** (draft, not published):
+  [MODEL_CARD](docs/MODEL_CARD.md).
 
 ### Week 13 — the final recipe, a larger encoder, and a third unseen tool
 
@@ -509,7 +534,7 @@ codemix-deepfake-detection/
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
 │   ├── inference/       # streaming inference, ONNX export, predict
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 995 tests — firewalls, anti-leakage, live-call server, Twilio stream
+├── tests/               # 997 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs (notebooks hold no logic)
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
@@ -623,7 +648,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–13
+## Progress — Weeks 1–14
 
 Only completed work is listed. The full 12-week plan lives in the team drive,
 outside this repo.
@@ -641,13 +666,14 @@ outside this repo.
 | **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 over the channel, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
 | **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
+| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads) ([W14](docs/W14_mounika_encoder_spontaneous.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; paper introduction and future work updated ([W14](docs/W14_krishna_live_final_recipe.md)) |
 
 **Open:** fund the Twilio account and re-verify the phone demo on real numbers (trial
 credit exhausted, PSTN leg unproven since week 10); spontaneous speech is still rejected
-(single models of every recipe call 38.5-54.4% of HiACC's genuine speech fake, the final
-recipe 43.9%; [hiacc_final_v1](docs/results/hiacc_final_v1.md)), and fixing it needs
-spontaneous training data; measure the larger encoder's cost on a live call before deploying it; compile
-the paper and submit it.
+(every genuine 60 s spontaneous call is warned by both live models;
+[hiacc_final_v1](docs/results/hiacc_final_v1.md)), and fixing it needs spontaneous genuine
+speech in training; decide on publishing the weights ([MODEL_CARD](docs/MODEL_CARD.md));
+compile the paper and submit it.
 
 ---
 
