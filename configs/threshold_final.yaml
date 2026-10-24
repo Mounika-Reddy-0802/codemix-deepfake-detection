@@ -1,0 +1,10 @@
+# Live-demo operating point (W8-T5, P-029). Chosen by src.inference.calibrate on
+# streaming-path smoothed window scores of the dev manifest only, for a low false-alarm
+# rate on genuine 60 s calls; validated on held-out sets in experiments/results/threshold_calibration_final.json.
+threshold: 0.6868554928153753
+checkpoint: final_s1234
+margin: 0.5
+min_windows: 2
+suspicious_after: 3
+fake_after: 5
+recover_after: 3
