@@ -107,7 +107,16 @@ explanation, not to characterise one.
 
 \subsection{Future work}
 
-The most valuable next result is the one that would change a deployment decision:
+The first is spontaneous speech, because it decides whether the system can face real
+callers: every genuine 60\,s spontaneous call is warned by both the deployed model and the
+final recipe (Sec.~\ref{sec:system-calls}). More read voices and a real codec did not move
+it, so it needs spontaneous genuine speech in training, from a speaker-disjoint corpus kept
+apart from every test set, together with clones made from the same speakers' voices so that
+speaking style cannot become the shortcut. Second, English: the final recipe lets most
+English clones through, so a mixed-language service needs English telephone audio in
+training or a language-identification step that routes English calls to S1.
+
+After those, the most valuable result is the one that would change a deployment decision:
 \emph{what makes an unseen tool detectable over a narrowband channel?} Our probing
 suggests a direction --- adaptation moved the model's evidence for genuine speech
 into the pitch-harmonic band that survives a codec --- so training explicitly for

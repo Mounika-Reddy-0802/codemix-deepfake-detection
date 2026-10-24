@@ -86,13 +86,24 @@ conditions, which fails it.
     lowers the deployed recipe to 26.63\% over five seeds, which we report as
     exploratory (Section~\ref{sec:variants}). We report the weak result as
     prominently as the strong one.
+  \item \textbf{More voices and a real codec close most of the gap.} Training the same
+    adapters on 248 genuine speakers instead of 21, over both the simulated G.711 line and
+    the real AMR-NB codec, cuts error on unseen Tortoise clones from 30.8\% to 8.8\% over
+    the line and from 36.3\% to 6.0\% over AMR-NB, better in every one of five seeds, with
+    no unseen-tool audio in training; every seed beats its shortcut floor on every test set
+    (Section~\ref{sec:res-final}). A larger encoder trained the same way is better still,
+    and three unseen generators show where the gap remains: IndicF5 and Chatterbox
+    (Section~\ref{sec:res-finalssl}).
   \item \textbf{Adaptation beats full fine-tuning where it matters.} Training the
     whole encoder on the same data reaches the lowest seen-tool error in the study
     (0.83\%) and collapses to chance on English. The adapters keep both.
   \item \textbf{A deployed system, not an illustration.} The detector runs on a live
     call and warns the callee --- and only the callee --- roughly ten seconds into
     the speech, using the same windowing and operating point the evaluation uses
-    (Section~\ref{sec:system}).
+    (Section~\ref{sec:system}). Measured on whole calls through that path, the final
+    recipe warns no genuine read-speech caller and catches every Tortoise call, while
+    every genuine spontaneous call is still warned, the clearest limit of the work
+    (Section~\ref{sec:system-calls}).
 \end{enumerate}
 
 The corpora, attacks, manifests, configurations and per-clip scores behind every
