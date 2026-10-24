@@ -59,7 +59,48 @@ recording, not the language mix), the new-speaker and IndicF5 table, and the rea
 those results against their matched floors, including that the Tortoise floors on new
 speakers sit near chance and that no system clears its IndicF5 floor.
 
+### What the runs found
+
+**More voices (run 1).** The extended recipe beat the deployed one in every one of five
+seeds on new speakers (0.91% against 10.75% EER), on both unseen tools (Tortoise 13.59%
+against 29.82%, IndicF5 27.25% against 35.40%) and in false alarms (0.47% against 3.40%).
+
+**AASIST (run 2).** Zero-shot it rejects 82.3% of genuine Hindi-English speech, the same
+failure as our English-trained S1. Fine-tuned on the 248 speakers it gains as much as our
+adapter, better on Tortoise and worse on the seen tool, RVC and false alarms.
+
+**The final recipe (run 4).** `src/data/final_recipe.py` stacks the 248-speaker set over
+both telephone codecs (simulated G.711 and real AMR-NB, 16,036 clips). Five paired seeds
+against the deployed recipe: better on ten of eleven test sets, in every seed on nine;
+over the real AMR-NB codec new-speaker Tortoise falls from 36.3% to 6.0% and IndicF5 from
+46.5% to 21.3%. The cost is RVC, worse in all five seeds (8.5% against 6.1%)
+(`docs/results/final_recipe_v1.md`).
+
+**SSL-AASIST, the larger encoder (runs 5, 7 and 8).** `src/baselines/ssl_aasist_model.py`
+loads the published XLS-R 300M checkpoint into a Hugging Face network without fairseq.
+Run 5 first failed when scoring its fine-tuned models: our own saved weights held the
+positional convolution's folded weight, which a fresh network did not accept. The fix
+folds it before loading, with a test that saves and reloads a state dict. Zero-shot it
+rejects 73.1% of genuine speech. Trained on the final-recipe data with the same five
+seeds as the adapter, it is better in every seed on eight of eleven sets (exact
+Mann-Whitney p = 0.008 on seven): new-speaker Tortoise over AMR-NB 0.51% against 6.04%,
+CM04 1.75% against 17.73%, Chatterbox 12.86% against 31.98% (one adapter seed). False
+alarms and both IndicF5 sets are not separated (`docs/results/ssl_vs_adapter_v1.md`,
+built by `src/reporting/w13_runs.py`).
+
+### The paper
+
+New results subsections for the final recipe and both outside baselines, each with its
+table; the abstract cut from about 450 words to about 240 and rewritten around the final
+recipe and the larger encoder; the conclusion and the four-page version updated to match.
+Every number in them comes from a committed results file. Once Lahari's floor run
+landed, the final-recipe and larger-encoder sections, the abstract, the conclusion and the
+results summary state that both final systems beat their shortcut floor in every seed, with
+the caveat that three of those floors are above chance; the abstract is back under 250
+words, and the Chatterbox subsection now comes before the tables that use CM09.
+
 ## What is still open
 
-The two Kaggle runs. When they land, the extended-recipe and AASIST results go into the
-results chapter and the short paper, with the seed-for-seed comparison.
+The larger encoder's cost on a live call is not measured; the adapter is what runs there.
+IndicF5 stays at 15.8-21.8% for both encoders. Neither system has been tested on the
+spontaneous HiACC speech after the final recipe.

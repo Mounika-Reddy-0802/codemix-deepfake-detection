@@ -142,6 +142,22 @@ def analyse(run1: str | None = None, run2: str | None = None, run3: str | None =
     return report
 
 
+def analyse_ssl(run4: str, run7: str, run8: str | None = None) -> dict:
+    """SSL-AASIST against the wav2vec2 adapter, both trained on the final-recipe data.
+
+    ``run4`` holds the adapter (``system == "final"``), ``run7`` and ``run8`` the larger
+    encoder (``data == "final"``); the two SSL runs hold different seeds and are pooled.
+    """
+    adapter = select(load_runs(run4), "system", "final")
+    ssl = select(load_runs(run7) + (load_runs(run8) if run8 else []), "data", "final")
+    cm09 = by_seed(ssl, "cm09")  # Chatterbox: the adapter was scored on one seed only
+    return {
+        "run7_ssl_vs_final": compare(ssl, adapter),
+        "run7_ssl_cm09": mean_interval(list(cm09.values())) if cm09 else None,
+        "run7_ssl_cm09_by_seed": cm09,
+    }
+
+
 TITLES = {
     "run1_ext_vs_deployed": (
         "Run 1: extended recipe (248 speakers) vs deployed (21)",
@@ -162,6 +178,11 @@ TITLES = {
         "Run 3: G.711 + AMR-NB training vs deployed (G.711)",
         "two-codec",
         "deployed",
+    ),
+    "run7_ssl_vs_final": (
+        "Runs 7 and 8: SSL-AASIST vs the adapter, both on the final-recipe data",
+        "SSL-AASIST",
+        "adapter",
     ),
 }
 
@@ -212,6 +233,16 @@ def markdown(report: dict) -> str:
                 f"| {p} | {mwu} |"
             )
         lines.append("")
+    if report.get("run7_ssl_cm09"):
+        by = report.get("run7_ssl_cm09_by_seed", {})
+        seeds = ", ".join(f"{s}: {100 * v:.2f}" for s, v in sorted(by.items()))
+        lines += [
+            "## Chatterbox (CM09), SSL-AASIST only",
+            "",
+            f"{_cell(report['run7_ssl_cm09'])}; by seed {seeds}. The adapter was scored on",
+            "seed 1234 only (31.98), so there is no paired test.",
+            "",
+        ]
     return "\n".join(lines)
 
 
@@ -220,10 +251,15 @@ def main() -> None:
     parser.add_argument("--run1", help="overfit_fix_results.zip or its folder")
     parser.add_argument("--run2", help="aasist_results.zip or its folder")
     parser.add_argument("--run3", help="mixcodec_results.zip or its folder")
+    parser.add_argument("--run4", help="final_results.zip (the adapter) or its folder")
+    parser.add_argument("--run7", help="final_ssl_results.zip or its folder")
+    parser.add_argument("--run8", help="final_ssl_seeds2_results.zip or its folder")
     parser.add_argument("--out", default="experiments/results/w13_runs_v1.json")
     parser.add_argument("--doc", default="docs/results/w13_runs_v1.md")
     args = parser.parse_args()
     report = analyse(args.run1, args.run2, args.run3)
+    if args.run4 and args.run7:
+        report.update(analyse_ssl(args.run4, args.run7, args.run8))
     Path(args.out).write_text(json.dumps(report, indent=2), encoding="utf-8")
     Path(args.doc).write_text(markdown(report), encoding="utf-8")
     print(markdown(report))

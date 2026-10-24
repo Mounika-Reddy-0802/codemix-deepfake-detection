@@ -15,39 +15,23 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 \maketitle
 
 \begin{abstract}
-Audio deepfake detectors report error rates below one percent on English
-benchmarks. We ask what those numbers mean for the speech most exposed to voice
-fraud: Hindi--English code-mixed conversation carried over a telephone line. A
-wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\% equal error rate on
-English and 48.21\% on clean code-mixed speech, rising to 58.42\% over a simulated
-narrowband channel, where its AUC falls below chance. The failure is a rejection of
-genuine speakers rather than a loss of sensitivity to clones: at a fixed threshold it
-rejects 0.37\% of genuine English and 94.8\% of genuine Hindi--English. A
-language-controlled test on 183 unseen speakers, holding speaker and recording fixed,
-shows this is not caused by code-mixing: genuine English is rejected as often as mixed
-speech, and the Code-Mixing Index does not predict the score. Low-rank
-adaptation of the frozen encoder, training 1.13\% of the parameters on
-speaker-disjoint code-mixed speech and clones generated for this study, reduces
-channel-matched error to 2.75\% (3.27\% averaged over five training seeds) while
-retaining 2.42\% on clean English. Hearing more voices matters more than any other
-change we tried: the same recipe trained on 248 genuine speakers instead of 21 is better
-in every one of five seeds on new speakers (0.91\% against 10.75\%), on two unseen
-cloning tools (Tortoise 13.59\% against 29.82\%, IndicF5 27.25\% against 35.40\%) and
-in false alarms (0.47\% against 3.40\%); fine-tuning the
-whole encoder on identical data is better on the tool it saw (0.83\%) and collapses
-to chance on English. Every result is compared, by a paired test over speakers, with
-a shortcut floor: the error rate eight cheap signal statistics reach when trained on
-the same data and scored on the same clips. Against a cloning tool no model was
-allowed to see, the adapted system generalises on clean audio (5.44\% against a
-29.49\% floor); over the channel the deployed model averages 35.59\% across five
-training seeds against a 37.79\% floor and beats it in none, while full fine-tuning on
-a single attack family stays below its floor in every seed (19.72\%). A second unseen
-generator, IndicF5, is no easier (30.6\%). Randomising
-recording cues during training lowers the deployed recipe's unseen-tool error to
-26.63\% over five seeds, an exploratory result that does not yet clear the floor. The
-detector runs on live calls
-and warns the callee, and only the callee, about ten seconds into the speech, using
-the windowing and operating point the evaluation reports.
+Audio deepfake detectors report error rates below one percent on English benchmarks.
+We ask what that means for Hindi--English code-mixed speech over a telephone line, where
+voice fraud happens. A wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\%
+equal error rate (EER) on English but 58.42\% over a simulated narrowband channel, because
+it rejects genuine speakers (94.8\% of genuine Hindi--English speech). A language-controlled
+test on 183 unseen speakers shows code-mixing is not the cause: genuine English is rejected
+as often as mixed speech. Low-rank adaptation of the encoder (1.13\% of the parameters)
+lowers channel-matched error to 2.75\%. The largest further gains come from more genuine
+voices and real codec audio: trained on 248 speakers over both simulated G.711 and real
+AMR-NB, error on unseen Tortoise clones over AMR-NB falls from 36.3\% to 6.0\% over five
+seeds, with no unseen-tool audio in training. A larger encoder (SSL-AASIST) trained the
+same way reaches 0.5\% there and 12.9\% on a third unseen generator, Chatterbox, while
+IndicF5 stays at 15.8--21.8\%. Both final systems beat a shortcut floor of cheap signal
+statistics in every seed on every test set, where the deployed model never did on the
+unseen tool over the channel; three of those floors are above chance and so weak bars. Spontaneous speech is still
+rejected. The detector runs on live calls and warns the callee about ten seconds into the
+speech.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.
