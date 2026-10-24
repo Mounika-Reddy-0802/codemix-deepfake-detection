@@ -62,8 +62,10 @@ XTTS, Tortoise and RVC call, half of the IndicF5 calls and one in six Chatterbox
 - All attacks were made by the project with open tools; commercial cloning services were
   not tested.
 - A larger encoder (SSL-AASIST, XLS-R 300M) trained on the same data is better on eight of
-  eleven sets (`docs/results/ssl_vs_adapter_v1.md`); its cost on a live call is still to be
-  reported.
+  eleven sets (`docs/results/ssl_vs_adapter_v1.md`) and keeps up with a live call even on two
+  CPU threads (1.14 s per 2 s window hop; 69 ms on a T4 GPU). On spontaneous speech one of its
+  trainings calls 5.8% of genuine clips fake and another 46.7%, so it is a lead, not a fix
+  (`docs/results/encoder_spontaneous_v1.md`). It is the candidate for the next release.
 
 ## Training data and licences
 
