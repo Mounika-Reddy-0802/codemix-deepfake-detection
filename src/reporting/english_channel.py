@@ -26,7 +26,11 @@ import pandas as pd
 from src.training.false_alarm import DEPLOYED_THRESHOLD, summarise
 
 RESULTS_DIR = "experiments/results/english_channel_v1"
-MODELS = {"deployed_s2": "Deployed S2", "s1": "S1 (English only)"}
+MODELS = {
+    "deployed_s2": "Deployed S2",
+    "s1": "S1 (English only)",
+    "final_s1234": "Final recipe (seed 1234)",
+}
 CONDITIONS = {"clean": "clean", "channel": "phone line"}
 
 

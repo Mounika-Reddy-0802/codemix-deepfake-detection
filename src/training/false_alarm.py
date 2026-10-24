@@ -123,6 +123,47 @@ def compare(
     }
 
 
+def compare_paired(
+    first: pd.DataFrame,
+    second: pd.DataFrame,
+    threshold: float = DEPLOYED_THRESHOLD,
+    n_boot: int = 1000,
+    seed: int = 0,
+) -> dict:
+    """First minus second false-alarm rate for two models scored on the same clips.
+
+    The clips are joined on ``filepath`` (refused unless both cover exactly the same
+    clips), and each bootstrap resample draws whole speakers once for both models, so the
+    interval is for the paired difference. Also counts the speakers whose own rate falls.
+    """
+    a, b = _genuine(first), _genuine(second)
+    joined = a[["filepath", "speaker", "score"]].merge(
+        b[["filepath", "score"]], on="filepath", suffixes=("_a", "_b"), validate="one_to_one"
+    )
+    if len(joined) != len(a) or len(joined) != len(b):
+        raise ValueError(f"the two score sets cover different clips ({len(a)}, {len(b)})")
+    flag_a = joined["score_a"].to_numpy(dtype=np.float64) < threshold
+    flag_b = joined["score_b"].to_numpy(dtype=np.float64) < threshold
+    speakers = joined["speaker"].astype(str).to_numpy()
+    unique = np.unique(speakers)
+    members = [np.flatnonzero(speakers == s) for s in unique]
+    rng = np.random.default_rng(seed)
+    diff = np.empty(n_boot)
+    for i in range(n_boot):
+        idx = np.concatenate([members[k] for k in rng.integers(0, len(unique), len(unique))])
+        diff[i] = flag_a[idx].mean() - flag_b[idx].mean()
+    per_a = np.array([flag_a[m].mean() for m in members])
+    per_b = np.array([flag_b[m].mean() for m in members])
+    return {
+        "clips": int(len(joined)),
+        "speakers": int(len(unique)),
+        "difference": float(flag_a.mean() - flag_b.mean()),
+        "difference_ci": [float(np.percentile(diff, 2.5)), float(np.percentile(diff, 97.5))],
+        "speakers_lower": int((per_a < per_b).sum()),
+        "speakers_higher": int((per_a > per_b).sum()),
+    }
+
+
 def main() -> None:
     """CLI: score a genuine-only manifest and report its false alarms against a reference."""
     import argparse

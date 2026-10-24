@@ -26,7 +26,7 @@ new speakers (0.91\% against 10.75\%), on both unseen tools (Tortoise 13.59\% ag
 against 3.40\%), with no unseen-tool audio in training. An established detector, AASIST, shows the same
 gap zero-shot (82.3\% of genuine speech rejected) and gains as much from the added
 voices; fine-tuned on them it is better than our adapter on Tortoise and worse on the seen
-tool, RVC and false alarms, so the voices matter more than the architecture. A larger encoder, SSL-AASIST, is stronger still: trained on the final-recipe data it reaches 0.51\% on new-speaker Tortoise over the real AMR-NB codec (the adapter: 6.04\%) and 12.86\% on Chatterbox (31.98\%, one adapter seed), over five seeds, and is better in every seed on eight of eleven sets. It is the system to deploy if its cost on a live call is acceptable, which we have not measured; IndicF5 stays at 16--22\% for both.
+tool, RVC and false alarms, so the voices matter more than the architecture. A larger encoder, SSL-AASIST, is stronger still: trained on the final-recipe data it reaches 0.51\% on new-speaker Tortoise over the real AMR-NB codec (the adapter: 6.04\%) and 12.86\% on Chatterbox (31.98\%, one adapter seed), over five seeds, and is better in every seed on eight of eleven sets. Its cost on a live call is affordable (1.14\,s per 2\,s hop on two CPU threads, 69\,ms on a GPU), so it is the system to deploy next; on spontaneous speech one of its trainings calls only 5.8\% of genuine clips fake and another 46.7\%, so it is a lead, not a fix. IndicF5 stays at 16--22\% for both.
 
 The detector runs on a live call. It scores four-second windows of the caller's
 speech, escalates only when consecutive windows agree, and warns the callee --- never
@@ -63,12 +63,17 @@ recipe is not the model that runs on live calls, and none of it has met a real p
 \textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
 lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model
 calls 54.37\% of genuine clips fake, against 0.89\% for the read lectures, and every
-speaker is above 10\%. Adaptation taught the model what genuine lecture recordings
-sound like, not genuine Hindi--English speech in general.
+speaker is above 10\%. Neither more read voices nor the real codec changes this: single
+models of the deployed and 248-speaker recipes call 38.5--54.4\% of that speech fake, and
+the final recipe 43.9\%.
+Adaptation taught the model what genuine lecture recordings sound like, not genuine
+Hindi--English speech in general.
 
 \textbf{The deployed model is for Hindi--English calls only.} English passed through
 the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only
-S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio.
+S1 (Sec.~\ref{sec:tradeoff}); the 2.42\% English figure holds for clean audio. The final
+recipe fails English the other way: it rarely rejects a genuine English speaker but lets
+most English clones through (13.44\% EER on clean English, one seed).
 
 \textbf{The attacks are ours, and most are not hard.} We made the code-mixed attacks
 because no benchmark provides them, so our numbers are against attacks of our own
@@ -102,7 +107,16 @@ explanation, not to characterise one.
 
 \subsection{Future work}
 
-The most valuable next result is the one that would change a deployment decision:
+The first is spontaneous speech, because it decides whether the system can face real
+callers: every genuine 60\,s spontaneous call is warned by both the deployed model and the
+final recipe (Sec.~\ref{sec:system-calls}). More read voices and a real codec did not move
+it, so it needs spontaneous genuine speech in training, from a speaker-disjoint corpus kept
+apart from every test set, together with clones made from the same speakers' voices so that
+speaking style cannot become the shortcut. Second, English: the final recipe lets most
+English clones through, so a mixed-language service needs English telephone audio in
+training or a language-identification step that routes English calls to S1.
+
+After those, the most valuable result is the one that would change a deployment decision:
 \emph{what makes an unseen tool detectable over a narrowband channel?} Our probing
 suggests a direction --- adaptation moved the model's evidence for genuine speech
 into the pitch-harmonic band that survives a codec --- so training explicitly for

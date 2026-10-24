@@ -1,0 +1,20 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/temp/ssl_ckpt/final_s1234/best.pt",
+  "manifest": "data/manifests/hiacc_adult_eval_channel20.csv",
+  "summary": {
+    "threshold": 0.0,
+    "clips": 3318,
+    "speakers": 24,
+    "false_alarm_rate": 0.05756479807112719,
+    "false_alarm_ci": [
+      0.0318786968783783,
+      0.09082911825017088
+    ],
+    "median_score": 4.153203010559082,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.03135521885521886,
+    "per_speaker_max": 0.2926829268292683,
+    "speakers_above_10pct": 5
+  }
+}

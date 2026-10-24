@@ -1,0 +1,26 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/temp/ssl_ckpt/final_s2025/best.pt",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "pooled": {
+    "eer": 0.05007103014602962,
+    "eer_ci_low": 0.035429300489465125,
+    "eer_ci_high": 0.07119929776752963,
+    "auc": 0.9851672342114609,
+    "auc_ci_low": 0.9742472846061508,
+    "auc_ci_high": 0.9921271710853952,
+    "f1": 0.9487603305785125,
+    "threshold": 5.828885078430176,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 6.30139
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.050071
+    }
+  ]
+}
