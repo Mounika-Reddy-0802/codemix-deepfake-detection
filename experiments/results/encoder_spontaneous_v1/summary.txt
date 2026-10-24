@@ -1,0 +1,25 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: a29790e6721eddfc3ba31443f793bbb621193a02
+timing per 4 s window: {'cpu_threads': 2, 'ssl_aasist_cuda_ms': 68.8, 'ssl_aasist_cpu_ms': 1136.7, 'wav2vec2_base_cuda_ms': 25.2, 'wav2vec2_base_cpu_ms': 398.8, 'params_ssl_aasist_m': 315.9, 'params_wav2vec2_base_m': 94.4}
+
+SSL-AASIST on the final-recipe data, EER (%): G.711 line, *_amr = real AMR-NB codec; hiacc_fa = spontaneous genuine called fake (%); control_fa = genuine clips called fake (%)
+run                    status    dev        eval_pool             cm04         rvc_test         new_xtts     new_tortoise             cm07       control_fa     new_xtts_amr new_tortoise_amr         cm07_amr         cm04_amr         hiacc_fa             cm09
+final_s1234                ok   0.00             0.13             1.74             6.30             0.05             0.91            25.83             0.00             0.05             1.30            31.77             0.88             5.76            12.58
+final_s2025                ok   0.00             0.13             0.68             5.01             0.00             0.37            14.86             0.16             0.00             0.41            21.84             0.27            46.68            12.41
+
+MEAN +/- SD over seeds
+  fine-tuned on final:
+    eval_pool           0.13 +/-  0.00 (n=2)
+    cm04                1.21 +/-  0.75 (n=2)
+    rvc_test            5.65 +/-  0.91 (n=2)
+    new_xtts            0.02 +/-  0.03 (n=2)
+    new_tortoise        0.64 +/-  0.38 (n=2)
+    cm07               20.35 +/-  7.75 (n=2)
+    control_fa          0.08 +/-  0.11 (n=2)
+    new_xtts_amr        0.02 +/-  0.03 (n=2)
+    new_tortoise_amr    0.86 +/-  0.63 (n=2)
+    cm07_amr           26.81 +/-  7.03 (n=2)
+    cm04_amr            0.58 +/-  0.43 (n=2)
+    hiacc_fa           26.22 +/- 28.94 (n=2)
+    cm09               12.50 +/-  0.12 (n=2)
