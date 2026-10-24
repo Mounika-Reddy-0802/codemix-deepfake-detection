@@ -162,9 +162,13 @@ tools (Tortoise 13.59% against 29.82%, IndicF5 27.25% against 35.40%) and in fal
 (0.47% against 3.40%) (`docs/results/w13_runs_v1.md`). It is the base of the final recipe
 under comment 2.
 
-**Not done.** The spontaneous HiACC set has not been scored with the final systems,
-and it remains the clearest limit: the deployed model calls 54.4% of that genuine speech
-fake.
+**Done (week 13, spontaneous speech with the final recipe), and still the clearest
+limit.** The final recipe's seed-1234 model calls 43.9% [36.5, 51.2] of HiACC's genuine
+spontaneous speech fake. On identical clips that is 10.5 points below the published
+deployed checkpoint (paired speaker bootstrap [-17.1, -3.8]), but single trainings of one
+recipe already span 38.5-54.4%, so with one seed this is not evidence that the recipe
+helps. More read voices and a real codec do not teach the detector spontaneous speech;
+that needs spontaneous training data (`docs/results/hiacc_final_v1.md`).
 
 ## 4. Hinglish phone-line vs clean-English trade-off
 
@@ -194,6 +198,13 @@ after normalisation, and English over the phone line.
 (`sec:tradeoff`), with the other-condition table and a deployment paragraph: the
 deployed model suits Hindi-English calls but should not judge English calls; the
 summary now says "clean English".
+
+**Done (week 14, the final recipe on English).** Its seed-1234 model scores 13.44% EER on
+clean English and 25.95% over the phone line (deployed: 2.30% and 24.20%). The error is the
+opposite kind: it calls 0.20% of genuine English fake (0.90% over the line, against 7.45%
+for the deployed model) but catches only 26% of English fakes at the operating point. The
+final recipe is better on Hindi-English and worse at catching English clones, which the
+paper now states (`docs/results/english_final_v1.md`).
 
 **Completed late.** The last two cells first stopped when the laptop ran out of
 memory and completed on 13 October: the deployed adapter on the clean RVC set

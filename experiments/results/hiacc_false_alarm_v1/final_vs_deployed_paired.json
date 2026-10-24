@@ -1,0 +1,15 @@
+{
+  "first": "final_s1234_channel",
+  "second": "deployed_s2_channel",
+  "threshold": 0.5,
+  "n_boot": 1000,
+  "clips": 3318,
+  "speakers": 24,
+  "difference": -0.10518384569017486,
+  "difference_ci": [
+    -0.1706773206150342,
+    -0.03818166492810575
+  ],
+  "speakers_lower": 16,
+  "speakers_higher": 8
+}
