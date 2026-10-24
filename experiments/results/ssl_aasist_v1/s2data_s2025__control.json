@@ -1,0 +1,20 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/temp/ssl_ckpt/s2data_s2025/best.pt",
+  "manifest": "data/manifests/mucs_language_control_channel20.csv",
+  "summary": {
+    "threshold": 0.0,
+    "clips": 1290,
+    "speakers": 183,
+    "false_alarm_rate": 0.05891472868217054,
+    "false_alarm_ci": [
+      0.032503317116320214,
+      0.09189508229515886
+    ],
+    "median_score": 6.664284706115723,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.0,
+    "per_speaker_max": 1.0,
+    "speakers_above_10pct": 22
+  }
+}

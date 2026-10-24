@@ -1,0 +1,2 @@
+== time limit
+stopped before extdata_s42; finished runs are kept

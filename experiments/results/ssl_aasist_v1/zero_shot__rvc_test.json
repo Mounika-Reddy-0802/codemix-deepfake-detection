@@ -1,0 +1,26 @@
+{
+  "model": "ssl",
+  "weights": "/kaggle/input/datasets/vyacheslavberezhnoy/baseline-model/LA_model.pth",
+  "manifest": "data/manifests/rvc_holdout_test_channel20.csv",
+  "pooled": {
+    "eer": 0.44101886477113666,
+    "eer_ci_low": 0.40375534650320327,
+    "eer_ci_high": 0.4846924286217007,
+    "auc": 0.6157686924185765,
+    "auc_ci_low": 0.5702952926074761,
+    "auc_ci_high": 0.651019598888931,
+    "f1": 0.553191489361702,
+    "threshold": -4.122768402099609,
+    "clips": 619,
+    "bonafide": 302,
+    "spoof": 317,
+    "score_std": 9.286366
+  },
+  "per_attack": [
+    {
+      "attack": "rvc",
+      "spoof_clips": 317,
+      "eer": 0.441019
+    }
+  ]
+}

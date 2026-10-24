@@ -1,0 +1,26 @@
+{
+  "model": "aasist",
+  "weights": "/kaggle/temp/aasist_ckpt/s2data_s2025/best.pt",
+  "manifest": "data/manifests/score_cm04_norm_channel20.csv",
+  "pooled": {
+    "eer": 0.29962717573770126,
+    "eer_ci_low": 0.2736613564179121,
+    "eer_ci_high": 0.31822187247314315,
+    "auc": 0.7951251206032113,
+    "auc_ci_low": 0.7752955518441081,
+    "auc_ci_high": 0.8158607234497809,
+    "f1": 0.7831368345837799,
+    "threshold": 7.447327613830566,
+    "clips": 2024,
+    "bonafide": 1566,
+    "spoof": 458,
+    "score_std": 4.524449
+  },
+  "per_attack": [
+    {
+      "attack": "tortoise",
+      "spoof_clips": 458,
+      "eer": 0.299627
+    }
+  ]
+}

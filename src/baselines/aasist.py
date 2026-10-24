@@ -61,9 +61,28 @@ def fixed_length(wave: np.ndarray, rng: np.random.Generator | None = None) -> np
     return np.tile(wave, reps)[:NB_SAMP]
 
 
-def build(weights: str | None = WEIGHTS, device: str = "cpu"):
-    """The AASIST network, with the published (hash-checked) or given weights."""
+SSL = "ssl"  # the SSL-AASIST variant (wav2vec 2.0 XLS-R front end); "aasist" is the default
+
+
+def build(weights: str | None = WEIGHTS, device: str = "cpu", kind: str = "aasist"):
+    """The AASIST network, with the published (hash-checked) or given weights.
+
+    ``kind="ssl"`` builds SSL-AASIST: ``weights`` is then either the published fairseq
+    checkpoint (renamed onto the Hugging Face network) or one of our own fine-tuned
+    state dicts.
+    """
     import torch
+
+    if kind == SSL:
+        from src.baselines import ssl_aasist_model as ssl
+
+        state = torch.load(weights, map_location="cpu", mmap=True)
+        if "ssl_model.model.mask_emb" in state:  # published fairseq naming
+            return ssl.load_ssl_aasist(state, device).to(device)
+        model = ssl.Model(None, device)
+        ssl.fold_weight_norm(model.ssl_model.model.encoder.pos_conv_embed.conv)
+        model.load_state_dict(state)
+        return model.to(device)
 
     from src.baselines.aasist_model import Model
 
@@ -77,14 +96,34 @@ def build(weights: str | None = WEIGHTS, device: str = "cpu"):
     return model.to(device)
 
 
+def rawboost(wave: np.ndarray, sample_rate: int = 16_000) -> np.ndarray:
+    """RawBoost algorithm 3 (coloured additive noise) with the published SSL-AASIST setting.
+
+    Tak et al., ICASSP 2022: SNR 10-40 dB, five random notch-filtered noise bands between
+    20 Hz and 8 kHz. Uses numpy's global random state, which the caller seeds per clip.
+    """
+    from src.baselines.rawboost import SSI_additive_noise
+
+    boosted = SSI_additive_noise(wave, 10, 40, 5, 20, 8000, 100, 1000, 10, 100, 0, 0, sample_rate)
+    return np.asarray(boosted, dtype=np.float32)
+
+
 class ClipSet:
     """A manifest as fixed-length waveforms and labels (1 = bonafide)."""
 
-    def __init__(self, df: pd.DataFrame, data_root: str | None, train: bool = False, seed: int = 0):
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        data_root: str | None,
+        train: bool = False,
+        seed: int = 0,
+        augment: bool = False,
+    ):
         self.df = df.reset_index(drop=True)
         self.data_root = data_root
         self.train = train
         self.seed = seed
+        self.augment = augment
         self.epoch = 0
 
     def __len__(self) -> int:
@@ -98,7 +137,11 @@ class ClipSet:
         wave, _ = load_wav(resolve(row["filepath"], self.data_root), target_sr=16_000)
         rng = np.random.default_rng((self.seed, self.epoch, index)) if self.train else None
         label = int(str(row["label"]).lower() == "bonafide")
-        return fixed_length(np.asarray(wave, dtype=np.float32), rng), label
+        wave = fixed_length(np.asarray(wave, dtype=np.float32), rng)
+        if self.train and self.augment:
+            np.random.seed(abs(hash((self.seed, self.epoch, index))) % (2**32))
+            wave = rawboost(wave)
+        return wave, label
 
 
 def _loader(dataset, batch_size: int, shuffle: bool, workers: int, seed: int = 0):
@@ -108,6 +151,11 @@ def _loader(dataset, batch_size: int, shuffle: bool, workers: int, seed: int = 0
     return torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=shuffle, num_workers=workers, generator=generator
     )
+
+
+def _logits(output):
+    """AASIST returns (embedding, logits); SSL-AASIST returns the logits alone."""
+    return output[1] if isinstance(output, tuple) else output
 
 
 def score(
@@ -125,7 +173,7 @@ def score(
     scores = []
     with torch.no_grad():
         for waves, _ in _loader(ClipSet(df, data_root), batch_size, False, workers):
-            _, logits = model(waves.to(device))
+            logits = _logits(model(waves.to(device)))
             scores.append((logits[:, 1] - logits[:, 0]).float().cpu().numpy())
     out = df.reset_index(drop=True).copy()
     out["score"] = np.concatenate(scores) if scores else np.array([])
@@ -158,15 +206,20 @@ def train(
     device: str = "cpu",
     workers: int = 0,
     log=print,
+    kind: str = "aasist",
+    augment: bool = False,
 ) -> float:
-    """Fine-tune AASIST; keep the epoch with the lowest dev EER. Returns that EER."""
+    """Fine-tune AASIST (or SSL-AASIST); keep the epoch with the lowest dev EER.
+
+    ``augment`` applies RawBoost to each training clip. Returns the best dev EER.
+    """
     import torch
 
     from src.training.metrics import eer
 
     torch.manual_seed(seed)
     np.random.seed(seed)
-    model = build(init, device)
+    model = build(init, device, kind)
     optimiser = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimiser, T_max=max(1, epochs))
     counts = train_df["label"].str.lower().value_counts()
@@ -180,7 +233,7 @@ def train(
         device=device,
     )
     loss_fn = torch.nn.CrossEntropyLoss(weight=weight)
-    dataset = ClipSet(train_df, data_root, train=True, seed=seed)
+    dataset = ClipSet(train_df, data_root, train=True, seed=seed, augment=augment)
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     best = float("inf")
@@ -190,7 +243,8 @@ def train(
         total = 0.0
         for waves, labels in _loader(dataset, batch_size, True, workers, seed + epoch):
             optimiser.zero_grad()
-            _, logits = model(waves.to(device), Freq_aug=True)
+            waves = waves.to(device)
+            logits = _logits(model(waves) if kind == SSL else model(waves, Freq_aug=True))
             loss = loss_fn(logits, labels.to(device))
             loss.backward()
             optimiser.step()
@@ -214,6 +268,7 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command", required=True)
     s = sub.add_parser("score")
     s.add_argument("--weights", default=WEIGHTS)
+    s.add_argument("--model", choices=("aasist", SSL), default="aasist")
     s.add_argument("--manifest", required=True)
     s.add_argument("--data-root", default=None)
     s.add_argument("--device", default="cpu")
@@ -228,6 +283,8 @@ def main() -> None:
     t.add_argument("--data-root", default=None)
     t.add_argument("--out-dir", required=True)
     t.add_argument("--init", default=WEIGHTS)
+    t.add_argument("--model", choices=("aasist", SSL), default="aasist")
+    t.add_argument("--rawboost", action="store_true", help="RawBoost augmentation (algorithm 3)")
     t.add_argument("--epochs", type=int, default=20)
     t.add_argument("--lr", type=float, default=1e-4)
     t.add_argument("--batch-size", type=int, default=24)
@@ -241,11 +298,11 @@ def main() -> None:
         df = pd.read_csv(args.manifest, dtype={"speaker": str})
         if args.limit:
             df = df.groupby("label", group_keys=False).head(args.limit)
-        model = build(args.weights, args.device)
+        model = build(args.weights, args.device, args.model)
         scored = score(model, df, args.data_root, args.device, args.batch_size, args.num_workers)
         scored.to_csv(args.scores_out, index=False)
         payload = {
-            "model": "aasist",
+            "model": args.model,
             "weights": args.weights,
             "manifest": args.manifest,
             **result(scored),
@@ -275,6 +332,8 @@ def main() -> None:
             args.device,
             args.num_workers,
             log=lambda m: print(m, flush=True),
+            kind=args.model,
+            augment=args.rawboost,
         )
 
 
