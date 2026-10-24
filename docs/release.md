@@ -23,3 +23,7 @@ checksums are in the archive. The genuine audio is MUCS 2021 (CC BY-SA 4.0) and 
 (CC BY 4.0), downloadable from their publishers, and the project's bundling code
 rebuilds the normalised and phone-line versions from them. HiACC child audio is never
 used and never appears in any manifest.
+
+**Proposed: the detector weights.** `docs/MODEL_CARD.md` drafts a card for the final
+recipe's adapter (intended use, out-of-scope uses, evaluation, limits, licence). Publishing
+the weights waits for the team's and the mentor's decision; until then they stay private.
