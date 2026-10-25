@@ -770,10 +770,21 @@ the larger encoder's seeds range from 13.5\% to 28.1\% over the codec. We have n
 why; IndicF5's clones are the most natural of the tools we used
 (Sec.~\ref{sec:data-extension}), which may make them the hardest.
 
-\textbf{What we have not shown.} The larger encoder has about three times the parameters and
-we have not measured what it costs on a live call; the adapter is what runs there. Against
-the same floor as the adapter, every one of its seeds is below it on every set, Chatterbox
-included (12.9\% against 39.5\%); the spontaneous HiACC set was not run.
+\textbf{It can run on a live call.} The larger encoder has 316 million parameters against
+94 million for wav2vec2-base. One 4\,s window takes 69\,ms on a T4 GPU and 1.14\,s on two
+CPU threads (wav2vec2-base: 25\,ms and 0.40\,s). The live path scores a window every 2\,s,
+so even on that CPU it keeps up, at 57\% of the budget. Against the same floor as the
+adapter, every one of its seeds is below it on every set, Chatterbox included (12.9\%
+against 39.5\%).
+
+\textbf{On spontaneous speech it depends on the seed.} Two further trainings (seeds 1234
+and 2025) were scored on HiACC's 3{,}318 genuine spontaneous clips. One calls 5.8\%
+{\scriptsize[3.2, 9.1]} of them fake, with 5 of 24 speakers above 10\%; the other 46.7\%
+{\scriptsize[37.6, 55.7]}, with 23 of 24 above 10\%, where the adapter's final-recipe model
+is at 43.9\%. Both reach 0\% EER on the dev set, so nothing in our model selection can tell
+them apart. The larger encoder can learn a notion of genuine speech that covers spontaneous
+talk, but it does not do so reliably without spontaneous speech in training
+(\texttt{docs/results/encoder\_spontaneous\_v1.md}).
 
 \subsection{The deployment trade-off}
 \label{sec:tradeoff}

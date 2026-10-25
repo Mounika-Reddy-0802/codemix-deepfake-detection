@@ -205,8 +205,9 @@ our encoder) rejects 73.1\% of genuine Hindi--English speech zero-shot. Trained 
 final-recipe data it is better than the adapter in every one of five seeds on eight of
 eleven sets (exact $p = 0.008$ on seven): new-speaker Tortoise over AMR-NB 0.51\% against
 6.04\%, Chatterbox 12.86\% against 31.98\% (one adapter seed), CM04 1.75\% against 17.73\%.
-It beats the same floor in every seed. IndicF5 stays at 15.8--21.8\% for both, and we
-have not measured the larger encoder's cost on a live call.
+It beats the same floor in every seed and keeps up with a live call even on two CPU
+threads (1.14\,s per 2\,s window hop). IndicF5 stays at 15.8--21.8\% for both, and on
+spontaneous speech two of its trainings call 5.8\% and 46.7\% of genuine clips fake.
 
 
 \section{Conclusion}
