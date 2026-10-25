@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2013-green)
-![Tests](https://img.shields.io/badge/tests-993%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-995%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -509,7 +509,7 @@ codemix-deepfake-detection/
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
 │   ├── inference/       # streaming inference, ONNX export, predict
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 993 tests — firewalls, anti-leakage, live-call server, Twilio stream
+├── tests/               # 995 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs (notebooks hold no logic)
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
@@ -644,8 +644,9 @@ outside this repo.
 
 **Open:** fund the Twilio account and re-verify the phone demo on real numbers (trial
 credit exhausted, PSTN leg unproven since week 10); spontaneous speech is still rejected
-(54.4% false alarms on HiACC for the deployed model, not yet scored with the final
-systems); measure the larger encoder's cost on a live call before deploying it; compile
+(single models of every recipe call 38.5-54.4% of HiACC's genuine speech fake, the final
+recipe 43.9%; [hiacc_final_v1](docs/results/hiacc_final_v1.md)), and fixing it needs
+spontaneous training data; measure the larger encoder's cost on a live call before deploying it; compile
 the paper and submit it.
 
 ---
