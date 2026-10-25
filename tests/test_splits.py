@@ -75,6 +75,14 @@ def test_eval_only_source_in_training_is_rejected() -> None:
         bm.check_no_eval_only_sources_in_training(df)
 
 
+def test_real_call_audio_in_training_is_rejected() -> None:
+    df = _clean_manifest()
+    row = _row("C19.wav", "spoof", "hi", "P1", "realcall", "xtts_v2", "train")
+    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+    with pytest.raises(bm.LeakageError):
+        bm.check_no_eval_only_sources_in_training(df)
+
+
 def test_child_audio_anywhere_is_rejected() -> None:
     df = _clean_manifest()
     df = pd.concat(

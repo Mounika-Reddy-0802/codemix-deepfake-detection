@@ -86,6 +86,44 @@ def load_wav(path: str, target_sr: int | None = None) -> tuple[np.ndarray, int]:
     return audio, sr
 
 
+def load_any(path: str, target_sr: int = TARGET_SR) -> np.ndarray:
+    """Load any audio file as float32 mono at ``target_sr``.
+
+    WAV and FLAC go through :func:`load_wav`. Phone call recorders write m4a, amr or
+    3gp, which ``soundfile`` cannot read, so anything else is decoded by an ``ffmpeg``
+    pipe straight to mono float32 at ``target_sr``.
+    """
+    import shutil
+    import subprocess
+
+    if path.lower().endswith((".wav", ".flac")):
+        return load_wav(path, target_sr=target_sr)[0]
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg is None:
+        raise RuntimeError(f"ffmpeg is needed to read {path}; install it or convert to WAV")
+    cmd = [ffmpeg, "-nostdin", "-v", "error", "-i", path, "-ac", "1", "-ar", str(target_sr)]
+    result = subprocess.run([*cmd, "-f", "f32le", "-"], capture_output=True, check=False)
+    if result.returncode:
+        raise RuntimeError(f"ffmpeg could not read {path}: {result.stderr.decode()[-300:]}")
+    return np.frombuffer(result.stdout, dtype=np.float32).copy()
+
+
+def trim_silence(
+    audio: np.ndarray, sr: int, threshold_dbfs: float = -45.0, frame_seconds: float = 0.02
+) -> np.ndarray:
+    """Cut leading and trailing frames quieter than ``threshold_dbfs``; keep the middle."""
+    a = np.asarray(audio, dtype=np.float32)
+    frame = max(1, int(sr * frame_seconds))
+    n = a.size // frame
+    if n == 0:
+        return a
+    levels = np.sqrt(np.mean(a[: n * frame].reshape(n, frame).astype(np.float64) ** 2, axis=1))
+    loud = np.flatnonzero(levels > db_to_amp(threshold_dbfs))
+    if loud.size == 0:
+        return a[:0]
+    return a[loud[0] * frame : min(a.size, (loud[-1] + 1) * frame)]
+
+
 def save_wav(path: str, audio: np.ndarray, sr: int) -> None:
     """Write a mono float32 signal to a WAV file (lazy ``soundfile`` import)."""
     import soundfile as sf

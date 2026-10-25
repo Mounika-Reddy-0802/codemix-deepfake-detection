@@ -28,7 +28,8 @@ TRAINING_SPLITS = {"train", "dev"}
 HELD_OUT_TOOL = "tortoise"
 #: Every evaluation-only generator. IndicF5 is the second held-out tool (week 13).
 HELD_OUT_TOOLS = {"tortoise", "indicf5", "chatterbox"}
-EVAL_ONLY_SOURCES = {"indicsynth", "indictts_deepfake", "indicvoices"}
+#: ``realcall``: the team's real phone calls and the clones of the team's voices (week 14).
+EVAL_ONLY_SOURCES = {"indicsynth", "indictts_deepfake", "indicvoices", "realcall"}
 
 
 class LeakageError(AssertionError):
