@@ -34,6 +34,16 @@ evaluation, limits and training-data licences. Publishing the weights waits for 
 and the mentor's decision; the card proposes CC BY-NC-SA 4.0, since the weights derive from
 MUCS (share-alike) and XTTS-v2 output (non-commercial).
 
+### The conference paper
+
+`paper/short/main.tex` is now a six-page paper in the IEEE two-column format, the page limit
+most IEEE conferences use, instead of four. It adds what the four-page version had to leave
+out: the data and attack tables, the training settings, the final recipe against the
+deployed adapter and the larger encoder in one table, the overview figure, the live-call
+system with its architecture figure and the 60 s call results, and a limitations section.
+Every number is taken from the long paper. The page count is checked in Overleaf, since the
+laptop has no LaTeX.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The
