@@ -27,3 +27,21 @@ used and never appears in any manifest.
 **Proposed: the detector weights.** `docs/MODEL_CARD.md` drafts a card for the final
 recipe's adapter (intended use, out-of-scope uses, evaluation, limits, licence). Publishing
 the weights waits for the team's and the mentor's decision; until then they stay private.
+
+The package is ready for that decision. `python -m src.inference.model_package export`
+turns a checkpoint into a folder holding `model.safetensors` (the whole state dict: the
+adapters sit on Stage-1's fine-tuned encoder, so they cannot be published alone),
+`config.json` (training config, dev metrics, the live operating point and the windowing),
+`README.md` (the model card with Hugging Face metadata and the draft notice removed) and
+`SHA256SUMS`, which `load_package` checks before loading. safetensors holds tensors only, so
+loading the package runs no pickled code. `verify` loads the checkpoint and the package
+side by side; for `final_s1234` the scores are identical (largest difference 0.0).
+
+If the team and the mentor agree, publishing is two steps:
+
+1. Fill in the account and the licence they chose, and re-export if the licence changes
+   (`LICENSE` in `src/inference/model_package.py`).
+2. Upload the folder to a new model repository on Hugging Face, for example with
+   `huggingface-cli upload <account>/codemix-deepfake-detector <package folder> .`, and
+   replace "The trained weights are not yet public" in both papers' availability
+   statements with the link.

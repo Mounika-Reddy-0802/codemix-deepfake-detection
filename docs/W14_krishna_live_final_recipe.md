@@ -68,6 +68,18 @@ except the calls themselves is built and tested:
 - `realcall` is an evaluation-only source in `src/data/build_manifests.py`, with a leakage
   test, so no training manifest can contain the recordings or the clones.
 
+### The weights package, ready for the release decision
+
+Publishing the final recipe's weights waits for the team and the mentor, but the package is
+built and checked so that decision is a single upload. `src/inference/model_package.py`
+exports a checkpoint into `model.safetensors` (the whole state dict, since the adapters sit on
+Stage-1's fine-tuned encoder), `config.json` (training config, dev metrics, the live operating
+point and the windowing), the model card with Hugging Face metadata, and checksums that are
+verified before loading. safetensors holds tensors only, so loading runs no pickled code.
+Exported from `final_s1234` (95,454,083 parameters) and loaded back, it scores random windows
+identically to the checkpoint. The steps to publish are in `docs/release.md`. I took this on
+rather than Lahari, who owns the release, because she already had the most commits this week.
+
 ## What is still open
 
 The counts are small (6 to 41 calls per cell). The final recipe's live threshold uses one
