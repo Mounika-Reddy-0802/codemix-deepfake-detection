@@ -27,6 +27,11 @@ def _padded(seconds: float, sr: int) -> np.ndarray:
     return np.concatenate([pad, _speech(seconds, sr), pad])
 
 
+def _needs_audio_io() -> None:
+    pytest.importorskip("soundfile")  # audio wheels, not installed in CI
+    pytest.importorskip("librosa")
+
+
 def test_scripts_have_twelve_lines_and_unique_keys() -> None:
     assert len(rcp.SCRIPT_A) == len(rcp.SCRIPT_B) == 12
     keys = [line.key for line in ALL_LINES]
@@ -71,6 +76,7 @@ def test_xtts_table_loads_as_clone_jobs(tmp_path: Path) -> None:
 
 
 def test_build_pack_writes_trimmed_level_references_and_tables(tmp_path: Path) -> None:
+    _needs_audio_io()
     rec = tmp_path / "rec"
     rec.mkdir()
     for speaker in rcp.SPEAKERS:
@@ -87,6 +93,7 @@ def test_build_pack_writes_trimmed_level_references_and_tables(tmp_path: Path) -
 
 
 def test_short_reference_is_refused(tmp_path: Path) -> None:
+    _needs_audio_io()
     save_wav(str(tmp_path / "P1_ref.wav"), _speech(3.0, 16_000), 16_000)
     with pytest.raises(ValueError, match="at least"):
         rcp.build_pack(tmp_path, tmp_path / "pack", speakers=("P1",))
@@ -102,6 +109,7 @@ def test_missing_or_duplicate_recording_is_refused(tmp_path: Path) -> None:
 
 
 def test_assemble_calls_joins_clones_and_prepares_the_readings(tmp_path: Path) -> None:
+    _needs_audio_io()
     clones = tmp_path / "clones" / "rc_xtts"
     clones.mkdir(parents=True)
     rec = tmp_path / "rec"

@@ -61,6 +61,7 @@ def test_plan_playback_names_match_the_files_the_pack_builder_writes() -> None:
 
 
 def test_telephone_leg_keeps_length_and_removes_the_upper_band() -> None:
+    pytest.importorskip("librosa")  # resampling wheel, not installed in CI
     sr = 16_000
     tone = (0.3 * np.sin(2 * np.pi * 6_000 * np.arange(sr) / sr)).astype(np.float32)
     out = rc.telephone_leg(tone, sr)
@@ -69,6 +70,8 @@ def test_telephone_leg_keeps_length_and_removes_the_upper_band() -> None:
 
 
 def test_prepare_decodes_both_conditions_and_writes_manifests(tmp_path: Path) -> None:
+    pytest.importorskip("soundfile")  # audio wheels, not installed in CI
+    pytest.importorskip("librosa")
     rec = tmp_path / "rec"
     rec.mkdir()
     signal = (0.1 * np.sin(np.linspace(0, 2_000, 48_000 * 3))).astype(np.float32)

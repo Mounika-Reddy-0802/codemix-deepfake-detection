@@ -52,6 +52,7 @@ def test_load_any_reads_wav_and_decodes_phone_formats_with_ffmpeg(tmp_path) -> N
 
     import pytest
 
+    pytest.importorskip("soundfile")  # audio wheel, not installed in CI
     sr = 16_000
     tone = (0.1 * np.sin(2 * np.pi * 440 * np.arange(2 * sr) / sr)).astype(np.float32)
     wav = tmp_path / "call.wav"
