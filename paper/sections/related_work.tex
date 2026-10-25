@@ -45,7 +45,10 @@ our setting, Tsutsumi et al.~\cite{tsutsumi2026channel} score countermeasures on
 phone and VoIP recordings, find them near chance under the channel mismatch, and
 recover by adapting to in-domain degraded speech, and Delgado et
 al.~\cite{delgado2026presentation} argue that detectors fail in deployment because
-training audio never passes through the presentation channel. Our protocol differs
+training audio never passes through the presentation channel. RTCFake~\cite{xue2026rtcfake}
+passes speech deepfakes through real-time communication platforms such as Zoom and trains
+for invariance across them; it targets the processing of conferencing applications, where we
+target narrowband telephone codecs. Our protocol differs
 in what it holds fixed. Rather than augmenting toward unknown channels, we render
 training and test audio through the same narrowband G.711~\cite{itu1988g711} chain,
 evaluate a generator held out of training inside that channel, and judge each result
@@ -70,11 +73,13 @@ than only against its starting point.
 Multilingual spoofing corpora now exist: MLAAD~\cite{muller2024mlaad} and
 SpeechFake~\cite{huang2025speechfake} span many languages, IndicSynth~\cite{sharma2025indicsynth}
 covers twelve Indian languages, and Indic-CodecFake~\cite{girish2026indiccodecfake}
-shows English-trained detectors failing on neural-codec fakes in Indic languages.
-These corpora hold one language per utterance. Switching inside an utterance has
-been studied for Arabic--English in an audio-visual setting~\cite{kuckreja2026habibi};
-we found no detection study of Hindi--English code-mixing, in audio alone, over a
-telephone channel.
+shows English-trained detectors failing on neural-codec fakes in Indic languages, as
+SEA-CF~\cite{phukan2026seacf} does for South-East Asian languages. These corpora hold one
+language per utterance. Switching inside an utterance has been studied for Arabic--English
+in an audio-visual setting~\cite{kuckreja2026habibi}, and Vietnamese--English
+code-switching makes up nearly half of the VietPrism corpus~\cite{hoang2026vietprism}, on
+which multilingual detectors prove brittle zero-shot. We found no detection study of
+Hindi--English code-mixing, in audio, evaluated over a telephone channel.
 
 \subsection{The attacks and the speech}
 

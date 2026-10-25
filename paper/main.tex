@@ -43,6 +43,17 @@ speech.
 \input{sections/system}           % SK: live call system, label sec:system
 \input{sections/conclusion}     % SK
 
+\section*{Code and data availability}
+The code, configurations, frozen speaker pools, manifests, generation job tables, per-clip
+scores and results files behind every number in this paper are in the project repository,
+at the tag \texttt{paper-v1}; each table names the file it was read from. Training used the
+seeds 1234, 2025, 7, 42 and 99, and every split is checked mechanically before training
+(Sec.~\ref{sec:dataset}). The generated audio is not released, because it is cloned speech
+of identifiable people (Sec.~\ref{sec:dataset}); its metadata and checksums are. The
+genuine audio is MUCS 2021 and HiACC, available from their publishers, from which the
+repository rebuilds the normalised and telephone versions. The trained weights are not yet
+public.
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
 
