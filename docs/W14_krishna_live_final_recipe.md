@@ -40,6 +40,34 @@ with `DFD_CHECKPOINT` pointing at its checkpoint and `DFD_THRESHOLD_FILE` at
 published demo still reproduces. `live_call/README.md` and the system chapter
 (`sec:system-calls`, Table `tab:calls`) say so.
 
+### The real phone-call test, ready to run
+
+The team and the mentor agreed to a small test on real calls: genuine calls from the three of
+us and calls with clones of our voices played in, over a normal mobile network. Everything
+except the calls themselves is built and tested:
+
+- `docs/real_calls/PROTOCOL.md`: the steps for the day, the 30-call plan, and what is kept
+  where; `docs/real_calls/SCRIPTS.md`: two scripts of twelve code-mixed sentences (an
+  everyday call and an urgent request for money and a code) plus four reference sentences,
+  none needing a gendered first-person verb; `docs/ethics/real_call_consent_form.md`: the
+  consent form and the mentor's approval box, an addendum to the v2 sign-off, which covered
+  public corpora only.
+- `src/data/real_call_pack.py` turns each speaker's reference recording into cloning packs
+  for XTTS-v2 (the seen tool) and Chatterbox (the hardest unseen tool), in the job-table
+  format `src.data.generate_cli` already reads, and joins the clones into one-minute calls
+  at the same level as each speaker's own reading, so cloned and genuine replays reach the
+  phone through the same loudspeaker.
+- `notebooks/kaggle_w14_team_clones.ipynb` makes the clones on Kaggle with the existing
+  generation code, ethics gate and quality screen; its post-generation steps were run on
+  fake clips before handing it over.
+- `src/inference/real_calls.py` decodes the phone's recordings (m4a and the like, through
+  ffmpeg), scores each call as recorded and after a G.711 round trip (what the carrier
+  delivers), with both models through the calibration path, and replays every call through
+  the verdict ladder at each model's frozen operating point. A dry run with synthetic audio
+  and both real checkpoints went from recording to report on the laptop's CPU.
+- `realcall` is an evaluation-only source in `src/data/build_manifests.py`, with a leakage
+  test, so no training manifest can contain the recordings or the clones.
+
 ## What is still open
 
 The counts are small (6 to 41 calls per cell). The final recipe's live threshold uses one
