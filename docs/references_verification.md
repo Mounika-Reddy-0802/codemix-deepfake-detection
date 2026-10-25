@@ -221,3 +221,22 @@ for exactly that review, so the multilingual entries above are there to fill it.
   "codec".
 - "Are audio DeepFake detection models polyglots?" (arXiv 2412.17924) and HAV-DF (arXiv
   2411.15457) have no peer-reviewed venue that I could find, so both were dropped.
+
+## Week 14 additions (checked 2026-10-25 against the arXiv abstract pages)
+
+- **xue2026rtcfake:** "RTCFake: Speech Deepfake Detection in Real-Time Communication",
+  Xue, Yi, Huang, Ren, Chen, Fan, Su, Zhang, Cai; arXiv 2604.23742 (26 April 2026), comment
+  "Accepted by ACL 2026". No page numbers or DOI published yet, so none are given.
+- **phukan2026seacf:** "Bridging the SEA Gap: An Initial Benchmark for Neural Audio
+  Codec-Synthesized Speech Deepfakes in South-East Asian Languages", Chetia Phukan, Girish,
+  Akhtar, Buduru; arXiv 2606.15968 (14 June 2026), comment "Accepted to IJCAI-ECAI 2026".
+- **hoang2026vietprism:** "VietPrism: A large-scale Vietnamese speech and deepfake corpus
+  with diverse dialects and code-switching", Hoang, Le; arXiv 2609.30005 (24 September 2026),
+  a preprint submitted to ICASSP 2027. An exception to the no-preprint rule above, because it
+  is the closest code-switching deepfake corpus and the novelty statement must account for
+  it; it is labelled as a preprint in the bibliography.
+
+**Verified but not added:** ML-ITW (Li et al., arXiv 2603.05852, a 14-language in-the-wild
+benchmark, preprint; multilingual corpora are already represented by MLAAD and SpeechFake)
+and BabelFake (Segna et al., arXiv 2610.06339, audio-visual, five European languages, no
+Hindi or code-switching).
