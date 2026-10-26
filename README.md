@@ -599,6 +599,15 @@ python -m src.data.channel_qa                               # objective 20/20 ch
 # --- 4. Spoof generation (needs the signed ethics note in docs/ethics/) ---
 python -m src.data.ethics_gate                              # must exit 0
 python -m src.data.pilot_jobs --data-root $DATA_ROOT \
+To run the final recipe instead (the model the real calls support), point the server at
+its checkpoint and its own operating point; `/api/health` then shows that checkpoint and
+the 0.687 threshold:
+
+```bash
+set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
+set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
+```
+
     --pack-dir $DATA_ROOT/generated/pilot --romanise
 python -m src.data.spoof_generation --jobs <pack>/generation_jobs.csv \
     --pack-dir <pack> --out-dir <pack>/outputs

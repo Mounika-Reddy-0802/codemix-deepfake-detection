@@ -64,6 +64,13 @@ def test_upload_returns_verdict_and_window_timeline(client):
     assert len(body["window_scores"]) == 4
 
 
+def test_upload_names_the_threshold_file_the_server_runs_on(client):
+    # the final recipe runs on its own operating point; the verdict must say which one it used
+    client.shared.detector.settings.threshold_file = "configs/threshold_final.yaml"
+    response = client.post("/api/predict", files={"file": ("clip.wav", _wav_bytes(), "audio/wav")})
+    assert response.json()["threshold_source"] == "configs/threshold_final.yaml"
+
+
 def test_bad_upload_is_a_client_error(client):
     response = client.post("/api/predict", files={"file": ("x.wav", b"not audio", "audio/wav")})
     assert response.status_code == 400
