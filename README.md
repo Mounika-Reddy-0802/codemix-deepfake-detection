@@ -565,6 +565,20 @@ or record), **play a prepared call**, the **receiver dashboard**, and a **WebRTC
 call** page where a participant can speak or play a clip into the call. Real phone
 calls through Twilio: [`live_call/README.md`](live_call/README.md).
 
+To run the final recipe instead (the model the real calls support), point the server at
+its checkpoint and its own operating point; `/api/health` then shows that checkpoint and
+the 0.687 threshold:
+
+```bash
+set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
+set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
+set DEMO_CLIPS_DIR=<data>/demo_clips_final       # the same calls, verified on this model
+```
+
+`demo_clips_final` is built by `scripts/prepare_demo_clips.py` with the final checkpoint and
+`--threshold-file configs/threshold_final.yaml`; it plays the same five calls and records what
+this model does on each (the Tortoise demo call stays green for both models).
+
 ## Quick start
 
 ```bash
@@ -599,15 +613,6 @@ python -m src.data.channel_qa                               # objective 20/20 ch
 # --- 4. Spoof generation (needs the signed ethics note in docs/ethics/) ---
 python -m src.data.ethics_gate                              # must exit 0
 python -m src.data.pilot_jobs --data-root $DATA_ROOT \
-To run the final recipe instead (the model the real calls support), point the server at
-its checkpoint and its own operating point; `/api/health` then shows that checkpoint and
-the 0.687 threshold:
-
-```bash
-set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
-set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
-```
-
     --pack-dir $DATA_ROOT/generated/pilot --romanise
 python -m src.data.spoof_generation --jobs <pack>/generation_jobs.csv \
     --pack-dir <pack> --out-dir <pack>/outputs

@@ -165,7 +165,9 @@ def main() -> None:
     (out / "demo_clips.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
     report = [{k: v for k, v in e.items() if k != "source"} for e in index]
     Path("experiments/results").mkdir(parents=True, exist_ok=True)
-    Path("experiments/results/demo_clips_verification.json").write_text(
+    # named after the output folder, so the final recipe's demo set (demo_clips_final) does
+    # not overwrite the deployed model's record (demo_clips)
+    Path(f"experiments/results/{out.name}_verification.json").write_text(
         json.dumps(
             {
                 "checkpoint": Path(args.checkpoint).name,

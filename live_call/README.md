@@ -164,7 +164,10 @@ fake-leaning windows and a strong warning after **4**. It was chosen by
 | Unseen tool (Tortoise) | 0% (0 / 15) | 33% (2 / 6) |
 
 Full sweep and per-clip numbers: `experiments/results/threshold_calibration.json`.
-Demo call verification: `experiments/results/demo_clips_verification.json`.
+Demo call verification: `experiments/results/demo_clips_verification.json` (deployed
+adapter) and `demo_clips_final_verification.json` (final recipe, demo calls in
+`<data>/demo_clips_final`). The Tortoise demo call stays green for both models (0 and 2 of
+22 windows fake-leaning), although the final recipe catches every Tortoise test call.
 
 **Known limit, say it in the demo:** the deployed phone-line model does not reliably
 catch a cloning tool it has never seen (Tortoise). That is a measured result of the
