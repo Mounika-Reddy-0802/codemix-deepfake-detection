@@ -226,6 +226,31 @@ def window_eer(windows: pd.DataFrame, calls: pd.DataFrame, genuine_kind: str, to
     }
 
 
+#: Time-in-call bands (seconds, by window end) for :func:`score_by_phase`.
+PHASES = ((0.0, 10.0, "0-10 s"), (10.0, 20.0, "10-20 s"), (20.0, float("inf"), "after 20 s"))
+
+
+def score_by_phase(windows: pd.DataFrame, calls: pd.DataFrame) -> list[dict]:
+    """Mean window score per kind of call and time in the call.
+
+    A phone call starts with the handset's noise suppression and level control settling,
+    so a genuine call can look different in its first seconds than later; this shows where
+    in a call the scores move. It describes the calls and chooses nothing.
+    """
+    kinds = calls.set_index("call_id")[["kind", "tool"]]
+    w = windows.dropna(subset=["score"]).drop(columns=["label", "tool"], errors="ignore")
+    w["call_id"] = w["filepath"].map(lambda p: Path(str(p)).stem)
+    w = w.join(kinds, on="call_id", how="inner")
+    out = []
+    for (kind, tool), group in w.groupby(["kind", "tool"], sort=True):
+        row = {"kind": kind, "tool": tool}
+        for low, high, label in PHASES:
+            band = group[(group["end_seconds"] > low) & (group["end_seconds"] <= high)]
+            row[label] = round(float(band["score"].mean()), 3) if len(band) else None
+        out.append(row)
+    return out
+
+
 def score_all(audio: Path, checkpoints: dict[str, str], out: Path, device: str = "cpu") -> None:
     """Window scores for every model and condition, resumable, via the calibration path."""
     from src.inference.calibrate import score_manifest
@@ -273,6 +298,7 @@ def report(audio: Path, windows_dir: Path, plan: pd.DataFrame = CALL_PLAN) -> di
                     for genuine in ("genuine_replay", "genuine_live")
                     for tool in ("xtts_v2", "chatterbox")
                 ],
+                "by_phase": score_by_phase(windows, calls),
             }
     return result
 
@@ -282,8 +308,8 @@ def report_markdown(result: dict) -> str:
     out = [
         "# Real phone-call test",
         "",
-        "Written by `python -m src.inference.real_calls report`. Calls between two fixed",
-        "phones over the mobile network, recorded on the receiving phone (protocol:",
+        "Written by `python -m src.inference.real_calls report`. Calls over a mobile",
+        "network, recorded on the receiving phone (protocol, and what happened on the day:",
         "`docs/real_calls/PROTOCOL.md`). *recorded*: as the receiving phone recorded it;",
         "*g711*: after an 8 kHz G.711 round trip, as the live system's carrier delivers it.",
         "Counts are small; read every percentage with its number of calls.",
@@ -312,6 +338,17 @@ def report_markdown(result: dict) -> str:
         for row in entry["window_eer"]:
             eer = "-" if row["eer_pct"] is None else f"{row['eer_pct']}%"
             out.append(f"| {row['genuine']} | {row['tool']} | {eer} | {row['windows']} |")
+        labels = [label for _, _, label in PHASES]
+        out += [
+            "",
+            "Mean window score (P(genuine)) by time in the call:",
+            "",
+            "| Calls | Tool | " + " | ".join(labels) + " |",
+            "|---|---|" + "---|" * len(labels),
+        ]
+        for row in entry.get("by_phase", []):
+            cells = ["-" if row[label] is None else f"{row[label]:.3f}" for label in labels]
+            out.append(f"| {row['kind']} | {row['tool']} | " + " | ".join(cells) + " |")
         out.append("")
     return "\n".join(out)
 

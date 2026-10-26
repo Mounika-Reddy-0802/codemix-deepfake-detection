@@ -151,3 +151,20 @@ def test_report_writes_per_call_verdicts_and_markdown(
     assert calls.loc["C19", "seconds"] == 61.0
     text = rc.report_markdown(result)
     assert "final_g711" in text and "clone_replay" in text
+    assert "by time in the call" in text and "after 20 s" in text
+
+
+def test_score_by_phase_splits_each_kind_of_call_by_time() -> None:
+    # windows end at 4, 6, ..., 26 s: four in 0-10 s, five in 10-20 s, three after 20 s
+    genuine = [0.2] * 4 + [0.8] * 5 + [1.0] * 3
+    windows = pd.DataFrame(_call_windows("C01", genuine) + _call_windows("C19", [0.1] * 12))
+    calls = rc.CALL_PLAN.merge(rc.call_verdicts(windows, EngineConfig(threshold=0.5)), on="call_id")
+    phases = {(r["kind"], r["tool"]): r for r in rc.score_by_phase(windows, calls)}
+    assert phases[("genuine_live", "none")] == {
+        "kind": "genuine_live",
+        "tool": "none",
+        "0-10 s": 0.2,
+        "10-20 s": 0.8,
+        "after 20 s": 1.0,
+    }
+    assert phases[("clone_replay", "xtts_v2")]["after 20 s"] == 0.1
