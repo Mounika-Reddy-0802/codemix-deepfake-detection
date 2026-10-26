@@ -125,7 +125,7 @@ transformer layers contextualise the frames. Pooling computes an attention-weigh
 mean and standard deviation over frames (attention width 128), giving a
 1{,}536-dimensional vector. The classifier is Linear(1536, 256), ReLU, dropout 0.3 and
 Linear(256, 2); its softmax output is read as $P(\text{genuine})$. The model has
-95{,}454{,}083 parameters. In every system the convolutional feature extractor is
+94{,}864{,}259 parameters, 95{,}454{,}083 with S2's adapters. In every system the convolutional feature extractor is
 frozen, following common practice for self-supervised
 anti-spoofing~\cite{tak2022wav2vec}.
 % src/models/{encoder,pooling,classifier,detector}.py
@@ -138,12 +138,14 @@ precision and seed 1234. The remaining settings are in Table~\ref{tab:hparams}.
 The checkpoint with the lowest EER on the development set is kept.
 
 \textbf{S2.} Rank-8 adapters ($\alpha = 16$, dropout 0.05) wrap the query, key,
-value and output projections of all twelve transformer layers. Only the adapters and
-the classifier head are trained: 1{,}082{,}371 parameters, or 1.13\% of the model.
+value and output projections of all twelve transformer layers. Only the adapters, the
+attentive pooling and the classifier head are trained: 1{,}082{,}371 parameters, or
+1.13\% of the model.
 % src/models/lora.py; docs/results/gap_closure_v1.md
 
-\textbf{S2 and S3} use class-weighted cross-entropy, since the adaptation sets are
-not balanced (Table~\ref{tab:splits}).
+\textbf{All three systems} use inverse-frequency class-weighted cross-entropy: ASVspoof
+is 8.7:1 spoof to real, and the adaptation sets are not balanced either
+(Table~\ref{tab:splits}).
 
 \begin{table}[t]
 \centering
@@ -190,7 +192,7 @@ knowledge of synthetic speech. Following the check proposed with
 AffectDF~\cite{affectdf2026}, we fit a logistic regression on eight cheap signal
 statistics (RMS mean and standard deviation, peak amplitude, clipping ratio, DC
 offset, zero-crossing rate, spectral roll-off and high-frequency energy ratio). Its
-EER is the \emph{shortcut floor}. Each detector gets its own floor: the regression is
+EER is the \emph{shortcut floor}. Each S2, S3 and final-recipe detector gets its own floor: the regression is
 fitted on exactly the manifest the detector was trained on and scored on exactly the
 clips the detector is scored on, so the two differ only in what they can hear. A
 result counts as evidence only when the paired, speaker-resampled 95\% interval of

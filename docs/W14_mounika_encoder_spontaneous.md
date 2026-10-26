@@ -96,6 +96,14 @@ anything changed, found results-section wording that said more than the numbers:
   numbers come from the five calls and which from 86 English clips; a model is scored in
   its training condition except in the cross-condition tests, which the method now says.
 
+A read of the method chapter against the code fixed three statements: all three systems use
+inverse-frequency class weighting (`class_weighted` defaults to true in
+`src/training/train.py`, and S1 needs it most, at 8.7:1), not S2 and S3 only; S2's 1,082,371
+trainable parameters include the attentive pooling as well as the adapters and the head; and
+the model has 94,864,259 parameters, 95,454,083 with the adapters. The floor paragraph now
+says which detectors have their own floor (S1 is read against the lowest code-mixed floor
+and the AASIST baselines have none).
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
