@@ -25,8 +25,8 @@ are in [`VIVA_QA.md`](VIVA_QA.md).
 - "A detector trained on English reaches 0.85% EER on English and 58.42% on Hindi-English
   speech over a phone line. Even on clean audio it calls 94.8% of genuine Hindi-English
   clips fake."
-- "It is not the language mix: on 183 unseen speakers it rejects their genuine English as
-  often as their mixed speech. It is the recording domain."
+- "It is not the language mix: on 183 unseen speakers it rejects their genuine English at
+  least as often as their mixed speech. It is the recording domain."
 - Point at the three cards: **listen, score, warn**.
 
 ## 2. The results (2 minutes): overview page, *Measured results*
@@ -37,9 +37,9 @@ are in [`VIVA_QA.md`](VIVA_QA.md).
 - **Three systems.** S1 English-only; S2 adds LoRA adapters (1.13% of the weights);
   S3 trains the whole encoder on code-mixed audio.
 - **The finding.** "S3 is the best on the attack it trained on (0.83%), but it
-  forgets English entirely: 51-56% EER, chance. S2 keeps English at 2.4%. That's why
-  the deployed model is S2."
-- **What closed the rest.** "More genuine voices and a real mobile codec, not more attack
+  was never trained on English and is at chance there: 51-56% EER. S2 keeps clean English at 2.4%. That's
+  why the deployed model is S2."
+- **What narrowed the rest.** "More genuine voices and a real mobile codec, not more attack
   tools: trained on 248 speakers over G.711 and real AMR-NB, unseen Tortoise clones over
   the mobile codec fall from 36.3% to 6.0% error, in every one of five seeds."
 - **Honest limits.** "The deployed model does not reliably catch a tool it never saw over a
@@ -53,7 +53,7 @@ Play in this order, each from *Play a prepared clip as a live call* (deployed ad
 | Play | What the dashboard does | Say |
 |---|---|---|
 | **Genuine caller** | stays green for 46 s, 0 of 22 windows fake-leaning | "A real held-out speaker: no false alarm." |
-| **XTTS-v2 cloned voice** | amber at 6 s with the warning tone; red at 10 s | "A clone: the receiver is warned 6 seconds into the call." |
+| **XTTS-v2 cloned voice** | amber at 6 s with the warning tone; red at 10 s | "A clone: the receiver is cautioned 6 seconds into the call and warned at 10." |
 | **RVC voice conversion** | red, 24 of 24 windows | "Voice conversion keeps real prosody, and it's still caught, on speakers the model never saw." |
 | **Tortoise clone** | stays green | "This is the tool we held out. The phone-line model misses it; that's the limitation we report, and the final recipe is what fixes most of it." |
 
@@ -89,7 +89,7 @@ trial credit ran out. Show instead the real-call test we ran over a normal mobil
 (`docs/results/real_calls_v1.md`): genuine calls from the team and clones of our own
 voices played into a call, recorded on the receiving phone and scored through the same
 live path. "On real calls the deployed model warns genuine callers too, and the final
-recipe is the one that holds up. That is why the final recipe is the model to deploy
+recipe holds up on the seen tool (not yet on Chatterbox). That is why the final recipe is the model to deploy
 next." Section 7 of `VIVA_QA.md` has the numbers.
 
 ---
@@ -98,7 +98,7 @@ next." Section 7 of `VIVA_QA.md` has the numbers.
 
 - **How is this different from AffectDF?** AffectDF measures a generalisation failure
   on acted emotional speech. We measure it on code-mixed telephone speech, trace it to the
-  recording domain, close it cheaply with LoRA, show that native training wrecks English,
+  recording domain, close it cheaply with LoRA, show that full fine-tuning, never trained on English, is at chance on it,
   and deploy the result on live calls with an operating point chosen on development data.
 - **Why trust results on fakes we made ourselves?** Every number is read against a
   shortcut floor measured on the same clips; three attack tools (Tortoise, IndicF5,

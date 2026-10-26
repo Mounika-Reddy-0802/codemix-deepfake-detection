@@ -14,7 +14,8 @@ its error rate goes from 0.85% to 58.42%, and on clean audio it already calls 94
 Hindi-English clips fake. A language-controlled test on 183 unseen speakers showed the cause is the
 recording domain, not the code-mixing. We fixed it cheaply with LoRA adapters that train
 1.13% of the parameters, then showed that hearing more genuine voices through a real
-mobile codec closes most of the remaining gap on attack tools the model never saw. Every
+mobile codec closes most of the remaining gap on Tortoise, a tool the model never saw
+(IndicF5 and Chatterbox improve less and stay hard). Every
 result is checked against a shortcut floor, so a low error rate cannot come from loudness or
 bandwidth differences alone. The detector runs on live calls and warns only the person
 receiving the call, about ten seconds into the speech, and we tested it on real phone calls
@@ -87,10 +88,14 @@ code-mixed data. S3 fine-tunes the whole encoder on the same code-mixed data, st
 the pretrained model.
 
 **Q13. What is LoRA and why use it?**
-Low-rank adaptation: small trainable matrices (rank 8) added to the attention projections,
-1.13% of the parameters. We use it because it learns code-mixed speech while keeping English:
-S2 keeps English at 2.42% EER, while S3 reaches the best seen-tool error (0.83%) but falls to
-chance on English (50.90-56.42%).
+Low-rank adaptation: small trainable matrices (rank 8) added to the attention projections;
+with the attentive pooling and the classifier head, 1.13% of the parameters train (the
+adapters alone are about 0.6%). We use it because it learns code-mixed speech while keeping English:
+S2 keeps clean English at 2.42% EER (over the phone line English rises to 24.20%), while S3
+reaches the best seen-tool error (0.83%) but is at chance on English (50.90-56.42%). Be exact
+if asked: S3 starts from the self-supervised checkpoint, not from S1, so it never trained on
+English and did not "forget" it. The adapter keeps English because it is built on S1. Whether
+fully fine-tuning S1 itself would keep English was not tested.
 
 **Q14. What is the "telephone channel" in your experiments?**
 A simulated narrowband line: resample to 8 kHz, G.711 mu-law, noise at 20 dB SNR, back to
@@ -115,27 +120,32 @@ genuine 60-second dev calls raise at most 5% alerts of any level. Test sets neve
 
 **Q18. Is the gap caused by code-mixing?**
 No. On 183 unseen speakers, holding speaker and recording fixed, S1 rejects 84.3% of their
-genuine English and 78.1% of their mixed speech, and the Code-Mixing Index does not predict its
-score (rank correlation -0.01). The gap follows the recording domain.
+genuine English and 78.1% of their mixed speech, so English at least as often. On the evaluation
+pool the Code-Mixing Index does not predict its score (rank correlation -0.01 clean, +0.13 over
+the channel). The gap follows the recording domain.
 
 **Q19. How much does LoRA fix?**
 Over the phone channel the deployed adapter reaches 2.75% EER on unseen speakers (3.27% +/- 1.17
 over five seeds), 7.21 points below its shortcut floor, with clean English at 2.42%.
 
 **Q20. What about attack tools the model never saw?**
-On clean audio the adapter generalises to Tortoise (5.44% against a 29.49% floor). Over the
+On clean audio the XTTS-only adapter generalises to Tortoise (5.44% against a 29.49% floor). Over the
 phone line the deployed model averages 35.59% across five seeds against a 37.79% floor, so we
 cannot claim it detects an unseen tool over a phone line. We say so in the abstract.
 
 **Q21. What closed most of the remaining gap?**
 More genuine voices, not more attacks. Retraining on 248 genuine speakers instead of 21, with no
 unseen-tool audio, cut new-speaker Tortoise error from 29.82% to 13.59% and false alarms from
-3.40% to 0.47%, better in every one of five seeds.
+3.40% to 0.47%, better in every one of five seeds. If asked why: the added speakers came with
+seen-tool clones of them, so this run cannot say whether the genuine speech or the clones did
+it. A broader idea of genuine speech is the likely reason, and the papers say only that.
 
 **Q22. What is the final recipe?**
 The same adapter trained on 248 speakers with every clip through both the simulated G.711 line
 and the real AMR-NB codec. Over AMR-NB, unseen Tortoise error falls from 36.3% to 6.0%, and every
-seed beats its shortcut floor on all eleven test sets.
+seed beats its shortcut floor on all eleven test sets. Say the caveat before you are asked:
+three of those floors (CM04 over either codec, new-speaker Tortoise over AMR-NB) are above
+chance, so beating them is a weak bar.
 
 **Q23. Did you compare with established systems?**
 Yes. AASIST and SSL-AASIST fail the same way zero-shot (they reject 82.3% and 73.1% of genuine
@@ -149,14 +159,16 @@ It is the candidate for the next release: it keeps up with a live call even on t
 development scores call 5.8% and 46.7% of genuine clips fake, so it is not yet reliable.
 
 **Q25. Which attack is hardest?**
-IndicF5, whose clones are rated as natural as genuine speech (UTMOS 3.07 against 3.10), and
-Chatterbox. IndicF5 stays at 15.8-21.8% even for the best system.
+It depends on the detector. For our adapters, Chatterbox (32.0%, one seed). For the larger
+encoder, IndicF5, whose clones are rated as natural as genuine speech (UTMOS 3.07 against 3.10)
+and which stays at 15.8-21.8% even for the best system.
 
 **Q26. How do you know the model is not just reading the language?**
-Shuffling a call into 100 ms pieces destroys words, grammar and code-mixing, and the verdicts do
-not move. The decision is already formed by the third transformer layer, before linguistic
+On five held-out calls with the deployed model, shuffling a call into 100 ms pieces destroys
+words, grammar and code-mixing, and the verdicts do not move. The decision is already formed by the third transformer layer, before linguistic
 content appears in wav2vec 2.0. Scrambling the phase while keeping the spectrum flips genuine
-audio to fake, so the cue is in fine waveform structure.
+audio to fake, which points to fine waveform structure. Five calls can refute an explanation,
+not establish one.
 
 **Q27. Does adapting to Hindi-English hurt English?**
 On clean English the deployed adapter keeps 2.42% EER. Over the phone line English rises to
@@ -175,11 +187,14 @@ four, recovery after three genuine-leaning ones.
 A caller who learns they have been detected learns how to evade the detector.
 
 **Q30. How fast is it?**
-The first caution comes near 6 seconds of speech and the warning near 10 seconds.
+With the deployed model the first caution comes near 6 seconds of speech and the warning near
+10 seconds; the final recipe's ladder (3 and 5 windows) puts them near 8 and 12 seconds. On the
+real calls the final recipe took the XTTS-v2 clones to "likely cloned" only 30-46 s in.
 wav2vec2-base scores a window in 25 ms on a T4 GPU and 0.40 s on two CPU threads.
 
 **Q31. Is the system the same as the evaluation?**
-Yes: the same encoder, windowing, silence gate and operating point, which is why a demonstration
+The same encoder, windows, silence gate and normalisation, at an operating point calibrated on
+development calls through the live path, which is why a demonstration
 counts as evidence and not just an illustration.
 
 **Q31a. In the demo, why does the Tortoise call stay green even with the final recipe?**
@@ -208,23 +223,25 @@ apart. The final recipe held up. As the live system's carrier would deliver the 
 one of eight genuine live calls to "likely cloned" and cautioned two more, took three of four
 XTTS-v2 clone calls to "likely cloned", and none of the four Chatterbox clone calls (it only
 cautioned one), which matches
-Chatterbox being the hardest unseen tool offline.
+Chatterbox being the adapter's hardest unseen tool offline.
 
 **Q34. Why does the deployed model fail on real calls?**
 We rebuilt the call chain on each speaker's direct recordings, one stage at a time. The deployed
 model's mean P(genuine) goes from 0.77 (direct) and 0.63 (simulated G.711 line) to 0.29 through
 the real AMR-NB mobile codec; the call recorder adds little. The final recipe, which trained on
-AMR-NB, stays at 0.91-0.98 through every stage. So the real mobile codec alone is enough to
-break the deployed model (the live calls cost it more still, so the network and handset add
+AMR-NB, stays at 0.91-0.98 through every stage. So on average the real mobile codec takes
+the deployed model below its threshold (per reading: two of four cross it at AMR-NB, one
+stays above, one was below it before any codec) (the live calls cost it more still, so the network and handset add
 damage too), as the paper's offline AMR-NB result predicted. If asked whether the real codec
 in training is what fixes it: the final recipe also has more voices, so the calls cannot
 separate the two; offline, adding AMR-NB alone to the deployed recipe's training recovers
 most of the loss (new-speaker XTTS over AMR-NB 7.59% against 22.37%, three seeds).
 
 **Q35. What does it change?**
-It is the strongest evidence for the final recipe: real codec audio and more voices in training
-are what make the detector usable on real calls, so the final recipe should replace the deployed
-adapter in the live system. False alarms on genuine calls come early in a call (mean score 0.73
+It is the strongest evidence for the final recipe: with real codec audio and more voices in
+training it holds up on the seen tool on real calls (not on Chatterbox), though the calls cannot
+say which change did it, so the final recipe should replace the deployed adapter in the live
+system. False alarms on genuine calls come early in a call (mean score 0.73
 in the first ten seconds against 0.98 after twenty). Part of the reason is the very first
 window, which covers the quiet before the caller's first word: it is just loud enough to pass
 the -50 dBFS gate, gets normalised, and is scored as if it were speech. But it is not the whole
@@ -251,29 +268,31 @@ floors are above chance and so weak bars.
 
 **Q37. What about natural conversation?**
 All code-mixed training speech is read lectures. On spontaneous HiACC speech the deployed model
-calls 54.37% of genuine clips fake (0.89% for read lectures) and the final recipe 43.9%. The first
+calls 54.37% of genuine clips fake (0.89% for read lectures) and the final recipe 43.9%, one
+seed inside the 38.5-54.4% spread of single trainings, so not evidence of a gain. The first
 future step is spontaneous genuine speech in training.
 
 **Q38. Are your fakes realistic?**
 They are our own, made with open tools, and most are not hard: the seen tool sits half a MOS point
-below genuine speech. IndicF5 is as natural as real speech and is also the hardest to detect, so
-numbers on easy fakes are optimistic.
+below genuine speech. IndicF5 is as natural as real speech and stays at 15.8-21.8% even for the larger
+encoder (for our adapters Chatterbox is harder still), so numbers on easy fakes are optimistic.
 
 **Q39. Did you test commercial cloning services?**
 No. Only open tools.
 
 **Q40. Is anything unexplained?**
 On a live browser call a genuine caller sometimes loses consecutive windows that the same clip
-never loses offline. Encoding the clips through the browser codec offline does not reproduce it,
-so the cause lies in real-time transport (jitter buffering or packet-loss concealment); we have
-not isolated it.
+never loses offline. An offline round trip through a default Opus encoder (not the browser's own)
+does not reproduce it; real-time transport (jitter buffering, packet-loss concealment) or the
+browser's adaptive encoder remain the likeliest causes, and we have not isolated it.
 
 ## 9. Questions examiners like to ask
 
 **Q41. What is new here?**
 No single ingredient is new. The contribution is the combination and the measurement discipline:
 Hindi-English switching within an utterance, in audio, over the same telephone channel for
-training and testing; every result against a matched shortcut floor with a speaker-level test;
+training and testing; every result for our systems against a matched shortcut floor with a
+speaker-level test;
 adaptation judged by what it keeps of English; and the detector deployed on live calls and
 tested on real ones.
 
@@ -291,7 +310,9 @@ comparisons) are marked as one seed wherever they appear.
 
 **Q44. Did you tune anything on the test sets?**
 No. Thresholds, checkpoints and recipe choices are made on development data by rules fixed in
-advance. One variant chosen after a test score was seen is reported as exploratory.
+advance. One variant chosen after a test score was seen is reported as exploratory. Be ready
+for the follow-up: the final recipe joins two changes whose gains were first seen on test sets,
+so we report it with five seeds and shortcut floors, not as a blind selection.
 
 **Q45. Did you use any tools to help write the code or the paper?**
 Answer honestly and the same way the paper's acknowledgments do: which tools, what they were used
@@ -303,11 +324,11 @@ describe our own parts and be able to explain the others'.
 
 **Q47. What did you change after the external review?**
 All six comments were taken as mandatory (`docs/external_review_response.md`). Five training
-seeds per system showed our published Tortoise number (30.99%) was a lucky draw, so the paper
+seeds behind the main claims (two to four for the outside baselines) showed our published Tortoise number (30.99%) was a lucky draw, so the paper
 now quotes the five-seed mean (35.59%). For the unseen tools, the answer was more genuine voices
 (21 to 248) and the real AMR-NB codec in training: unseen Tortoise over AMR-NB from 36.3% to
 6.0%. We added 60 new test speakers, 183 language-control speakers, 24 spontaneous speakers and
-real calls; measured English clean for every system we trained and over the phone line for
+real calls; measured English clean for S1, S2, S3 and the final recipe and over the phone line for
 S1, the deployed adapter and the final recipe; matched every
 shortcut floor to its detector's own training data; and rebuilt the references (45, each
 checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say so.
@@ -324,5 +345,5 @@ checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say 
 | Unseen Tortoise over AMR-NB: deployed vs final recipe | 36.3% vs 6.0% |
 | False alarms: 21 vs 248 genuine speakers | 3.40% vs 0.47% |
 | SSL-AASIST on Chatterbox (final data) | 12.86% |
-| First caution / warning on a live call | about 6 s / 10 s |
+| First caution / warning on a live call | about 6 s / 10 s (deployed); 8 s / 12 s (final recipe) |
 | Speakers in the language-controlled test | 183 |

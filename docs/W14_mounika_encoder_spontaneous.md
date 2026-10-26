@@ -115,6 +115,16 @@ English error is of the opposite kind only over the line; 0.85% is on an evaluat
 eleven of whose thirteen attacks are unseen (A16 and A19 repeat training attacks); and the
 variant description gives each augmentation's probability.
 
+The viva answers and the demo script were then checked against the corrected paper, since
+we will say them out loud. Fifteen answers changed: which attack is hardest depends on the
+detector (Chatterbox for our adapters, IndicF5 for the larger encoder); the -0.01 correlation
+is on the evaluation pool, not the 183 control speakers; the final recipe warns later than
+the deployed model (about 8 s and 12 s, and 30-46 s on the real calls); the 43.9%
+spontaneous figure is one seed and not a gain; LoRA's own weights are about 0.6% of the
+model; S3 never trained on English; the Opus test used a default encoder; and the
+"tuned on test sets?" answer now prepares the follow-up that the final recipe joins two
+changes first seen on test sets.
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
