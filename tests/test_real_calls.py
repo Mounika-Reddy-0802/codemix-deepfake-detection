@@ -168,3 +168,88 @@ def test_score_by_phase_splits_each_kind_of_call_by_time() -> None:
         "after 20 s": 1.0,
     }
     assert phases[("clone_replay", "xtts_v2")]["after 20 s"] == 0.1
+
+
+def test_wilson_interval_is_sensible_for_small_counts() -> None:
+    assert rc.wilson_interval(0, 0) == [0.0, 100.0]
+    low, high = rc.wilson_interval(0, 4)
+    assert low == 0.0 and 40 < high < 60  # none of four still allows about half
+    low, high = rc.wilson_interval(4, 4)
+    assert 40 < low < 60 and high == 100.0
+    low, high = rc.wilson_interval(3, 4)
+    assert low < 75 < high
+    narrow = rc.wilson_interval(30, 40)
+    assert narrow[1] - narrow[0] < high - low  # more calls, narrower interval
+
+
+def test_summary_carries_an_interval_for_each_share() -> None:
+    config = EngineConfig(threshold=0.5)
+    windows = pd.DataFrame(_call_windows("C19", [0.01] * 10) + _call_windows("C21", [0.99] * 10))
+    calls = rc.CALL_PLAN.merge(rc.call_verdicts(windows, config), on="call_id")
+    row = next(r for r in rc.summarise(calls) if r["tool"] == "xtts_v2")
+    assert row["calls"] == 2 and row["likely_cloned_pct"] == 50.0
+    assert row["likely_cloned_ci"][0] < 50.0 < row["likely_cloned_ci"][1]
+
+
+def _speechlike(seed: int, seconds: float = 30.0, sr: int = 16_000) -> np.ndarray:
+    """Noise bursts with speech-like timing: 0.4-2 s of sound, 0.2-1 s pauses."""
+    rng = np.random.default_rng(seed)
+    audio = 0.001 * rng.standard_normal(int(seconds * sr))
+    t = 0.5
+    while t < seconds - 1:
+        burst = rng.uniform(0.4, 2.0)
+        a, b = int(t * sr), int(min(t + burst, seconds) * sr)
+        audio[a:b] += 0.2 * rng.standard_normal(b - a)
+        t += burst + rng.uniform(0.2, 1.0)
+    return audio.astype(np.float32)
+
+
+def _as_recorded(audio: np.ndarray, delay_s: float, sr: int = 16_000) -> np.ndarray:
+    """A replay as a phone records it: later start, other gain, its own noise floor."""
+    rng = np.random.default_rng(99)
+    shifted = np.concatenate([np.zeros(int(delay_s * sr), np.float32), 0.3 * audio])
+    return (shifted + 0.002 * rng.standard_normal(shifted.size)).astype(np.float32)
+
+
+def test_speech_activity_finds_the_played_file_despite_delay_and_gain() -> None:
+    played, other = _speechlike(1), _speechlike(2)
+    recorded = rc.speech_activity(_as_recorded(played, delay_s=1.3))
+    assert rc.overlap_correlation(recorded, rc.speech_activity(played)) > 0.8
+    assert rc.overlap_correlation(recorded, rc.speech_activity(other)) < 0.5
+    assert rc.overlap_correlation(np.ones(5), np.ones(5)) == -1.0  # flat tracks never match
+
+
+def test_check_replays_flags_a_swapped_file(tmp_path: Path) -> None:
+    pytest.importorskip("soundfile")  # audio wheels, not installed in CI
+    pytest.importorskip("librosa")
+    playback, recordings = tmp_path / "playback", tmp_path / "recordings"
+    playback.mkdir()
+    recordings.mkdir()
+    a, b = _speechlike(3), _speechlike(4)
+    save_wav(str(playback / "xtts_v2_P2_A.wav"), a, 16_000)
+    save_wav(str(playback / "xtts_v2_P2_B.wav"), b, 16_000)
+    save_wav(str(recordings / "C21.wav"), _as_recorded(a, 0.8), 16_000)  # as planned
+    save_wav(str(recordings / "C22.wav"), _as_recorded(a, 1.1), 16_000)  # B planned, A played
+    table = rc.check_replays(recordings, playback).set_index("call_id")
+    assert list(table.index) == ["C21", "C22"]
+    assert bool(table.loc["C21", "ok"]) and not bool(table.loc["C22", "ok"])
+    assert table.loc["C22", "best"] == "xtts_v2_P2_A.wav"
+
+
+def test_skipping_the_first_window_resmooths_and_can_clear_an_early_caution() -> None:
+    config = EngineConfig(threshold=0.687, suspicious_after=3, fake_after=5)
+    # a quiet first window scored as fake, then speech that settles high
+    early = pd.DataFrame(_call_windows("C05", [0.0, 0.5, 0.6, 1.0, 1.0, 1.0]))
+    clone = pd.DataFrame(_call_windows("C21", [0.0] + [0.05] * 6))
+    windows = pd.concat([early, clone], ignore_index=True)
+    skipped = rc.without_first_window(windows)
+    first = skipped[skipped["window"] == 0]
+    assert first["score"].isna().all() and first["smoothed"].isna().all()
+    c05 = skipped[skipped["filepath"].str.contains("C05")].set_index("window")
+    assert c05.loc[1, "smoothed"] == pytest.approx(0.5)  # the average restarts at window 1
+    assert c05.loc[2, "smoothed"] == pytest.approx(0.55)
+    before = rc.call_verdicts(windows, config).set_index("call_id")
+    after = rc.call_verdicts(skipped, config).set_index("call_id")
+    assert bool(before.loc["C05", "caution"]) and not bool(after.loc["C05", "caution"])
+    assert bool(after.loc["C21", "likely_cloned"])  # a clone is still caught without it
+    assert windows["score"].notna().all()  # the input is left alone
