@@ -69,8 +69,8 @@ clips, 85.2\% of all-Hindi and 78.1\% of mixed; within the same speakers, mixed 
 is rejected 9.5 points \emph{less} often than English [$-$15.6, $-$3.5]. Over the
 channel the three conditions are 43.1, 53.2 and 41.2\%, and the mixed-minus-English
 difference ($-$5.2 [$-$13.4, +2.9]) contains zero. The adapted systems keep false
-alarms at 2--5\% in every condition, with no condition singled out. S1 rejects English
-lecture speech by the same English speakers almost exactly as often as it rejects their
+alarms at 2--5\% in every condition, and none rejects mixed speech more often than
+English. S1 rejects the same speakers' English lecture speech at least as often as their
 code-mixed speech: the failure follows the recording, not the language mix.
 
 \begin{table}[t]
@@ -349,7 +349,7 @@ Published recipe (chosen)     & 5.50 & 2.57 & 30.14 & 5.33 \\
 Under the rule the published recipe stays (Table~\ref{tab:variants}). Crop with
 augmentation is lowest on dev, at 5.34\%, but within half a point of the recipe's
 5.50\%, and the two layer-mix variants are worse on dev. None of the changes improves
-the deployed model on its own validation data.
+the deployed model on its own validation data by more than that half point.
 
 \textbf{An exploratory result.} One variant, crop with augmentation and the layer
 mix, had the lowest single-run Tortoise error (26.43\%), below every seed of the
@@ -505,7 +505,7 @@ dataset rules keep HiACC from supplying
 \label{sec:res-final}
 
 The two largest gains so far came separately: more genuine speakers
-(Sec.~\ref{sec:data-extension}) and real AMR-NB audio in training next to the simulated
+(Sec.~\ref{sec:res-speakers}) and real AMR-NB audio in training next to the simulated
 G.711 line. The final recipe uses both: the adapter is trained on the 248-speaker set,
 every clip in both codecs (16{,}036 clips), with the same dev set and the same five seeds
 as the deployed adapter (Table~\ref{tab:final}).
@@ -555,18 +555,20 @@ it. We report it as a cost of the larger set.
 \textbf{Against its shortcut floor.} Both systems trained on the final data share one
 floor: the eight statistics fitted on the final training set and scored on each detector's
 own clips, with the speaker-level paired test of Sec.~\ref{sec:floors}. Every one of
-the five adapter seeds beats it on all eleven sets. On the unseen tools the floor is
+the five adapter seeds beats it on all ten sets scored with five seeds, and the single
+Chatterbox seed beats its floor too. On the unseen tools the floor is
 informative and the margin is wide: new-speaker Tortoise 8.8\% against a floor of 36.5\%,
 IndicF5 21.7\% against 38.8\% (21.3\% against 37.8\% over AMR-NB). The deployed recipe
-beat its Tortoise floor over the channel in no seed. On three sets, CM04 over either codec
+beat its CM04 Tortoise floor over the channel in no seed. On three sets, CM04 over either codec
 and new-speaker Tortoise over AMR-NB, the floor is above chance (54.6--71.4\%): the cheap
 statistics rank genuine and fake the wrong way round on those recordings, so beating it
 there shows only that the detector does not lean on those cues
 (\texttt{docs/results/floor\_final\_v1.md}).
 
-\textbf{What we have not shown.} With five paired seeds the smallest possible exact $p$ is
-$0.0625$ per set, so the comparison with the deployed recipe rests on the direction being
-the same in every seed. IndicF5 (21.7\%) and, below, Chatterbox stay hard.
+\textbf{What we have not shown.} With five paired seeds the smallest possible exact paired
+$p$ is $0.0625$ per set; treating the seeds as independent, as Table~\ref{tab:speakers248}
+does, the exact Mann--Whitney test can reach $0.008$. Either way the comparison with the
+deployed recipe rests on the direction being the same in every seed. IndicF5 (21.7\%) and, below, Chatterbox stay hard.
 
 \subsection{A third unseen tool}
 \label{sec:res-chatterbox}
@@ -595,19 +597,21 @@ Adapter, 248 speakers, 2 codecs & 32.0 [30.0, 34.9] & 49.0 [45.8, 52.2] \\
 % experiments/results/cm09_v1/
 \end{table}
 
-\textbf{It is the hardest unseen tool.} The best detector reaches 32.0\% over the phone
+\textbf{It is the hardest unseen tool for the adapters.} The best of these reaches 32.0\% over the phone
 line, against 9.0\% for the same model (seed 1234) on new-speaker Tortoise and 25.7\% on IndicF5, and
-clean audio is near chance for both adapters (48--49\%). The English-only S1 is at 55.0\%.
+clean audio is near chance for both adapters, which were trained over the phone line
+(48--49\%). The English-only S1 is at 55.0\%.
 
 \textbf{The added voices help little here.} The 248-speaker adapter is 3.8 points better
 than the 21-speaker one over the phone line (the intervals overlap, and it is one seed), far
-less than the 11 to 22 points it gained on XTTS and Tortoise. Training on more genuine
-speakers closed the gap for tools that resemble the training clones; it did not carry over
-to a generator of a different family.
+less than the 11 to 22 points it gained on XTTS and Tortoise, or the 13 on IndicF5. The
+248-speaker model also changed codec, and each row is one model, so why it gains less here
+is untested.
 
-\textbf{The watermark did not help.} Chatterbox marks its output, yet no detector found
-it: the scores are worse than for IndicF5, so the watermark does not appear to be a
-shortcut they use. We report this as a limit: a tool we did not train on can still defeat the detector,
+\textbf{The watermark did not help these detectors.} Chatterbox marks its output, yet none
+of them found it: their scores are worse than for IndicF5, so the watermark does not appear
+to be a shortcut they use. SSL-AASIST (Sec.~\ref{sec:res-finalssl}) does better on
+Chatterbox than on IndicF5, so for it a watermark cue cannot be ruled out. We report this as a limit: a tool we did not train on can still defeat the detector,
 and we have not tried to detect the watermark itself.
 
 \subsection{An outside baseline}
@@ -700,7 +704,8 @@ so even a strong English-trained detector shows the gap.
 \textbf{A larger encoder is stronger once it sees the voices.} Fine-tuned on the 248
 speakers it is lower than our adapter on every set: Tortoise from new speakers 0.5\%
 against 13.6\%, CM04 1.1\% against 24.5\%, IndicF5 16.5\% against 27.3\%, and false alarms
-0.2\% against 0.5\%. The same holds with 21 speakers. We read this as the encoder, and in
+0.2\% against 0.5\%. With 21 speakers it is lower on every EER set, though not in false
+alarms (3.7\% against 3.4\%). We read this as the encoder, and in
 part the full fine-tuning, not the training recipe. The recipe still does what it did for
 the adapter: SSL-AASIST on 21 speakers is 24.1\% on IndicF5 and 5.0\% on CM04, and the added
 voices cut CM04 to 1.1\%, so the voices help it as much. Two caveats: SSL-AASIST has fewer
@@ -766,7 +771,7 @@ CM07, IndicF5 & 21.75 $\pm$ 5.58 & 21.32 $\pm$ 2.27 & 0.690 \\
 new-speaker Tortoise is 0.51\% against 6.04\% for the adapter. On the seen tool, on both
 Tortoise sets and on the same sets over AMR-NB, all five SSL-AASIST seeds are below all
 five adapter seeds (exact $p = 0.008$); on the RVC half every paired seed is better, with
-overlapping ranges ($p = 0.024$). On Chatterbox, the hardest tool, the five seeds range from
+overlapping ranges ($p = 0.024$). On Chatterbox, the adapter's hardest tool, the five seeds range from
 8.2\% to 18.3\%, every one below the adapter's single 32.0\%.
 
 \textbf{Level on three.} False alarms (0.29\% against 0.51\%, four seeds of five), IndicF5
@@ -775,7 +780,7 @@ against 21.3\%) are not separated by five seeds.
 
 \textbf{IndicF5 remains hard for both.} Neither encoder brings it below 15\% on average, and
 the larger encoder's seeds range from 13.5\% to 28.1\% over the codec. We have not tested
-why; IndicF5's clones are the most natural of the tools we used
+why; IndicF5's clones are the most natural of the tools we scored
 (Sec.~\ref{sec:data-extension}), which may make them the hardest.
 
 \textbf{It can run on a live call.} The larger encoder has 316 million parameters against
@@ -867,8 +872,8 @@ telephone audio in the adaptation data. We have tested neither.
 
 The detector reads a raw waveform and has no hand-written features, so we probe it
 by changing one property of the audio at a time and reading the score. All numbers
-here are the deployed S2 model on the five held-out demo calls, scored exactly as
-the live system scores a call.
+here, except the English check at the end, are the deployed S2 model on the five held-out
+demo calls, scored exactly as the live system scores a call.
 
 \textbf{Not language, words or prosody.} Cutting a code-mixed call into 100~ms
 pieces and shuffling them destroys word order, grammar, code-mixing and sentence
@@ -894,8 +899,8 @@ transformer layer 3. In wav2vec~2.0 linguistic content emerges in the middle and
 upper layers~\cite{pasad2021layerwise}, so the decision is essentially complete
 before it exists.
 
-\textbf{Language is not the cue.} Real English from ASVspoof, through this
-Hinglish-adapted model, scores a mean of 1.000 and is called real in 100\% of
+\textbf{Language is not the cue.} Real English from ASVspoof (53 genuine and 33 fake
+clips), through this Hinglish-adapted model, scores a mean of 1.000 and is called real in 100\% of
 clips, while English attacks are caught in 84.8\%.
 
 Together these say the model reads how the waveform was produced, at the scale of a

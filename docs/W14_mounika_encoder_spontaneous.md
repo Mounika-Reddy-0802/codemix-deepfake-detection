@@ -67,7 +67,7 @@ comparisons are one seed each (Q43). A new question, Q47, answers what changed a
 external review, since the mentor is likely to ask it.
 
 The call-chain answer (Q34) said the real codec "is what breaks" the deployed model and that
-training on it "is the fix". The chain shows the codec alone is enough to break it, and the
+training on it "is the fix". The chain shows the codec takes it below its threshold on average, and the
 live calls cost it more, so the network and handset add damage; and the final recipe changes
 voices and codec together, so the calls cannot say which one fixes it. The answer now says
 that and gives the offline result that does isolate the codec (AMR-NB added to the deployed
@@ -78,6 +78,23 @@ the channel-trained adapter more) are now marked as likely, not stated as findin
 Two tables in the long paper ran about a third of an inch past their column in the Overleaf
 build: the training settings and the week-13 sets with their intervals. Both now use the
 smaller type and tighter column spacing the paper's other wide tables use.
+
+An independent read of the long paper, each point checked against the results files before
+anything changed, found results-section wording that said more than the numbers:
+
+- The language-control test: mixed speech is rejected significantly *less* often than
+  English (-9.5 [-15.6, -3.5]), so "almost exactly as often" became "at least as often".
+- The final-recipe floors: ten sets have five seeds and Chatterbox one, not "all eleven";
+  the deployed recipe's unbeaten floor is CM04's; the paired and unpaired seed tests are
+  now named side by side (the paired one cannot go below 0.0625 with five seeds).
+- Chatterbox is the hardest tool for the adapters only (SSL-AASIST does better on it than on
+  IndicF5, so for it a watermark cue is not ruled out); its smaller gain from the added
+  voices is no longer explained by "a different family", since that model also changed
+  codec and each row is one model; IndicF5's 13-point gain is now in the comparison.
+- SSL-AASIST with 21 speakers is not lower than the adapter in false alarms (3.7 against
+  3.4); IndicF5 is the most natural of the tools *scored*; the probe section says which
+  numbers come from the five calls and which from 86 English clips; a model is scored in
+  its training condition except in the cross-condition tests, which the method now says.
 
 ## What is still open
 

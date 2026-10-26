@@ -110,7 +110,8 @@ $\mu$-law, add white noise at 20~dB SNR and resample back to 16~kHz. Noise is se
 per clip from a hash of its name. A single shared noise draw would add one identical
 waveform to every clip, which a detector could learn in place of the speech. On the
 evaluation render, energy above 4~kHz falls from 0.185\% to 0.0001\% and the measured
-SNR is 18.8~dB. A model is always scored in the condition it was trained in.
+SNR is 18.8~dB. A model is scored in the condition it was trained in, except in the
+deliberate cross-condition tests (the trade-off, AMR-NB and English tests).
 % configs/data/channel_sim.yaml; docs/results/channel_matched_v1.md
 
 \subsection{Model}
@@ -173,8 +174,9 @@ deterministic 4~s crop per clip, with 95\% bootstrap confidence intervals over
 clips~\cite{efron1993bootstrap}. Clips from one speaker are not independent and each
 test set holds only 12--15 speakers, so every comparison between two systems, or
 between a system and its floor, is made on a paired bootstrap that resamples whole
-speakers (1{,}000 resamples), never by setting two separately computed intervals side
-by side.
+speakers (1{,}000 resamples). Comparisons across training seeds use exact rank tests, and
+the few that only set two separately computed intervals side by side say so and are read
+as indicative.
 Three code-mixed test sets probe three kinds of generalisation: the evaluation pool
 (seen tool, unseen speakers), CM04 (unseen tool) and the RVC test half (speakers
 unseen as either source or target). The ASVspoof 2019 LA evaluation set measures
