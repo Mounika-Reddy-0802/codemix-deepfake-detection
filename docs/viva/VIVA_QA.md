@@ -182,6 +182,13 @@ wav2vec2-base scores a window in 25 ms on a T4 GPU and 0.40 s on two CPU threads
 Yes: the same encoder, windowing, silence gate and operating point, which is why a demonstration
 counts as evidence and not just an illustration.
 
+**Q31a. In the demo, why does the Tortoise call stay green even with the final recipe?**
+Because one call is not the rate. Over all the Tortoise test calls the final recipe catches
+every one (on CM04 the deployed model catches one in three), but on this speaker's demo
+call only 2 of 22 windows lean fake, too few for a warning. We kept the call that fails
+rather than pick one that works. The upload box can still call the same file "spoof", because it judges a clip by
+its single lowest window, while a call needs several fake-leaning windows in a row.
+
 ## 7. The real phone-call test
 
 These are the first 20 of the 30 planned calls (two of the three speakers); the numbers are
@@ -198,8 +205,9 @@ threshold was chosen on these calls.
 **Q33. What happened?**
 The deployed model warned every call, genuine or cloned: on real calls it cannot tell them
 apart. The final recipe held up. As the live system's carrier would deliver the audio, it took
-one of eight genuine live calls to "likely cloned" and cautioned two more, caught three of four
-XTTS-v2 clone calls, and caught none of the four Chatterbox clone calls, which matches
+one of eight genuine live calls to "likely cloned" and cautioned two more, took three of four
+XTTS-v2 clone calls to "likely cloned", and none of the four Chatterbox clone calls (it only
+cautioned one), which matches
 Chatterbox being the hardest unseen tool offline.
 
 **Q34. Why does the deployed model fail on real calls?**
@@ -212,10 +220,23 @@ deployed model, as the paper's offline AMR-NB result predicted, and training on 
 **Q35. What does it change?**
 It is the strongest evidence for the final recipe: real codec audio and more voices in training
 are what make the detector usable on real calls, so the final recipe should replace the deployed
-adapter in the live system. False alarms on genuine calls come mostly from the first ten seconds
-of a call (mean score 0.73 there against 0.98 after twenty seconds), so the warning ladder's
-warm-up is the next thing to calibrate, on a separate set of real development calls, never on
-these. Chatterbox-type tools remain the open problem.
+adapter in the live system. False alarms on genuine calls come early in a call (mean score 0.73
+in the first ten seconds against 0.98 after twenty). Part of the reason is the very first
+window, which covers the quiet before the caller's first word: it is just loud enough to pass
+the -50 dBFS gate, gets normalised, and is scored as if it were speech. But it is not the whole
+reason (Q35a). So the next step is a set of real development calls, separate from these, to set
+a stricter speech gate for the first seconds and the operating point together. Chatterbox-type
+tools remain the open problem.
+
+**Q35a. How much of the early false alarms is the quiet start?**
+Part, not all. On the genuine live calls the first window averages about -30 dBFS, against -20
+to -26 dBFS for the rest of each call, and it is the lowest-scoring window (mean 0.48; every
+later window averages 0.69 or more). In every warned genuine call, the run of fake-leaning
+windows that raised the warning starts there. But when we replay the calls with that window
+treated as silence, as a check that chooses nothing, two of the three warned calls clear over
+G.711, none clear as recorded, and one call still reaches "likely cloned" from speech windows
+8-14 seconds in. We first guessed the phone's noise suppression, then the silence alone; the
+data corrected us both times, and we say so.
 
 ## 8. Limitations, said plainly
 

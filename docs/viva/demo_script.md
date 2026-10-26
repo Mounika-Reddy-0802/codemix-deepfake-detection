@@ -5,8 +5,13 @@ section 1). Open three browser windows: `http://localhost:8000/`, `/dashboard`,
 and `/call`. Click once anywhere on the dashboard so the browser allows the warning
 tone. Check that the status pills read *model* and *threshold 0.500* (the deployed
 adapter). To show the final recipe instead, start the server with `DFD_CHECKPOINT`
-pointing at `final_s1234_best.pt` and `DFD_THRESHOLD_FILE=configs/threshold_final.yaml`;
-the pill then reads *threshold 0.687*.
+pointing at `final_s1234_best.pt`, `DFD_THRESHOLD_FILE=configs/threshold_final.yaml` and
+`DEMO_CLIPS_DIR=<data>/demo_clips_final`; the pill then reads *threshold 0.687*. The
+`demo_clips_final` folder holds the same five calls with what the final recipe does on each
+(`python scripts/prepare_demo_clips.py --checkpoint <final checkpoint> --threshold-file
+configs/threshold_final.yaml --data-root <data>/lora_bundle_norm_ch20 --out
+<data>/demo_clips_final`), so the page never shows the deployed model's result beside the
+final recipe's call.
 
 **Backup:** if anything fails live, the recorded run (W11-T3) and the test suite
 (`tests/test_live_server.py`) show the same path. Questions and answers for the viva
@@ -50,6 +55,17 @@ Play in this order, each from *Play a prepared clip as a live call* (deployed ad
 | **XTTS-v2 cloned voice** | amber at 6 s with the warning tone; red at 10 s | "A clone: the receiver is warned 6 seconds into the call." |
 | **RVC voice conversion** | red, 24 of 24 windows | "Voice conversion keeps real prosody, and it's still caught, on speakers the model never saw." |
 | **Tortoise clone** | stays green | "This is the tool we held out. The phone-line model misses it; that's the limitation we report, and the final recipe is what fixes most of it." |
+
+With the final recipe the first four calls behave the same, and **the Tortoise call still
+stays green** (2 of 22 windows fake-leaning, against 0 for the deployed model). Say so before
+playing it: "Across the Tortoise test calls the final recipe catches every one (33% to 100%),
+but not this speaker's call. One call is not the rate, and we keep the call that fails in
+the demo." Do not swap it for a call it catches.
+
+The *try a clip* upload judges a whole clip by its single lowest window, while a call needs
+consecutive fake-leaning windows, so the same Tortoise file can read "spoof" when uploaded
+and stay green as a call. If asked, that is the reason: one window is too noisy to warn a
+caller on.
 
 Point at the timeline: dots are 4 s windows, the line is the smoothed score, the red
 dashed line is the threshold.

@@ -48,6 +48,16 @@ credit ran out, points to the real-call test instead, and states the threshold r
 The real-call answers use the first 20 of 30 calls and are updated when the last speaker's
 calls are in.
 
+Two answers were wrong and are corrected. The early false alarms on genuine calls were first
+put down to the phone's noise suppression, then to the quiet before the first word alone;
+the window levels and a replay with the first window treated as silence show the quiet start
+is part of the cause, not all of it (Q35, Q35a). And the demo script said the final recipe
+fixes the Tortoise demo call. A rehearsal with the final recipe showed that call stays green
+for both models (2 of 22 windows fake-leaning, against 0), although the final recipe catches
+every Tortoise test call. The script now says so before the call is played, points to a
+second set of demo calls verified on the final recipe (`demo_clips_final`), and explains why
+an uploaded clip can read "spoof" while the same audio as a call stays green (Q31a).
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
