@@ -63,18 +63,19 @@ code-mixed speech. The gap follows the recording domain.
 
 A low error rate on a newly built corpus can also be obtained for the wrong reason. Real
 and cloned clips that differ in loudness or bandwidth can be told apart without any
-knowledge of speech synthesis. We therefore compare every result with a shortcut floor
-fitted on the same training data and scored on the same clips. Our contributions are:
+knowledge of speech synthesis. We therefore compare every result of our systems with a
+shortcut floor fitted on the same training data and scored on the same clips. Our
+contributions are:
 \begin{itemize}
 \item a measured gap on Hindi--English telephone speech, traced by a language-controlled
 test of 183 unseen speakers to the recording domain rather than to code-mixing;
 \item closure of the gap by low-rank adapters~\cite{hu2022lora} on a frozen wav2vec~2.0
-encoder~\cite{baevski2020wav2vec}, which keep clean English where full fine-tuning loses it;
+encoder~\cite{baevski2020wav2vec}, which, added to the English detector, keep clean English;
 \item evidence that more training speakers (genuine speech and seen-tool clones of them) and
 a real mobile codec, not more attack tools,
 close most of the remaining gap on the unseen Tortoise generator, over five training seeds
 and with a larger encoder, while IndicF5 and Chatterbox stay hard;
-\item matched shortcut floors with a paired speaker bootstrap for every claim, which
+\item matched shortcut floors with a paired speaker bootstrap for our systems, which
 changed several of our own conclusions; and
 \item a live-call system that runs the same detector and operating point, and warns only
 the person receiving the call.
@@ -103,9 +104,8 @@ as Zoom; we target narrowband telephone codecs.
 
 \textbf{Parameter-efficient adaptation.} LoRA~\cite{hu2022lora} has been applied to
 wav2vec~2.0 fake-audio detection, where it matches full fine-tuning with far fewer
-trainable parameters~\cite{wang2023lora}. We use it for a different reason: it lets the
-detector learn code-mixed speech while keeping English, which full fine-tuning on the same
-data does not.
+trainable parameters~\cite{wang2023lora}. We use it for a different reason: added to an
+English detector, it learns code-mixed speech while the detector keeps clean English.
 
 \textbf{Multilingual and code-switched detection.} MLAAD~\cite{muller2024mlaad} and
 SpeechFake~\cite{huang2025speechfake} span many languages,
@@ -216,8 +216,9 @@ only the adapters and the classifier on code-mixed data: 1.08M parameters, or 1.
 the model. The \emph{deployed} S2 is trained on XTTS-v2 clones and RVC conversions of 21
 genuine speakers (the 8 adaptation speakers and the 13 source speakers of the RVC training
 half), over the telephone channel.
-\item \textbf{S3} fine-tunes the whole encoder on the same data as S2, starting from the
-pretrained checkpoint rather than from S1.
+\item \textbf{S3} fine-tunes the transformer layers and the classifier on the same data as
+S2, starting from the self-supervised checkpoint rather than from S1, so it is never
+trained on English.
 \end{itemize}
 The \emph{final recipe} trains the S2 adapter on the 248-speaker set, with every clip
 rendered through both G.711 and AMR-NB. As outside baselines we use
@@ -238,7 +239,7 @@ with a paired bootstrap that resamples whole speakers (1,000
 resamples)~\cite{efron1993bootstrap}. Comparisons across seeds use the exact
 Mann--Whitney test, whose smallest possible $p$ for five seeds against five is 0.008.
 
-Following the check proposed with AffectDF~\cite{affectdf2026}, every detector is paired
+Following the check proposed with AffectDF~\cite{affectdf2026}, each of our systems is paired
 with a \textbf{shortcut floor}: a logistic regression on eight cheap signal statistics
 (RMS mean and standard deviation, peak, clipping ratio, DC offset, zero-crossing rate,
 spectral roll-off and high-frequency energy ratio), fitted on exactly the detector's
@@ -262,8 +263,9 @@ genuine English, a 256-fold rise in false alarms.
 \begin{table}[t]
 \centering
 \caption{EER (\%) on the original test sets, each system in its training condition
-(XTTS + RVC training for S2 and S3). Floor: the matched shortcut floor. Bold: below the
-floor at the speaker level; italic: inconclusive.}
+(XTTS + RVC training for S2 and S3), one training run (seed 1234); five-seed means are in
+the text. Floor: the matched shortcut floor. Bold: below the floor at the speaker level;
+italic: inconclusive.}
 \label{tab:main}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -290,11 +292,7 @@ fixed, S1 rejects 84.3\% of the control speakers' genuine English and 78.1\% of 
 mixed speech; within speakers, mixed speech is rejected 9.5 points \emph{less} often than
 English [$-$15.6, $-$3.5]. On the evaluation pool S1 rejects 93.5--95.2\% of genuine clips
 in every Code-Mixing Index band, and the rank correlation between a clip's index and its
-score is $-$0.01. Probes of the deployed adapter on five held-out calls point the same
-way. Cutting a call into 100~ms pieces and shuffling them destroys words, grammar and
-code-mixing, yet leaves its verdicts unchanged, and the decision between genuine and
-cloned speech is already formed by the third transformer layer, before linguistic content
-appears in wav2vec~2.0~\cite{pasad2021layerwise}. The gap is a recording-domain gap that
+score is $-$0.01. The gap is a recording-domain gap that
 Hindi--English telephone speech carries, where the domain is the corpus as a whole: its
 recording conditions and its speakers, which this test does not separate.
 
@@ -324,20 +322,21 @@ The deployed adapter reaches 2.75\% EER over the channel on unseen speakers, 7.2
 below its matched floor [$-$12.92, $-$1.10], and 3.27\% $\pm$ 1.17 across five seeds,
 three of which beat that floor, while keeping clean English at 2.42\%. It beats its RVC floor in all five seeds (5.33\%
 $\pm$ 1.27). Full fine-tuning (S3) is the most accurate of the three systems on the seen tool
-(0.83\% clean), but it sits at chance on English (50.90--56.42\%) in every variant. Each model
-learns its own training domain's idea of genuine speech, and only adaptation keeps both.
+(0.83\% clean), but, never trained on English, it sits at chance there (50.90--56.42\%) in
+every variant. Each model learns its own training domain's idea of genuine speech, and only
+the adapter, built on the English detector, has both.
 
-The training condition matters as well. The deployed adapter loses little on clean audio
-(2.75\% to 6.71\% on the evaluation pool), while its clean-trained counterpart rises from
-1.99\% to 22.97\% over the channel, so a telephone service should train over the channel.
+The training condition matters as well. The deployed adapter loses less on clean audio
+(2.75\% to 6.71\% on the evaluation pool) than its clean-trained counterpart loses over the
+channel (1.99\% to 22.97\%), so a telephone service should train over the channel.
 
 \subsection{Unseen tools and new speakers}
 
 On clean audio the adapters generalise to Tortoise (5.44\% against a 29.49\% floor, with
 XTTS-only training). Over the channel they do not do so reliably. The deployed model
 averages 35.59\% $\pm$ 3.35 across five seeds against a 37.79\% floor and beats it in no
-seed, and adding RVC to training is what removed the Tortoise advantage (25.59\% $\pm$
-5.27 without it).
+seed. Trained without RVC, and so without the 13 genuine speakers its conversions came
+from, the adapter averages 25.59\% $\pm$ 5.27 but beats its own floor in only one seed.
 
 On 60 speakers no model has heard, the deployed model reaches 9.4\% on the seen tool over
 the channel (median speaker 2.9\%, worst 17.1\%), but Tortoise stays at 29.4\% and IndicF5
@@ -353,7 +352,8 @@ seen tool on new speakers falls from 10.75\% to 0.91\%, new-speaker Tortoise fro
 to 13.59\%, IndicF5 from 35.40\% to 27.25\%, and false alarms on the control speakers from
 3.40\% to 0.47\%. Only RVC, whose training conversions did not change, stays level. The
 added data are genuine speech and clones by the seen tool, so the gains on unseen tools do
-not come from exposure to new attacks; a broader idea of genuine speech is the likely reason.
+not come from exposure to new attacks. A broader idea of genuine speech is the likely
+reason, though the speakers came with their clones and the run does not separate the two.
 
 The final recipe adds the AMR-NB codec to this (Table~\ref{tab:final}). Each comparison
 retrains the deployed recipe in the same run with the same seeds, so its numbers differ a
@@ -362,14 +362,15 @@ the deployed adapter on ten of eleven sets, and in every seed on nine of them: o
 simulated line new-speaker Tortoise falls from 30.8\% to 8.8\%, and over AMR-NB from
 36.3\% to 6.0\%. Every seed beats its shortcut floor on every set, for example 8.8\%
 against 36.5\% on new-speaker Tortoise, although on three sets the floor is above chance
-and so a weak bar. The cost is RVC, which rises from 6.1\% to 8.5\% in all five seeds,
+and so uninformative. The cost is RVC, which rises from 6.1\% to 8.5\% in all five seeds,
 possibly because the added speakers have no conversions.
 
 \begin{table}[t]
 \centering
-\caption{The deployed adapter (21 speakers, G.711 only) against the final-recipe data
-(248 speakers, both codecs). EER (\%), mean of five seeds; ``genuine called fake'' is the
-share of genuine clips. $^\dagger$One model.}
+\caption{The deployed adapter (21 speakers, G.711 only), the final recipe (248 speakers,
+both codecs) and SSL-AASIST trained on the final-recipe data. EER (\%), mean of five seeds;
+``genuine called fake'': share of the language-control speakers' genuine clips.
+$^\dagger$One model; not counted in the set comparisons.}
 \label{tab:final}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -414,8 +415,9 @@ speech and SSL-AASIST 73.1\%, so the gap is not particular to our architecture. 
 on the 248 speakers over G.711 (three seeds), AASIST beats our adapter trained on the same
 data on Tortoise (CM04 16.7\% against 24.5\%,
 $p = 0.036$) but loses on the seen tool (1.8\% against 0.9\%), on RVC (13.5\% against
-6.5\%) and in false alarms (2.3\% against 0.5\%). Both gain far more from the added voices
-than they differ from each other.
+6.5\%) and in false alarms (2.3\% against 0.5\%). On the seen tool, Tortoise and false
+alarms both gain far more from the added voices than they differ from each other; on
+IndicF5 AASIST barely moves, and its RVC error doubles.
 
 SSL-AASIST, with about three times the parameters of our encoder, is the strongest system
 once trained on the final-recipe data (Table~\ref{tab:final}). It is better than the
@@ -509,13 +511,13 @@ with one real codec, and no system has yet been tested on real phone calls.
 \section{Conclusion}
 
 An English-trained deepfake detector fails on Hindi--English telephone speech by rejecting
-genuine speakers, and a language-controlled test shows that the cause is the recording
-domain, not code-mixing. A low-rank adapter that trains 1.13\% of the parameters closes
-the gap on the seen tool and keeps clean English. Hearing more genuine voices through a
-real mobile codec closes most of the remaining gap on the unseen Tortoise generator without
-any of its audio in training, and a larger encoder fine-tuned on the same data goes further. Spontaneous
-speech and the most natural unseen generator, IndicF5, remain open. We report each result
-against a matched shortcut floor rather than against zero, and we suggest that results on
+genuine speakers, and a language-controlled test shows that the cause is not code-mixing:
+the gap follows the recording domain. A low-rank adapter that trains 1.13\% of the
+parameters closes the gap on the seen tool and keeps clean English. More training speakers
+and a real mobile codec close most of the remaining gap on the unseen Tortoise generator
+without any of its audio in training, and a larger encoder fine-tuned on the same data goes
+further. Spontaneous speech and the most natural unseen generator, IndicF5, remain open. We
+report each result for our systems against a matched shortcut floor rather than against zero, and we suggest that results on
 newly built corpora be read the same way.
 
 \section*{Code and data availability}

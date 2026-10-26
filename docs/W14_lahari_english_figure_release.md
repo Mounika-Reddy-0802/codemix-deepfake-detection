@@ -128,6 +128,24 @@ paper where it says the same thing:
   warning" in the live-system section and "likely cloned" in the real-call paragraph, and
   said every spontaneous call "raises a warning" where the table counts a caution or worse.
 
+A second, independent read of the six-page paper, each point checked against the source
+before it was changed, found claims whose comparison changes two things at once:
+
+- S3 starts from the self-supervised checkpoint, never from S1, so it never had English to
+  lose. Both papers now say it is at chance on English, on which it was never trained, and
+  that the adapter keeps clean English because it is built on the English detector. Whether
+  fully fine-tuning S1 would keep English was not tested, and the long paper says so.
+- Adding RVC to training also added the 13 genuine speakers its conversions came from, and
+  the XTTS-only adapter beat its Tortoise floor in only one seed of five. "Adding RVC is what
+  removed the Tortoise advantage" is now stated as what was measured, with the confound.
+- AASIST does not gain more from the added voices than it differs from the adapter on every
+  set: on IndicF5 it barely moves and its RVC error doubles. The papers say where it holds.
+- The floors that sit above chance are called uninformative, not weak; the floor claims are
+  limited to our systems (the AASIST baseline has none); Table 2 says it is one run; Table 4
+  says what its SSL-AASIST column and "genuine called fake" are and that Chatterbox is left
+  out of the set counts. The six-page paper drops the probe evidence, which was about the
+  adapter, not S1, and rested on five calls.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The
