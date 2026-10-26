@@ -156,6 +156,16 @@ called the newest generator, since Chatterbox came later; and the licence paragr
 states that XTTS-v2 output is non-commercial under the Coqui Public Model Licence, as the
 licence register requires.
 
+A second fresh read of the six-page paper, after those fixes, found what they had left: the
+adapters keep clean English in the deployed configuration only (the final recipe is at
+13.44%); "not more attack tools" was never tested, so it now says no new tool was added; the
+overview figure's caption said S1 was not scored on AMR-NB, but it was (40-50%; it is just
+not drawn), and its floor tick belongs to the two final-data systems only, which the caption
+and `final_figure.py` now say; a false alarm is defined (P(genuine) below 0.5); S2's trained
+parameters include the pooling; the 43.9% spontaneous figure is one seed inside the spread of
+single trainings; Chatterbox is named among the open problems; and the 0.85% detector is
+ours on the same benchmark, not a replication of the cited XLS-R recipe.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The
