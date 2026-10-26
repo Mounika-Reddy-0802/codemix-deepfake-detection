@@ -104,6 +104,17 @@ the model has 94,864,259 parameters, 95,454,083 with the adapters. The floor par
 says which detectors have their own floor (S1 is read against the lowest code-mixed floor
 and the AASIST baselines have none).
 
+A last line-by-line read of the results section against its source files fixed: the final
+SSL-AASIST runs used three epochs, not the earlier five; HiACC is reported for two later
+trainings, not "not run"; over G.711 the two-codec recipe is worse on RVC, not "level or
+better"; the Chatterbox gain is compared with what the same two models do elsewhere (20.4
+points on new-speaker Tortoise, 4.9 on IndicF5), not with five-seed means; the SSL-AASIST
+comparison changes encoder, back end, fine-tuning and augmentation together, so it no longer
+names a cause, and the voices help it by fewer points than the adapter; the final recipe's
+English error is of the opposite kind only over the line; 0.85% is on an evaluation set
+eleven of whose thirteen attacks are unseen (A16 and A19 repeat training attacks); and the
+variant description gives each augmentation's probability.
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
