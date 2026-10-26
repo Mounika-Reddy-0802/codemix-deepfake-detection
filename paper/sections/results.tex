@@ -416,8 +416,8 @@ training data and paired clip by clip (\texttt{docs/results/floor\_new\_sets\_v1
 every S2 system is below its floor on the new speakers for both XTTS and Tortoise; the
 deployed model by 28.6 [$-$33.1, $-$24.5] and 28.8 [$-$33.9, $-$23.8] points. That
 result is weaker than it looks: the Tortoise floors land at 40--58\%, near or past
-chance, because the recording cues that separate the training clips do not carry to
-the new speakers' recordings. On IndicF5 the floors stay informative (34.0--35.9\%)
+chance, probably because the recording cues that separate the training clips do not
+carry to the new speakers' recordings. On IndicF5 the floors stay informative (34.0--35.9\%)
 and no system clears one: the deployed model is inconclusive ($-$5.4 [$-$11.2, +1.5]),
 the clean adapters are level with theirs, and the XTTS-only channel adapter is worse
 than its floor (+9.9 [+3.3, +16.5]). The second unseen tool therefore confirms the
@@ -428,8 +428,9 @@ through the reference AMR-NB codec at 12.2~kbit/s instead of the simulated G.711
 the deployed model rises from 9.4\% to 23.7\% {\scriptsize[19.6, 27.4]} on new-speaker
 XTTS, from 29.4\% to 37.0\% on Tortoise, from 30.6\% to 47.0\% on IndicF5, and to
 40.6\% on CM04. The clean-trained adapter holds better on AMR-NB (12.6\% on XTTS) than
-the channel-trained one, because AMR-NB keeps the voice band and adds no noise, so it
-sounds closer to clean audio than to the noisy G.711 render. Training over the channel
+the channel-trained one, probably because AMR-NB keeps the voice band and adds no
+noise, so it sounds closer to clean audio than to the noisy G.711 render; we did not test
+this. Training over the channel
 taught the deployed model one telephone chain, not telephone audio in general; a service
 on mobile networks needs real codecs in training (\texttt{docs/results/amr\_channel\_v1.md}).
 

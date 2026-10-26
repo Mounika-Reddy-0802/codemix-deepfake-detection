@@ -214,8 +214,12 @@ Chatterbox being the hardest unseen tool offline.
 We rebuilt the call chain on each speaker's direct recordings, one stage at a time. The deployed
 model's mean P(genuine) goes from 0.77 (direct) and 0.63 (simulated G.711 line) to 0.29 through
 the real AMR-NB mobile codec; the call recorder adds little. The final recipe, which trained on
-AMR-NB, stays at 0.91-0.98 through every stage. So the real mobile codec is what breaks the
-deployed model, as the paper's offline AMR-NB result predicted, and training on it is the fix.
+AMR-NB, stays at 0.91-0.98 through every stage. So the real mobile codec alone is enough to
+break the deployed model (the live calls cost it more still, so the network and handset add
+damage too), as the paper's offline AMR-NB result predicted. If asked whether the real codec
+in training is what fixes it: the final recipe also has more voices, so the calls cannot
+separate the two; offline, adding AMR-NB alone to the deployed recipe's training recovers
+most of the loss (new-speaker XTTS over AMR-NB 7.59% against 22.37%, three seeds).
 
 **Q35. What does it change?**
 It is the strongest evidence for the final recipe: real codec audio and more voices in training

@@ -66,6 +66,15 @@ claim: Chatterbox for the adapter, English with the final recipe and the spontan
 comparisons are one seed each (Q43). A new question, Q47, answers what changed after the
 external review, since the mentor is likely to ask it.
 
+The call-chain answer (Q34) said the real codec "is what breaks" the deployed model and that
+training on it "is the fix". The chain shows the codec alone is enough to break it, and the
+live calls cost it more, so the network and handset add damage; and the final recipe changes
+voices and codec together, so the calls cannot say which one fixes it. The answer now says
+that and gives the offline result that does isolate the codec (AMR-NB added to the deployed
+recipe's own training, 7.59% against 22.37%). Two explanations in the results section that
+no experiment tested (why the Tortoise floors reach chance on new speakers, why AMR-NB hurts
+the channel-trained adapter more) are now marked as likely, not stated as findings.
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
