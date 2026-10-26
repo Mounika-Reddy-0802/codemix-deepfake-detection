@@ -146,6 +146,16 @@ before it was changed, found claims whose comparison changes two things at once:
   out of the set counts. The six-page paper drops the probe evidence, which was about the
   adapter, not S1, and rested on five calls.
 
+A third read, of the data chapter against the repository itself, corrected what the chapter
+said the data and checks are: the 25/10/15 pools come from 50 shortlisted speakers, not all
+520, and the extension pools hold the other 470; the build check on real training configs is
+`tests/test_config_guard.py`, while `tests/test_splits.py` tests the checks on synthetic
+manifests; the code-mixed sets range from 0.3:1 (CM04) to 1.5:1, not all near 1.5:1;
+ASVspoof is 109.7 hours; AMR-NB carries 2G and 3G calls, AMR-WB 4G; IndicF5 is no longer
+called the newest generator, since Chatterbox came later; and the licence paragraph now
+states that XTTS-v2 output is non-commercial under the Coqui Public Model Licence, as the
+licence register requires.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The

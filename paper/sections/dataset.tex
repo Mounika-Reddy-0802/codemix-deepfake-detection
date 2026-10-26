@@ -19,33 +19,35 @@ measured from the audio rather than estimated:
 \end{itemize}
 
 Together 56{,}143 clips and 92.8 hours over 544 speakers. The English side is
-ASVspoof 2019 LA~\cite{todisco2019asvspoof}: 121{,}461 clips and 109.6 hours across
+ASVspoof 2019 LA~\cite{todisco2019asvspoof}: 121{,}461 clips and 109.7 hours across
 the official train, development and evaluation partitions, at a spoof-to-real ratio
 of 8.7:1.
 
 That ratio matters when reading results across the two. The code-mixed evaluation
-sets are close to balanced, near 1.5:1, so the same detector confidence produces
+sets are far closer to balanced, from 0.3:1 (CM04) to 1.5:1 (the evaluation pool), so the
+same detector confidence produces
 different operating points on the two families and accuracy figures are not directly
 comparable between them.
 
 \subsection{Speaker pools, frozen before any audio was generated}
 
-The 520 MUCS speakers are divided once into three disjoint pools --- 25 for training,
-10 for adaptation, 15 for evaluation --- and the division was committed before a
-single clip was cloned. This ordering is the point: a pool drawn after seeing which
+Fifty of the 520 MUCS speakers, shortlisted on signal-to-noise ratio and speech
+duration, are divided once into three disjoint pools --- 25 for training, 10 for
+adaptation, 15 for evaluation --- and the division was committed before a single clip
+was cloned. This ordering is the point: a pool drawn after seeing which
 speakers clone well would quietly select for them.
 
-The original study used 50 of the 520 speakers. For the extension experiments the
-remaining speakers with enough clips were carved, again before any of their audio was
-scored or cloned, into three further pools whose membership is committed and hashed:
+For the extension experiments the other 470 speakers were carved, again before any of
+their audio was scored or cloned, into three further pools whose membership is committed and hashed:
 \emph{new test speakers} (60), \emph{language control} (183, evaluation only) and
 \emph{extra adaptation} speakers (227). The two evaluation pools are added to the
 leakage checks, so no configuration can train on them.
 
 Disjointness is enforced mechanically rather than by discipline.
-\texttt{tests/test\_splits.py} fails the build if a speaker crosses a pool boundary,
-if a held-out tool reaches a training manifest, or if any excluded identifier appears
-anywhere. The anti-leakage checks run before every training launch.
+\texttt{tests/test\_config\_guard.py} reads every committed training configuration and the
+manifests it names, and fails the build if a training row comes from an evaluation-pool
+speaker, a held-out tool or an excluded identifier; \texttt{tests/test\_splits.py} tests
+the checks themselves on synthetic manifests. Both run before every training launch.
 
 \subsection{Who the models hear, and who they are tested on}
 \label{sec:data-speakers}
@@ -136,7 +138,7 @@ Five further attack sets were made the same way, each from a committed job table
     Indian-language TTS built on F5-TTS~\cite{chen2024f5tts}, from all-Hindi references
     and all-Hindi sentences of other speakers: 526 of 610 (86.2\%); most rejections
     stall at two to six characters a second. Like Tortoise it never enters training;
-    it is the second unseen tool and the most recent generator in the study.
+    it is the second unseen tool.
   \item \textbf{CM08}, XTTS-v2 clones of the 227 extra adaptation speakers: 1{,}759 of
     1{,}816 (96.9\%), used only for training.
   \item \textbf{CM09}, clones by Chatterbox Multilingual (Resemble AI, MIT licence), a
@@ -184,8 +186,8 @@ requested.
 Clean and channel copies of every evaluation set are retained separately, so the
 channel effect stays separable from the language effect throughout the results.
 
-G.711 is the fixed-line codec and nearly transparent; mobile calls are carried by AMR-NB,
-which models the voice and discards the rest. As a check on the simulation, the
+G.711 is the fixed-line codec and nearly transparent; 2G and 3G mobile calls are carried
+by AMR-NB (4G voice by AMR-WB), which models the voice and discards the rest. As a check on the simulation, the
 new-speaker, IndicF5 and CM04 sets are also passed through the reference AMR-NB
 encoder at 12.2~kbit/s and decoded back, with no added noise, so that condition isolates
 a real mobile codec.
@@ -210,7 +212,9 @@ is auditable without the audio being distributed.
 
 \textbf{Licensing constrains what a release could contain.} MUCS is CC BY-SA 4.0, so
 clones derived from MUCS references inherit ShareAlike. HiACC is CC BY 4.0, ASVspoof
-is under its own research licence, and one surveyed corpus is non-commercial only.
+is under its own research licence, and one surveyed corpus is non-commercial only. The
+clones are XTTS-v2 output, which the Coqui Public Model Licence restricts to
+non-commercial use; this work is non-commercial academic research.
 Any future release of the code-mixed spoof set must satisfy the strictest of these.
 
 \subsection{What the composition cannot tell us}
