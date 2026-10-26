@@ -75,6 +75,10 @@ recipe's own training, 7.59% against 22.37%). Two explanations in the results se
 no experiment tested (why the Tortoise floors reach chance on new speakers, why AMR-NB hurts
 the channel-trained adapter more) are now marked as likely, not stated as findings.
 
+Two tables in the long paper ran about a third of an inch past their column in the Overleaf
+build: the training settings and the week-13 sets with their intervals. Both now use the
+smaller type and tighter column spacing the paper's other wide tables use.
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
