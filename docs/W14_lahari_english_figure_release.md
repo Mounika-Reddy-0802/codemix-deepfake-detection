@@ -44,6 +44,34 @@ system with its architecture figure and the 60 s call results, and a limitations
 Every number is taken from the long paper. The page count is checked in Overleaf, since the
 laptop has no LaTeX.
 
+### A consistency pass over both papers
+
+Before submission I checked every number that appears in more than one place, in both papers
+and the model card, against the result files and the manifests. Every reference, citation and
+table row resolves. These did not agree, and are fixed:
+
+- The deployed recipe is retrained inside each comparison (the seed study, the 248-speaker run
+  and the final-recipe run), so its five-seed numbers differ a little between tables: CM04 over
+  the channel is 35.59%, 33.46% and 36.2%. Both papers now say so. Every comparison is still
+  made within one run, and the differences sit inside the seed spread.
+- The attack table listed CM01 (3,998 clones of the training pool) as the seen-tool test set.
+  The seen-tool test set is the 2,400 clones of the evaluation pool (`codemix_eval.csv`). CM01
+  was kept out of training so that S2 and S3 see the same data (P-028).
+- IndicF5 and Chatterbox share 651 genuine clips of 75 speakers, and the clones that pass
+  screening cover 54 and 61 of them. The tables had given 54 and 61 as the speakers of each set.
+- Smaller fixes:
+  - The language-control set has equal numbers per speaker only where the recordings allow
+    (439, 412 and 439 clips).
+  - The measured SNR is 18.8 dB against the 20 dB requested; the text had said the two match.
+  - The figure of 12 to 15 speakers per test set holds for the original test sets only.
+  - S3's 0.83% is the lowest seen-tool error of the three systems, not of the whole study:
+    SSL-AASIST is lower.
+- In the 60 s call tables, "warned" counts any alert, a caution or worse. The final recipe's
+  ladder is a caution after three windows and "likely cloned" after five, but the model card
+  had called the first level a warning.
+
+The real-call numbers were left alone here, since they change when the last calls are in.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The

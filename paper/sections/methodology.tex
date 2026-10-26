@@ -44,7 +44,7 @@ test sets hold 15 + 12 speakers none of them has heard
 (Section~\ref{sec:data-speakers}).
 % configs/data/splits.yaml; docs/datasheet.md
 
-\textbf{Code-mixed synthetic speech.} Four attack sets are built from these pools
+\textbf{Code-mixed synthetic speech.} The attack sets are built from these pools
 (Table~\ref{tab:attacks}). XTTS-v2~\cite{casanova2024xtts} zero-shot clones are made
 for both pools, so at test time XTTS is a \emph{seen tool on unseen speakers}.
 RVC~\cite{rvc2023} converts one MUCS speaker into another. Its conversions are split
@@ -56,20 +56,23 @@ any training manifest, and an automated test fails the build if it does.
 
 \begin{table}[t]
 \centering
-\caption{Code-mixed attack sets. Usable clips passed the quality screen.}
+\caption{Code-mixed attack sets. Usable: clips kept after generation and screening.}
 \label{tab:attacks}
 \small
 \begin{tabular}{@{}llrl@{}}
 \toprule
 Set  & Tool      & Usable  & Role \\
 \midrule
-CM01 & XTTS-v2   & 3{,}998 & test, seen tool \\
+CM01 & XTTS-v2   & 3{,}998 & training pool, unused\textsuperscript{a} \\
+Eval pool & XTTS-v2 & 2{,}400 & test, seen tool \\
 CM02 & RVC       & 1{,}404 & split: train half, test half \\
 CM03 & XTTS-v2   & 1{,}600 & adaptation only \\
 CM04 & Tortoise  & 458     & test, unseen tool \\
 \bottomrule
+\multicolumn{4}{@{}l}{\footnotesize \textsuperscript{a}Kept out so that S2 and S3 train on the same data.}
 \end{tabular}
-% docs/datasheet.md
+% docs/datasheet.md; data/manifests/eval_generation_jobs.csv, codemix_eval.csv;
+% docs/problems_and_decisions.md P-028 (CM01 not in the normalised bundle)
 \end{table}
 
 \begin{table}[t]
@@ -169,8 +172,8 @@ Training data    & ASVspoof LA & code-mixed & code-mixed \\
 
 We report equal error rate (EER) and area under the ROC curve (AUC), scoring one
 deterministic 4~s crop per clip, with 95\% bootstrap confidence intervals over
-clips~\cite{efron1993bootstrap}. Clips from one speaker are not independent and each
-test set holds only 12--15 speakers, so every comparison between two systems, or
+clips~\cite{efron1993bootstrap}. Clips from one speaker are not independent and the
+original test sets hold only 12--15 speakers each, so every comparison between two systems, or
 between a system and its floor, is made on a paired bootstrap that resamples whole
 speakers (1{,}000 resamples), never by setting two separately computed intervals side
 by side.

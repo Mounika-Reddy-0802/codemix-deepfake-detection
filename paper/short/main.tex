@@ -153,11 +153,13 @@ Evaluation pool (XTTS-v2) & 3,966 & 15 & seen tool \\
 CM04 (Tortoise) & 2,024 & 15 & unseen tool \\
 RVC test half & 619 & 12 & conversion \\
 New speakers (XTTS, Tortoise) & 4,392 & 60 & both \\
-CM07 (IndicF5) & 1,177 & 54 & unseen tool \\
-CM09 (Chatterbox) & 1,176 & 61 & unseen tool \\
+CM07 (IndicF5)\textsuperscript{a} & 1,177 & 75 & unseen tool \\
+CM09 (Chatterbox)\textsuperscript{a} & 1,176 & 75 & unseen tool \\
 HiACC (genuine, spontaneous) & 3,318 & 24 & false alarms \\
 Language control (genuine) & 1,290 & 183 & false alarms \\
 \bottomrule
+\multicolumn{4}{@{}l}{\footnotesize \textsuperscript{a}The same 651 genuine clips; clones of 54}\\
+\multicolumn{4}{@{}l}{\footnotesize and 61 of the 75 speakers pass screening.}
 \end{tabular}
 \end{table}
 
@@ -171,7 +173,7 @@ target of any training conversion appears in the test half. Three generators nev
 training: Tortoise-TTS~\cite{betker2023tortoise} (91.6\% pass),
 IndicF5~\cite{ai4bharat2025indicf5}, a flow-matching Indian-language TTS built on
 F5-TTS~\cite{chen2024f5tts} (86.2\%), and Chatterbox Multilingual from Resemble AI
-(86.1\%), whose clips pair one to one with IndicF5's. A MOS
+(86.1\%), made from the same references and sentences as IndicF5's. A MOS
 predictor~\cite{saeki2022utmos} rates IndicF5 clones level with the same speakers' genuine
 speech (3.07 against 3.10), while XTTS-v2 sits half a point below its genuine speech (2.66
 against 3.17).
@@ -193,9 +195,9 @@ To separate language from recording, each genuine clip of the 183 control speake
 tagged word by word from its transcript, in which MUCS writes Hindi in Devanagari and
 English in Latin script. A clip is all-English or all-Hindi when every tagged word is in
 one language (at least three words), and mixed when its Code-Mixing
-Index~\cite{das2014cmi} is at least 20. Each speaker contributes equal numbers of the three
-kinds from the same lecture recordings, 439, 412 and 439 clips in all, so only the language
-changes.
+Index~\cite{das2014cmi} is at least 20. Each speaker contributes the three kinds in equal
+numbers where the same lecture recordings allow, 439, 412 and 439 clips in all, so only the
+language changes.
 
 \section{Systems and evaluation}
 
@@ -317,8 +319,8 @@ Deployed S2, channel & 4.3  & 4.1  & 2.3  & $-$2.6 [$-$5.8, +0.5] \\
 The deployed adapter reaches 2.75\% EER over the channel on unseen speakers, 7.21 points
 below its matched floor [$-$12.92, $-$1.10], and 3.27\% $\pm$ 1.17 across five seeds,
 while keeping clean English at 2.42\%. It beats its RVC floor in all five seeds (5.33\%
-$\pm$ 1.27). Full fine-tuning (S3) is the most accurate system on the seen tool (0.83\%
-clean), but it sits at chance on English (50.90--56.42\%) in every variant. Each model
+$\pm$ 1.27). Full fine-tuning (S3) is the most accurate of the three systems on the seen tool
+(0.83\% clean), but it sits at chance on English (50.90--56.42\%) in every variant. Each model
 learns its own training domain's idea of genuine speech, and only adaptation keeps both.
 
 The training condition matters as well. The deployed adapter loses little on clean audio
@@ -349,7 +351,9 @@ to 13.59\%, IndicF5 from 35.40\% to 27.25\%, and false alarms on the control spe
 added data are genuine speech and clones by the seen tool, so the gains on unseen tools
 come from a broader idea of genuine speech, not from exposure to the attacks.
 
-The final recipe adds the AMR-NB codec to this (Table~\ref{tab:final}). It is better than
+The final recipe adds the AMR-NB codec to this (Table~\ref{tab:final}). Each comparison
+retrains the deployed recipe in the same run with the same seeds, so its numbers differ a
+little between comparisons, within the seed spread. The final recipe is better than
 the deployed adapter on ten of eleven sets, and in every seed on nine of them: over the
 simulated line new-speaker Tortoise falls from 30.8\% to 8.8\%, and over AMR-NB from
 36.3\% to 6.0\%. Every seed beats its shortcut floor on every set, for example 8.8\%
@@ -440,7 +444,8 @@ detection core does not depend on the carrier. Verdicts reach only the receiver'
 Table~\ref{tab:calls} shows what a caller meets. We replayed test clips through the live
 scoring path and joined clips of one label into 60~s calls. The final recipe's threshold
 was chosen on development calls only, by the rule used for the deployed model: the most
-sensitive setting whose genuine calls raise at most 5\% warnings. On read speech the final
+sensitive setting whose genuine calls raise at most 5\% alerts of any level (for the final
+recipe, a caution after three fake-leaning windows and a warning after five). On read speech the final
 recipe is the better live model. It no longer warns genuine new speakers (44\% of their
 calls to none) and it catches every Tortoise call (33\% to 100\%), but it catches fewer
 IndicF5 and Chatterbox calls, and every genuine spontaneous call raises a warning with
@@ -450,7 +455,7 @@ and unit-tested but has not yet run on live numbers.
 \begin{table}[t]
 \centering
 \caption{60~s calls through the live path: share of genuine calls warned and of fake calls
-caught (reaching a warning). Counts are small (6--41 calls per cell).}
+caught, each meaning a caution or worse. Counts are small (6--41 calls per cell).}
 \label{tab:calls}
 \small
 \setlength{\tabcolsep}{4pt}

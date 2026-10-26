@@ -380,7 +380,7 @@ Table~\ref{tab:new} scores every system in its own training condition.
 \centering
 \caption{EER (\%) on the week-13 sets, each system in its training condition; 95\%
 speaker-bootstrap intervals. New speakers: 60 speakers, 2{,}400 genuine clips.
-IndicF5: 54 speakers, 651 all-Hindi genuine clips.}
+IndicF5: clones of 54 speakers, 651 all-Hindi genuine clips of 75.}
 \label{tab:new}
 \small
 \begin{tabular}{@{}lrrr@{}}
@@ -448,6 +448,10 @@ The deployed S2 adapts on 21 genuine speakers. We retrained the same recipe, cha
 only the training manifest, on 248: the 227 extra adaptation speakers
 (Section~\ref{sec:data-extension}) and their CM08 clones. Both recipes were trained with
 the same five seeds and scored on every set over the channel (Table~\ref{tab:speakers248}).
+Here, as in Sec.~\ref{sec:res-final}, the deployed recipe is retrained in the same run as the
+recipe it is compared with, so its numbers differ a little from table to table (CM04 over the
+channel: 35.59\% in Table~\ref{tab:seeds}, 33.46\% here, 36.2\% in Table~\ref{tab:final}),
+always within the seed-to-seed spread; every comparison is made within one run.
 
 \begin{table}[t]
 \centering
@@ -572,7 +576,7 @@ the same in every seed. IndicF5 (21.7\%) and, below, Chatterbox stay hard.
 Chatterbox (CM09) is a third generator family none of our training data resembles: XTTS-v2
 is an autoregressive decoder, Tortoise adds diffusion, IndicF5 uses flow matching, and
 Chatterbox is a recent multilingual cloner. We scored the same models on its 525 clips
-against the 651 genuine all-Hindi clips of the same speakers (Table~\ref{tab:chatterbox}).
+against the same 651 genuine all-Hindi clips as IndicF5 (Table~\ref{tab:chatterbox}).
 
 \begin{table}[t]
 \centering
