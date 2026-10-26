@@ -101,6 +101,29 @@ two committed PDF figures are drawn again (the PNGs come out byte for byte the s
 nothing in the drawing moved), and two tests fail if a Type 3 font comes back. Any figure added
 later must be drawn through `_style()` or set `PDF_FONTS` itself.
 
+### A reviewer's read of the six-page paper
+
+A read of the six-page paper as a reviewer would read it found places where the text said more
+than the experiment shows, or left a reader to guess. Fixed in that paper, and in the long
+paper where it says the same thing:
+
+- The 248-speaker run added genuine speakers and seen-tool clones of them together, so it
+  cannot say the unseen-tool gains come from more genuine speech. Both papers now say the
+  gains do not come from exposure to the attacks and that a broader idea of genuine speech
+  is the likely reason, which the experiment does not separate.
+- "Keeps English" became "keeps clean English" (English over the line is 24.20%), and the
+  table column says clean. "Closes most of the gap on unseen generators" became "on the
+  unseen Tortoise generator".
+- Missing context a reader needs: who the 21 training speakers are (8 adaptation speakers
+  and 13 RVC source speakers), that SSL-AASIST is fine-tuned in full with RawBoost, that the
+  AASIST comparison is over G.711 in three seeds against our adapter trained on the same
+  data, that Chatterbox is left out of the "eight of eleven sets" count (one adapter seed),
+  that SSL-AASIST was not scored on English, and that three of the five deployed seeds beat
+  the eval-pool floor.
+- "Recording domain" is now defined where it is first claimed: the corpus as a whole, its
+  recording conditions and its speakers, which the language-control test does not separate.
+  HiACC is described as differing from the lectures in both speaking style and recording.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The
