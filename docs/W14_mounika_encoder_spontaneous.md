@@ -58,6 +58,14 @@ every Tortoise test call. The script now says so before the call is played, poin
 second set of demo calls verified on the final recipe (`demo_clips_final`), and explains why
 an uploaded clip can read "spoof" while the same audio as a call stays green (Q31a).
 
+A check of every answer against the paper corrected three more. The 94.8% of genuine speech
+that S1 calls fake is measured on clean audio, so it does not explain the 58.42% over the
+phone line by itself (Q4 and the opening summary). The threshold rule counts alerts of any
+level, not only warnings. And five training seeds back the main comparisons, not every
+claim: Chatterbox for the adapter, English with the final recipe and the spontaneous-speech
+comparisons are one seed each (Q43). A new question, Q47, answers what changed after the
+external review, since the mentor is likely to ask it.
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not

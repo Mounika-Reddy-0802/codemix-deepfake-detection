@@ -23,7 +23,8 @@ are in [`VIVA_QA.md`](VIVA_QA.md).
 
 - "Voice cloning needs seconds of audio. Scam calls in India come in Hindi-English."
 - "A detector trained on English reaches 0.85% EER on English and 58.42% on Hindi-English
-  speech over a phone line. It calls 94.8% of genuine Hindi-English speakers fake."
+  speech over a phone line. Even on clean audio it calls 94.8% of genuine Hindi-English
+  clips fake."
 - "It is not the language mix: on 183 unseen speakers it rejects their genuine English as
   often as their mixed speech. It is the recording domain."
 - Point at the three cards: **listen, score, warn**.
@@ -105,4 +106,4 @@ next." Section 7 of `VIVA_QA.md` has the numbers.
   anti-leakage rules are enforced by tests on every training config.
 - **How was the threshold chosen?** On development calls only, through the live path:
   the most sensitive setting whose genuine 60 s development calls raise at most 5%
-  warnings. It was then validated on held-out speakers, never tuned on them.
+  alerts of any level. It was then validated on held-out speakers, never tuned on them.

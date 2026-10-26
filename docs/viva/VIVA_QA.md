@@ -10,8 +10,8 @@ did not show when that is the honest answer: examiners trust a team that knows i
 Voice-cloning scams in India arrive as phone calls in Hindi-English code-mixed speech.
 Deepfake detectors are trained on English studio speech and report error rates below 1%.
 We measured what happens to such a detector on Hindi-English speech over a telephone line:
-its error rate goes from 0.85% to 58.42%, because it calls 94.8% of genuine Hindi-English
-speakers fake. A language-controlled test on 183 unseen speakers showed the cause is the
+its error rate goes from 0.85% to 58.42%, and on clean audio it already calls 94.8% of genuine
+Hindi-English clips fake. A language-controlled test on 183 unseen speakers showed the cause is the
 recording domain, not the code-mixing. We fixed it cheaply with LoRA adapters that train
 1.13% of the parameters, then showed that hearing more genuine voices through a real
 mobile codec closes most of the remaining gap on attack tools the model never saw. Every
@@ -37,9 +37,9 @@ Equal error rate: the error at the threshold where the false-alarm rate on genui
 equals the miss rate on fakes. 50% is chance; lower is better.
 
 **Q4. What exactly fails when the English detector meets Hindi-English speech?**
-It rejects real speakers rather than missing clones. At its operating point it calls 94.8% of
-genuine Hindi-English speech fake but only 0.37% of genuine English, a 256-fold rise in
-false alarms. Over the phone channel its AUC is 0.381: clones look more genuine to it than
+It rejects real speakers rather than missing clones. At its operating point, on clean audio, it
+calls 94.8% of genuine Hindi-English speech fake but only 0.37% of genuine English, a 256-fold
+rise in false alarms. Over the phone channel its AUC on the evaluation pool is 0.381: clones look more genuine to it than
 real people.
 
 ## 3. Data and ethics
@@ -109,7 +109,7 @@ Resampling clips would make intervals look narrower than they are.
 
 **Q17. How did you choose thresholds without cheating?**
 Only on the development set, by a rule fixed in advance: the most sensitive setting whose
-genuine 60-second dev calls raise at most 5% warnings. Test sets never choose anything.
+genuine 60-second dev calls raise at most 5% alerts of any level. Test sets never choose anything.
 
 ## 5. Results
 
@@ -279,9 +279,11 @@ speakers so speaking style cannot become the shortcut); English routing; the lar
 live system; the Twilio leg on live numbers; and harder, commercial attacks.
 
 **Q43. Why should we trust numbers from such small test sets?**
-We do not hide it: intervals come from a speaker-level bootstrap, five training seeds back every
-main claim, and seed-to-seed spread (three to five points on Tortoise) is reported, so a
-single-run difference of that size is not treated as evidence.
+We do not hide it: intervals come from a speaker-level bootstrap, five training seeds back the
+main comparisons, and seed-to-seed spread (three to five points on Tortoise) is reported, so a
+single-run difference of that size is not treated as evidence. The few one-seed results
+(Chatterbox for the adapter, English with the final recipe, the spontaneous-speech
+comparisons) are marked as one seed wherever they appear.
 
 **Q44. Did you tune anything on the test sets?**
 No. Thresholds, checkpoints and recipe choices are made on development data by rules fixed in
@@ -295,13 +297,24 @@ for, and that every result was run, checked and verified by us. Do not deny or p
 Answer from the weekly records in `docs/W*_*.md` and the commit history; each of us should
 describe our own parts and be able to explain the others'.
 
+**Q47. What did you change after the external review?**
+All six comments were taken as mandatory (`docs/external_review_response.md`). Five training
+seeds per system showed our published Tortoise number (30.99%) was a lucky draw, so the paper
+now quotes the five-seed mean (35.59%). For the unseen tools, the answer was more genuine voices
+(21 to 248) and the real AMR-NB codec in training: unseen Tortoise over AMR-NB from 36.3% to
+6.0%. We added 60 new test speakers, 183 language-control speakers, 24 spontaneous speakers and
+real calls; measured English clean for every system we trained and over the phone line for
+S1, the deployed adapter and the final recipe; matched every
+shortcut floor to its detector's own training data; and rebuilt the references (45, each
+checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say so.
+
 ## 10. Numbers to remember
 
 | What | Number |
 |---|---|
 | English detector on English | 0.85% EER |
 | Same detector, Hindi-English over the phone line | 58.42% EER |
-| Genuine Hindi-English speech it calls fake | 94.8% |
+| Genuine Hindi-English speech it calls fake (clean audio) | 94.8% |
 | Trainable share with LoRA | 1.13% |
 | Deployed adapter, phone line, five seeds | 3.27% +/- 1.17 |
 | Unseen Tortoise over AMR-NB: deployed vs final recipe | 36.3% vs 6.0% |
