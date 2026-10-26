@@ -435,8 +435,9 @@ deliver 16~kHz mono audio to one shared detector. A streaming scorer takes a 4~s
 every 2~s, skips silence below $-50$~dBFS, normalises to $-23$~dBFS and scores on a worker
 thread, so a slow window cannot stall the call. One window is too noisy to act on, so a
 verdict ladder escalates only when consecutive windows agree: a caution after two
-fake-leaning windows and a warning after four, with recovery after three genuine-leaning
-ones. On speech this places the first caution near 6~s and the warning near 10~s. Verdicts
+fake-leaning windows and ``likely cloned'', with a spoken warning, after four, with recovery
+after three genuine-leaning ones. On speech this places the first caution near 6~s and the
+spoken warning near 10~s. Verdicts
 go only to the person receiving the call, because a caller who learns they have been
 detected also learns how to evade the detector.
 
@@ -452,11 +453,11 @@ Table~\ref{tab:calls} shows what a caller meets. We replayed test clips through 
 scoring path and joined clips of one label into 60~s calls. The final recipe's threshold
 was chosen on development calls only, by the rule used for the deployed model: the most
 sensitive setting whose genuine calls raise at most 5\% alerts of any level (for the final
-recipe, a caution after three fake-leaning windows and a warning after five). On read speech the final
+recipe, a caution after three fake-leaning windows and ``likely cloned'' after five). On read speech the final
 recipe is the better live model. It no longer warns genuine new speakers (44\% of their
 calls to none) and it catches every Tortoise call (33\% to 100\%), but it catches fewer
-IndicF5 and Chatterbox calls, and every genuine spontaneous call raises a warning with
-either model. The WebRTC carrier is verified end to end; the Twilio carrier is implemented
+IndicF5 and Chatterbox calls, and every genuine spontaneous call is warned by either
+model. The WebRTC carrier is verified end to end; the Twilio carrier is implemented
 and unit-tested but has not yet run on live numbers.
 
 \begin{table}[t]

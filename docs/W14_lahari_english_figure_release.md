@@ -123,6 +123,10 @@ paper where it says the same thing:
 - "Recording domain" is now defined where it is first claimed: the corpus as a whole, its
   recording conditions and its speakers, which the language-control test does not separate.
   HiACC is described as differing from the lectures in both speaking style and recording.
+- The ladder's levels now have one name each, as in the long paper and the code: a caution,
+  then "likely cloned" with a spoken warning. The six-page paper had called the top level "a
+  warning" in the live-system section and "likely cloned" in the real-call paragraph, and
+  said every spontaneous call "raises a warning" where the table counts a caution or worse.
 
 ## What is still open
 
