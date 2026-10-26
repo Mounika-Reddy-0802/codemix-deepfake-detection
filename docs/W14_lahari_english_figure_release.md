@@ -69,6 +69,13 @@ table row resolves. These did not agree, and are fixed:
 - In the 60 s call tables, "warned" counts any alert, a caution or worse. The final recipe's
   ladder is a caution after three windows and "likely cloned" after five, but the model card
   had called the first level a warning.
+- A second check, of the slides, the viva answers and the README against the paper, found
+  two errors in the paper itself. "Over the telephone channel every AUC falls below 0.5"
+  is true for two of the three sets (0.381 and 0.425), not CM04 (0.561). And the 94.8% of
+  genuine speech that S1 calls fake was measured on clean audio, so it explains the clean
+  failure, not the 58.42% over the channel. The six-page paper also said every test set was
+  passed through AMR-NB (only the new-speaker, IndicF5 and CM04 sets are) and that more
+  voices close the gap on three unseen tools (on Tortoise; IndicF5 and Chatterbox stay hard).
 
 The real-call numbers were left alone here, since they change when the last calls are in.
 

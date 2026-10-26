@@ -71,8 +71,8 @@ test of 183 unseen speakers to the recording domain rather than to code-mixing;
 \item closure of the gap by low-rank adapters~\cite{hu2022lora} on a frozen wav2vec~2.0
 encoder~\cite{baevski2020wav2vec}, which keep English where full fine-tuning loses it;
 \item evidence that more genuine voices and a real mobile codec, not more attack tools,
-close most of the remaining gap on three unseen generators, over five training seeds and
-with a larger encoder;
+close most of the remaining gap on the unseen Tortoise generator, over five training seeds
+and with a larger encoder, while IndicF5 and Chatterbox stay hard;
 \item matched shortcut floors with a paired speaker bootstrap for every claim, which
 changed several of our own conclusions; and
 \item a live-call system that runs the same detector and operating point, and warns only
@@ -186,8 +186,8 @@ alone separated the classes, and an early 1.34\% result had no margin over cheap
 statistics, so we withdrew it. The telephone condition resamples to 8~kHz, applies G.711
 $\mu$-law~\cite{itu1988g711} and white noise at 20~dB SNR, seeded per clip, and resamples
 back; energy above 4~kHz falls from 0.185\% to 0.0001\% of the total. As a check on the
-simulation, the test sets are also passed through the reference AMR-NB mobile codec at
-12.2~kbit/s.
+simulation, the new-speaker, IndicF5 and CM04 sets are also passed through the reference
+AMR-NB mobile codec at 12.2~kbit/s.
 
 \subsection{A language-controlled set}
 
@@ -252,8 +252,9 @@ so an unmatched floor would understate the detector.
 
 S1 is a strong English detector (0.85\% EER, AUC 0.994) and fails on every code-mixed set
 (Table~\ref{tab:main}): 41.67--48.21\% EER on clean audio and 44.15--58.42\% over the
-channel, where every AUC falls below 0.5. It fails by rejecting real speakers. At its
-operating point it calls 94.8\% of genuine Hindi--English speech fake, against 0.37\% of
+channel, where the AUC falls below 0.5 on two of the three sets. It fails by rejecting real
+speakers. At its operating point it calls 94.8\% of genuine clean Hindi--English speech
+fake, against 0.37\% of
 genuine English, a 256-fold rise in false alarms.
 
 \begin{table}[t]

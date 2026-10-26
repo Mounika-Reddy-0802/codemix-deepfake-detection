@@ -50,8 +50,9 @@ speakers. It calls 94.8\% of genuine Hindi--English speech fake on clean audio, 
 a median $P(\text{genuine})$ of 0.0005. The same model at the same operating point
 rejects 0.37\% of genuine English, so changing the language and the recording domain
 raises its false-alarm rate on real speech by a factor of 256.
-Over the telephone channel every AUC falls
-below 0.5, so the clones look \emph{more} genuine to S1 than the real speakers do.
+Over the telephone channel the AUC falls
+below 0.5 on two of the three sets (0.381 and 0.425), so there the clones look \emph{more}
+genuine to S1 than the real speakers do.
 In a deployment this is the more damaging error: nearly every genuine caller would
 be flagged. The model's notion of genuine speech is tied to the recording conditions
 and language of its training data rather than to properties of synthesis. Because
