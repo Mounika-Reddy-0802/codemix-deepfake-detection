@@ -33,6 +33,21 @@ for this reason.
 The results chapter, the conclusion and the four-page version now report the speed and the
 spontaneous result.
 
+## Viva preparation
+
+`docs/viva/VIVA_QA.md` holds the questions an examiner is likely to ask, each with a short
+answer and the one number that matters, read from the long paper: the problem, data and
+ethics, method, results, the live system, the real-call test, the limitations said plainly,
+and a table of numbers to remember. It is written to be understood and then answered in our
+own words, not read out. `docs/viva/demo_script.md` was still the week-10 version; it now
+quotes the current numbers (58.42%, not "about 54%"), adds the language-controlled finding and
+the final recipe, says plainly that the Twilio leg cannot be shown live because the trial
+credit ran out, points to the real-call test instead, and states the threshold rule correctly
+(at most 5% warnings on genuine development calls, not "zero false alarms").
+
+The real-call answers use the first 20 of 30 calls and are updated when the last speaker's
+calls are in.
+
 ## What is still open
 
 Two trainings are enough to show the spread, not to estimate it. The larger encoder has not
