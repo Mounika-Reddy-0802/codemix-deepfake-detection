@@ -72,6 +72,19 @@ table row resolves. These did not agree, and are fixed:
 
 The real-call numbers were left alone here, since they change when the last calls are in.
 
+### The datasheet, brought up to date
+
+`docs/datasheet.md` still described week 9. Its attack table listed CM05-CM09 as
+"not made yet" under IDs first reserved for kNN-VC, IndicSynth and an AffectDF subset, none
+of which was built, and it said S3 trains on CM01. The table now lists the ten sets that
+exist, with the jobs from each committed table and the clips and speakers in each manifest
+(CM05 1,770 of 1,800; CM06 222 of 240; CM07 526 of 610; CM08 1,759 of 1,816; CM09 525 of
+610), the eval-pool set, and who sees each one. The pools table now names the later
+extensions, and a new command at the end reproduces the new rows. The SSL-AASIST tables in
+both papers also gained the original test pool (0.25% against 1.13%), the one set of the
+eleven they had left out, so "better in every seed on eight of eleven sets" can be checked
+against the table.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The
