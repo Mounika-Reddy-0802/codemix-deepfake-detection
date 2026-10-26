@@ -85,6 +85,15 @@ both papers also gained the original test pool (0.25% against 1.13%), the one se
 eleven they had left out, so "better in every seed on eight of eleven sets" can be checked
 against the table.
 
+### Figure fonts for submission
+
+matplotlib writes Type 3 fonts into PDF figures by default, and IEEE PDF eXpress rejects
+them, so the paper would have failed the submission check. The shared figure style and the
+architecture figure now embed TrueType fonts (`PDF_FONTS` in `src/reporting/figures.py`), the
+two committed PDF figures are drawn again (the PNGs come out byte for byte the same, so
+nothing in the drawing moved), and two tests fail if a Type 3 font comes back. Any figure added
+later must be drawn through `_style()` or set `PDF_FONTS` itself.
+
 ## What is still open
 
 The English result is one seed, and the larger encoder was not scored on English. The
