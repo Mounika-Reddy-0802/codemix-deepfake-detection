@@ -365,7 +365,9 @@ def create_app(state: App | None = None) -> FastAPI:
         config = shared.detector.config()
         score_fn = shared.detector.score_fn()
         loop = asyncio.get_running_loop()
-        threshold = Threshold(config.threshold, "configs/threshold.yaml", provisional=False)
+        threshold = Threshold(
+            config.threshold, shared.detector.settings.threshold_file, provisional=False
+        )
 
         def run():
             from src.inference.streaming import StreamingScorer

@@ -25,6 +25,12 @@ docs/ethics/*.jpeg
 gpu-laptop-bundle/
 gpu-laptop-bundle.zip
 
+# Kaggle result zips and Overleaf exports are downloaded into the repo root. Some carry
+# clones of the team's own voices from the real-call test, which the consent form keeps out
+# of git, and all of them are one `git add -A` away from history. Results that matter are
+# committed unzipped under experiments/results/.
+/*.zip
+
 # --- Large corpora & model artifacts: local / Kaggle only ---
 # Track the directory skeleton (.gitkeep) but ignore all real data files.
 data/**

@@ -2,7 +2,9 @@
 
 A cloned voice on a call makes the **receiver** hear a warning, the receiver's
 dashboard turn red, and an SMS arrive. The caller hears nothing. The same pipeline
-runs over a browser call (WebRTC) and over a real phone call (Twilio).
+runs over a browser call (WebRTC) and over a real phone call (Twilio). The browser path is
+verified end to end; the Twilio path is implemented and tested, but has not yet run on live
+numbers, because the trial credit ran out.
 
 ```
 caller audio ──▶ 16 kHz PCM frames ──▶ 4 s windows every 2 s ──▶ detector ──▶ verdict ladder ──▶ alerts
@@ -59,7 +61,13 @@ pip install -r requirements.txt
    ```bash
    set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
    set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
+   set DEMO_CLIPS_DIR=<data>/demo_clips_final
    ```
+
+   `demo_clips_final` holds the same five calls verified on the final recipe (step 2 with
+   `--checkpoint <data>/checkpoints/final_s1234_best.pt --threshold-file
+   configs/threshold_final.yaml --out <data>/demo_clips_final`). Its Tortoise demo call stays
+   green, as it does for the deployed model; say so before playing it.
 
 4. Open <http://localhost:8000>. The status pills at the top must read
    **model: lora_norm_rvc_channel_best.pt**, **threshold: 0.500** and
@@ -97,7 +105,9 @@ second laptop, expose the server with ngrok (below) and open the https URL.
    On `LIKELY_FAKE` it announces a stronger warning and **sends an SMS** to the
    receiver. At hang-up, an SMS summary.
 
-Every Twilio request is checked against its `X-Twilio-Signature`.
+Every Twilio webhook request is checked against its `X-Twilio-Signature` (unless
+`TWILIO_VALIDATE=0`). The media WebSocket itself is not authenticated; anyone who knows the
+public URL could open it, so the server should not be left exposed between demonstrations.
 
 ### Setup (about 15 minutes)
 
@@ -164,7 +174,10 @@ fake-leaning windows and a strong warning after **4**. It was chosen by
 | Unseen tool (Tortoise) | 0% (0 / 15) | 33% (2 / 6) |
 
 Full sweep and per-clip numbers: `experiments/results/threshold_calibration.json`.
-Demo call verification: `experiments/results/demo_clips_verification.json`.
+Demo call verification: `experiments/results/demo_clips_verification.json` (deployed
+adapter) and `demo_clips_final_verification.json` (final recipe, demo calls in
+`<data>/demo_clips_final`). The Tortoise demo call stays green for both models (0 and 2 of
+22 windows fake-leaning), although the final recipe catches every Tortoise test call.
 
 **Known limit, say it in the demo:** the deployed phone-line model does not reliably
 catch a cloning tool it has never seen (Tortoise). That is a measured result of the
