@@ -9,7 +9,8 @@ Configuration comes from the environment, so the same code runs on the laptop an
 on a server:
 
 - ``DFD_CHECKPOINT``: detector checkpoint (S1, S2 LoRA or S3; an SSL-AASIST checkpoint,
-  ``ssl`` in its file name, loads through ``src.inference.predict.load_ssl_aasist``), required;
+  ``ssl`` in its file name, loads as ``kind="ssl_aasist"`` through
+  ``src.inference.predict.load_score_fn``), required;
 - ``DFD_THRESHOLD_FILE``: frozen operating point, default ``configs/threshold.yaml``;
 - ``DFD_DEVICE``: ``cpu`` (default) or ``cuda``.
 """
@@ -76,15 +77,10 @@ class DetectorService:
                         )
                     from src.inference import predict
 
-                    if is_ssl_aasist(self.settings.checkpoint):
-                        self._score_fn = predict.load_ssl_aasist(
-                            self.settings.checkpoint, device=self.settings.device
-                        )
-                    else:
-                        model, device = predict.load_detector(
-                            self.settings.checkpoint, device=self.settings.device
-                        )
-                        self._score_fn = predict.make_score_fn(model, device)
+                    kind = "ssl_aasist" if is_ssl_aasist(self.settings.checkpoint) else "adapter"
+                    self._score_fn = predict.load_score_fn(
+                        self.settings.checkpoint, kind=kind, device=self.settings.device
+                    )
         return self._score_fn
 
     def status(self) -> dict:

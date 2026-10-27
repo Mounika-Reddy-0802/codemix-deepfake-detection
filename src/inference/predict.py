@@ -140,30 +140,6 @@ def load_detector(checkpoint: str, encoder: str = "wav2vec2-base", device: str |
     return model.to(resolved).eval(), resolved
 
 
-def load_ssl_aasist(checkpoint: str, device: str | None = None):
-    """SSL-AASIST (the larger encoder) as a ``window -> P(bonafide)`` callable.
-
-    It reads a fixed 64,600 samples, so each 4 s live window is repeated to that length
-    exactly as ``src.baselines.aasist`` scores a clip; the softmax of its two logits is
-    the same P(bonafide) the wav2vec2 detectors return.
-    """
-    import torch
-
-    from src.baselines.aasist import SSL, _logits, build, fixed_length
-    from src.utils.device import resolve_device
-
-    resolved = resolve_device(device)
-    model = build(checkpoint, resolved, kind=SSL).eval()
-
-    def score(window: np.ndarray) -> float:
-        wave = torch.from_numpy(fixed_length(window.astype(np.float32))).unsqueeze(0)
-        with torch.no_grad():
-            logits = _logits(model(wave.to(resolved))).float()
-            return float(torch.softmax(logits, dim=1)[0, 1])
-
-    return score
-
-
 def make_score_fn(model, device: str):
     """Wrap a loaded detector as a ``window -> P(bonafide)`` callable."""
     import torch
