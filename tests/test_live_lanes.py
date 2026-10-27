@@ -125,6 +125,39 @@ def test_every_lane_scores_the_same_windows_with_its_own_ladder():
     assert {m["lane"] for m in sent} == {"S1 (English only)", "Final recipe"}
 
 
+def test_an_ssl_aasist_lane_loads_through_its_own_loader(monkeypatch, tmp_path):
+    from src.inference import predict
+
+    ckpt = tmp_path / "ssl_aasist_final_s1234.pt"
+    ckpt.write_bytes(b"x")
+    monkeypatch.setattr(predict, "load_ssl_aasist", lambda path, device=None: lambda w: 0.7)
+    lanes = build_lanes(
+        parse_lanes(f"SSL-AASIST={ckpt}=configs/threshold_final.yaml"),
+        DetectorService(DetectorSettings("", "", "cpu")),
+    )
+    assert lanes[0].role == "ssl" and lanes[0].colour == "#8b6cff"
+    assert lanes[0].detector.score_fn()(np.zeros(64000, dtype=np.float32)) == 0.7
+
+
+def test_the_ssl_aasist_score_is_its_softmax_on_a_full_input(monkeypatch):
+    torch = pytest.importorskip("torch")
+    from src.baselines import aasist
+    from src.inference import predict
+
+    seen = []
+
+    class Stand(torch.nn.Module):
+        def forward(self, wave):
+            seen.append(tuple(wave.shape))
+            return torch.tensor([[0.0, 2.0]])
+
+    monkeypatch.setattr(aasist, "build", lambda weights, device, kind: Stand())
+    score = predict.load_ssl_aasist("ssl.pt", device="cpu")
+    p = score(np.zeros(64000, dtype=np.float32))
+    assert seen == [(1, aasist.NB_SAMP)]  # a 4 s window repeated to AASIST's fixed length
+    assert p == pytest.approx(float(torch.softmax(torch.tensor([0.0, 2.0]), 0)[1]))
+
+
 # --------------------------------------------------------------------------- endpoints
 fastapi = pytest.importorskip("fastapi")
 pytest.importorskip("httpx")

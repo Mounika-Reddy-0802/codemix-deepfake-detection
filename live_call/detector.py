@@ -8,7 +8,8 @@ one thread keeps windows from different calls in arrival order.
 Configuration comes from the environment, so the same code runs on the laptop and
 on a server:
 
-- ``DFD_CHECKPOINT``: detector checkpoint (S1, S2 LoRA or S3), required;
+- ``DFD_CHECKPOINT``: detector checkpoint (S1, S2 LoRA or S3; an SSL-AASIST checkpoint,
+  ``ssl`` in its file name, loads through ``src.inference.predict.load_ssl_aasist``), required;
 - ``DFD_THRESHOLD_FILE``: frozen operating point, default ``configs/threshold.yaml``;
 - ``DFD_DEVICE``: ``cpu`` (default) or ``cuda``.
 """
@@ -22,6 +23,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from live_call.verdict_engine import EngineConfig, load_config
+
+
+def is_ssl_aasist(checkpoint: str) -> bool:
+    """SSL-AASIST checkpoints carry ``ssl`` in their file name and need their own loader."""
+    return "ssl" in Path(checkpoint).name.lower()
 
 
 @dataclass
@@ -68,12 +74,17 @@ class DetectorService:
                         raise FileNotFoundError(
                             f"DFD_CHECKPOINT not found: {self.settings.checkpoint!r}"
                         )
-                    from src.inference.predict import load_detector, make_score_fn
+                    from src.inference import predict
 
-                    model, device = load_detector(
-                        self.settings.checkpoint, device=self.settings.device
-                    )
-                    self._score_fn = make_score_fn(model, device)
+                    if is_ssl_aasist(self.settings.checkpoint):
+                        self._score_fn = predict.load_ssl_aasist(
+                            self.settings.checkpoint, device=self.settings.device
+                        )
+                    else:
+                        model, device = predict.load_detector(
+                            self.settings.checkpoint, device=self.settings.device
+                        )
+                        self._score_fn = predict.make_score_fn(model, device)
         return self._score_fn
 
     def status(self) -> dict:
