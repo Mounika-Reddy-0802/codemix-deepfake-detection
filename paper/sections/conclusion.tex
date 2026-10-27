@@ -40,7 +40,12 @@ calls and takes five of six clone calls of the seen tool to ``likely cloned'', f
 later in the call than offline, but none of an unseen one;
 rebuilding the call chain on direct
 recordings shows that the real mobile codec takes the deployed model to its threshold on average, so the final
-recipe is the model the live system should run now.
+recipe is the model the live system should run now. The larger encoder, at its own operating
+point chosen the same way, does better on the same calls: it warns one genuine live call of
+twelve and takes every seen-tool clone call and one unseen-tool call of six to ``likely
+cloned''. That is one checkpoint. On held-out calls it also warns 11 of 41 genuine
+spontaneous calls where the final recipe warns all 41, but its trainings differ on spontaneous
+speech, so a second checkpoint must agree before it replaces the final recipe.
 
 \subsection{What we could not do}
 
@@ -83,7 +88,10 @@ threshold over 60\,s calls, choosing nothing, every threshold that catches all T
 warns at least 38 of 41 genuine spontaneous calls, and the thresholds that warn fewer than
 half catch 4 of 18 unseen-tool calls or fewer.
 Adaptation taught the model what genuine lecture recordings sound like, not genuine
-Hindi--English speech in general.
+Hindi--English speech in general. The larger encoder can be an exception: one checkpoint, at
+its own operating point, warns 11 of the 41 calls while catching every Tortoise call
+(Sec.~\ref{sec:real-calls}), and of two earlier trainings one looked like it on these clips and
+one did not (Sec.~\ref{sec:res-finalssl}).
 
 \textbf{The deployed model is for Hindi--English calls only.} English passed through
 the same telephone channel rises to 24.20\% EER, against 6.50\% for the English-only
@@ -146,7 +154,9 @@ did not register a 9-point gain on the unseen tool, so choosing among detectors 
 a validation split built from a synthesis tool held out from training, separate from
 the one used for testing.
 
-Beyond that: running the final recipe in the live system, which the real calls support;
+Beyond that: running the final recipe in the live system, which the real calls support, and
+a second SSL-AASIST checkpoint on the real and spontaneous calls, to see whether the larger
+encoder should replace it;
 exercising the telephony carrier on live numbers; real development calls, to set a stricter
 speech gate for the first seconds of a call and the operating point together, since the false
 alarms on genuine live calls start with the quiet before the first word but do not end there;

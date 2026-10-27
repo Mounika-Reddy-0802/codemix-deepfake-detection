@@ -155,8 +155,9 @@ Chatterbox, against 31.98% for our adapter.
 
 **Q24. Why not deploy SSL-AASIST then?**
 It is the candidate for the next release: it keeps up with a live call even on two CPU threads
-(1.14 s per window, inside the 2 s hop). But on spontaneous speech two trainings with equal
-development scores call 5.8% and 46.7% of genuine clips fake, so it is not yet reliable.
+(1.14 s per window, inside the 2 s hop), and on our 30 real calls it did better than the final
+recipe (Q33a). But on spontaneous speech two trainings with equal development scores call 5.8%
+and 46.7% of genuine clips fake, so it is not yet reliable.
 
 **Q25. Which attack is hardest?**
 It depends on the detector. For our adapters, Chatterbox (32.0%, one seed). For the larger
@@ -228,6 +229,20 @@ the same speaker's; one reached "likely cloned"), took five of six XTTS-v2 clone
 "likely cloned", and none of the six Chatterbox clone calls (it only cautioned one), which
 matches Chatterbox being the adapter's hardest unseen tool offline. With twelve calls a
 percentage moves in steps of 8 points: one of twelve is a 95% interval of 1.5-35%.
+
+**Q33a. And the larger encoder on the same calls?**
+It did better. We retrained SSL-AASIST on Kaggle with the week-13 settings so its weights could
+be kept, chose its operating point on the same 506 dev clips by the same rule before scoring
+any call (threshold 0.580, caution after two windows, "likely cloned" after four), and scored
+the 30 calls. Over G.711 it warned one of twelve genuine live calls (a caution 48 s in, none
+"likely cloned"), took all six XTTS-v2 calls to "likely cloned" (four of them 10-14 s in),
+caught one Chatterbox call and cautioned two, and, like the final recipe, took one of six
+genuine replays to "likely cloned". If asked how sure: it is one checkpoint, and offline it is
+the weakest of six trainings on Chatterbox (21.2% against 8.2-18.3%), so this is a reason to
+test it next, not proof it is better. On held-out 60 s calls at the same operating
+point it also warned only 11 of 41 genuine spontaneous calls (the final recipe warns all 41),
+but two earlier trainings of this encoder disagreed on spontaneous speech, so a second
+checkpoint has to agree before it replaces the final recipe.
 
 **Q34. Why does the deployed model fail on real calls?**
 We rebuilt the call chain on each speaker's direct recordings, one stage at a time. Over the six
@@ -354,5 +369,6 @@ checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say 
 | Unseen Tortoise over AMR-NB: deployed vs final recipe | 36.3% vs 6.0% |
 | False alarms: 21 vs 248 genuine speakers | 3.40% vs 0.47% |
 | SSL-AASIST on Chatterbox (final data) | 12.86% |
+| Real calls, SSL-AASIST: genuine live warned / XTTS-v2 / Chatterbox "likely cloned" | 1 of 12 / 6 of 6 / 1 of 6 |
 | First caution / warning on a live call | about 6 s / 10 s (deployed); 8 s / 12 s (final recipe) |
 | Speakers in the language-controlled test | 183 |

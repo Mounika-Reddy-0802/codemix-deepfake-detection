@@ -243,6 +243,24 @@ their three caught XTTS-v2 calls reach a caution 18--32\,s in and ``likely clone
 in, where the five-window ladder could reach ``likely cloned'' after 12\,s; the third speaker's two are caught at
 12 and 14\,s.
 
+\textbf{The larger encoder does better on these calls.} SSL-AASIST fine-tuned on the
+final-recipe data (Sec.~\ref{sec:res-finalssl}), at its own operating point chosen on the same
+dev clips by the same rule (threshold 0.580, a caution after two fake-leaning windows and
+``likely cloned'' after four), warns one of the twelve genuine live calls, a caution 48\,s in,
+and takes none to ``likely cloned''. It takes all six XTTS-v2 calls to ``likely cloned'', four
+of them 10--14\,s into the call, and of the Chatterbox calls it catches one and cautions two.
+Against the genuine replays one of six reaches ``likely cloned'', as for the final recipe, and
+its window-level EER against them is 4.4\% on XTTS-v2 and 36.6\% on Chatterbox. Its genuine
+live calls show no early dip (mean 0.98 over the first 10\,s). Its shorter ladder makes it
+faster and, by itself, more prone to false alarms, yet it warns fewer genuine calls. It is one
+checkpoint, a retraining of seed 1234 kept for this test; GPU training does not repeat
+exactly, and offline this one is the weakest of six trainings on Chatterbox (21.2\% against
+8.2--18.3\%). On the held-out 60\,s calls that validate the operating points it warns no genuine
+read-speech call and 11 of 41 genuine spontaneous calls (HiACC; one ``likely cloned''), where
+the final recipe warns all 41; but trainings of this encoder differ on spontaneous speech
+(Sec.~\ref{sec:res-finalssl}), so a second checkpoint must agree before it replaces the final
+recipe.
+
 \textbf{The final recipe's false alarms come early in a call.} Over the first 10\,s its mean
 score on genuine live calls is 0.79, after 20\,s 0.98. Part of the cause is the first window,
 which spans the quiet before the first word (median $-30$\,dBFS, against $-21$ to $-26$ for the

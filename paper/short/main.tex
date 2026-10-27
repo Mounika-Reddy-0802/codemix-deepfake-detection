@@ -34,8 +34,8 @@ another unseen generator. The main results are tested against a shortcut floor o
 signal statistics by a paired speaker bootstrap. Spontaneous speech, IndicF5 and, for the adapters, Chatterbox
 remain unsolved. The detector runs on live calls, warning only the callee. On 30 real mobile
 calls scored offline, the deployed model, failing mostly at the mobile codec, warns most
-genuine live calls, the final recipe one in four, and flags five of six seen-tool clone calls as
-likely cloned.
+genuine live calls, the final recipe one in four and the larger encoder one in twelve; these two
+flag five and six of six seen-tool clone calls as likely cloned.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -485,7 +485,9 @@ and none of the third's. The final recipe warns three of twelve genuine live cal
 ``likely cloned''), all from one speaker, and takes five of six XTTS-v2 clone calls to
 ``likely cloned'' (for two speakers only 30--46~s into the call) and none of six Chatterbox
 calls (it cautions one). Against the fair control, the genuine replays that share the
-clones' loudspeaker path, one of six reaches ``likely cloned''. Rebuilding the call chain on
+clones' loudspeaker path, one of six reaches ``likely cloned''. SSL-AASIST, one checkpoint at its
+own operating point chosen on the same dev clips, does better: it warns one genuine live call
+of twelve, takes all six XTTS-v2 calls to ``likely cloned'' and catches one Chatterbox call. Rebuilding the call chain on
 our direct recordings (Fig.~\ref{fig:realchain}) shows the real AMR-NB codec is the largest
 step in the deployed model's failure: averaged over six readings its mean P(genuine) is 0.75
 through the simulated line and 0.50 through AMR-NB (two readings cross the threshold there;

@@ -158,6 +158,25 @@ def _logits(output):
     return output[1] if isinstance(output, tuple) else output
 
 
+def window_score_fn(model, device: str = "cpu"):
+    """Wrap a loaded (SSL-)AASIST as a ``window -> P(bonafide)`` callable for the live path.
+
+    A 4 s window is brought to the training length the same way a short clip is in
+    training (``fixed_length``: repeated to ``NB_SAMP``), then scored.
+    """
+    import torch
+
+    model.eval()
+
+    def score(window: np.ndarray) -> float:
+        wave = fixed_length(np.asarray(window, dtype=np.float32))
+        with torch.no_grad():
+            logits = _logits(model(torch.from_numpy(wave).unsqueeze(0).to(device)))
+        return float(torch.softmax(logits.float(), dim=1)[0, 1])
+
+    return score
+
+
 def score(
     model,
     df: pd.DataFrame,

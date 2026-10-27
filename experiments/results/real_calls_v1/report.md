@@ -216,3 +216,107 @@ silence (how much of a verdict rests on the quiet before the first word):
 | genuine_live | none | 12 | 8.3% | 8.3% |
 | genuine_replay | none | 6 | 16.7% | 16.7% |
 
+## ssl_aasist_recorded (threshold 0.580, ladder [2, 4])
+
+| Calls | Tool | n | Caution [95% CI] | Likely cloned [95% CI] | Median first caution (s) |
+|---|---|---|---|---|---|
+| clone_replay | chatterbox | 6 | 50.0% [18.8, 81.2] | 33.3% [9.7, 70.0] | 12 |
+| clone_replay | xtts_v2 | 6 | 100.0% [61.0, 100.0] | 100.0% [61.0, 100.0] | 10 |
+| genuine_live | none | 12 | 0.0% [0.0, 24.3] | 0.0% [0.0, 24.3] | - |
+| genuine_replay | none | 6 | 16.7% [3.0, 56.4] | 16.7% [3.0, 56.4] | 40 |
+
+| Genuine side | Tool | Window EER | Windows (genuine, clone) |
+|---|---|---|---|
+| genuine_replay | xtts_v2 | 4.41% | [158, 205] |
+| genuine_replay | chatterbox | 36.56% | [158, 162] |
+| genuine_live | xtts_v2 | 3.41% | [352, 205] |
+| genuine_live | chatterbox | 32.69% | [352, 162] |
+
+Mean window score (P(genuine)) by time in the call:
+
+| Calls | Tool | 0-10 s | 10-20 s | after 20 s |
+|---|---|---|---|---|
+| clone_replay | chatterbox | 0.834 | 0.771 | 0.872 |
+| clone_replay | xtts_v2 | 0.158 | 0.073 | 0.054 |
+| genuine_live | none | 0.986 | 0.989 | 0.974 |
+| genuine_replay | none | 0.993 | 0.957 | 0.934 |
+
+Per speaker (calls warned and taken to 'likely cloned'):
+
+| Speaker | Calls | Tool | n | Caution | Likely cloned |
+|---|---|---|---|---|---|
+| P1 | clone_replay | chatterbox | 2 | 0 | 0 |
+| P1 | clone_replay | xtts_v2 | 2 | 2 | 2 |
+| P1 | genuine_live | none | 4 | 0 | 0 |
+| P1 | genuine_replay | none | 2 | 0 | 0 |
+| P2 | clone_replay | chatterbox | 2 | 1 | 1 |
+| P2 | clone_replay | xtts_v2 | 2 | 2 | 2 |
+| P2 | genuine_live | none | 4 | 0 | 0 |
+| P2 | genuine_replay | none | 2 | 0 | 0 |
+| P3 | clone_replay | chatterbox | 2 | 2 | 1 |
+| P3 | clone_replay | xtts_v2 | 2 | 2 | 2 |
+| P3 | genuine_live | none | 4 | 0 | 0 |
+| P3 | genuine_replay | none | 2 | 1 | 1 |
+
+Diagnostic, chooses nothing: the same calls with each first window treated as
+silence (how much of a verdict rests on the quiet before the first word):
+
+| Calls | Tool | n | Caution | Likely cloned |
+|---|---|---|---|---|
+| clone_replay | chatterbox | 6 | 66.7% | 33.3% |
+| clone_replay | xtts_v2 | 6 | 100.0% | 100.0% |
+| genuine_live | none | 12 | 0.0% | 0.0% |
+| genuine_replay | none | 6 | 16.7% | 16.7% |
+
+## ssl_aasist_g711 (threshold 0.580, ladder [2, 4])
+
+| Calls | Tool | n | Caution [95% CI] | Likely cloned [95% CI] | Median first caution (s) |
+|---|---|---|---|---|---|
+| clone_replay | chatterbox | 6 | 50.0% [18.8, 81.2] | 16.7% [3.0, 56.4] | 14 |
+| clone_replay | xtts_v2 | 6 | 100.0% [61.0, 100.0] | 100.0% [61.0, 100.0] | 10 |
+| genuine_live | none | 12 | 8.3% [1.5, 35.4] | 0.0% [0.0, 24.3] | 48 |
+| genuine_replay | none | 6 | 16.7% [3.0, 56.4] | 16.7% [3.0, 56.4] | 40 |
+
+| Genuine side | Tool | Window EER | Windows (genuine, clone) |
+|---|---|---|---|
+| genuine_replay | xtts_v2 | 4.41% | [158, 205] |
+| genuine_replay | chatterbox | 36.56% | [158, 162] |
+| genuine_live | xtts_v2 | 3.41% | [352, 205] |
+| genuine_live | chatterbox | 32.69% | [352, 162] |
+
+Mean window score (P(genuine)) by time in the call:
+
+| Calls | Tool | 0-10 s | 10-20 s | after 20 s |
+|---|---|---|---|---|
+| clone_replay | chatterbox | 0.832 | 0.760 | 0.866 |
+| clone_replay | xtts_v2 | 0.104 | 0.083 | 0.051 |
+| genuine_live | none | 0.977 | 0.987 | 0.969 |
+| genuine_replay | none | 0.990 | 0.965 | 0.927 |
+
+Per speaker (calls warned and taken to 'likely cloned'):
+
+| Speaker | Calls | Tool | n | Caution | Likely cloned |
+|---|---|---|---|---|---|
+| P1 | clone_replay | chatterbox | 2 | 0 | 0 |
+| P1 | clone_replay | xtts_v2 | 2 | 2 | 2 |
+| P1 | genuine_live | none | 4 | 0 | 0 |
+| P1 | genuine_replay | none | 2 | 0 | 0 |
+| P2 | clone_replay | chatterbox | 2 | 1 | 1 |
+| P2 | clone_replay | xtts_v2 | 2 | 2 | 2 |
+| P2 | genuine_live | none | 4 | 1 | 0 |
+| P2 | genuine_replay | none | 2 | 0 | 0 |
+| P3 | clone_replay | chatterbox | 2 | 2 | 0 |
+| P3 | clone_replay | xtts_v2 | 2 | 2 | 2 |
+| P3 | genuine_live | none | 4 | 0 | 0 |
+| P3 | genuine_replay | none | 2 | 1 | 1 |
+
+Diagnostic, chooses nothing: the same calls with each first window treated as
+silence (how much of a verdict rests on the quiet before the first word):
+
+| Calls | Tool | n | Caution | Likely cloned |
+|---|---|---|---|---|
+| clone_replay | chatterbox | 6 | 66.7% | 16.7% |
+| clone_replay | xtts_v2 | 6 | 100.0% | 100.0% |
+| genuine_live | none | 12 | 8.3% | 0.0% |
+| genuine_replay | none | 6 | 16.7% | 16.7% |
+

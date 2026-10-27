@@ -33,6 +33,15 @@ def test_model_scores_one_batch():
     assert tuple(logits.shape) == (1, 2)
 
 
+def test_window_score_fn_scores_a_live_window():
+    pytest.importorskip("torch")
+    score = aasist.window_score_fn(aasist.build(aasist.WEIGHTS))
+    window = np.random.default_rng(0).normal(0, 0.05, 4 * 16_000).astype(np.float32)
+    p = score(window)  # 4 s, shorter than NB_SAMP: repeated as in training
+    assert 0.0 <= p <= 1.0
+    assert score(window) == pytest.approx(p)  # deterministic: no random crop at inference
+
+
 def test_result_switches_to_false_alarms_for_genuine_only():
     genuine = pd.DataFrame(
         {"label": ["bonafide"] * 4, "speaker": ["a", "a", "b", "b"], "score": [1.0, -1.0, 2.0, 3.0]}
