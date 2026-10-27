@@ -30,7 +30,7 @@ Run::
     python -m src.inference.real_calls score --audio data/real_calls/scored \\
         --deployed CKPT --final CKPT --out experiments/results/real_calls_v1
     python -m src.inference.real_calls report --audio data/real_calls/scored \\
-        --windows experiments/results/real_calls_v1 --md docs/results/real_calls_v1.md
+        --windows experiments/results/real_calls_v1 --md experiments/results/real_calls_v1/report.md
 """
 
 from __future__ import annotations
@@ -289,6 +289,27 @@ def summarise(calls: pd.DataFrame) -> list[dict]:
     return out
 
 
+def by_speaker(calls: pd.DataFrame) -> list[dict]:
+    """Calls warned and taken to 'likely cloned', per speaker and kind of call.
+
+    Three speakers are too few for a rate per speaker; this shows whether the warnings on
+    genuine calls are spread across the speakers or come from one of them.
+    """
+    out = []
+    for (speaker, kind, tool), group in calls.groupby(["speaker", "kind", "tool"], sort=True):
+        out.append(
+            {
+                "speaker": speaker,
+                "kind": kind,
+                "tool": tool,
+                "calls": int(len(group)),
+                "caution": int(group["caution"].sum()),
+                "likely_cloned": int(group["likely_cloned"].sum()),
+            }
+        )
+    return out
+
+
 def window_eer(windows: pd.DataFrame, calls: pd.DataFrame, genuine_kind: str, tool: str) -> dict:
     """Window-level EER (%) of one tool's cloned calls against one kind of genuine call."""
     from src.training.metrics import compute_eer
@@ -407,6 +428,7 @@ def report(audio: Path, windows_dir: Path, plan: pd.DataFrame = CALL_PLAN) -> di
                 "threshold": config.threshold,
                 "ladder": [config.suspicious_after, config.fake_after],
                 "summary": summarise(calls),
+                "by_speaker": by_speaker(calls),
                 "window_eer": [
                     window_eer(windows, calls, genuine, tool)
                     for genuine in ("genuine_replay", "genuine_live")
@@ -475,6 +497,19 @@ def report_markdown(result: dict) -> str:
         for row in entry.get("by_phase", []):
             cells = ["-" if row[label] is None else f"{row[label]:.3f}" for label in labels]
             out.append(f"| {row['kind']} | {row['tool']} | " + " | ".join(cells) + " |")
+        if entry.get("by_speaker"):
+            out += [
+                "",
+                "Per speaker (calls warned and taken to 'likely cloned'):",
+                "",
+                "| Speaker | Calls | Tool | n | Caution | Likely cloned |",
+                "|---|---|---|---|---|---|",
+            ]
+            for row in entry["by_speaker"]:
+                out.append(
+                    f"| {row['speaker']} | {row['kind']} | {row['tool']} | {row['calls']} | "
+                    f"{row['caution']} | {row['likely_cloned']} |"
+                )
         if entry.get("first_window_skipped"):
             out += [
                 "",
@@ -517,7 +552,8 @@ def main() -> None:
     rp = sub.add_parser("report")
     rp.add_argument("--audio", required=True)
     rp.add_argument("--windows", required=True)
-    rp.add_argument("--md", default="docs/results/real_calls_v1.md")
+    # the generated report; docs/results/real_calls_v1.md is the hand-written write-up
+    rp.add_argument("--md", default="experiments/results/real_calls_v1/report.md")
     args = parser.parse_args()
 
     if args.cmd == "plan":

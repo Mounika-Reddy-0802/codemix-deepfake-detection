@@ -206,6 +206,11 @@ def missing_inputs() -> list[tuple[str, str]]:
 # --------------------------------------------------------------------------- #
 # Plotting (matplotlib imported lazily)
 # --------------------------------------------------------------------------- #
+#: Embed TrueType fonts in PDF figures. matplotlib's default writes Type 3 fonts, which
+#: IEEE PDF eXpress rejects, so a paper built from those figures would not pass submission.
+PDF_FONTS = {"pdf.fonttype": 42, "ps.fonttype": 42}
+
+
 def _style():
     import matplotlib
 
@@ -222,6 +227,7 @@ def _style():
             "grid.alpha": 0.25,
             "axes.spines.top": False,
             "axes.spines.right": False,
+            **PDF_FONTS,
         }
     )
     return plt

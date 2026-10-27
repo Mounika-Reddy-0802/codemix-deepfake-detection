@@ -79,3 +79,4 @@ def test_figure_is_written(tmp_path):
     pytest.importorskip("matplotlib")
     out = Path(rf.figure(str(tmp_path / "fig"), root=_results(tmp_path)))
     assert out.is_file() and out.with_suffix(".pdf").is_file()
+    assert b"/Type3" not in out.with_suffix(".pdf").read_bytes()  # IEEE PDF eXpress

@@ -191,6 +191,26 @@ def test_summary_carries_an_interval_for_each_share() -> None:
     assert row["likely_cloned_ci"][0] < 50.0 < row["likely_cloned_ci"][1]
 
 
+def test_by_speaker_shows_whose_genuine_calls_are_warned() -> None:
+    config = EngineConfig(threshold=0.5)
+    windows = pd.DataFrame(
+        _call_windows("C05", [0.01] * 6)  # P2, genuine live, warned
+        + _call_windows("C06", [0.99] * 6)  # P2, genuine live, clear
+        + _call_windows("C09", [0.99] * 6)  # P3, genuine live, clear
+    )
+    calls = rc.CALL_PLAN.merge(rc.call_verdicts(windows, config), on="call_id")
+    rows = {(r["speaker"], r["kind"]): r for r in rc.by_speaker(calls)}
+    assert rows[("P2", "genuine_live")] == {
+        "speaker": "P2",
+        "kind": "genuine_live",
+        "tool": "none",
+        "calls": 2,
+        "caution": 1,
+        "likely_cloned": 1,
+    }
+    assert rows[("P3", "genuine_live")]["caution"] == 0
+
+
 def _speechlike(seed: int, seconds: float = 30.0, sr: int = 16_000) -> np.ndarray:
     """Noise bursts with speech-like timing: 0.4-2 s of sound, 0.2-1 s pauses."""
     rng = np.random.default_rng(seed)

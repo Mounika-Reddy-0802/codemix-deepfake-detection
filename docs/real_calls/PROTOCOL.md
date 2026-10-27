@@ -129,7 +129,7 @@ Copy the recordings into `data/real_calls/recordings/` (`C01.m4a`, `C02.m4a`, ..
 ```
 python -m src.inference.real_calls prepare --recordings data/real_calls/recordings --out data/real_calls/scored
 python -m src.inference.real_calls score --audio data/real_calls/scored --deployed <deployed checkpoint> --final <final_s1234 checkpoint> --out experiments/results/real_calls_v1
-python -m src.inference.real_calls report --audio data/real_calls/scored --windows experiments/results/real_calls_v1 --md docs/results/real_calls_v1.md
+python -m src.inference.real_calls report --audio data/real_calls/scored --windows experiments/results/real_calls_v1 --md experiments/results/real_calls_v1/report.md
 ```
 
 Each call is scored twice: as the receiving phone recorded it, and after an 8 kHz G.711
@@ -152,6 +152,33 @@ The recordings and clones are evaluation-only: `realcall` is listed in
 `EVAL_ONLY_SOURCES` (`src/data/build_manifests.py`), so no training manifest can contain
 them. When the project ends, delete the Kaggle dataset, the notebook's output and the
 `data/real_calls/` folder, as the consent form promises.
+
+## What happened on the day (26 and 27 October 2026)
+
+The plan above assumes the three of us in one place with two fixed phones. On the day we were
+at home in three places, so the setup changed, and these changes are part of the result:
+
+- **Phones.** The live calls of P2 (C05-C08) were made from her own phone to P3's phone, which
+  recorded them. The other way round, P2's phone received and recorded P3's live calls
+  (C09-C12) and every replay call from C15 to C30. TO CONFIRM: which phone recorded P1's live
+  calls (C01-C04) and her first two replays (C13, C14). Every call recording is 8 kHz mono
+  AAC at the same bit rate, with no tags naming the phone.
+- **References** were recorded on each speaker's own phone (P2: AAC at 44.1 kHz; P3: MP3 at
+  48 kHz) rather than on one shared phone, and reached the laptop as a WhatsApp document (P2,
+  then deleted from the chat) or by USB cable (P3).
+- **P1 was unwell**, so her references, her live calls (C01-C04) and her replay calls (C13,
+  C14, C19, C20, C25, C26) were made the next day, with her clones from a second Kaggle run.
+  That session's replays are about 9 dB louder than the other twelve (integrated loudness
+  -29 to -33 LUFS against -33 to -47), so speaker and replay level are confounded within the
+  replay calls.
+- **Clones.** XTTS-v2 passed 45 of 48 sentences and Chatterbox 47 of 48 for P2 and P3, and 24
+  of 24 and 23 of 24 for P1 (69 and 70 of 72 in all); the five that stalled were left out, so
+  five playback calls hold 11 of 12 sentences.
+- **A 20 s test call** (P2) checked the format first; it is not one of the 30 calls.
+- **Labels checked.** With the calls made from home, nobody else watched which file was played
+  into which call, so before scoring every replay recording is matched back to its playback
+  file by speech activity (`python -m src.inference.real_calls check`); all 12 replays of P2
+  and P3 hold their planned file.
 
 ## What this test can and cannot show
 
