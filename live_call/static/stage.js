@@ -177,11 +177,14 @@ const Stage = (() => {
     document.body.append(drawer);
   }
 
-  function toggleNotes(force) {
+  // Only the presenter's own toggle is remembered: the overview opening its notes by
+  // default must not leave them open over every scene on the projector.
+  function toggleNotes(force, remember = true) {
     const p = $("#presenter");
     if (!p) return;
     const open = force === undefined ? !p.classList.contains("open") : force;
     p.classList.toggle("open", open);
+    if (!remember) return;
     try { localStorage.setItem("stage.notes", open ? "1" : "0"); } catch (e) { /* private window */ }
   }
 
@@ -233,7 +236,7 @@ const Stage = (() => {
     let open = false;
     try { open = localStorage.getItem("stage.notes") === "1"; } catch (e) { /* private window */ }
     if (key === "hub" && window.innerHeight > 900) open = true; // the overview opens them on a tall screen
-    toggleNotes(open);
+    toggleNotes(open, false);
   }
 
   // The dashboard socket, reconnecting: every lane window and call verdict arrives here.
