@@ -154,6 +154,36 @@ The day did not go as planned: we were at home in three places, so the receiving
 phones differ by call, the references came from different phones, and P1's calls followed a day
 later. The protocol records each change.
 
+### The larger encoder on the real calls
+
+Both papers call SSL-AASIST the candidate to deploy after the final recipe, but the week-13
+runs had scored each training and deleted it, so there were no weights to put on a call. I
+made the live path score either kind of checkpoint (`load_score_fn` in
+`src/inference/predict.py`, `window_score_fn` in `src/baselines/aasist.py`: a 4 s window is
+brought to the training length the way a short clip is in training) and we retrained seed 1234
+on Kaggle with the week-13 settings, keeping the weights this time
+(`experiments/results/ssl_checkpoint_v1/`). GPU training does not repeat exactly: this
+checkpoint matches the week-13 trainings on most sets but is the weakest of six on Chatterbox
+offline (21.2% EER against 8.2-18.3%). Its operating point was chosen before any call was
+scored, on the same 506 dev clips by the same rule as the final recipe
+(`python -m src.inference.calibrate score --kind ssl_aasist`, then `choose`): threshold 0.580,
+a caution after two fake-leaning windows and "likely cloned" after four.
+
+On the 30 calls over G.711 it does better than the final recipe on three rows of the table and
+level on the fourth: one genuine live call of twelve cautioned (48 s in) and none taken to
+"likely cloned", all six XTTS-v2 calls taken to "likely cloned" (four of them 10-14 s in), one
+Chatterbox call caught and two cautioned, and one genuine replay of six "likely cloned", as for
+the final recipe. SSL-AASIST's four window EERs came out identical as recorded and over G.711,
+which looked like a bug in the report; I recounted the
+errors at each EER point from the two files separately and they are the same counts at
+different thresholds, because its scores sit near 0 and 1 and the G.711 round trip moves them
+without changing their order (rank correlation 0.997). Validated on the same held-out 60 s
+calls as the final recipe (`--validate`; the choice itself reads dev only), it warns no genuine
+read-speech call, catches every CM04 Tortoise call, and warns 11 of 41 genuine spontaneous HiACC
+calls (one "likely cloned") where the final recipe warns all 41. Two earlier trainings of this
+encoder disagreed on spontaneous speech, so before it replaces the final recipe a second
+checkpoint has to show the same on the real and the spontaneous calls.
+
 ## Numbers
 
 | What | Number | Source |
@@ -167,6 +197,10 @@ later. The protocol records each change.
 | Call chain, deployed, mean of six readings: direct, simulated G.711, real AMR-NB | 0.83, 0.75, 0.50 | `codec_chain.csv` |
 | Call chain, final recipe, every reading at every stage | 0.82-1.00 | same |
 | Replay recordings matched to their planned file | 18 of 18 (0.54-0.95; others at most 0.40) | `replay_check.csv` |
+| SSL-AASIST's live operating point, chosen on dev only | threshold 0.580; caution after 2 windows, "likely cloned" after 4 | `configs/threshold_ssl_aasist.yaml` |
+| Real calls: SSL-AASIST, genuine live calls warned / "likely cloned" | 1 of 12 / 0 of 12 | `real_calls_v1.md` |
+| Real calls: SSL-AASIST, XTTS-v2 / Chatterbox calls caught | 6 of 6 / 1 of 6 (2 more cautioned) | same |
+| SSL-AASIST checkpoint offline, Chatterbox EER | 21.2% (week-13 trainings 8.2-18.3%) | `ssl_checkpoint_v1/summary.txt` |
 | Weights package against the checkpoint | identical scores | `docs/release.md` |
 
 ## How to run
@@ -183,6 +217,16 @@ python -m src.inference.real_calls report --audio data/real_calls/scored \
 python -m src.inference.real_call_codecs --references data/real_calls/references --speakers P1,P2,P3 \
     --deployed <deployed .pt> --final <final .pt> --out experiments/results/real_calls_v1/codec_chain.csv
 python -m src.reporting.real_call_figure
+
+# SSL-AASIST: operating point on the dev clips (same rule), validated on held-out calls, then the real calls
+python -m src.inference.calibrate score --kind ssl_aasist --checkpoint <ssl .pt> \
+    --manifest <dev clips> --data-root <dev audio> --out experiments/calibration_ssl/dev_windows.csv
+python -m src.inference.calibrate choose --dev experiments/calibration_ssl/dev_windows.csv \
+    --validate experiments/calibration_ssl/{cm04,cm07,cm09,hiacc}_windows.csv \
+    --checkpoint-name ssl_aasist_final_s1234 --out configs/threshold_ssl_aasist.yaml \
+    --report experiments/results/threshold_calibration_ssl_aasist.json
+python -m src.inference.real_calls score --audio data/real_calls/scored --ssl <ssl .pt> \
+    --out experiments/results/real_calls_v1
 
 # the weights package
 python -m src.inference.model_package export --checkpoint <final .pt> --out <package dir>
@@ -201,4 +245,7 @@ On real calls the final recipe warns late for two speakers (their XTTS-v2 calls 
 a caution 18-32 s in), its false alarms on live calls start with the quiet before the first word
 but do not end there, and the warned genuine live calls over G.711 are one speaker's from one
 handset. A stricter speech gate and the
-operating point both need a separate set of real development calls.
+operating point both need a separate set of real development calls. SSL-AASIST did better
+than the final recipe on the real calls and on spontaneous speech, but from one checkpoint;
+a second one has to agree before the larger encoder becomes the live default, and its weights
+(632 MB) are kept outside git like the others.

@@ -70,3 +70,8 @@ def test_silent_file_is_no_speech() -> None:
 def test_prediction_dict_flags_provisional() -> None:
     out = pr.predict_audio(_speech(4.0), lambda w: 0.95, T).as_dict()
     assert out["provisional"] is True and out["threshold"] == 0.9
+
+
+def test_load_score_fn_refuses_an_unknown_kind() -> None:
+    with pytest.raises(ValueError, match="unknown detector kind"):
+        pr.load_score_fn("any.pt", kind="wavlm")

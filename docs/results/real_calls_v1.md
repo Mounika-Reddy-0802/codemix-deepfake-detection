@@ -31,20 +31,28 @@ through the live path (4 s windows every 2 s, smoothed, through the warning ladd
 model's frozen operating point, as recorded and after a G.711 round trip (what the live
 system's carrier delivers). No threshold was chosen on these calls.
 
+Three models are scored: the deployed adapter, the final recipe, and SSL-AASIST, the larger
+encoder (XLS-R 300M) fine-tuned on the final recipe's data. SSL-AASIST's operating point was
+chosen the same way as the final recipe's, by the same rule on the same 506 dev clips, before
+any call was scored with it: threshold 0.580, a caution after two fake-leaning windows and
+"likely cloned" after four (`configs/threshold_ssl_aasist.yaml`; the final recipe's rule picked
+three and five for it).
+
 ## Results
 
 As the carrier delivers the calls (G.711):
 
-| Calls | n | Deployed: likely cloned | Final: warned (caution or worse) | Final: likely cloned |
-|---|---|---|---|---|
-| Genuine, live | 12 | 8 | 3 | 1 |
-| Genuine, replayed | 6 | 6 | 1 | 1 |
-| XTTS-v2 clones, replayed | 6 | 6 | 5 | 5 |
-| Chatterbox clones, replayed | 6 | 6 | 1 | 0 |
+| Calls | n | Deployed: likely cloned | Final: warned (caution or worse) | Final: likely cloned | SSL-AASIST: warned | SSL-AASIST: likely cloned |
+|---|---|---|---|---|---|---|
+| Genuine, live | 12 | 8 | 3 | 1 | 1 | 0 |
+| Genuine, replayed | 6 | 6 | 1 | 1 | 1 | 1 |
+| XTTS-v2 clones, replayed | 6 | 6 | 5 | 5 | 6 | 6 |
+| Chatterbox clones, replayed | 6 | 6 | 1 | 0 | 3 | 1 |
 
-Window-level EER of the final recipe, clones against the genuine replays that share their path:
-XTTS-v2 19.0%, Chatterbox 50.0% (chance). As recorded, the verdicts are close to these
-(final: genuine live 4 of 12 warned, 2 likely cloned).
+Window-level EER, clones against the genuine replays that share their path: final recipe
+XTTS-v2 19.0%, Chatterbox 50.0% (chance); SSL-AASIST 4.4% and 36.6%. As recorded, the verdicts
+are close to these (final: genuine live 4 of 12 warned, 2 likely cloned; SSL-AASIST: none of
+the 12 warned, and 2 of 6 Chatterbox calls likely cloned).
 
 **The deployed model fails for two speakers of three.** It takes every replayed call, genuine
 or cloned, to "likely cloned" (18 of 18), and every live call of P2 and P3 (mean window scores
@@ -71,7 +79,30 @@ live calls average 0.88 with the lowest at 0.78. P2's live calls came from P2's 
 network, P2's replays from the phone beside the laptop, so speaker and calling handset change
 together here and this pilot cannot separate them.
 
-**False alarms come early in a call.** Mean window score of the final recipe by time in the call:
+**The larger encoder does better than the final recipe on three rows and level on the
+fourth.** Over G.711, SSL-AASIST
+warns one of the twelve genuine live calls (C08, P2's, a caution 48 s in; none as recorded)
+and takes none to "likely cloned"; its mean score per genuine live call is 0.91-1.00, against
+0.78-1.00 for the final recipe. It takes all six XTTS-v2 calls to "likely cloned", P1's and
+P2's four 10-14 s into the call and P3's two at 28 and 32 s. Of the six Chatterbox calls it
+takes one to "likely cloned" (C28, P2's, at 16 s) and cautions two (both P3's); P1's two pass.
+Against the genuine replays, one of six reaches "likely cloned" (C18, P3's, 44 s in; for the
+final recipe it is C17, also P3's). It shows no early-call dip: genuine live calls average 0.98
+over their first 10 s. Its ladder is shorter (two and four windows, against three and five),
+which makes it faster and, by itself, more prone to false alarms, yet it warns fewer genuine
+calls. This is one checkpoint, and not a strong one offline: it is a retraining of seed 1234
+with the week-13 settings, kept so it could be run here, and GPU training does not repeat
+exactly, so its offline Chatterbox EER is 21.2% where the five week-13 trainings range 8.2-18.3%
+(`experiments/results/ssl_checkpoint_v1/`). Chatterbox stays far from solved on real calls
+(window EER 36.6%). On the held-out 60 s calls that validate the operating points
+(`experiments/results/threshold_calibration_ssl_aasist.json`), the same checkpoint warns no genuine
+read-speech call, catches every CM04 Tortoise call, and warns 11 of 41 genuine spontaneous
+HiACC calls (one "likely cloned"), where the final recipe warns all 41 (40 "likely cloned").
+Two earlier trainings of this encoder disagreed on spontaneous speech (5.8% and 46.7% of
+clips called fake; this one scores 6.4% of its 1,000 HiACC clips below 0.5, the final recipe
+44.5%), so a second checkpoint has to show the same before it replaces the final recipe.
+
+**The final recipe's false alarms come early in a call.** Mean window score of the final recipe by time in the call:
 
 | Calls | 0-10 s | 10-20 s | after 20 s |
 |---|---|---|---|
@@ -148,6 +179,8 @@ figure is `experiments/figures/real_call_chain.pdf` (also `paper/figures/`).
   carrier was not exercised.
 - References and recordings came from different phones (each speaker's references on their own
   phone, in three formats), which a fixed protocol would avoid.
+- SSL-AASIST is one checkpoint at one operating point. The call chain (next section) was rebuilt
+  for the deployed model and the final recipe only.
 
 ## Reproduce
 
@@ -155,6 +188,10 @@ figure is `experiments/figures/real_call_chain.pdf` (also `paper/figures/`).
 python -m src.inference.real_calls check --recordings data/real_calls/recordings --playback data/real_calls/playback --out experiments/results/real_calls_v1/replay_check.csv
 python -m src.inference.real_calls prepare --recordings data/real_calls/recordings --out data/real_calls/scored
 python -m src.inference.real_calls score --audio data/real_calls/scored --deployed <deployed ckpt> --final <final_s1234 ckpt> --out experiments/results/real_calls_v1
+# SSL-AASIST: its operating point on the dev clips first (same rule), then the calls
+python -m src.inference.calibrate score --kind ssl_aasist --checkpoint <ssl_aasist_final_s1234_fp16.pt> --manifest <dev clips> --data-root <dev audio> --out experiments/calibration_ssl/dev_windows.csv
+python -m src.inference.calibrate choose --dev experiments/calibration_ssl/dev_windows.csv --checkpoint-name ssl_aasist_final_s1234 --out configs/threshold_ssl_aasist.yaml --report experiments/results/threshold_calibration_ssl_aasist.json
+python -m src.inference.real_calls score --audio data/real_calls/scored --ssl <ssl_aasist_final_s1234_fp16.pt> --out experiments/results/real_calls_v1
 python -m src.inference.real_calls report --audio data/real_calls/scored --windows experiments/results/real_calls_v1 --md experiments/results/real_calls_v1/report.md
 python -m src.inference.real_call_codecs --references data/real_calls/references --speakers P1,P2,P3 --deployed <deployed ckpt> --final <final_s1234 ckpt> --out experiments/results/real_calls_v1/codec_chain.csv
 python -m src.reporting.real_call_figure   # the call-chain figure, then copy the .pdf to paper/figures/

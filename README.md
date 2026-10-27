@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2014-green)
-![Tests](https://img.shields.io/badge/tests-1039%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1045%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -31,7 +31,9 @@ Recorded real mobile calls were scored offline through the same path.
 > takes every replayed call and every live call of two speakers of three to "likely cloned"
 > (for the speakers it fails on, the real mobile codec is the largest step); the final recipe
 > warns 3 of 12 genuine live calls (all one speaker's) and takes 5 of 6 XTTS-v2 clone calls
-> to "likely cloned", but none of 6 Chatterbox calls (it cautions one)
+> to "likely cloned", but none of 6 Chatterbox calls (it cautions one); the larger encoder
+> (SSL-AASIST, one checkpoint at its own dev-chosen operating point) warns 1 of 12 genuine live
+> calls and takes all 6 XTTS-v2 calls and 1 of 6 Chatterbox calls to "likely cloned"
 > ([real_calls_v1](docs/results/real_calls_v1.md); the call chain, stage by stage:
 > [`paper/figures/real_call_chain.pdf`](paper/figures/real_call_chain.pdf)).
 
@@ -140,7 +142,16 @@ into 60 s calls, with the final recipe's operating point chosen on the dev set o
   Over 30 calls from three speakers, the deployed model takes every replayed call and every
   live call of two speakers of three to "likely cloned"; the final recipe warns 3 of 12
   genuine live calls (all one speaker's) and takes 5 of 6 XTTS-v2 clone calls but none of 6
-  Chatterbox calls to "likely cloned". Rebuilding the call chain on our direct recordings
+  Chatterbox calls to "likely cloned". **The larger encoder does better on the same calls**:
+  SSL-AASIST, retrained on Kaggle so its weights could be kept and given its own operating point
+  on the same dev clips by the same rule, warns 1 of 12 genuine live calls (none "likely
+  cloned"), takes all 6 XTTS-v2 calls to "likely cloned" (four of them 10-14 s in) and catches 1
+  Chatterbox call and cautions 2. It is one checkpoint, the weakest of six trainings on
+  Chatterbox offline (21.2% EER against 8.2-18.3%). On held-out 60 s calls at the
+  same operating point it warns 11 of 41 genuine spontaneous (HiACC) calls, where the final recipe
+  warns all 41, but trainings of this encoder differ on spontaneous speech, so a second checkpoint
+  has to agree first.
+  Rebuilding the call chain on our direct recordings
   shows where the deployed model breaks: over six readings its mean P(genuine) falls from 0.75
   through the simulated line to **0.50 through the real AMR-NB codec**, its threshold, the
   largest step for the two speakers it fails on, while the final recipe stays at 0.82-1.00
@@ -600,7 +611,7 @@ codemix-deepfake-detection/
 │   ├── baselines/       # AASIST, SSL-AASIST, RawBoost
 │   ├── reporting/       # every paper table and figure, built from committed results
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 1,039 tests — firewalls, anti-leakage, live-call server, Twilio stream
+├── tests/               # 1,045 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs and the live thresholds
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
@@ -766,10 +777,11 @@ outside this repo.
 | **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 on two of the three channel sets, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
 | **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed on six of seven sets; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
-| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted; ✅ **conference paper at six pages** ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads); ✅ **viva preparation** and the demo script brought to week 14 ([W14](docs/W14_mounika_encoder_spontaneous.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; ✅ **real-call pilot**: consent, protocol, cloning packs, real calls scored, and the call chain that shows the mobile codec takes the deployed model to its threshold on average; ✅ **weights package** verified for the release decision ([W14](docs/W14_krishna_live_final_recipe.md)) |
+| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted; ✅ **conference paper at six pages** ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads); ✅ **viva preparation** and the demo script brought to week 14 ([W14](docs/W14_mounika_encoder_spontaneous.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; ✅ **real-call pilot**: consent, protocol, cloning packs, real calls scored, and the call chain that shows the mobile codec takes the deployed model to its threshold on average; ✅ **weights package** verified for the release decision; ✅ **the larger encoder on the real calls**, at its own dev-chosen operating point (better than the final recipe there and on spontaneous calls, one checkpoint) ([W14](docs/W14_krishna_live_final_recipe.md)) |
 
-**Open:** run the final recipe as the live system's default (the real calls support it);
-fund the Twilio account and run the carrier on real numbers for the first time (trial
+**Open:** run the final recipe as the live system's default (the real calls support it), and
+score a second SSL-AASIST checkpoint on the real and spontaneous calls, to see whether the
+larger encoder should replace it (one checkpoint did better on both); fund the Twilio account and run the carrier on real numbers for the first time (trial
 credit exhausted; the carrier leg has never run on them); spontaneous speech is still rejected
 (every genuine 60 s spontaneous call is warned by both live models, and no threshold avoids it;
 [hiacc_final_v1](docs/results/hiacc_final_v1.md),
@@ -851,7 +863,7 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/dataset_inventory_v1.md`](docs/results/dataset_inventory_v1.md) | Clips and hours for every corpus and attack |
 | [`docs/results/encoder_ablation_v1.md`](docs/results/encoder_ablation_v1.md) | **XLSR-53 against wav2vec2-base** — XLSR-53's frozen-feature advantage does not survive training in our LoRA/S3 recipes (separate from SSL-AASIST) |
 | [`docs/results/live_final_recipe_v1.md`](docs/results/live_final_recipe_v1.md) | **What a caller meets** — 60 s calls through the live path, deployed model against the final recipe |
-| [`docs/results/real_calls_v1.md`](docs/results/real_calls_v1.md) | **Real phone calls** — the pilot over a mobile network, and the call chain, in which the mobile codec is the largest single step in the deployed model's failure |
+| [`docs/results/real_calls_v1.md`](docs/results/real_calls_v1.md) | **Real phone calls** — the pilot over a mobile network, and the call chain, in which the mobile codec is the largest single step in the deployed model's failure; the larger encoder (one checkpoint) on the same calls |
 | [`docs/real_calls/PROTOCOL.md`](docs/real_calls/PROTOCOL.md) | **How the real-call test is run** — consent, scripts, the 30-call plan, what is kept where |
 | [`docs/results/english_final_v1.md`](docs/results/english_final_v1.md) | **English with the final recipe** — it misses English fakes rather than rejecting English callers |
 | [`docs/results/encoder_spontaneous_v1.md`](docs/results/encoder_spontaneous_v1.md) | **The larger encoder** on spontaneous speech, and its speed on a live call |
