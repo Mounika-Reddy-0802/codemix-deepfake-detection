@@ -37,6 +37,22 @@
     .fallback { margin-top: 1rem; display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; color: var(--dim); font-size: 0.9rem; }
     .steps-list { margin: 0.4rem 0 0; padding-left: 1.2rem; color: var(--dim); font-size: 0.88rem; }
     .steps-list li { margin: 0.15rem 0; }
+    /* a 768- or 720-line projector: the call button and the mirror stay on screen */
+    @media (max-height: 900px) and (min-width: 1101px) {
+      main.scene { padding-top: 0.7rem; }
+      .head { margin-bottom: 0.6rem; }
+      .head h1.title { font-size: 1.7rem; }
+      .head p.lede { display: none; }
+      iframe.caller { height: calc(100vh - 190px); min-height: 470px; }
+      .qr { width: 132px; height: 132px; }
+      .phonecard { gap: 0.8rem; }
+      .mirror { margin-top: 0.7rem; padding: 0.9rem 1rem; }
+      .mirror .vword { font-size: 2rem; }
+      .mirror .times { margin-top: 0.6rem; }
+      .mirror .times b { font-size: 1.3rem; }
+      .mirror canvas { height: 56px; margin-top: 0.6rem; }
+      .fallback { margin-top: 0.6rem; }
+    }
   </style>
 </head>
 <body>

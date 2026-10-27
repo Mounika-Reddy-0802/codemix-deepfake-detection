@@ -232,7 +232,7 @@ const Stage = (() => {
     await presenter(key);
     let open = false;
     try { open = localStorage.getItem("stage.notes") === "1"; } catch (e) { /* private window */ }
-    if (key === "hub") open = true;
+    if (key === "hub" && window.innerHeight > 900) open = true; // the overview opens them on a tall screen
     toggleNotes(open);
   }
 
