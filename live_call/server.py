@@ -54,8 +54,10 @@ from fastapi import (
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from live_call import demo_routes
 from live_call.alerts import AlertDispatcher, announcement_twiml
 from live_call.detector import DetectorService, DetectorSettings
+from live_call.lanes import LaneSet
 from live_call.media_handler import TwilioStreamSource
 from live_call.phone import CALLER, RECEIVER, CallState, Exchange
 from live_call.replay import FileSource
@@ -92,11 +94,18 @@ class App:
     """Everything the routes share, created once per process."""
 
     def __init__(
-        self, detector: DetectorService | None = None, dispatcher: AlertDispatcher | None = None
+        self,
+        detector: DetectorService | None = None,
+        dispatcher: AlertDispatcher | None = None,
+        lanes: LaneSet | None = None,
     ):
         _load_env_file(ROOT / ".env")
         self.detector = detector or DetectorService(DetectorSettings.from_env())
         self.dispatcher = dispatcher or AlertDispatcher()
+        #: the detectors of the three-lane view (``DFD_LANES``), read on first use
+        self._lanes = lanes
+        self.lanes_task: asyncio.Task | None = None
+        self.lanes_run: str | None = None
         self.hub = Hub()
         self.sessions = SessionRegistry()
         self.exchange = Exchange()
@@ -124,6 +133,11 @@ class App:
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
         return session
+
+    def lane_set(self) -> LaneSet:
+        if self._lanes is None:
+            self._lanes = LaneSet.from_env(self.detector)
+        return self._lanes
 
     def start_pending(self, room: str) -> None:
         """Begin monitoring the caller audio held for ``room``; called on answer."""
@@ -264,6 +278,13 @@ def create_app(state: App | None = None) -> FastAPI:
                 log.info("detector ready")
             except Exception as exc:  # no checkpoint on this machine: pages still work
                 log.warning("detector not loaded: %s", exc)
+            # the lanes view's other models too, so the first lanes call does not wait
+            for lane in shared.lane_set().lanes:
+                try:
+                    await loop.run_in_executor(shared.detector.executor, lane.detector.score_fn)
+                    log.info("lane %r ready", lane.name)
+                except Exception as exc:
+                    log.warning("lane %r not loaded: %s", lane.name, exc)
 
         warming = asyncio.create_task(warm())
         queue = shared.hub.subscribe()
@@ -305,6 +326,15 @@ def create_app(state: App | None = None) -> FastAPI:
     async def home() -> HTMLResponse:
         return page("index.html")
 
+    @api.get("/favicon.ico", include_in_schema=False)
+    async def favicon() -> Response:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" '
+            'rx="8" fill="#2a63e8"/><path d="M5 16h3l3-8 5 16 4-12 2 4h5" fill="none" stroke="#fff" '
+            'stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        )
+        return Response(svg, media_type="image/svg+xml")
+
     @api.get("/dashboard")
     async def dashboard() -> HTMLResponse:
         return page("dashboard.html")
@@ -317,6 +347,16 @@ def create_app(state: App | None = None) -> FastAPI:
     async def demo_console() -> HTMLResponse:
         """One-screen console for a live evaluation: both handsets and the analysis."""
         return page("console.html")
+
+    @api.get("/console")
+    async def console_page() -> HTMLResponse:
+        """The one-screen console under its own name (the phone scene's fallback)."""
+        return page("console.html")
+
+    @api.get("/lanes")
+    async def lanes_page() -> HTMLResponse:
+        """Scene 2: three detectors on one call."""
+        return page("lanes.html")
 
     @api.get("/phone")
     async def phone_home() -> HTMLResponse:
@@ -347,6 +387,7 @@ def create_app(state: App | None = None) -> FastAPI:
                 "dashboards": shared.hub.subscribers,
                 "demo_clips": len(list_demo_clips()),
                 "demo_clips_dir": demo_clips_dir().name,
+                "lanes": len(shared.lane_set().lanes),
             }
         )
 
@@ -458,6 +499,9 @@ def create_app(state: App | None = None) -> FastAPI:
                 "checkpoint": shared.detector.status()["checkpoint"],
             }
         )
+
+    # ----------------------------------------------------------------- demo scenes
+    demo_routes.add_lane_routes(api, shared, find_clip, clip_audio)
 
     # ----------------------------------------------------------------- dashboard push
     @api.websocket("/ws/dashboard")
