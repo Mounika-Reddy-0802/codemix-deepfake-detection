@@ -12,8 +12,11 @@
       display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1.1rem;
       border-bottom: 1px solid var(--line); background: rgba(6, 10, 19, 0.85); position: sticky; top: 0; z-index: 5;
     }
-    .rxhead .who b { display: block; font-size: 0.98rem; }
-    .rxhead .who small { color: var(--dim); font-size: 0.76rem; }
+    .rxhead .who { flex: 1 1 auto; min-width: 0; }
+    .rxhead .only { flex: none; }
+    .rxhead .who b { display: block; font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rxhead .who small { color: var(--dim); font-size: 0.76rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    @media (max-width: 400px) { .rxhead .only { font-size: 0.72rem; padding: 0.25rem 0.55rem; } .rxhead .long { display: none; } }
     .rxhead .only {
       margin-left: auto; font-size: 0.82rem; font-weight: 650; color: #bfe9d3;
       background: rgba(34, 201, 122, 0.12); border: 1px solid rgba(34, 201, 122, 0.35);
@@ -99,7 +102,7 @@
 </head>
 <body class="stage">
   <header class="rxhead">
-    <div class="who"><b>Receiver handset</b><small id="net">connecting…</small></div>
+    <div class="who"><b>Receiver<span class="long"> handset</span></b><small id="net">connecting…</small></div>
     <span class="only">Verdicts reach only the receiver</span>
   </header>
 

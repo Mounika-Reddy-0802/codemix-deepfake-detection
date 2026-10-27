@@ -51,6 +51,24 @@
     .fbar .detbar { top: 12px; background: var(--final); }
     .flegend { display: flex; gap: 1rem; color: var(--dim); font-size: 0.8rem; margin-top: 0.9rem; flex-wrap: wrap; }
     .flegend i { display: inline-block; width: 18px; height: 8px; border-radius: 4px; margin-right: 0.35rem; vertical-align: middle; }
+    /* a 720- or 768-line projector: the verdicts and the result stay on screen */
+    @media (max-height: 820px) and (min-width: 1151px) {
+      main.scene { padding-top: 0.8rem; }
+      .head { margin-bottom: 0.6rem; }
+      .head h1.title { font-size: 1.8rem; }
+      .card { padding: 0.85rem 1rem; }
+      .chips { margin-bottom: 0.5rem; }
+      .btn.big { padding: 0.6rem 1.1rem; font-size: 1rem; }
+      .pair { margin-top: 0.6rem; }
+      .version { padding: 0.65rem 0.8rem; gap: 0.35rem; }
+      .version audio { height: 30px; }
+      .version .vword { font-size: 1.35rem; }
+      .version canvas { height: 44px; }
+      .result { margin-top: 0.6rem; padding: 0.6rem 0.9rem; font-size: 1rem; }
+      .motto { font-size: 1.1rem; margin-top: 0.6rem; }
+      .floor .hero .v { font-size: 2rem; }
+      .frow { margin-top: 0.55rem; }
+    }
   </style>
 </head>
 <body>

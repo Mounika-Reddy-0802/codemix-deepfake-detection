@@ -27,6 +27,26 @@
     .pair .stat .v { font-size: 2.1rem; }
     .answer { margin-top: 1.4rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
     .answer p { margin: 0; font-size: 1.1rem; color: #cfe0f8; max-width: 32rem; }
+    /* a 720- or 768-line projector: the whole opening card on one screen */
+    @media (max-height: 820px) and (min-width: 1101px) {
+      main.scene { padding-top: 0.8rem; }
+      h1.title { font-size: 1.8rem; margin-bottom: 0.3rem; }
+      .layout { margin-top: 0; gap: 1.2rem; }
+      .phone { padding: 0.7rem 0.9rem 0.9rem; max-width: 360px; }
+      .phone .who { padding: 0.4rem 0 0.5rem; }
+      .phone .av { width: 52px; height: 52px; font-size: 1.3rem; margin-bottom: 0.3rem; }
+      .phone .nm { font-size: 1.1rem; }
+      .bubbles { min-height: 0; gap: 0.4rem; }
+      .bubble { font-size: 0.88rem; padding: 0.42rem 0.7rem; }
+      .label { margin-top: 0.5rem; }
+      .stat-big { font-size: 4.4rem; }
+      .claim { font-size: 1.2rem; margin: 0.3rem 0 0.7rem; }
+      .pair { margin: 0.7rem 0; gap: 0.7rem; }
+      .pair .stat .v { font-size: 1.6rem; }
+      .note { font-size: 0.86rem; padding: 0.5rem 0.8rem; }
+      .answer { margin-top: 0.8rem; }
+      .answer p { font-size: 0.98rem; }
+    }
   </style>
 </head>
 <body>
