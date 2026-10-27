@@ -17,22 +17,25 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 \maketitle
 
 \begin{abstract}
-Deepfake detectors trained on English benchmarks report error rates below one percent.
-We test what that means for Hindi--English code-mixed speech over a telephone line, where
-voice-cloning fraud takes place. A wav2vec~2.0 detector trained on ASVspoof 2019 LA
-reaches 0.85\% equal error rate (EER) on English but 58.42\% over a simulated narrowband
-channel, because it rejects genuine speakers: it calls 94.8\% of genuine Hindi--English
-speech fake. A language-controlled test on 183 unseen speakers shows that code-mixing is
-not the cause, since their genuine English is rejected as often as their mixed speech.
-Low-rank adaptation of 1.13\% of the parameters brings channel-matched error to 2.75\%.
-The largest further gain comes from hearing more genuine voices through real codecs:
-trained on 248 speakers over simulated G.711 and real AMR-NB, error on unseen Tortoise
-clones over AMR-NB falls from 36.3\% to 6.0\% across five seeds, with no unseen-tool audio
-in training. A larger encoder (SSL-AASIST) trained the same way reaches 0.5\% there and
-12.9\% on a third unseen generator. Every result is tested, with a paired bootstrap over
-speakers, against a shortcut floor of eight cheap signal statistics. Spontaneous speech and
-the IndicF5 generator remain unsolved. The detector runs on live calls and warns the
-person receiving the call about ten seconds into the speech.
+Deepfake detectors report error rates below one percent on English benchmarks.
+We test what that means for Hindi--English speech over a telephone line. A
+wav2vec~2.0 detector trained on ASVspoof 2019 LA
+reaches 0.85\% equal error rate on English but 58.42\% on code-mixed speech over a
+simulated narrowband channel; it rejects genuine speakers, calling 94.8\% of clean genuine
+Hindi--English speech fake. A language-controlled
+test on 183 unseen speakers shows the gap follows the recording domain, not
+code-mixing. Low-rank adaptation of 1.13\% of the parameters brings channel-matched error to
+2.75\% (the deployed model). More training speakers and a real codec help most: the final
+recipe, trained on 248 speakers over simulated G.711 and real AMR-NB, takes error on new
+speakers' unseen Tortoise clones from 30.8\% to 8.8\% over the line and from 36.3\% to 6.0\%
+over AMR-NB across five seeds, with no unseen-tool audio in training. A larger encoder
+(SSL-AASIST) fine-tuned on the same data reaches 0.5\% over AMR-NB and 12.9\% on Chatterbox,
+another unseen generator. The main results are tested against a shortcut floor of cheap
+signal statistics by a paired speaker bootstrap. Spontaneous speech, IndicF5 and, for the adapters, Chatterbox
+remain unsolved. The detector runs on live calls, warning only the callee. On 30 real mobile
+calls scored offline, the deployed model, failing mostly at the mobile codec, warns most
+genuine live calls, the final recipe one in four, and flags five of six seen-tool clone calls as
+likely cloned.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -59,8 +62,8 @@ when both conditions change at once, why it happens, and what it costs to fix.
 The answer to the first question is stark. The English detector fails, and it fails by
 rejecting real speakers rather than by missing clones. The answer to the second is less
 obvious. The natural suspect is the language mix, but when we hold speaker and recording
-fixed and change only the language, the detector rejects genuine English as often as
-code-mixed speech. The gap follows the recording domain.
+fixed and change only the language, the detector rejects genuine English at least as often
+as code-mixed speech. The gap follows the recording domain.
 
 A low error rate on a newly built corpus can also be obtained for the wrong reason. Real
 and cloned clips that differ in loudness or bandwidth can be told apart without any
@@ -79,8 +82,9 @@ close most of the remaining gap on the unseen Tortoise generator, over five trai
 and with a larger encoder, while IndicF5 and Chatterbox stay hard;
 \item matched shortcut floors with a paired speaker bootstrap for our systems, which
 changed several of our own conclusions; and
-\item a live-call system that runs the same detector and operating point, and warns only
-the person receiving the call.
+\item a live-call system that runs the same detector, at an operating point calibrated on
+development calls, warns only the person receiving the call, and has a first test on real
+mobile calls.
 \end{itemize}
 
 \section{Related work}
@@ -469,6 +473,33 @@ IndicF5 and Chatterbox calls, and every genuine spontaneous call is warned by ei
 model. The WebRTC carrier is verified end to end; the Twilio carrier is implemented
 and unit-tested but has not yet run on live numbers.
 
+\textbf{Real phone calls.} As a pilot, we made calls among ourselves, with written consent
+and our faculty mentor's approval, over a commercial mobile network: 30 calls from the three
+of us, twelve genuine live calls, six replays of our own readings from a laptop speaker, and
+twelve replays of clones of our voices (XTTS-v2 and Chatterbox). The receiving handset
+recorded each call, and we scored the recordings offline through the live scoring path after
+a G.711 round trip, at each model's frozen threshold. The deployed model takes every replayed
+call to ``likely cloned'', and eight of the twelve genuine live calls: all of two speakers'
+and none of the third's. The final recipe warns three of twelve genuine live calls (one
+``likely cloned''), all from one speaker, and takes five of six XTTS-v2 clone calls to
+``likely cloned'' (for two speakers only 30--46~s into the call) and none of six Chatterbox
+calls (it cautions one). Against the fair control, the genuine replays that share the
+clones' loudspeaker path, one of six reaches ``likely cloned''. Rebuilding the call chain on
+our direct recordings (Fig.~\ref{fig:realchain}) shows the real AMR-NB codec is the largest
+step in the deployed model's failure: averaged over six readings its mean P(genuine) is 0.75
+through the simulated line and 0.50 through AMR-NB (two readings cross the threshold there;
+one was below it before any codec; the third speaker's two stay at 0.87--1.00), and 0.38
+on the live calls. The final recipe stays above 0.8 at every stage; it adds more voices as
+well as AMR-NB, which these calls cannot separate.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{real_call_chain.pdf}
+\caption{Mean P(genuine) of our direct recordings through each stage of a phone call, and of
+the genuine live calls as the carrier delivers them. Dashed: each model's live threshold.}
+\label{fig:realchain}
+\end{figure}
+
 \begin{table}[t]
 \centering
 \caption{60~s calls through the live path: share of genuine calls warned and of fake calls
@@ -514,7 +545,7 @@ through.
 
 \textbf{Our attacks, our channel.} The attacks are of our own making, and most are not
 hard: the seen tool sits half a MOS point below genuine speech. The channel is simulated,
-with one real codec, and no system has yet been tested on real phone calls.
+with one real codec, and the real-call test is a pilot of 30 calls from the three authors.
 
 \section{Conclusion}
 

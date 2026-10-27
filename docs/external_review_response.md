@@ -1,13 +1,30 @@
 # External review: response and progress
 
 Reviewer: external reviewer, IIT Madras. Six comments, received October 2026. Every
-comment is being addressed. This file records, for each one, what we checked, what we
-changed, the evidence, and what is still to run. Status: **done**, **in progress**,
+comment has been answered; parts of comments 2-4 remain open (last column of the table). This file records, for each one, what we checked, what we
+changed, the evidence, and what is still open. Status: **done**, **in progress**,
 **planned**.
 
 Rule for all new experiments: every choice (augmentation, layer mix, learning rate,
 epoch) is made on the **dev set**; CM04 (Tortoise) and the RVC test set are scored
 **once** per final system. Nothing is tuned on a test set.
+
+## At a glance (week 14)
+
+| # | The reviewer asked | What we did | What it showed | Still open |
+|---|---|---|---|---|
+| 1 | Several seeds and confidence intervals | Five training seeds for every system that carries a claim; a paired bootstrap over speakers, not clips; Wilson intervals on the real calls | Deployed adapter 3.27 ± 1.17% over the phone line. On Tortoise 35.59 ± 3.35%, so the published 30.99% was a favourable draw | - |
+| 2 | Better generalisation to unseen tools, especially Tortoise | More genuine voices (21 to 248 speakers) and the real AMR-NB codec in training; three unseen tools (Tortoise, IndicF5, Chatterbox); AASIST and SSL-AASIST as outside baselines; augmentation reported as exploratory | Final recipe: new-speaker Tortoise from 30.8% to 8.8% over the line and from 36.3% to 6.0% over AMR-NB, every seed, every set beating its floor (three floors above chance, so weak bars); SSL-AASIST 0.5% | IndicF5 (16-22%) and Chatterbox (32.0% for the adapter, 12.9% for SSL-AASIST) |
+| 3 | More speakers and speaking styles | 248 training speakers; 60 new test speakers; 183 language-control speakers; 24 spontaneous HiACC speakers; per-speaker results; real mobile calls in our own voices | False alarms 3.40% to 0.47%; seen tool on new speakers 10.75% to 0.91%; the gap is the recording domain, not code-mixing | Spontaneous speech: 43.9% of genuine clips called fake by the final recipe |
+| 4 | The Hinglish-versus-English trade-off | English scored clean for S1, the adapters, S3 and the final recipe, and over the phone line for S1, the deployed adapter and the final recipe | Deployed: 2.42% clean, 24.20% over the line; S3 at chance (50.9-56.4%); final recipe 13.44% clean, missing English clones; deployment needs routing or English phone audio | English telephone training |
+| 5 | How to read the shortcut floor | A floor matched to each detector's own training data, a paired speaker-level test against it, and weak floors flagged | The old floor fitted on Tortoise itself (25.79%) understated the deployed model; matched, it is 37.79%, and three floors above chance are marked as weak bars | - |
+| 6 | Full references and positioning | Bibliography rebuilt and checked against publishers (now 45 entries); related work rewritten with a "how this work differs" part | Each ingredient has precedent; the contribution is stated as the combination | - |
+
+On 30 real calls (week 14, three speakers): the deployed model warns every replayed call and
+every live call of two speakers of three (for those speakers the real mobile codec is the
+largest step, though not the only cause), and the final recipe holds up on the seen tool
+(`docs/results/real_calls_v1.md`). That is the deployment implication comments 2 and 4 asked
+about, measured rather than argued.
 
 ---
 
@@ -49,8 +66,10 @@ conclusion now state the Tortoise result from the seeds, not the single run.
 
 **Checked.** The numbers are right, and the problem is narrower than it looks.
 Several systems already generalise to Tortoise: S2 trained on XTTS (clean) reaches
-5.44%, and S3 trained on XTTS only reaches 13.71% over the phone line. The failure
-appears when RVC is added to phone-line training (S2 28.16 → 30.99; S3 13.71 → 31.67).
+5.44%, and S3 trained on XTTS only reaches 13.71% over the phone line. Over the phone
+line only S3 trained on XTTS alone beats its floor (S2 on XTTS alone is inconclusive at 28.16%,
+beating its floor in one seed of five); with RVC, which also adds 13 genuine speakers, added
+to training, neither S2 nor S3 is shown to (30.99%, 31.67%).
 Tried without gain: XLSR-53 (LoRA 58.50%; full fine-tune 32.08%,
 `results/ablation_encoder/kaggle_xlsr_run/`). Against the matched floor (comment 5),
 the deployed model's 30.99% is 6.80 points *below* its floor, inconclusive at the
@@ -71,7 +90,7 @@ configs train exactly as before:
 **Done (Krishna, `docs/results/variants_v1.md`).** The deployed recipe trained with
 four variants (crop; crop + augment; crop + layer mix; all three), chosen by the rule
 fixed in advance (dev EER only, ties within 0.5 points to fewer changes). The
-published recipe stays: no variant improves dev EER. The two layer-mix variants first
+published recipe stays: no variant improves dev EER by more than the half-point tie margin. The two layer-mix variants first
 crashed (strict load of the Stage-1 checkpoint, fixed in `load_initial_weights`) and
 were re-run.
 
@@ -91,8 +110,8 @@ weights set on a dev set that, as above, cannot see the unseen tool.
 cloned 54 test speakers (CM07, 526 clips, never in training). Over the phone line the
 deployed model scores 30.6% on it, about where Tortoise is on the new speakers
 (29.4%), and no system clears its matched IndicF5 floor
-(`docs/results/new_speakers_v1.md`, `floor_new_sets_v1.md`). The augmentation lead
-could not be checked on it: those variants' checkpoints were not kept.
+(`docs/results/new_speakers_v1.md`, `floor_new_sets_v1.md`). The exploratory variant
+(crops, augmentation and a layer mix together) could not be checked on it: those variants' checkpoints were not kept.
 
 **Done (week 13, the final recipe).** The two largest gains, more genuine speakers
 (comment 3) and real AMR-NB audio next to the simulated G.711 line, combined: the adapter
@@ -109,11 +128,14 @@ unseen tools included (new-speaker Tortoise 8.8% against a floor of 36.5%). On C
 either codec and Tortoise over AMR-NB the floor itself is above chance (54.6-71.4%), and
 the report says those rows are a weak bar (`docs/results/floor_final_v1.md`,
 `src/training/floor_final.py`). This is the answer to the comment as asked: the deployed
-recipe never cleared its Tortoise floor over the channel; the final recipe does in every
-seed.
+recipe never cleared its Tortoise floor over the channel; the final recipe beats an
+informative Tortoise floor on the new speakers in every seed (8.8% against 36.5%), while on
+CM04 itself the floor is above chance, so that row is a weak bar. The limitation narrows; it
+does not disappear.
 
 **Done (week 13, outside baselines).** AASIST zero-shot rejects 82.3% of genuine
-Hindi-English speech; fine-tuned on our data it gains as much as our adapter
+Hindi-English speech; fine-tuned on our data it gains as much from the added voices as our
+adapter on most sets, though not on IndicF5 or RVC
 (`docs/results/w13_runs_v1.md`). SSL-AASIST (XLS-R 300M front end, ported without fairseq)
 zero-shot rejects 73.1%; trained on the final-recipe data with the same five seeds as the
 adapter it is better in every seed on eight of eleven sets (exact Mann-Whitney p = 0.008
@@ -122,7 +144,7 @@ on seven): new-speaker Tortoise over AMR-NB 0.51% against 6.04%
 
 **Done (week 13, a third unseen tool).** Chatterbox Multilingual cloned the IndicF5
 speakers from the same references and sentences (CM09, 525 clips, held out). It is the
-hardest tool: 35.8% for the deployed adapter, 32.0% for the final recipe (one seed), 12.9%
+adapters' hardest tool: 35.8% for the deployed adapter, 32.0% for the final recipe (one seed), 12.9%
 for the larger encoder over five seeds. IndicF5 stays at 15.8-21.8% for both final systems.
 
 ## 3. More speakers and speaking styles
@@ -131,7 +153,7 @@ for the larger encoder over five seeds. IndicF5 stays at 15.8-21.8% for both fin
 > evaluate performance on additional unseen speakers.
 
 **Checked.** Partly correct. "10" is the XTTS adaptation pool (8 train + 2 dev); the
-deployed model trains on 21 speakers (RVC adds 13), which the paper does not say.
+deployed model trains on 21 speakers (RVC adds 13), which the paper did not then say.
 Unseen-speaker testing already exists (15 eval speakers, 12 RVC-test speakers, no
 overlap, enforced by `config_guard`). The real gaps: one speaking style (MUCS read
 lectures), no spontaneous speech, no per-speaker results.
@@ -175,8 +197,8 @@ that needs spontaneous training data (`docs/results/hiacc_final_v1.md`).
 > Quantify the trade-off between improved Hinglish phone-line detection and degraded
 > clean-English performance after channel-matched adaptation; discuss deployment.
 
-**Checked.** Partly addressed already. English EER: S1 0.85% → deployed 2.42%; S3
-collapses to 50.9-56.4%. Channel training *protects* English relative to clean
+**Checked.** Partly addressed already. English EER: S1 0.85% → deployed 2.42%; S3,
+never trained on English, is at chance (50.9-56.4%). Channel training *protects* English relative to clean
 training (2.42% vs 3.75%; 2.55% vs 15.83%). At the deployed threshold the deployed
 model catches 77.4% of English fakes against 93.5% for S1
 (`classification_metrics_v1.md`). Not yet measured: channel models on clean Hinglish
@@ -231,8 +253,9 @@ kept for reference). `results.tex` has a new floors table (matched and oracle), 
 main table marked by the paired test (bold = beats, italic = inconclusive,
 dagger = worse), and Findings 1, 2 and 5 and the summary rewritten to match. The
 abstract, introduction (a new "matched shortcut floors" contribution) and conclusion
-no longer say the deployed model *loses* to the Tortoise floor: it is below its
-matched floor (30.99% vs 37.79%) but inconclusive at the speaker level.
+no longer say the deployed model *loses* to the Tortoise floor: over five seeds it averages
+35.59% against its matched 37.79% and beats it in no seed (the published 30.99% run was
+inconclusive at the speaker level).
 
 **Done.** Both floor figures (`systems_s2_s3.png`, `ablation_rvc.png`) were redrawn
 with the matched floor per bar (`src/reporting/figures.py`).
@@ -240,7 +263,7 @@ with the matched floor per bar (`src/reporting/figures.py`).
 **Done (week 13, the recording-domain question itself).** A language-controlled set
 holds speaker and recording fixed and changes only the language (183 unseen speakers,
 all-English / all-Hindi / mixed clips from the same lectures). S1 rejects genuine
-English as often as mixed speech (84.3% vs 78.1% clean; within speakers mixed is
+English at least as often as mixed speech (84.3% vs 78.1% clean; within speakers mixed is
 9.5 points lower), and the Code-Mixing Index does not predict its score on the
 evaluation pool (`language_control_v1.md`, `cmi_bands_v1.md`). The gap is a
 recording-domain gap. The matched floors on the new sets also show the limit of the
@@ -257,7 +280,7 @@ bootstrap and a layer-wise claim were named without citations; related work excl
 multilingual detection and cited no channel/codec-robustness or adapter-based
 anti-spoofing work.
 
-**Done.** `paper/refs.bib` rebuilt: 38 entries (the 10 cited ones completed, 28
+**Done.** `paper/refs.bib` rebuilt: now 45 entries (the 10 cited ones completed, 35
 added), every field checked against the publisher, Crossref or the ISCA Archive;
 sources per entry in `docs/references_verification.md`. One error corrected in an
 existing entry (wav2vec 2.0 second author). New references cover ASVspoof 2021,
@@ -271,7 +294,7 @@ detectors and self-supervised front-ends; channel and codec robustness; paramete
 efficient adaptation; multilingual and code-switched detection; and a "how this work
 differs" subsection. The old disclaimer that multilingual detection was out of scope
 is gone. AdamW, G.711, Opus, the bootstrap and the layer-wise claim are now cited.
-All 38 references are cited and every citation resolves.
+All 45 references are cited and every citation resolves.
 The verified literature shows each ingredient has precedent separately (real
 telephone/VoIP channel adaptation, Odyssey 2026; intra-utterance code-switched
 deepfakes, Arabic-English, ICLR 2026; LoRA for detectors, 2023 and ICASSP 2026), so

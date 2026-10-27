@@ -7,8 +7,8 @@ stitched into 60 s calls, as in the week-8 calibration (P-029).
 
 **Operating point.** Chosen on the dev manifest only, by the rule fixed in week 8: the most
 sensitive threshold and warning ladder whose genuine 60 s dev calls raise no more than 5%
-alerts. For the final recipe (seed 1234) that is a threshold of 0.687 with a warning after
-3 fake-leaning windows and a "likely fake" after 5 (`configs/threshold_final.yaml`); the dev
+alerts of any level. For the final recipe (seed 1234) that is a threshold of 0.687 with a
+caution after 3 fake-leaning windows and "likely cloned" after 5 (`configs/threshold_final.yaml`); the dev
 calls raise 0% alerts and every fake dev call is caught. Re-running the same rule on the
 deployed model's dev windows reproduces its published threshold exactly (0.49997), so the
 two are compared like for like (`experiments/results/threshold_calibration_final.json`,
@@ -27,8 +27,8 @@ the window scores are in `experiments/calibration/` and `experiments/calibration
 | Chatterbox (unseen) | 8 / 6 | 0% | 0% | 33% | 17% |
 | HiACC, spontaneous (genuine only) | 41 / 0 | **100%** | **100%** | - | - |
 
-"Fakes caught" counts calls that reach at least a warning; "genuine warned" counts genuine
-calls that raise any warning.
+"Fakes caught" counts calls that reach at least a caution; "genuine warned" counts genuine
+calls that raise any alert, a caution or worse.
 
 ## Reading
 

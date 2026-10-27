@@ -48,11 +48,10 @@ al.~\cite{delgado2026presentation} argue that detectors fail in deployment becau
 training audio never passes through the presentation channel. RTCFake~\cite{xue2026rtcfake}
 passes speech deepfakes through real-time communication platforms such as Zoom and trains
 for invariance across them; it targets the processing of conferencing applications, where we
-target narrowband telephone codecs. Our protocol differs
-in what it holds fixed. Rather than augmenting toward unknown channels, we render
-training and test audio through the same narrowband G.711~\cite{itu1988g711} chain,
-evaluate a generator held out of training inside that channel, and judge each result
-against a shortcut floor computed on the same channel.
+target narrowband telephone codecs. Like Tsutsumi et al.\ and Delgado et al., we train in
+the target channel, rendering training and test audio through the same narrowband
+G.711~\cite{itu1988g711} chain; what we add is a generator held out of training and
+evaluated inside that channel, and a shortcut floor computed on the same channel.
 
 \subsection{Parameter-efficient adaptation}
 
@@ -62,10 +61,10 @@ far fewer trainable parameters~\cite{wang2023lora}, and meta-learned to generali
 across attacks~\cite{laakkonen2026metalora}; adapters~\cite{wu2024adapter} and prompt
 tuning~\cite{oiso2024prompt} serve the same purpose inside self-supervised front-ends,
 the latter for test-time domain adaptation. We use LoRA for a different reason. With
-1.13\% of the parameters trainable, the adapted model gains code-mixed performance
-\emph{and keeps} English, whereas fine-tuning the whole encoder on identical data
-reaches a lower seen-tool error and loses English almost entirely
-(Section~\ref{sec:systems}). We measure adaptation against that native ceiling rather
+1.13\% of the parameters trainable, the deployed adapter gains code-mixed performance
+\emph{and keeps} clean English, whereas fine-tuning the whole encoder on identical data,
+from the self-supervised checkpoint, reaches a lower seen-tool error but is at chance on
+English, on which it never trains (Section~\ref{sec:main}). We measure adaptation against that native ceiling rather
 than only against its starting point.
 
 \subsection{Multilingual and code-switched detection}
@@ -99,8 +98,8 @@ No single ingredient here is new: telephone-channel adaptation, code-switched
 fakes, LoRA on a self-supervised detector and held-out generators each have the
 precedents above. The contribution is their combination, and the measurement
 discipline around it: Hindi--English switching within an utterance, in audio;
-training and testing over the same narrowband channel; every result compared, by a
-paired test over speakers, with a shortcut floor fitted on the same training data
+training and testing over the same narrowband channel; every result of our systems
+compared, by a paired test over speakers, with a shortcut floor fitted on the same training data
 and scored on the same clips; adaptation judged by what it keeps of English and
 against a native fine-tuning ceiling; and the detector deployed on live calls. We do
 not review the speaker verification literature that anti-spoofing was developed to
