@@ -7,7 +7,8 @@ server reads as a list of what it offers:
 - :func:`add_lane_routes`: scene 2, several detectors on one call (``live_call.lanes``);
 - :func:`add_live_routes`: scene 3, the address and QR code the receiver's phone opens;
 - :func:`add_results_routes`: scenes 1, 4 and 6, numbers read from committed results
-  (``live_call.results_view``) and the stage player's prepared audio.
+  (``live_call.results_view``) and the stage player's prepared audio;
+- :func:`add_shuffle_routes`: scene 5, the same call with its words shuffled away.
 
 Every route scores audio through the live path (``StreamingScorer`` + ``VerdictEngine``)
 or reads a committed result file; none holds a number of its own.
@@ -218,3 +219,76 @@ def add_results_routes(api: FastAPI, stage_dir: Callable[[], Path]) -> None:
         if entry is None or not (stage_dir() / entry["file"]).is_file():
             raise HTTPException(404, "unknown stage")
         return FileResponse(stage_dir() / entry["file"])
+
+
+def add_shuffle_routes(
+    api: FastAPI,
+    shared,
+    find_clip: Callable[[str], dict],
+    clip_audio: Callable[[dict], np.ndarray],
+) -> None:
+    """Scene 5: ``POST /api/shuffle/{id}`` and ``GET /api/shuffle/{id}/audio``."""
+    from live_call.lanes import primary_lane
+
+    cache: dict[tuple[str, int, float], np.ndarray] = {}
+
+    def shuffled_audio(clip_id: str, seed: int, chunk_ms: float) -> np.ndarray:
+        from src.inference.interpretability import shuffle_chunks
+
+        key = (clip_id, seed, chunk_ms)
+        if key not in cache:
+            audio = clip_audio(find_clip(clip_id))
+            cache[key] = shuffle_chunks(audio, chunk_ms, np.random.default_rng(seed))
+        return cache[key]
+
+    def check_chunk(chunk_ms: float) -> None:
+        if not 10.0 <= chunk_ms <= 1000.0:
+            raise HTTPException(400, "chunk_ms must be between 10 and 1000")
+
+    @api.post("/api/shuffle/{clip_id}")
+    async def shuffle_proof(
+        clip_id: str, seed: int = 1234, chunk_ms: float = 100.0
+    ) -> JSONResponse:
+        """Score a call and the same call cut into ``chunk_ms`` pieces and shuffled.
+
+        Shuffling 100 ms pieces destroys the words, the grammar and the language but keeps
+        how the voice was produced. Both versions go through the live model's windows and
+        ladder; if the verdict holds, the detector is not reading what is said.
+        """
+        check_chunk(chunk_ms)
+        clip = find_clip(clip_id)
+        original = clip_audio(clip)
+        scrambled = shuffled_audio(clip_id, seed, chunk_ms)
+        lane = primary_lane(shared.detector, "Live model")
+        executor = shared.detector.executor
+        before = (await score_lanes(original, [lane], executor))[0]
+        after = (await score_lanes(scrambled, [lane], executor))[0]
+        return JSONResponse(
+            {
+                "clip": clip_id,
+                "title": clip.get("title", clip_id),
+                "label": clip.get("label"),
+                "seed": seed,
+                "chunk_ms": chunk_ms,
+                "checkpoint": shared.detector.status()["checkpoint"],
+                "original": {**before.summary(), "windows": before.windows},
+                "shuffled": {**after.summary(), "windows": after.windows},
+                "verdict_unchanged": before.summary()["peak_state"]
+                == after.summary()["peak_state"],
+            }
+        )
+
+    @api.get("/api/shuffle/{clip_id}/audio")
+    async def shuffle_audio(clip_id: str, seed: int = 1234, chunk_ms: float = 100.0) -> Response:
+        import wave
+
+        check_chunk(chunk_ms)
+        audio = shuffled_audio(clip_id, seed, chunk_ms)
+        buffer = io.BytesIO()
+        with wave.open(buffer, "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)
+            wav.setframerate(16000)
+            pcm = (np.clip(audio, -1.0, 32767 / 32768) * 32768).astype("<i2")
+            wav.writeframes(pcm.tobytes())
+        return Response(buffer.getvalue(), media_type="audio/wav")

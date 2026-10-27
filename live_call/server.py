@@ -368,6 +368,11 @@ def create_app(state: App | None = None) -> FastAPI:
         """Scene 4: the real mobile network, scores only."""
         return page("network.html")
 
+    @api.get("/trust")
+    async def trust_page() -> HTMLResponse:
+        """Scene 5: why the verdict can be trusted."""
+        return page("trust.html")
+
     @api.get("/phone")
     async def phone_home() -> HTMLResponse:
         return page("phone.html")
@@ -524,6 +529,7 @@ def create_app(state: App | None = None) -> FastAPI:
             os.environ.get("STAGE_PLAYER_DIR", str(demo_clips_dir().parent / "stage_player"))
         ),
     )
+    demo_routes.add_shuffle_routes(api, shared, find_clip, clip_audio)
 
     # ----------------------------------------------------------------- dashboard push
     @api.websocket("/ws/dashboard")

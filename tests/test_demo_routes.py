@@ -66,7 +66,16 @@ def client(monkeypatch, tmp_path):
 
 
 def test_scene_pages_are_served(client):
-    for path in ("/live", "/lanes", "/network", "/console", "/phone/receiver", "/phone/caller"):
+    pages = (
+        "/live",
+        "/lanes",
+        "/network",
+        "/trust",
+        "/console",
+        "/phone/receiver",
+        "/phone/caller",
+    )
+    for path in pages:
         response = client.get(path)
         assert response.status_code == 200 and "<html" in response.text, path
 
@@ -112,6 +121,38 @@ def test_the_stage_player_serves_prepared_stages(client):
     assert body["available"] is True and body["stages"][0]["key"] == "direct"
     assert client.get("/api/stage_player/direct/audio").content.startswith(b"RIFF")
     assert client.get("/api/stage_player/nope/audio").status_code == 404
+
+
+def _call(folder: Path, seconds: float = 12.0) -> None:
+    import io
+    import json
+    import wave
+
+    import numpy as np
+
+    folder.mkdir(parents=True, exist_ok=True)
+    t = np.arange(int(16000 * seconds)) / 16000
+    pcm = (0.2 * np.sin(2 * np.pi * 220 * t) * 32767).astype("<i2")
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes(pcm.tobytes())
+    (folder / "call.wav").write_bytes(buffer.getvalue())
+    index = [{"id": "call", "file": "call.wav", "title": "A call", "label": "spoof"}]
+    (folder / "demo_clips.json").write_text(json.dumps(index), encoding="utf-8")
+
+
+def test_shuffle_proof_scores_both_versions(client):
+    _call(client.data / "demo_calls_v2")
+    body = client.post("/api/shuffle/call").json()
+    audio = client.get("/api/shuffle/call/audio")
+    assert body["chunk_ms"] == 100.0 and body["verdict_unchanged"] is True
+    assert body["original"]["scored_windows"] == body["shuffled"]["scored_windows"] == 5
+    assert audio.status_code == 200 and audio.content[:4] == b"RIFF"
+    assert client.post("/api/shuffle/call", params={"chunk_ms": 1}).status_code == 400
+    assert client.post("/api/shuffle/nope").status_code == 404
 
 
 def test_qr_codes_are_standalone_svg(client):

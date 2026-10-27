@@ -145,7 +145,7 @@ def test_limits_cite_their_numbers_and_say_what_landed():
             assert cited["source"].startswith(("experiments/", "configs/"))
 
 
-SCENE_PAGES = ["lanes.html", "live.html", "network.html", "phone_receiver.html"]
+SCENE_PAGES = ["lanes.html", "live.html", "network.html", "trust.html", "phone_receiver.html"]
 #: Results that must reach a page through the API, never typed into it.
 TYPED = ["94.8", "58.42", "36.5", "8.8%", "3.27", "0.83", "0.98", "0.38", "25%", "83%", "5 of 6"]
 
