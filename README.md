@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2014-green)
-![Tests](https://img.shields.io/badge/tests-1110%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1115%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -645,11 +645,11 @@ keys between scenes, and the committed file behind every number on hover.
 | Scene | Page | What it shows |
 |---|---|---|
 | 1 The threat | `/threat` | a Hindi-English fraud call; the English-only detector calls 94.8% of genuine speakers fake |
-| 2 Three detectors | `/lanes` | one call, three timelines: English-only, deployed adapter, final recipe, each on its own threshold |
+| 2 Three detectors | `/lanes` | one call, three timelines: English-only, deployed adapter, final recipe, each on its own threshold (SSL-AASIST joins as a fourth when its weights are on the laptop) |
 | 3 Live call | `/live` + `/phone/receiver` | a phone rings with a cloned voice and warns the person holding it; the caller sees nothing (fallback: `/console`) |
 | 4 Real network | `/network` | the 30 real calls, scores only: the call chain, a stage player through the real codecs, the table |
 | 5 Why trust it | `/trust` | the call shuffled into 100 ms pieces keeps its verdict; every result against its shortcut floor |
-| 6 Limits + try it | `/limits` | the four limits with numbers, what was done about each, the spontaneous-speech trade-off, try it |
+| 6 Limits + try it | `/limits` | the four limits with numbers, what was done about each (the larger encoder on the real and spontaneous calls, one checkpoint), the spontaneous-speech trade-off, try it |
 
 Every call the demo plays has its expected verdict in `configs/demo_rehearsal.json`, checked
 through the exact live path; the demo is shown only when every row passes twice in a row

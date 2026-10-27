@@ -76,9 +76,17 @@ which would warn a real voice on one dip. `scripts/run_demo.bat` sets every vari
 the server and opens `/demo`. The overview page now shows the final recipe; no page carries
 the week-10 numbers.
 
-**Ready for a fourth lane.** A checkpoint with `ssl` in its name loads through
-`predict.load_ssl_aasist`, so SSL-AASIST becomes the fourth lane with one more `DFD_LANES`
-entry once its checkpoint and threshold file arrive.
+**The larger encoder, as it landed overnight (#63).** Krishna's SSL-AASIST results are merged
+into this branch and shown in scene 6 beside the final recipe, each number read from its file:
+on the 30 real calls it takes 1 of 6 Chatterbox and 6 of 6 XTTS-v2 calls to likely cloned and
+warns 1 of 12 genuine live calls, and on the held-out spontaneous calls it warns 11 of 41 where
+the final recipe warns all 41. The card says what Krishna's record says: one checkpoint, the
+weakest of six offline on Chatterbox, so the next candidate and not a replacement. The demo
+loads it through Krishna's `predict.load_score_fn(kind="ssl_aasist")` (my own loader is gone),
+and `run_demo.bat` adds it as a fourth lane at its own threshold
+(`configs/threshold_ssl_aasist.yaml`) as soon as `ssl_aasist_final_s1234_fp16.pt` is in
+`C:\dfdata\checkpoints`; scene 2 then reads "Four detectors" and fits four lanes on a
+768-line projector (checked with a stand-in fourth lane).
 
 **One rule for every page.** No page holds a number. They ask `/api/headline`,
 `/api/real_calls` and `/api/limits`, which answer from `live_call/results_view.py` with each
@@ -118,10 +126,10 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
   WebRTC path was checked once per call type, not twice per call.
 - **The deployed adapter does not "waver" on the genuine corpus calls**, as the plan
   expected: it stays green. The presenter's line says only what happens.
-- **The fourth lane is untested on a real checkpoint**: the SSL-AASIST loader was tested with
-  a stand-in network; its checkpoint and threshold file have not arrived.
-- **Two of the night's Track A results are still pending** (SSL-AASIST on the real calls, the
-  early-warning study); scene 6 says so until their files are committed.
+- **The fourth lane is untested on the real checkpoint**: the weights are on Krishna's laptop,
+  not this one. Its threshold file is committed; the lane, the layout and the rehearsal
+  (a lane the file does not list is reported, not judged) were checked with a stand-in.
+- **The early-warning study is still pending**; scene 6 says so until its file is committed.
 - **The stage player starts from the speaker's clean MUCS recording**, the source of the demo
   call, not from the exact clips joined into it.
 
@@ -141,5 +149,7 @@ pytest tests -q --deselect tests/test_env_check.py
 ## What's next
 
 The human part of B7: two timed rehearsals with the phone in hand, the backup screen
-recording, then review and merge. If Track A's SSL-AASIST checkpoint arrives, add it as the
-fourth lane and its expectations to `configs/demo_rehearsal.json`.
+recording, then review and merge (#63 first: this branch carries its commit). Copy
+`ssl_aasist_final_s1234_fp16.pt` from Krishna's laptop into `C:\dfdata\checkpoints`, rehearse
+once to see what the fourth lane does on each call, and only then write its expectations into
+`configs/demo_rehearsal.json`.

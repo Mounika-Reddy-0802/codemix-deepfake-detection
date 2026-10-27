@@ -224,7 +224,7 @@ comes from Git LFS (`checkpoints/baseline/best.pt`).
 
 | Variable | What it sets |
 |---|---|
-| `DFD_LANES` | the scene-2 detectors, `name=checkpoint=threshold_file` separated by commas; a checkpoint with `ssl` in its name loads as SSL-AASIST |
+| `DFD_LANES` | the scene-2 detectors, `name=checkpoint=threshold_file` separated by commas; a checkpoint with `ssl` in its name loads as SSL-AASIST (`predict.load_score_fn(kind="ssl_aasist")`); `run_demo.bat` adds it as a fourth lane when its weights are present |
 | `STAGE_PLAYER_DIR` | the stage player's audio (`scripts/prepare_stage_player.py`); its scores are committed in `experiments/results/stage_player_v1.json` |
 | `TUNNEL_URL_FILE` | where `scripts/start_tunnel.py` writes the tunnel's https address |
 
