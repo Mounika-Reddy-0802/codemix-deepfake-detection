@@ -40,8 +40,8 @@ The XTTS-v2 and RVC calls are caught at every threshold from 0.20 up; the full t
 
 - **No threshold fixes spontaneous speech.** Every threshold that catches all six Tortoise
   calls (0.45 and above) warns at least 38 of the 41 genuine spontaneous calls. Bringing
-  those warnings below half needs 0.25 or lower, where the final recipe catches half the
-  Tortoise calls and 4 of the 18 unseen-tool calls (22%).
+  those warnings below half needs 0.25 or lower, where the final recipe catches at most
+  half the Tortoise calls and at most 4 of the 18 unseen-tool calls (22%).
 - **The read-speech false alarms are not what binds.** No genuine read-speech call is warned
   at any threshold up to 0.75, so the live threshold could rise that far for free on read
   speech; the spontaneous calls are already all warned well below it. Genuine spontaneous

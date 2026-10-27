@@ -249,8 +249,8 @@ training it holds up on the seen tool on real calls (not on Chatterbox), though 
 say which change did it, so the final recipe should replace the deployed adapter in the live
 system. False alarms on genuine calls come early in a call (mean score 0.79
 in the first ten seconds against 0.98 after twenty). Part of the reason is the very first
-window, which covers the quiet before the caller's first word: it is just loud enough to pass
-the -50 dBFS gate, gets normalised, and is scored as if it were speech. But it is not the whole
+window, which covers the quiet before the caller's first word: at about -30 dBFS it is well above
+the -50 dBFS gate, so it gets normalised and is scored as if it were speech. But it is not the whole
 reason (Q35a). So the next step is a set of real development calls, separate from these, to set
 a stricter speech gate for the first seconds and the operating point together. Chatterbox-type
 tools remain the open problem.
@@ -258,11 +258,11 @@ tools remain the open problem.
 **Q35a. How much of the early false alarms is the quiet start?**
 Part, not all. On the genuine live calls the first window sits at a median -30 dBFS, against
 -21 to -26 dBFS for the rest of each call; in eleven of twelve calls it passes the -50 dBFS gate
-and is scored as speech, at a mean of 0.60 against 0.96 for the later windows. In every warned genuine call, the run of fake-leaning
+and is scored as speech, at a mean of 0.60 against 0.96 for the later windows. In every warned genuine live call, the run of fake-leaning
 windows that raised the warning starts there. But when we replay the calls with that window
 treated as silence, as a check that chooses nothing, two of the three warned calls clear over
-G.711, none clear as recorded, and one call still reaches "likely cloned" from speech windows
-8-14 seconds in. We first guessed the phone's noise suppression, then the silence alone; the
+G.711; as recorded one clears but another call is cautioned instead, and one call still reaches
+"likely cloned", its run including two speech windows 8-14 seconds in. We first guessed the phone's noise suppression, then the silence alone; the
 data corrected us both times, and we say so.
 
 ## 8. Limitations, said plainly
