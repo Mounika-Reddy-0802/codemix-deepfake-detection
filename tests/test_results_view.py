@@ -25,13 +25,13 @@ def _truthy(series: pd.Series) -> pd.Series:
     return series.astype(str).str.lower().isin({"true", "1"})
 
 
-@pytest.mark.parametrize("model", ["deployed", "final"])
+@pytest.mark.parametrize("model", ["deployed", "final", "ssl_aasist"])
 def test_the_real_call_table_recounts_from_the_per_call_csv(model):
     calls = pd.read_csv(REAL / f"calls_{model}_g711.csv")
     summary = json.loads((REAL / "summary.json").read_text(encoding="utf-8"))["models"][
         f"{model}_g711"
     ]
-    for row in rv.real_call_table():
+    for row in rv.real_call_table(models=("deployed", "final", "ssl_aasist")):
         mine = calls[(calls["kind"] == row["kind"]) & (calls["tool"] == row["tool"])]
         got = row[model]
         assert got["calls"]["value"] == len(mine)
@@ -143,6 +143,40 @@ def test_limits_cite_their_numbers_and_say_what_landed():
         assert lim["tonight"]["what"] and isinstance(lim["tonight"]["landed"], bool)
         for cited in _cited(lim["numbers"]):
             assert cited["source"].startswith(("experiments/", "configs/"))
+
+
+def test_the_larger_encoder_landed_with_the_reviewed_real_call_counts():
+    """#63: SSL-AASIST at its own dev-chosen threshold, beside the final recipe."""
+    by_key = {lim["key"]: lim["tonight"] for lim in rv.limits()["limits"]}
+    ssl = by_key["chatterbox"]
+    assert ssl["landed"] and ssl["doc"] == "docs/results/real_calls_v1.md"
+    r = ssl["result"]
+    assert (
+        r["ssl"]["chatterbox"]["likely"]["value"],
+        r["final"]["chatterbox"]["likely"]["value"],
+    ) == (1, 0)
+    assert (r["ssl"]["xtts"]["likely"]["value"], r["final"]["xtts"]["likely"]["value"]) == (6, 5)
+    assert (
+        r["ssl"]["genuine_live"]["warned"]["value"],
+        r["final"]["genuine_live"]["warned"]["value"],
+    ) == (1, 3)
+    assert r["checkpoint_chatterbox_eer"]["value"] == 21.17
+    assert r["ladder"]["threshold"]["value"] == pytest.approx(0.5796, abs=1e-4)
+    assert (r["ladder"]["caution_after"]["value"], r["ladder"]["likely_after"]["value"]) == (2, 4)
+    assert "one checkpoint" in ssl["caveat"].lower()
+    # held-out spontaneous calls: 11 of 41 warned, where the final recipe warns all 41
+    spont = by_key["spontaneous"]["ssl"]
+    assert spont["real_calls"]["value"] == 41
+    assert round(spont["real_alerted_pct"]["value"] * 41 / 100) == 11
+    # the real-call counts are recounted above; here the calibration and checkpoint files
+    for entry in [*_cited(ssl["result"]), *_cited(ssl["held_out"]), *_cited(spont)]:
+        file = entry["source"].split(":")[0]
+        if file.endswith(".json") and not file.startswith("experiments/results/real_calls_v1/"):
+            raw = _resolve(entry["source"])
+            value = entry["value"]
+            assert value == pytest.approx(raw, abs=0.051) or value == pytest.approx(
+                100 * raw, abs=0.051
+            )
 
 
 def test_the_spontaneous_tradeoff_is_read_from_its_sweep():

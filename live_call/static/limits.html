@@ -9,7 +9,7 @@
     main.scene { padding-top: 1.1rem; }
     .layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); gap: 1.1rem; align-items: start; }
     @media (max-width: 1150px) { .layout { grid-template-columns: 1fr; } }
-    .limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+    .limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; align-items: start; }
     @media (max-width: 800px) { .limits { grid-template-columns: 1fr; } }
     .limit { display: flex; flex-direction: column; gap: 0.5rem; }
     .limit .lh { display: flex; align-items: center; gap: 0.6rem; }
@@ -21,6 +21,13 @@
     .limit .tonight .st { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; font-size: 0.74rem; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 0.25rem; }
     .st.landed { color: #8ff0c0; } .st.pending { color: #ffd18a; }
     .limit .fix { color: var(--dim); font-size: 0.84rem; }
+    .limit .ssl { margin-top: 0.35rem; padding-left: 0.55rem; border-left: 3px solid #8b6cff; color: #d9d0ff; }
+    .sslt { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 0.84rem; }
+    .sslt th, .sslt td { text-align: left; padding: 0.18rem 0.3rem; border-bottom: 1px solid var(--line); font-weight: 500; }
+    .sslt th { color: var(--faint); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .sslt .v { color: #c9bcff; font-weight: 700; }
+    .limit .doc[title] { cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
+    .limit .caveat { margin-top: 0.3rem; color: #ffd18a; font-size: 0.8rem; }
     .tradeoff svg { width: 100%; height: auto; display: block; }
     .tryit .script { font-size: 1.25rem; line-height: 1.45; font-weight: 600; padding: 0.9rem 1rem; border-radius: 12px; background: rgba(91, 149, 255, 0.10); border: 1px solid rgba(91, 149, 255, 0.4); margin: 0.6rem 0; }
     .tryit .verdict { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.9rem; }
@@ -108,13 +115,39 @@
       const landed = t.landed && limit.key !== "carrier";
       const status = limit.key === "carrier" ? ["pending", "stated honestly"] : landed ? ["landed", "done tonight"] : ["pending", "running tonight"];
       const body = [make("div", { class: "st " + status[0], text: status[1] }), make("div", { text: t.what })];
-      if (landed && t.first_paragraph) body.push(make("div", { class: "faint", style: "margin-top:0.3rem", text: t.first_paragraph }));
-      if (limit.key === "chatterbox") {
+      if (limit.key === "spontaneous" && t.ssl) {
+        body.push(make("div", { class: "ssl" }, ["The larger encoder, at its own threshold chosen on dev, warns ",
+          make("b", {}, [cite(t.ssl.real_alerted_pct, p0)]), " of ", cite(t.ssl.real_calls), " of the same calls."]));
+      }
+      if (limit.key === "chatterbox" && landed && t.result) body.push(sslCalls(t));
+      else if (limit.key === "chatterbox") {
         body.push(make("div", { class: "faint", style: "margin-top:0.3rem" },
           ["Offline already: SSL-AASIST reaches ", cite(limit.numbers.ssl_eer, p1), " EER on Chatterbox (", cite(limit.numbers.ssl_seeds), " seeds)."]));
       }
-      body.push(make("div", { class: "faint tiny", style: "margin-top:0.25rem", text: t.doc }));
+      // the result doc's own summary stays one hover away, so the card shows the result first
+      body.push(make("div", { class: "faint tiny doc", style: "margin-top:0.25rem", title: landed && t.first_paragraph ? t.first_paragraph : null, text: t.doc }));
       return make("div", { class: "tonight" }, body);
+    }
+    // The larger encoder beside the final recipe on the 30 real calls (#63).
+    function sslCalls(t) {
+      const r = t.result;
+      const row = (label, key, field) => make("tr", {}, [
+        make("td", { text: label }),
+        make("td", {}, [cite(r.final[key][field]), " / ", cite(r.final[key].calls)]),
+        make("td", { class: "v" }, [cite(r.ssl[key][field]), " / ", cite(r.ssl[key].calls)]),
+      ]);
+      return make("div", {}, [
+        make("table", { class: "sslt" }, [
+          make("tr", {}, [make("th", { text: "Real calls" }), make("th", { text: "Final" }), make("th", { class: "v", text: "SSL-AASIST" })]),
+          row("Chatterbox, likely cloned", "chatterbox", "likely"),
+          row("XTTS-v2, likely cloned", "xtts", "likely"),
+          row("Genuine live, warned", "genuine_live", "warned"),
+        ]),
+        make("div", { class: "faint", style: "margin-top:0.3rem" }, ["Held-out 60 s Chatterbox calls: warns ",
+          cite(t.held_out.fake_alerted_pct, p0), ", likely cloned ", cite(t.held_out.fake_likely_pct, p0),
+          ". This checkpoint's offline Chatterbox EER: ", cite(r.checkpoint_chatterbox_eer, p1), "."]),
+        make("div", { class: "caveat", text: t.caveat }),
+      ]);
     }
     async function loadLimits() {
       try {

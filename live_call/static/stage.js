@@ -37,6 +37,7 @@ const Stage = (() => {
     ],
     limits: () => [
       "What it cannot do yet, with numbers, and what we did about each overnight.",
+      "The larger encoder already does better on the real calls and on spontaneous speech, but it is one checkpoint: the next candidate, not a replacement.",
       "Now read this line into the microphone.",
     ],
     hub: () => [

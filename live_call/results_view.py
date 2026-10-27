@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -214,9 +215,17 @@ def headline() -> dict:
         "calls_60s_deployed": {
             "hiacc": _calls_60s("threshold_calibration_deployed_w14.json", "hiacc_windows"),
         },
+        # SSL-AASIST at its own operating point, chosen on the same dev clips (#63)
+        "calls_60s_ssl": {
+            "tortoise": _calls_60s("threshold_calibration_ssl_aasist.json", "cm04_windows"),
+            "indicf5": _calls_60s("threshold_calibration_ssl_aasist.json", "cm07_windows"),
+            "chatterbox": _calls_60s("threshold_calibration_ssl_aasist.json", "cm09_windows"),
+            "hiacc": _calls_60s("threshold_calibration_ssl_aasist.json", "hiacc_windows"),
+        },
         "ladders": {
             "deployed": _threshold("configs/threshold.yaml"),
             "final": _threshold("configs/threshold_final.yaml"),
+            "ssl": _threshold("configs/threshold_ssl_aasist.yaml"),
         },
     }
 
@@ -240,19 +249,21 @@ def _median(values: list[float]) -> float | None:
     return v[mid] if len(v) % 2 else (v[mid - 1] + v[mid]) / 2
 
 
-def real_call_table(version: str = "g711") -> list[dict]:
+def real_call_table(
+    version: str = "g711", models: tuple[str, ...] = ("deployed", "final")
+) -> list[dict]:
     """The four rows of the real-call table, counted from the per-call CSVs.
 
-    Deployed: calls taken to "likely cloned". Final recipe: calls warned (caution or
-    worse), calls taken to "likely cloned", and the median time of the first caution
-    over the warned calls. The summary JSON's percentages are returned beside the
-    counts, so a page and a test can see that the two agree.
+    Per model: calls warned (caution or worse), calls taken to "likely cloned", and the
+    median time of the first caution over the warned calls. The summary JSON's
+    percentages are returned beside the counts, so a page and a test can see that the
+    two agree. ``models`` may add ``ssl_aasist`` (the larger encoder, #63).
     """
     summary = _json(REAL_CALLS / "summary.json")["models"]
     rows = []
     for kind, tool, label in CALL_ROWS:
         out = {"kind": kind, "tool": tool, "label": label}
-        for model in ("deployed", "final"):
+        for model in models:
             path = REAL_CALLS / f"calls_{model}_{version}.csv"
             calls = [
                 r for r in _call_rows(model, version) if r["kind"] == kind and r["tool"] == tool
@@ -381,9 +392,50 @@ def real_calls() -> dict:
 #: time so the limits scene picks them up the moment they are committed.
 TONIGHT = {
     "spontaneous": ("docs/results/spontaneous_tradeoff_v1.md", "spontaneous_tradeoff_v1"),
-    "chatterbox": ("docs/results/real_calls_ssl_v1.md", "real_calls_ssl_v1"),
     "late": ("docs/results/early_warning_v1.md", "early_warning_v1"),
 }
+#: The larger encoder's answer landed as new columns of the real-call study (#63).
+SSL_CALLS = REAL_CALLS / "calls_ssl_aasist_g711.csv"
+SSL_CHECKPOINT = RESULTS / "ssl_checkpoint_v1" / "summary.json"
+SSL_CALIBRATION = RESULTS / "threshold_calibration_ssl_aasist.json"
+
+
+def _ssl_landed() -> dict:
+    """SSL-AASIST on the 30 real calls and the held-out calls, beside the final recipe."""
+    files = (SSL_CALLS, SSL_CHECKPOINT, SSL_CALIBRATION)
+    out = {
+        "doc": "docs/results/real_calls_v1.md",
+        "landed": all(p.is_file() for p in files),
+        "data": [_rel(p) for p in files if p.is_file()],
+    }
+    if not out["landed"]:
+        return out
+    table = {(r["kind"], r["tool"]): r for r in real_call_table(models=("final", "ssl_aasist"))}
+    run = _json(SSL_CHECKPOINT)["runs"][0]
+    out.update(
+        {
+            "title": "SSL-AASIST on the 30 real calls, at a threshold chosen on dev",
+            "result": {
+                "ssl": {
+                    "chatterbox": table[("clone_replay", "chatterbox")]["ssl_aasist"],
+                    "xtts": table[("clone_replay", "xtts_v2")]["ssl_aasist"],
+                    "genuine_live": table[("genuine_live", "none")]["ssl_aasist"],
+                },
+                "final": {
+                    "chatterbox": table[("clone_replay", "chatterbox")]["final"],
+                    "xtts": table[("clone_replay", "xtts_v2")]["final"],
+                    "genuine_live": table[("genuine_live", "none")]["final"],
+                },
+                "checkpoint_chatterbox_eer": cite(
+                    round(100 * run["cm09"], 2), SSL_CHECKPOINT, "runs[0].cm09"
+                ),
+                "ladder": _threshold("configs/threshold_ssl_aasist.yaml"),
+            },
+            "caveat": "One checkpoint, and offline the weakest of the six SSL-AASIST trainings on "
+            "Chatterbox, so it is the next candidate, not a replacement: a second checkpoint must agree.",
+        }
+    )
+    return out
 
 
 def _landed(key: str) -> dict:
@@ -414,8 +466,11 @@ def _landed(key: str) -> dict:
                 break
             body.append(ln)
         paragraph = " ".join(body)
-        if len(paragraph) > 600:
-            paragraph = paragraph[:600].rsplit(" ", 1)[0] + " …"
+        # shown as plain text on the page: links keep their words, code and emphasis marks go
+        paragraph = re.sub(r"\[([^\]]+)\]\([^)]*\)", lambda m: m.group(1), paragraph)
+        paragraph = re.sub(r"[`*]", "", paragraph)
+        if len(paragraph) > 360:
+            paragraph = paragraph[:360].rsplit(" ", 1)[0] + " …"
         out.update({"title": title, "first_paragraph": paragraph})
     return out
 
@@ -506,6 +561,7 @@ def limits() -> dict:
                     "what": "A threshold sweep on the final recipe's existing scores that chooses nothing: "
                     "the share of genuine spontaneous calls warned against the share of clone calls caught.",
                     **_landed("spontaneous"),
+                    "ssl": h["calls_60s_ssl"]["hiacc"],
                 },
                 "fix": "Spontaneous genuine speech in training. No threshold is chosen on HiACC.",
             },
@@ -528,7 +584,8 @@ def limits() -> dict:
                 "tonight": {
                     "what": "The larger encoder (SSL-AASIST) trained on the final-recipe data, then the "
                     "30 real calls scored with it at a threshold fixed on development calls.",
-                    **_landed("chatterbox"),
+                    **_ssl_landed(),
+                    "held_out": h["calls_60s_ssl"]["chatterbox"],
                 },
                 "fix": "A larger encoder: SSL-AASIST already reaches a far lower Chatterbox EER offline.",
             },
