@@ -1,5 +1,9 @@
 # Evaluator demo script (about 8 minutes)
 
+> For the final review use the six-scene flow on the final recipe instead:
+> [`final_review_demo.md`](final_review_demo.md) (`scripts\run_demo.bat`, then `/demo`).
+> This script is the earlier walk-through of the overview, dashboard and call pages.
+
 **Before evaluators arrive (10 minutes):** start the server (`live_call/README.md`,
 section 1). Open three browser windows: `http://localhost:8000/`, `/dashboard`,
 and `/call`. Click once anywhere on the dashboard so the browser allows the warning

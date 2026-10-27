@@ -5,11 +5,13 @@ One FastAPI app serves everything the evaluation demo needs:
 | Route | What it is |
 |---|---|
 | ``GET /`` | evaluator home: what the system does, live status, links |
+| ``GET /demo`` | the final review's guided flow; its scenes ``/threat``, ``/lanes``, ``/live``, ``/network``, ``/trust``, ``/limits`` (routes in ``demo_routes.py``) |
+| ``GET /console`` | one screen: both handsets, the signal path and the live analysis |
 | ``GET /dashboard`` | receiver dashboard: every live call, verdict light, score timeline, alerts |
 | ``GET /call`` | WebRTC call page; a participant can speak or play a clip into the call |
 | ``POST /offer`` | WebRTC signalling; every participant's audio becomes a monitored session |
 | ``POST /api/predict`` | upload or record a clip, get a verdict and its window timeline |
-| ``GET /api/demo-clips``, ``POST /api/replay/{id}`` | play a prepared real or cloned clip as a live call |
+| ``GET /api/demo-clips``, ``POST /api/replay/{id}`` | play a prepared real or cloned clip as a live call (``?realtime=false&wait=true``: as fast as it scores, verdict returned) |
 | ``GET /api/results`` | the measured S1/S2/S3 tables and the calibration, from committed JSONs |
 | ``WS /ws/dashboard`` | push channel for the dashboard |
 | ``POST /twilio/voice`` | Twilio webhook for an incoming call: stream it, bridge the receiver |
