@@ -184,6 +184,20 @@ calls (one "likely cloned") where the final recipe warns all 41. Two earlier tra
 encoder disagreed on spontaneous speech, so before it replaces the final recipe a second
 checkpoint has to show the same on the real and the spontaneous calls.
 
+### Trying the stricter speech gate
+
+The papers said a stricter speech gate for the first seconds of a call would help. I tried
+one set on the dev clips alone (`src/inference/early_warning.py`): windows ending in the
+first 10 s and quieter than -29.87 dBFS, the level of the quietest 1% of dev speech, are
+treated as silence, and every model's stored real-call windows are replayed through the same
+ladder. Over G.711 it clears two of the final recipe's three warned genuine live calls, but as
+recorded it warns one more (C07), it delays every model's first caution on the XTTS-v2 calls
+by 2-5 s, and it treats 83 of the 120 early windows as silence, speech included: the calls
+are far quieter than the normalised dev clips. So the gate cannot be set without real
+development calls, which is now measured rather than said (`docs/results/early_warning_v1.md`).
+To share the replay code with the first-window diagnostic, `without_first_window` now calls
+a common `as_silence` in `real_calls.py`; its results are unchanged.
+
 ## Numbers
 
 | What | Number | Source |
@@ -201,6 +215,7 @@ checkpoint has to show the same on the real and the spontaneous calls.
 | Real calls: SSL-AASIST, genuine live calls warned / "likely cloned" | 1 of 12 / 0 of 12 | `real_calls_v1.md` |
 | Real calls: SSL-AASIST, XTTS-v2 / Chatterbox calls caught | 6 of 6 / 1 of 6 (2 more cautioned) | same |
 | SSL-AASIST checkpoint offline, Chatterbox EER | 21.2% (week-13 trainings 8.2-18.3%) | `ssl_checkpoint_v1/summary.txt` |
+| Stricter start gate set on dev (-29.87 dBFS, first 10 s), final recipe over G.711 | warned genuine live calls 3 to 1; as recorded 4 to 5; first caution 2-5 s later for every model | `early_warning_v1/summary.json` |
 | Weights package against the checkpoint | identical scores | `docs/release.md` |
 
 ## How to run
@@ -228,6 +243,10 @@ python -m src.inference.calibrate choose --dev experiments/calibration_ssl/dev_w
 python -m src.inference.real_calls score --audio data/real_calls/scored --ssl <ssl .pt> \
     --out experiments/results/real_calls_v1
 
+# the stricter start gate, set on dev, replayed on the real calls
+python -m src.inference.early_warning --dev experiments/calibration_final/dev_windows.csv \
+    --windows experiments/results/real_calls_v1 --out experiments/results/early_warning_v1
+
 # the weights package
 python -m src.inference.model_package export --checkpoint <final .pt> --out <package dir>
 python -m src.inference.model_package verify --checkpoint <final .pt> --package <package dir>
@@ -245,7 +264,8 @@ On real calls the final recipe warns late for two speakers (their XTTS-v2 calls 
 a caution 18-32 s in), its false alarms on live calls start with the quiet before the first word
 but do not end there, and the warned genuine live calls over G.711 are one speaker's from one
 handset. A stricter speech gate and the
-operating point both need a separate set of real development calls. SSL-AASIST did better
+operating point both need a separate set of real development calls; a gate set on the dev
+clips alone was tried and does not transfer. SSL-AASIST did better
 than the final recipe on the real calls and on spontaneous speech, but from one checkpoint;
 a second one has to agree before the larger encoder becomes the live default, and its weights
 (632 MB) are kept outside git like the others.

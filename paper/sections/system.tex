@@ -270,7 +270,13 @@ Only part, though: replaying the calls with that window treated as silence, a di
 chooses nothing, clears two of the three warned genuine live calls over G.711, while as recorded
 it clears one of four and cautions another; and one call over G.711 (two as recorded) still
 reaches ``likely cloned'', its run including two speech windows 8--14\,s in.
-A stricter speech gate at the start of a call would help but not suffice, and both it and the
+A stricter speech gate at the start of a call does not transfer from the dev clips. Set there
+(windows in the first 10\,s quieter than $-29.9$\,dBFS, the level of the quietest 1\% of
+dev speech, treated as silence), it clears two of the three warned genuine live calls over G.711
+and leaves the third at a caution, but as recorded it warns one call more, it delays every
+model's first caution on the XTTS-v2 calls by 2--5\,s at the median, and it silences 83 of the
+120 windows that end in the first 10\,s, speech included: the calls are far quieter than the
+normalised dev clips (\texttt{docs/results/early\_warning\_v1.md}). Both the gate and the
 operating point need real development calls, not these. The counts are small, and the intervals
 say so: five of six clone calls caught is a 95\% Wilson interval of 44--97\%, none of six is
 0--39\%, one of twelve genuine live calls ``likely cloned'' is 1.5--35\%.

@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2014-green)
-![Tests](https://img.shields.io/badge/tests-1045%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1049%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -611,7 +611,7 @@ codemix-deepfake-detection/
 │   ├── baselines/       # AASIST, SSL-AASIST, RawBoost
 │   ├── reporting/       # every paper table and figure, built from committed results
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 1,045 tests — firewalls, anti-leakage, live-call server, Twilio stream
+├── tests/               # 1,049 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
 ├── configs/             # train/eval/generation configs and the live thresholds
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
@@ -788,7 +788,9 @@ credit exhausted; the carrier leg has never run on them); spontaneous speech is 
 [spontaneous_tradeoff_v1](docs/results/spontaneous_tradeoff_v1.md)), and fixing it needs spontaneous genuine
 speech in training; real development calls, to set a stricter speech gate for the first
 seconds of a call together with the operating point (the quiet before the first word is
-scored as speech, and some early speech windows score as fake too);
+scored as speech, and some early speech windows score as fake too; a gate set on the dev
+clips alone helps over G.711, not as recorded, and delays every model:
+[early_warning_v1](docs/results/early_warning_v1.md));
 decide on publishing the weights (the package is ready, [release](docs/release.md)); settle
 the title, authors and venue, tag `paper-v1` (both papers point readers to it), then submit
 the paper.
@@ -864,6 +866,7 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/encoder_ablation_v1.md`](docs/results/encoder_ablation_v1.md) | **XLSR-53 against wav2vec2-base** — XLSR-53's frozen-feature advantage does not survive training in our LoRA/S3 recipes (separate from SSL-AASIST) |
 | [`docs/results/live_final_recipe_v1.md`](docs/results/live_final_recipe_v1.md) | **What a caller meets** — 60 s calls through the live path, deployed model against the final recipe |
 | [`docs/results/real_calls_v1.md`](docs/results/real_calls_v1.md) | **Real phone calls** — the pilot over a mobile network, and the call chain, in which the mobile codec is the largest single step in the deployed model's failure; the larger encoder (one checkpoint) on the same calls |
+| [`docs/results/early_warning_v1.md`](docs/results/early_warning_v1.md) | **A stricter speech gate for the first seconds of a call**, set on dev and replayed on the real calls: it clears two of the final recipe's three warned genuine live calls over G.711 but not as recorded, delays every model, and shows the gate needs real development calls |
 | [`docs/real_calls/PROTOCOL.md`](docs/real_calls/PROTOCOL.md) | **How the real-call test is run** — consent, scripts, the 30-call plan, what is kept where |
 | [`docs/results/english_final_v1.md`](docs/results/english_final_v1.md) | **English with the final recipe** — it misses English fakes rather than rejecting English callers |
 | [`docs/results/encoder_spontaneous_v1.md`](docs/results/encoder_spontaneous_v1.md) | **The larger encoder** on spontaneous speech, and its speed on a live call |

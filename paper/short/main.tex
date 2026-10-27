@@ -17,25 +17,25 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 \maketitle
 
 \begin{abstract}
-Deepfake detectors report error rates below one percent on English benchmarks.
-We test what that means for Hindi--English speech over a telephone line. A
+Deepfake detectors report error rates below one percent on English benchmarks; we
+test Hindi--English speech over a telephone line. A
 wav2vec~2.0 detector trained on ASVspoof 2019 LA
 reaches 0.85\% equal error rate on English but 58.42\% on code-mixed speech over a
 simulated narrowband channel; it rejects genuine speakers, calling 94.8\% of clean genuine
 Hindi--English speech fake. A language-controlled
 test on 183 unseen speakers shows the gap follows the recording domain, not
 code-mixing. Low-rank adaptation of 1.13\% of the parameters brings channel-matched error to
-2.75\% (the deployed model). More training speakers and a real codec help most: the final
+2.75\% (the deployed model). More speakers and a real codec help most: the final
 recipe, trained on 248 speakers over simulated G.711 and real AMR-NB, takes error on new
 speakers' unseen Tortoise clones from 30.8\% to 8.8\% over the line and from 36.3\% to 6.0\%
-over AMR-NB across five seeds, with no unseen-tool audio in training. A larger encoder
+over AMR-NB across five seeds, without unseen-tool audio in training. A larger encoder
 (SSL-AASIST) fine-tuned on the same data reaches 0.5\% over AMR-NB and 12.9\% on Chatterbox,
 another unseen generator. The main results are tested against a shortcut floor of cheap
 signal statistics by a paired speaker bootstrap. Spontaneous speech, IndicF5 and, for the adapters, Chatterbox
-remain unsolved. The detector runs on live calls, warning only the callee. On 30 real mobile
+remain unsolved. The detector warns only the callee. On 30 real mobile
 calls scored offline, the deployed model, failing mostly at the mobile codec, warns most
 genuine live calls, the final recipe one in four and the larger encoder one in twelve; these two
-flag five and six of six seen-tool clone calls as likely cloned.
+catch five and six of six seen-tool clone calls.
 \end{abstract}
 
 \begin{IEEEkeywords}
