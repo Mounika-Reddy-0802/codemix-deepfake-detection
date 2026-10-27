@@ -363,6 +363,11 @@ def create_app(state: App | None = None) -> FastAPI:
         """Scene 3: the caller on this laptop, the receiver on the mentor's phone."""
         return page("live.html")
 
+    @api.get("/network")
+    async def network_page() -> HTMLResponse:
+        """Scene 4: the real mobile network, scores only."""
+        return page("network.html")
+
     @api.get("/phone")
     async def phone_home() -> HTMLResponse:
         return page("phone.html")
@@ -511,6 +516,12 @@ def create_app(state: App | None = None) -> FastAPI:
         api,
         lambda: Path(
             os.environ.get("TUNNEL_URL_FILE", str(demo_clips_dir().parent / "tunnel_url.txt"))
+        ),
+    )
+    demo_routes.add_results_routes(
+        api,
+        lambda: Path(
+            os.environ.get("STAGE_PLAYER_DIR", str(demo_clips_dir().parent / "stage_player"))
         ),
     )
 

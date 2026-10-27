@@ -5,7 +5,9 @@ The routes here serve the demo's scenes on top of it, each in its own function s
 server reads as a list of what it offers:
 
 - :func:`add_lane_routes`: scene 2, several detectors on one call (``live_call.lanes``);
-- :func:`add_live_routes`: scene 3, the address and QR code the receiver's phone opens.
+- :func:`add_live_routes`: scene 3, the address and QR code the receiver's phone opens;
+- :func:`add_results_routes`: scenes 1, 4 and 6, numbers read from committed results
+  (``live_call.results_view``) and the stage player's prepared audio.
 
 Every route scores audio through the live path (``StreamingScorer`` + ``VerdictEngine``)
 or reads a committed result file; none holds a number of its own.
@@ -23,8 +25,9 @@ from pathlib import Path
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 
+from live_call import results_view
 from live_call.lanes import new_run_id, score_lanes
 
 log = logging.getLogger("live_call")
@@ -176,3 +179,42 @@ def add_live_routes(api: FastAPI, tunnel_file: Callable[[], Path]) -> None:
             buffer, kind="svg", scale=8, border=2, dark="#06101f", light="#ffffff", xmldecl=False
         )
         return Response(buffer.getvalue(), media_type="image/svg+xml")
+
+
+def add_results_routes(api: FastAPI, stage_dir: Callable[[], Path]) -> None:
+    """Committed results for the scene pages, and the stage player's prepared audio."""
+
+    @api.get("/api/headline")
+    async def headline() -> JSONResponse:
+        return JSONResponse(results_view.headline())
+
+    @api.get("/api/real_calls")
+    async def real_calls() -> JSONResponse:
+        return JSONResponse(results_view.real_calls())
+
+    @api.get("/api/limits")
+    async def limits() -> JSONResponse:
+        return JSONResponse(results_view.limits())
+
+    def stage_index() -> dict | None:
+        import json
+
+        index = stage_dir() / "stage_player.json"
+        return json.loads(index.read_text(encoding="utf-8")) if index.is_file() else None
+
+    @api.get("/api/stage_player")
+    async def stage_player() -> JSONResponse:
+        """One genuine corpus call through each stage of a phone call, and its scores
+        (prepared offline by ``scripts/prepare_stage_player.py``)."""
+        data = stage_index()
+        if data is None:
+            return JSONResponse({"available": False, "stages": []})
+        return JSONResponse({"available": True, **data})
+
+    @api.get("/api/stage_player/{stage}/audio")
+    async def stage_audio(stage: str) -> FileResponse:
+        data = stage_index() or {}
+        entry = next((s for s in data.get("stages", []) if s["key"] == stage), None)
+        if entry is None or not (stage_dir() / entry["file"]).is_file():
+            raise HTTPException(404, "unknown stage")
+        return FileResponse(stage_dir() / entry["file"])

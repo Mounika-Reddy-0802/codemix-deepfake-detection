@@ -66,7 +66,7 @@ def client(monkeypatch, tmp_path):
 
 
 def test_scene_pages_are_served(client):
-    for path in ("/live", "/lanes", "/console", "/phone/receiver", "/phone/caller"):
+    for path in ("/live", "/lanes", "/network", "/console", "/phone/receiver", "/phone/caller"):
         response = client.get(path)
         assert response.status_code == 200 and "<html" in response.text, path
 
@@ -86,6 +86,32 @@ def test_the_phone_address_prefers_the_tunnel(client):
         "https://quiet-river-1234.trycloudflare.com\n", encoding="utf-8"
     )
     assert client.get("/api/tunnel").json()["url"] == "https://quiet-river-1234.trycloudflare.com"
+
+
+def test_results_routes_answer_from_committed_files(client):
+    real = client.get("/api/real_calls").json()
+    assert len(real["table"]) == 4 and len(real["chain"]["stages"]) == 6
+    assert client.get("/api/headline").json()["s1"]["genuine_called_fake_pct"]["source"]
+    # no stage player prepared in this test's data directory: the page says so
+    assert client.get("/api/stage_player").json() == {"available": False, "stages": []}
+    assert client.get("/api/stage_player/direct/audio").status_code == 404
+
+
+def test_the_stage_player_serves_prepared_stages(client):
+    import json
+
+    folder = client.data / "stage_player"
+    folder.mkdir()
+    (folder / "direct.wav").write_bytes(b"RIFF0000WAVE")
+    index = {
+        "speaker": "596505",
+        "stages": [{"key": "direct", "label": "Direct", "file": "direct.wav"}],
+    }
+    (folder / "stage_player.json").write_text(json.dumps(index), encoding="utf-8")
+    body = client.get("/api/stage_player").json()
+    assert body["available"] is True and body["stages"][0]["key"] == "direct"
+    assert client.get("/api/stage_player/direct/audio").content.startswith(b"RIFF")
+    assert client.get("/api/stage_player/nope/audio").status_code == 404
 
 
 def test_qr_codes_are_standalone_svg(client):

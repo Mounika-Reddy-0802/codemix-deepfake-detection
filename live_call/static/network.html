@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Real mobile network</title>
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    main.scene { padding-top: 1.1rem; }
+    .head { display: flex; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .head h1.title { margin: 0; }
+    .privacy { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 650; font-size: 0.86rem; color: #cfe0ff; background: rgba(91, 149, 255, 0.12); border: 1px solid rgba(91, 149, 255, 0.4); padding: 0.35rem 0.8rem; border-radius: 999px; }
+    .top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(360px, 1fr); gap: 1.1rem; }
+    @media (max-width: 1150px) { .top { grid-template-columns: 1fr; } }
+    .chart svg { width: 100%; height: auto; display: block; }
+    .chart svg text { font-family: var(--font); }
+    .legend { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.84rem; color: var(--dim); margin-top: 0.4rem; }
+    .legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+    .legend i { width: 22px; height: 4px; border-radius: 2px; display: inline-block; }
+    .player .stage { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.75rem; align-items: center; padding: 0.6rem 0.6rem; border-radius: 12px; border: 1px solid transparent; transition: background 0.15s, border-color 0.15s; }
+    .player .stage + .stage { margin-top: 0.25rem; }
+    .player .stage.on { background: rgba(91, 149, 255, 0.10); border-color: rgba(91, 149, 255, 0.45); }
+    .player .play { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255, 255, 255, 0.06); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+    .player .play:hover { background: rgba(255, 255, 255, 0.12); }
+    .player .stage.on .play { background: var(--accent); border-color: var(--accent); }
+    .player .play svg { width: 16px; height: 16px; }
+    .player .sl { font-weight: 650; font-size: 0.95rem; }
+    .bars { display: grid; grid-template-columns: 5.6rem 1fr 3.2rem; gap: 0.2rem 0.6rem; align-items: center; margin-top: 0.3rem; font-size: 0.78rem; color: var(--dim); }
+    .bar { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); position: relative; overflow: visible; }
+    .bar > b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+    .bar > s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: rgba(230, 238, 250, 0.8); text-decoration: none; }
+    .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 650; }
+    .val.low { color: #ff9a9a; }
+    .ptitle { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+    .calls { margin-top: 1.1rem; }
+    .calls table.data td.big { font-size: 1.15rem; font-weight: 700; }
+    .calls .sentence { margin-top: 0.7rem; color: var(--dim); font-size: 0.95rem; }
+    .speakers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.6rem; margin-top: 0.9rem; }
+    .spk { background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 0.6rem 0.8rem; font-size: 0.86rem; }
+    .spk b { font-size: 1rem; }
+    .dots { display: inline-flex; gap: 4px; margin-left: 0.4rem; vertical-align: middle; }
+    .dots i { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); display: inline-block; }
+    .dots i.w { background: var(--caution); }
+    .dots i.l { background: var(--fake); }
+    .dots i.g { background: var(--genuine); }
+    .mrow { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem; color: var(--dim); }
+    .mrow em { font-style: normal; width: 5.6rem; }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <p class="kicker">Scene 4 · A real mobile network</p>
+    <div class="head">
+      <h1 class="title">Thirty calls over a real mobile network.</h1>
+      <span class="privacy">Scores only: the team's own voices are never played</span>
+    </div>
+
+    <div class="top">
+      <section class="card chart">
+        <div class="ptitle"><h2>What each stage of a phone call does to the score</h2><span class="tiny faint" id="chainNote"></span></div>
+        <div id="chainSvg"><p class="muted small">Loading the call chain…</p></div>
+        <div class="legend" id="chainLegend"></div>
+      </section>
+
+      <section class="card player">
+        <div class="ptitle"><h2>Hear it</h2><span class="tiny faint" id="playerWho"></span></div>
+        <p class="small muted" style="margin:-0.3rem 0 0.6rem">One genuine held-out corpus speaker, rendered offline through the same
+          stages and scored on the live path. Press a stage to hear it.</p>
+        <div id="stages"><p class="muted small">Loading…</p></div>
+        <audio id="audio" preload="none"></audio>
+      </section>
+    </div>
+
+    <section class="card calls">
+      <div class="ptitle"><h2>The real calls</h2><span class="tiny faint" id="callsNote"></span></div>
+      <div class="table-wrap" id="callTable"><p class="muted small">Loading…</p></div>
+      <p class="sentence" id="sentence"></p>
+      <div class="speakers" id="speakers"></div>
+    </section>
+  </main>
+
+  <script src="/static/stage.js"></script>
+  <script>
+    const { make, json, cite } = Stage;
+    Stage.mount("network");
+    const $ = (id) => document.getElementById(id);
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = (tag, attrs = {}, text) => {
+      const n = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      if (text !== undefined) n.textContent = text;
+      return n;
+    };
+
+    // ------------------------------------------------------------------ call chain
+    function drawChain(chain) {
+      const W = 760, H = 500, L = 58, R = 16, T = 26, B = 84;
+      const n = chain.stages.length;
+      const x = (i) => L + ((W - L - R) * (i + 0.5)) / n;
+      const y = (v) => T + (H - T - B) * (1 - v);
+      const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Mean P(genuine) at each stage of a phone call" });
+      for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+        root.append(svg("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "rgba(255,255,255,0.07)" }));
+        root.append(svg("text", { x: L - 10, y: y(v) + 5, "text-anchor": "end", "font-size": 14, fill: "#8fa3c2" }, v.toFixed(2)));
+      }
+      root.append(svg("text", { x: 14, y: T + (H - T - B) / 2, transform: `rotate(-90 14 ${T + (H - T - B) / 2})`, "text-anchor": "middle", "font-size": 14, fill: "#8fa3c2" }, "mean P(genuine)"));
+      // the real-calls column is the calls themselves, not a rendering: set it apart
+      const lastX = x(n - 1) - (W - L - R) / n / 2;
+      root.append(svg("rect", { x: lastX, y: T, width: (W - L - R) / n, height: H - T - B, fill: "rgba(91,149,255,0.07)" }));
+      chain.stages.forEach((s, i) => {
+        const words = s.label.split(" ");
+        const lines = [];
+        let cur = "";
+        for (const w of words) { if ((cur + " " + w).trim().length > 16) { lines.push(cur.trim()); cur = w; } else cur += " " + w; }
+        lines.push(cur.trim());
+        lines.forEach((line, k) => root.append(svg("text", { x: x(i), y: H - B + 24 + k * 17, "text-anchor": "middle", "font-size": 14, fill: i === n - 1 ? "#cfe0ff" : "#b8c7de", "font-weight": i === n - 1 ? 700 : 500 }, line)));
+      });
+      for (const [key, m] of Object.entries(chain.models)) {
+        const t = m.threshold.value;
+        root.append(svg("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), stroke: m.colour, "stroke-dasharray": "6 5", "stroke-width": 1.4, opacity: 0.8 }));
+        // final recipe's label at the right end above its line, the deployed one at the left
+        // below its line: both bands are clear of every data point
+        const right = key === "final";
+        const label = svg("text", { x: right ? W - R - 6 : L + 6, y: y(t) + (right ? -8 : 18), "text-anchor": right ? "end" : "start", "font-size": 13, "font-weight": 600, fill: m.colour }, `${m.label} threshold ${t.toFixed(3)}`);
+        label.append(svg("title", {}, "read from " + m.threshold.source));
+        root.append(label);
+        const pts = chain.stages.map((s, i) => [x(i), y(s[key].value), s[key]]);
+        root.append(svg("polyline", { points: pts.map((p) => p[0] + "," + p[1]).join(" "), fill: "none", stroke: m.colour, "stroke-width": 3.2, "stroke-linejoin": "round" }));
+        pts.forEach(([px, py, v], i) => {
+          const g = svg("g");
+          g.append(svg("circle", { cx: px, cy: py, r: 6, fill: m.colour, stroke: "#060a13", "stroke-width": 2 }));
+          const above = key === "final" || v.value > 0.9;
+          g.append(svg("text", { x: px, y: py + (above ? -13 : 25), "text-anchor": "middle", "font-size": 16, "font-weight": 700, fill: "#eef3fc" }, v.value.toFixed(2)));
+          g.append(svg("title", {}, `${m.label}, ${chain.stages[i].label}: ${v.value.toFixed(4)} (mean of ${v.n}) · read from ${v.source}`));
+          root.append(g);
+        });
+      }
+      $("chainSvg").replaceChildren(root);
+      $("chainLegend").replaceChildren(
+        ...Object.values(chain.models).map((m) => make("span", {}, [make("i", { style: `background:${m.colour}` }), m.label])),
+        make("span", {}, [make("i", { style: "background:repeating-linear-gradient(90deg,#cfd9ea 0 5px,transparent 5px 9px)" }), "that model's live threshold: below it, the call is warned"]),
+      );
+      const direct = chain.stages[0].final.n;
+      const live = chain.stages.at(-1).final.n;
+      $("chainNote").textContent = `team's direct readings (${direct}) through each stage; then ${live} genuine live calls`;
+    }
+
+    // ------------------------------------------------------------------ stage player
+    let playing = null;
+    function drawPlayer(p, chain) {
+      const box = $("stages");
+      if (!p.available) {
+        box.replaceChildren(make("p", { class: "muted small", text: "Not prepared on this machine: run scripts/prepare_stage_player.py." }));
+        return;
+      }
+      $("playerWho").textContent = `held-out speaker ${p.speaker} · ${Math.round(p.seconds)} s`;
+      const models = chain ? chain.models : { deployed: { label: "Deployed adapter", colour: "#eb6834" }, final: { label: "Final recipe", colour: "#1baf7a" } };
+      box.replaceChildren(...p.stages.map((s) => {
+        const rows = [];
+        for (const key of ["deployed", "final"]) {
+          const v = s[key].mean_p_genuine, t = p.thresholds[key].value, m = models[key];
+          rows.push(make("span", { text: m.label.replace(" adapter", "") }));
+          rows.push(make("div", { class: "bar", title: `threshold ${t.toFixed(3)} (${p.thresholds[key].file})` }, [
+            make("b", { style: `width:${Math.max(1.5, v * 100)}%;background:${m.colour}` }),
+            make("s", { style: `left:${t * 100}%` }),
+          ]));
+          rows.push(make("span", { class: "val" + (v < t ? " low" : ""), title: `${s[key].windows} windows, ${s[key].fake_leaning_pct}% fake-leaning`, text: v.toFixed(2) }));
+        }
+        const row = make("div", { class: "stage", id: "st-" + s.key }, [
+          make("button", { class: "play", type: "button", title: "Play this stage", "aria-label": "Play " + s.label, onclick: () => playStage(s.key),
+            html: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' }),
+          make("div", {}, [make("div", { class: "sl", text: s.label }), make("div", { class: "bars" }, rows)]),
+        ]);
+        return row;
+      }));
+    }
+    function playStage(key) {
+      const audio = $("audio");
+      document.querySelectorAll(".player .stage").forEach((el) => el.classList.toggle("on", el.id === "st-" + key));
+      if (playing === key && !audio.paused) { audio.pause(); playing = null; document.getElementById("st-" + key).classList.remove("on"); return; }
+      // keep the place in the call when switching stage, so the change is heard at once
+      const at = audio.currentTime || 0;
+      audio.src = `/api/stage_player/${key}/audio`;
+      audio.addEventListener("loadedmetadata", () => { audio.currentTime = Math.min(at, audio.duration - 0.5); audio.play().catch(() => {}); }, { once: true });
+      playing = key;
+    }
+    $("audio").addEventListener("ended", () => document.querySelectorAll(".player .stage").forEach((el) => el.classList.remove("on")));
+
+    // ------------------------------------------------------------------ the 30 calls
+    function drawCalls(r) {
+      const pctOf = (cell) => cell.value === null ? "" : ` (${Math.round(cell.value)}%)`;
+      const head = make("tr", {}, [
+        make("th", { text: "Calls" }), make("th", { text: "n" }),
+        make("th", { text: "Deployed: likely cloned" }),
+        make("th", { text: "Final: warned (caution or worse)" }),
+        make("th", { text: "Final: likely cloned" }),
+        make("th", { text: "Final: median first caution" }),
+      ]);
+      const body = r.table.map((row) => {
+        const d = row.deployed, f = row.final;
+        const genuine = row.kind.startsWith("genuine");
+        // on a genuine call any warning is a false alarm; on a clone, catching all is the goal
+        const tone = (count) => genuine
+          ? (count.value === 0 ? "good" : "bad")
+          : (count.value === d.calls.value ? "good" : count.value === 0 ? "bad" : "warn");
+        return make("tr", {}, [
+          make("td", { text: row.label }),
+          make("td", {}, [cite(d.calls)]),
+          make("td", { class: "big " + tone(d.likely) }, [cite(d.likely)]),
+          make("td", { class: "big " + tone(f.warned) }, [cite(f.warned), make("span", { class: "sub", text: pctOf(f.warned_pct).trim() })]),
+          make("td", { class: "big " + tone(f.likely) }, [cite(f.likely), make("span", { class: "sub", text: pctOf(f.likely_pct).trim() })]),
+          make("td", {}, [cite(f.median_first_caution_s, (v) => Math.round(v) + " s")]),
+        ]);
+      });
+      $("callTable").replaceChildren(make("table", { class: "data" }, [make("thead", {}, head), make("tbody", {}, body)]));
+      $("sentence").textContent = r.note;
+      $("callsNote").textContent = `${r.calls_recorded.value} calls, three speakers, scored offline after a G.711 round trip`;
+      // genuine live calls per speaker: a dot per call
+      const bySpeaker = {};
+      for (const s of r.speakers) (bySpeaker[s.speaker] ||= {})[s.model] = s;
+      $("speakers").replaceChildren(...Object.entries(bySpeaker).map(([speaker, m]) => make("div", { class: "spk" }, [
+        make("b", { text: speaker }), make("span", { class: "muted", text: " · genuine live calls" }),
+        ...["deployed", "final"].map((model) => {
+          const s = m[model];
+          const dots = Array.from({ length: s.calls }, (_, k) =>
+            make("i", { class: k < s.likely ? "l" : k < s.warned ? "w" : "g" }));
+          return make("div", { class: "mrow" }, [make("em", { text: model === "final" ? "Final recipe" : "Deployed" }), make("span", { class: "dots" }, dots),
+            make("span", { text: s.warned ? ` ${s.warned} of ${s.calls} warned` : " none warned" })]);
+        }),
+      ])));
+    }
+
+    (async () => {
+      let chain = null;
+      try {
+        const r = await json("/api/real_calls");
+        chain = r.chain;
+        drawChain(r.chain);
+        drawCalls(r);
+      } catch (e) { Stage.toast("Could not read the real-call results: " + e.message, 12000); }
+      try { drawPlayer(await json("/api/stage_player"), chain); }
+      catch (e) { $("stages").replaceChildren(make("p", { class: "muted small", text: "Stage player unavailable: " + e.message })); }
+    })();
+  </script>
+</body>
+</html>
