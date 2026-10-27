@@ -2,7 +2,9 @@
 
 A cloned voice on a call makes the **receiver** hear a warning, the receiver's
 dashboard turn red, and an SMS arrive. The caller hears nothing. The same pipeline
-runs over a browser call (WebRTC) and over a real phone call (Twilio).
+runs over a browser call (WebRTC) and over a real phone call (Twilio). The browser path is
+verified end to end; the Twilio path is implemented and tested, but has not yet run on live
+numbers, because the trial credit ran out.
 
 ```
 caller audio ──▶ 16 kHz PCM frames ──▶ 4 s windows every 2 s ──▶ detector ──▶ verdict ladder ──▶ alerts
@@ -59,7 +61,13 @@ pip install -r requirements.txt
    ```bash
    set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
    set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
+   set DEMO_CLIPS_DIR=<data>/demo_clips_final
    ```
+
+   `demo_clips_final` holds the same five calls verified on the final recipe (step 2 with
+   `--checkpoint <data>/checkpoints/final_s1234_best.pt --threshold-file
+   configs/threshold_final.yaml --out <data>/demo_clips_final`). Its Tortoise demo call stays
+   green, as it does for the deployed model; say so before playing it.
 
 4. Open <http://localhost:8000>. The status pills at the top must read
    **model: lora_norm_rvc_channel_best.pt**, **threshold: 0.500** and
@@ -97,7 +105,9 @@ second laptop, expose the server with ngrok (below) and open the https URL.
    On `LIKELY_FAKE` it announces a stronger warning and **sends an SMS** to the
    receiver. At hang-up, an SMS summary.
 
-Every Twilio request is checked against its `X-Twilio-Signature`.
+Every Twilio webhook request is checked against its `X-Twilio-Signature` (unless
+`TWILIO_VALIDATE=0`). The media WebSocket itself is not authenticated; anyone who knows the
+public URL could open it, so the server should not be left exposed between demonstrations.
 
 ### Setup (about 15 minutes)
 

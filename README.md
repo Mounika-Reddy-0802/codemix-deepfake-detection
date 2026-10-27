@@ -2,53 +2,58 @@
 
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Phase](https://img.shields.io/badge/phase-week%2013-green)
-![Tests](https://img.shields.io/badge/tests-997%20passing-brightgreen)
+![Phase](https://img.shields.io/badge/phase-week%2014-green)
+![Tests](https://img.shields.io/badge/tests-1039%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
 project **measures that gap under a channel-matched telephony protocol**, closes
-most of it with LoRA, and demonstrates it live — a cloned voice on a phone call
-triggers a beep in the receiver's ear, a dashboard alert, and an SMS.
+most of it with LoRA and more genuine voices, and runs it live: on a browser call a cloned
+voice raises a warning on the receiver's dashboard, and the telephone carrier, built to
+beep in the receiver's ear and send an SMS, is implemented but not yet run on live numbers.
+Recorded real mobile calls were scored offline through the same path.
 
-> **Status: Week 12 of 12 — the external review is answered: five training seeds per phone-line system, matched shortcut floors, new speakers, the English trade-off, and 38 verified references.**
+> **Status: Week 14 — the final recipe, a larger encoder, and a first test on real phone calls.**
 >
-> Every detector is compared with a **matched shortcut floor** (eight cheap signal
-> statistics fitted on its own training data, scored on its own clips) by a paired
-> test over speakers. On the phone-line condition the deployed adapter (S2 LoRA, XTTS
-> + RVC) scores **2.75%** on the seen tool (**3.27 ± 1.17** over five seeds, floor
-> 9.96%), **5.01%** on RVC from unseen speakers (**5.33 ± 1.27**, floor 20.52%) and
-> **2.42%** on clean English, but **24.20%** on English over the same phone line.
-> Against the never-seen Tortoise tool it averages **35.59 ± 3.35** over five seeds,
-> about at its 37.79% floor: it is not shown to detect an unseen tool on a phone
-> line — stated, not hidden. S3 trained on XTTS alone stays under its Tortoise floor
-> in every seed (**19.72 ± 5.36**). On 24 new speakers talking freely, the deployed
-> model calls **54%** of genuine speech fake.
+> An English-trained detector (0.85% EER on English) reaches **58.42%** on Hindi–English
+> speech over a phone line; it rejects real speakers, calling **94.8%** of clean genuine
+> Hindi–English clips fake; a
+> language-controlled test on 183 unseen speakers shows the gap follows the **recording
+> domain, not the code-mixing**. LoRA adapters (1.13% of the weights) bring the phone-line
+> error to **3.27 ± 1.17%** over five seeds. The **final recipe**, the same adapter trained on
+> 248 genuine speakers (with seen-tool clones of the new ones) through both the simulated G.711 line and the real AMR-NB codec, cuts
+> unseen Tortoise clones over AMR-NB from **36.3% to 6.0%** and beats its shortcut floor in
+> every seed on every set (three of those floors are weak bars). A larger encoder (SSL-AASIST) trained on the same data reaches
+> **0.5%** there and **12.9%** on Chatterbox. Still open, and stated: IndicF5 (16–22%),
+> spontaneous speech, and English over the phone line.
 >
-> The live system scores every 4 s of a call and warns the receiver. On held-out
-> 60 s calls at the frozen threshold: **0% of genuine calls alerted; 100% of XTTS
-> and RVC cloned calls alerted; 33% of Tortoise calls**.
+> **Real calls (pilot, 30 calls, three speakers):** over a mobile network, the deployed model
+> takes every replayed call and every live call of two speakers of three to "likely cloned"
+> (for the speakers it fails on, the real mobile codec is the largest step); the final recipe
+> warns 3 of 12 genuine live callers (all one speaker's) and takes 5 of 6 XTTS-v2 clone calls
+> to "likely cloned", but none of 6 Chatterbox calls (it cautions one)
+> ([real_calls_v1](docs/results/real_calls_v1.md); the call chain, stage by stage:
+> [`paper/figures/real_call_chain.pdf`](paper/figures/real_call_chain.pdf)).
 
 ---
 
 ## Architecture
 
-The pipeline is a single vertical chain: every stage below consumes only what the
-stage above produced, and two firewalls (described under the diagram) cut across
+The pipeline is a vertical chain in which each stage builds on those above it, and two firewalls (described under the diagram) cut across
 all of them.
 
 ```mermaid
 flowchart TD
     A["1 · CORPORA — L<br/>ASVspoof 2019 LA (English)<br/>MUCS Hindi-English · HiACC-adult"]
     A --> B["2 · CORPUS INDEX — L<br/>56,143 clips · real Kaldi speaker ids<br/>HiACC child audio quarantined on extract"]
-    B --> C["3 · SPEAKER POOLS — FROZEN — SK<br/>25 train · 10 adaptation · 15 eval<br/>sha256 f57e0d85… · carved before any audio existed"]
-    C --> D["4 · SPOOF GENERATION — SK<br/>XTTS-v2 clones + RVC conversions = seen attacks<br/>Tortoise = held-out, eval only, never trained on"]
-    D --> E["5 · TELEPHONY CHANNEL — L<br/>8 kHz · G.711 μ-law / AMR-NB · SNR mixing<br/>verified by measurement and by ear"]
+    B --> C["3 · SPEAKER POOLS — FROZEN — SK<br/>25 train · 10 adaptation · 15 eval<br/>sha256 f57e0d85… · carved before any clone was made"]
+    C --> D["4 · SPOOF GENERATION — SK<br/>XTTS-v2 clones + RVC conversions = seen attacks<br/>Tortoise, IndicF5, Chatterbox = held out, never trained on"]
+    D --> E["5 · TELEPHONY CHANNEL — L<br/>8 kHz · G.711 μ-law / AMR-NB · SNR mixing<br/>G.711 verified by measurement and by ear; AMR-NB by measurement"]
     E --> F["6 · DETECTOR — M<br/>wav2vec2-base + attentive stats pooling + MLP"]
-    F --> G["7 · STAGE 1 — ENGLISH ONLY — M<br/>ASVspoof 2019 LA eval<br/>0.87% EER"]
-    G --> H["8 · GAP MATRIX — M<br/>same detector on code-mixed Hinglish<br/>44.65% EER — 51× worse"]
-    H --> I["9 · STAGE 2 — LoRA ADAPTATION — M<br/>1.13% of parameters, 2.2 min on one GPU<br/>clean 1.34% · channel-matched 3.89%"]
-    I --> J["10 · LIVE CALL DEMO — SK<br/>streaming inference over WebRTC now<br/>Twilio from Week 6 · beep + dashboard + SMS"]
+    F --> G["7 · STAGE 1 — ENGLISH ONLY — M<br/>ASVspoof 2019 LA eval<br/>0.85% EER"]
+    G --> H["8 · GAP MATRIX — M<br/>same detector on code-mixed Hinglish<br/>48.21% EER clean · 58.42% over the phone line"]
+    H --> I["9 · STAGE 2 — LoRA ADAPTATION — M<br/>1.13% of parameters · phone line 3.27 ± 1.17% (5 seeds)<br/>final recipe: 248 voices + the real AMR-NB codec"]
+    I --> J["10 · LIVE CALL SYSTEM — SK<br/>streaming inference over WebRTC · Twilio built, not yet on live numbers<br/>warning to the receiver only · real mobile calls scored"]
 
     style A fill:#1f3a5f,stroke:#4a90d9,color:#fff
     style B fill:#1f3a5f,stroke:#4a90d9,color:#fff
@@ -70,8 +75,9 @@ flowchart TD
    of speaker X counts as speaker X, so disjointness holds across bonafide *and*
    spoof.
 
-`tests/test_splits.py` runs before every training launch and fails the build if
-either is broken.
+`tests/test_config_guard.py` (every committed training config, on the rows it would
+really train on) and `tests/test_splits.py` (the checks themselves, on synthetic
+manifests) run before every training launch and fail the build if either is broken.
 
 ---
 
@@ -82,18 +88,22 @@ fraud calls in India are **code-mixed** — Hindi and English alternating *insid
 single utterance* — and arrive over an 8 kHz telephone channel that destroys exactly
 the high-frequency artefacts most detectors rely on.
 
-Two shifts stack: **language** and **channel**. Published EERs are measured with
-neither. This project measures both, in the condition a detector would actually be
-deployed in.
+Two shifts stack: **language** and **channel**. Most published EERs measure neither;
+the telephony benchmarks are English, and we found no study of Hindi–English code-mixing
+over a phone line. This project measures both, in the condition a detector would actually be
+deployed in. One result changed the question itself: holding speaker and recording fixed,
+the English-trained detector rejects genuine English at least as often as code-mixed speech, so what
+it fails on is the **recording domain** that code-mixed phone speech carries, not the
+language mix.
 
 ---
 
 ## Results — what is actually measured
 
 Every number below comes from a real run on real data and is reproducible from
-[Reproduce](#reproduce). **Start with the week-10 summary**: it supersedes the
-pre-normalisation numbers in sections 1–5, which are kept as the record of how we
-got here.
+[Reproduce](#reproduce) (the week-12 to week-14 runs are the `notebooks/kaggle_w12_*`, `kaggle_w13_*` and `kaggle_w14_*`
+notebooks). **The newest results come first**; sections 1–5
+are the pre-normalisation numbers, kept as the record of how we got here.
 
 ### Week 14 — what a caller meets
 
@@ -109,7 +119,8 @@ into 60 s calls, with the final recipe's operating point chosen on the dev set o
 | IndicF5 / Chatterbox calls caught | 67% / 33% | 50% / 17% |
 | **Genuine spontaneous calls (HiACC): warned** | **100%** | **100%** |
 
-- **The final recipe runs in the live system**: `DFD_CHECKPOINT` at its checkpoint and
+- **The final recipe can run in the live system** (the deployed adapter is still the
+  default): `DFD_CHECKPOINT` at its checkpoint and
   `DFD_THRESHOLD_FILE=configs/threshold_final.yaml` ([live_call/README](live_call/README.md)).
 - **English**: the final recipe rarely calls genuine English fake but catches only 26% of
   English fakes (13.44% EER clean) ([english_final_v1](docs/results/english_final_v1.md)).
@@ -120,10 +131,33 @@ into 60 s calls, with the final recipe's operating point chosen on the dev set o
   `paper/figures/final_overview.pdf`. **Model card** (draft, not published):
   [MODEL_CARD](docs/MODEL_CARD.md).
 
+  ![EER of every main system on every attack tool, over the simulated G.711 line and the real AMR-NB codec, with the shortcut floor](experiments/figures/final_overview.png)
+
+- **Real phone calls (pilot)**: with written consent and the mentor's approval, the team called
+  each other over a mobile network; genuine calls, our own readings and clones of our voices
+  replayed into calls, recorded on the receiving handset and scored through the live path
+  ([PROTOCOL](docs/real_calls/PROTOCOL.md), [real_calls_v1](docs/results/real_calls_v1.md)).
+  Over 30 calls from three speakers, the deployed model takes every replayed call and every
+  live call of two speakers of three to "likely cloned"; the final recipe warns 3 of 12
+  genuine live calls (all one speaker's) and takes 5 of 6 XTTS-v2 clone calls but none of 6
+  Chatterbox calls to "likely cloned". Rebuilding the call chain on our direct recordings
+  shows where the deployed model breaks: over six readings its mean P(genuine) falls from 0.75
+  through the simulated line to **0.50 through the real AMR-NB codec**, its threshold, the
+  largest step for the two speakers it fails on, while the final recipe stays at 0.82-1.00
+  for every reading. Every replay recording was checked against the file played into it
+  before scoring (18 of 18 match).
+
+  ![Mean P(genuine) of our own recordings through each stage of a phone call, and of the genuine live calls: on average the deployed adapter falls to its threshold at the mobile codec, the final recipe stays above its own](experiments/figures/real_call_chain.png)
+
+- **Conference paper** (`paper/short/main.tex`) in the IEEE two-column format; its page
+  count is checked in Overleaf, since the laptop has no LaTeX.
+- **Weights package** for the release decision: safetensors, config, model card, checksums,
+  verified identical to the checkpoint ([release](docs/release.md)).
+
 ### Week 13 — the final recipe, a larger encoder, and a third unseen tool
 
 **More voices and a real codec close most of the gap.** The final recipe trains the same
-LoRA adapter on 248 genuine speakers instead of 21, every clip over both the simulated
+LoRA adapter on 248 genuine speakers (with seen-tool clones of the new ones) instead of 21, every clip over both the simulated
 G.711 line and the real AMR-NB mobile codec. Five seeds, paired with the deployed recipe
 ([final_recipe_v1](docs/results/final_recipe_v1.md)); no unseen-tool audio in training.
 
@@ -143,19 +177,21 @@ G.711 line and the real AMR-NB mobile codec. Five seeds, paired with the deploye
   ([floor_final_v1](docs/results/floor_final_v1.md)).
 - **The larger encoder** (XLS-R 300M, about three times our encoder) is better than the
   adapter in every seed on eight of eleven sets (exact p = 0.008 on seven)
-  ([ssl_vs_adapter_v1](docs/results/ssl_vs_adapter_v1.md)). Its cost on a live call is not
-  measured; the live system still runs the deployed S2.
-- **Chatterbox** (CM09, 525 clips) is the hardest tool; IndicF5 stays at 15.8-21.8% for
+  ([ssl_vs_adapter_v1](docs/results/ssl_vs_adapter_v1.md)). Its cost on a live call was
+  measured in week 14 (above); the live system still runs the deployed S2.
+- **Chatterbox** (CM09, 525 clips) is the adapters' hardest tool (SSL-AASIST does better on
+  it than on IndicF5); IndicF5 stays at 15.8-21.8% for
   both final systems ([chatterbox scores](experiments/results/cm09_v1)).
 - **Outside baselines zero-shot fail the same way:** AASIST rejects 82.3% and SSL-AASIST
-  73.1% of genuine Hindi-English speech ([w13_runs_v1](docs/results/w13_runs_v1.md)).
+  73.1% of genuine Hindi-English speech ([w13_runs_v1](docs/results/w13_runs_v1.md),
+  [ssl_aasist_v1](docs/results/ssl_aasist_v1.md)).
 
 ### Week 13 — is it the code-mixing? New speakers, a second unseen tool, a real codec
 
-**The gap is the recording, not the language mix.** A language-controlled set holds
+**The gap follows the recording, not the language mix.** A language-controlled set holds
 speaker and recording fixed: 183 unseen speakers, each with all-English, all-Hindi and
 mixed clips from the same lectures. The English-only S1 rejects their genuine English
-as often as their mixed speech, and the Code-Mixing Index does not predict its score
+at least as often as their mixed speech, and the Code-Mixing Index does not predict its score
 ([language_control_v1](docs/results/language_control_v1.md),
 [cmi_bands_v1](docs/results/cmi_bands_v1.md)).
 
@@ -175,14 +211,15 @@ in training) for 54 test speakers, and XTTS for 227 extra adaptation speakers.
 | real AMR-NB codec | 23.7 | 37.0 | 47.0 |
 
 - The seen tool transfers to 60 new people (median speaker 2.9%).
-- Both unseen tools stay near 30% over the phone line; on IndicF5 no system clears its
-  matched floor. IndicF5 is also the most natural tool: predicted MOS 3.07 against 3.10
+- Both unseen tools stay near 30% over the phone line; on IndicF5 no system scored on
+  these sets clears its matched floor (the final recipe later does: 21.7% against 38.8%). IndicF5 is also the most natural tool of those scored: predicted MOS 3.07 against 3.10
   for genuine speech ([naturalness_v1](docs/results/naturalness_v1.md)).
 - A real mobile codec (AMR-NB) costs the deployed model most of its channel gain; an
   adapter trained on clean audio holds better there (12.6% on XTTS)
   ([amr_channel_v1](docs/results/amr_channel_v1.md)).
 
-These three runs led to the final recipe above: 248 speakers beat 21 in every seed
+These three runs led to the final recipe above: 248 speakers beat 21 in every seed on six
+of seven sets (RVC stays level)
 (`notebooks/kaggle_w13_overfit_fix.ipynb`), and training on G.711 and AMR-NB together
 recovers the codec loss (new-speaker XTTS over AMR-NB 7.59% against 22.37%,
 `notebooks/kaggle_w13_mixcodec.ipynb`).
@@ -208,8 +245,9 @@ What it says:
    mean over seeds sits at its floor. Where it works it is stable: RVC beats its
    floor in all five seeds.
 2. **S3 trained on XTTS alone is the dependable unseen-tool result**, below its floor
-   in every seed, at the cost of RVC.
-3. **Randomising the recording cues lowers Tortoise by 9 points** across seeds (exact
+   in every seed (significantly in three of five), at the cost of RVC.
+3. **A variant combining random crops, cue augmentation and a layer mix lowers Tortoise
+   by 9 points** across seeds, its parts not separated (exact
    p = 0.008), but the variant was singled out after seeing a test score, does not
    clear the floor, and is invisible on the dev set: a lead, not a result.
 4. **The deployed model suits Hindi–English calls only.** English over the phone line
@@ -225,29 +263,35 @@ What it says:
 
 ### Week 10 — the three systems, each number beside its own floor
 
-EER %, lower is better. **Bold** = the 95% CI upper bound is below that set's
-shortcut floor; ~~struck~~ = not below it, so not evidence of learning.
+EER %, lower is better, one training run (seed 1234). Marks follow the paper's Table
+`tab:main`: each system against the shortcut floor fitted on its own training data, by a
+paired test that resamples whole speakers ([shortcut_floor_v2](docs/results/shortcut_floor_v2.md)).
+**Bold** = below its floor; *italic* = inconclusive; *italic*† = worse than its floor.
+English has no floor. (The week-10 version of this table used the first, unmatched floors,
+under which five more cells looked like evidence.)
 
 | System (training data, condition) | Seen tool (XTTS) | Unseen tool (Tortoise) | RVC, unseen speakers | English (ASVspoof LA) |
 |---|---:|---:|---:|---:|
-| *Shortcut floor, clean / phone line* | *5.17 / 10.01* | *31.21 / 25.79* | *28.76 / 22.46* | *—* |
 | S1 English-only | not measured | not measured | not measured | 0.85 |
-| S2 LoRA — XTTS, clean | **1.46** | **5.44** | **23.91** | 15.83 |
-| S2 LoRA — XTTS, phone line | **4.41** | ~~28.16~~ | ~~29.56~~ | 2.55 |
+| S2 LoRA — XTTS, clean | **1.46** | **5.44** | *23.91* | 15.83 |
+| S2 LoRA — XTTS, phone line | *4.41* | *28.16* | *29.56* | 2.55 |
 | S2 LoRA — XTTS + RVC, clean | **1.99** | **12.01** | **5.01** | 3.75 |
-| **S2 LoRA — XTTS + RVC, phone line (deployed)** | **2.75** | ~~30.99~~ | **5.01** | **2.42** |
-| S3 native — XTTS, clean | **1.46** | **27.72** | ~~45.07~~ | 56.42 |
-| S3 native — XTTS, phone line | **1.92** | **13.71** | ~~32.15~~ | 55.83 |
-| S3 native — XTTS + RVC, clean | **0.83** | **21.39** | **8.24** | 50.90 |
-| S3 native — XTTS + RVC, phone line | **1.79** | ~~31.67~~ | **5.98** | 52.25 |
+| **S2 LoRA — XTTS + RVC, phone line (deployed)** | **2.75** | *30.99* | **5.01** | 2.42 |
+| S3 native — XTTS, clean | **1.46** | *27.72* | *45.07*† | 56.42 |
+| S3 native — XTTS, phone line | **1.92** | **13.71** | *32.15* | 55.83 |
+| S3 native — XTTS + RVC, clean | **0.83** | *21.39* | *8.24* | 50.90 |
+| S3 native — XTTS + RVC, phone line | **1.79** | *31.67* | **5.98** | 52.25 |
 
 What it says:
 
 1. **Adding RVC to training fixes RVC and costs the unseen tool** (23.91 → 5.01 on
    RVC, 5.44 → 12.01 on Tortoise, clean). Attack diversity is not a free route to
-   generalisation (P-027).
+   generalisation (P-027). The RVC data also bring 13 more genuine speakers, so the attack
+   family and the speakers are not separated here.
 2. **Native training is the ceiling, at a cost**: best seen-tool EER, English at
-   chance. LoRA adaptation keeps English (P-030).
+   chance (S3 starts from the self-supervised checkpoint and never trains on English).
+   LoRA adaptation, built on the English detector, keeps clean English in three of four
+   variants (2.42–3.75%; P-030).
 3. **Over a phone line, only S3 XTTS-only clears the Tortoise floor**; the deployed
    model does not, and the demo says so.
 
@@ -437,7 +481,7 @@ different statistics.
 | **2. Channel protocol** | Every eval clip through 8 kHz G.711 μ-law or AMR-NB plus SNR mixing, so the detector is tested on telephony rather than studio audio. | L |
 | **3. Spoof generation** | XTTS-v2 clones train-pool voices; Tortoise is held out as the *unseen* attack and never enters a training manifest. | SK |
 | **4. Detection** | wav2vec2-base + attentive stats pooling + MLP head; LoRA for Stage-2 code-mixed adaptation. | M |
-| **5. Live demo** | Streaming inference on a real call — WebRTC now, Twilio from Week 6. | SK |
+| **5. Live demo** | Streaming inference on a real call — WebRTC verified end to end; Twilio implemented, not yet run on live numbers. | SK |
 
 Generation and training are **decoupled by a job table**: `pilot_jobs` assembles a
 self-contained, path-portable pack and `spoof_generation` synthesises from it. The
@@ -458,15 +502,16 @@ two machines.
 
 ### The telephony channel is real, by measurement and by ear
 
-All 20 test pairs measure as telephony (0.185% → 0.0001% HF energy, 18.8 dB SNR),
-and a blind listening pass rated the result 4.0/5 for both telephony realism and
+All 20 test pairs measure as telephony (0.6% → 0.0001% energy above 4 kHz, 17.6 dB
+median SNR),
+and a listening pass by the three of us rated the result 4.0/5 for both telephony realism and
 intelligibility.
 → [`docs/qa/channel_sim_verdict.md`](docs/qa/channel_sim_verdict.md)
 
 ### Speaker pools frozen before a single clip was generated
 
 **25 train / 10 adaptation / 15 eval**, committed with SHA-256
-`f57e0d85…` and re-verified on every run. If a pool assignment moved after
+`f57e0d85…`, checkable with `speaker_pools.verify_frozen`. If a pool assignment moved after
 generation, every disjointness guarantee in the paper would be void.
 
 ### The corpus is written in one script, and it is Latin
@@ -493,29 +538,46 @@ Devanagari**.
 
 ## Honest limitations
 
-Owning these is the point.
+Owning these is the point. The paper's "What we could not do" is the full version.
 
-- **No model reliably detects a never-seen cloning tool over a phone line.** The
-  deployed phone-line adapter scores 30.99% on Tortoise against a 25.79% floor, and
-  alerts on 2 of 6 held-out Tortoise calls. Clean-audio adapters generalise better
-  (5.44%), but phone audio is the deployment condition.
-- **Every shortcut floor still fails the near-chance gate** (5–31%). Level
-  normalisation removed the level cue; the residual is recording domain (lecture
-  audio against vocoder output). Results are therefore quoted against floors, not
-  against 50%.
-- **Native training (S3) destroys English performance** (50.9–56.4% EER). It is
+- **The deployed model is not shown to detect an unseen tool over a phone line.** On Tortoise
+  over the channel it averages 35.59% EER across five seeds against a matched floor of
+  37.79%, and beats that floor in no seed at the speaker level. The final recipe brings
+  new-speaker Tortoise to 8.8% (G.711) and 6.0% (real AMR-NB) and beats its floor in
+  every seed, but Chatterbox stays at 32.0% for the adapter (one seed; 12.9% for
+  SSL-AASIST) and IndicF5 at 16–22% for both final systems.
+- **Results are quoted against shortcut floors, not against 50%**, and three floors (CM04
+  over either codec, new-speaker Tortoise over AMR-NB) are above chance, so beating them
+  proves less.
+- **Spontaneous speech is rejected.** Every code-mixed set is read lecture audio. On
+  spontaneous HiACC speech the deployed model calls 54.37% of genuine clips fake and the
+  final recipe 43.9% (one seed), and every genuine 60 s spontaneous call is warned.
+- **English over a phone line.** The deployed adapter rises to 24.20% EER on English
+  through the channel (2.30% clean on the same clips); the final recipe lets most English
+  clones through
+  (13.44% EER clean, one seed).
+- **Native training (S3) is at chance on English** (50.9–56.4% EER): it starts from the
+  self-supervised checkpoint and never trains on English. It is
   reported as the ceiling-at-a-cost row, not deployed.
-- **S1 was never scored on the normalised code-mixed sets**; its code-mixed numbers
-  (53.71% / 54.92%) are pre-normalisation.
-- **The demo threshold rests on 506 dev clips from 2 speakers**, stitched into 18
-  genuine and 21 cloned 60 s calls. Held-out validation agrees, but the call counts
-  are small.
+- **The attacks are ours**, made with open tools and screened by our own checks; the
+  seen tool is easy (rated 1.5 out of 5 for sounding human), and commercial cloning
+  services were not tested.
+- **The real-call test is a pilot**: 30 calls in the three authors' own voices, recorded
+  on a handset and scored offline, so its intervals are wide (five of six clone calls
+  caught is 44–97%), and speaker, session and handset change together.
+- **The Twilio leg is implemented and unit-tested but has not run on live numbers**, and
+  one live-call behaviour is unexplained: a genuine caller occasionally loses
+  consecutive windows on a browser call that the same clip never loses offline.
+- **The demo thresholds rest on small dev sets**: the deployed model's on 506 dev clips
+  from 2 speakers, stitched into 18 genuine and 21 cloned 60 s calls; the final recipe's
+  uses one training seed.
 - **Reported EERs are clip-level** (one 4 s crop per clip); the live system's
   behaviour was measured separately through the streaming path.
-- **AffectDF cross-evaluation and mono-Hindi/Tamil columns are not measured.**
-- **Stage-1's published 0.58% is not reproducible from this repo**; the committed
-  checkpoint re-measures at 0.85–0.87%.
-- **The phone-line adapters have a single seed.**
+- **AffectDF cross-evaluation, IndicSynth/IndicTTS-Deepfake and a Tamil column are not
+  measured.**
+- **Two Stage-1 numbers exist.** A Kaggle retrain reached 0.58% EER, but the committed
+  checkpoint, which every adapter descends from, measures 0.85% on a T4 and 0.90% on the
+  laptop (0.87% in the first gap run); the paper reports 0.85% (`docs/STAGE1_ASVSPOOF_RESULTS.md`, P-032).
 - **Two romanisation choices are judgement calls** (`फ` → `ph`, `ड़` → `r`).
 - **CI is intentionally light** (ruff + pytest + numpy/pandas); tests needing
   torch, FastAPI or aiortc skip in CI and run in the full environment.
@@ -532,13 +594,19 @@ codemix-deepfake-detection/
 │   │                    #   portable bundles, low-level cue gate
 │   ├── models/          # SSL encoder wrapper, attentive pooling, MLP head, LoRA
 │   ├── training/        # train loop (AMP, resume, W&B), evaluate, metrics
-│   ├── inference/       # streaming inference, ONNX export, predict
+│   ├── inference/       # streaming inference, threshold calibration, predict, ONNX
+│   │                    #   export, carrier and codec simulation, real-call scoring,
+│   │                    #   weights package
+│   ├── baselines/       # AASIST, SSL-AASIST, RawBoost
+│   ├── reporting/       # every paper table and figure, built from committed results
 │   └── utils/           # device, portable paths, audio, seeding, env check
-├── tests/               # 997 tests — firewalls, anti-leakage, live-call server, Twilio stream
+├── tests/               # 1,039 tests — firewalls, anti-leakage, live-call server, Twilio stream
 ├── scripts/             # download/extract (+ child quarantine), preprocess, train
-├── configs/             # train/eval/generation configs (notebooks hold no logic)
+├── configs/             # train/eval/generation configs and the live thresholds
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
-├── docs/results/        # the five measurement write-ups
+├── docs/results/        # one write-up per measurement, each naming its result files
+├── docs/real_calls/     # the real-call protocol, scripts and 30-call plan
+├── paper/               # the long paper (sections/) and the conference version (short/)
 ├── experiments/         # eval JSONs + per-clip score CSVs behind every table
 ├── checkpoints/         # Stage-1 and LoRA adapters (Git LFS)
 ├── live_call/           # live detection server: web demo, dashboard, WebRTC, Twilio
@@ -555,8 +623,9 @@ codemix-deepfake-detection/
 ```bash
 pip install -r requirements.txt
 # the deployed checkpoint: codemix-w10-results Kaggle dataset, lora_norm_rvc_channel_best.pt
-set DFD_CHECKPOINT=<data>/checkpoints/lora_norm_rvc_channel_best.pt
-set DEMO_CLIPS_DIR=<data>/demo_clips             # built by scripts/prepare_demo_clips.py
+# (Windows cmd: use `set NAME=value` instead of `export NAME=value`)
+export DFD_CHECKPOINT=<data>/checkpoints/lora_norm_rvc_channel_best.pt
+export DEMO_CLIPS_DIR=<data>/demo_clips          # built by scripts/prepare_demo_clips.py
 uvicorn live_call.server:app --host 0.0.0.0 --port 8000
 ```
 
@@ -570,9 +639,9 @@ its checkpoint and its own operating point; `/api/health` then shows that checkp
 the 0.687 threshold:
 
 ```bash
-set DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
-set DFD_THRESHOLD_FILE=configs/threshold_final.yaml
-set DEMO_CLIPS_DIR=<data>/demo_clips_final       # the same calls, verified on this model
+export DFD_CHECKPOINT=<data>/checkpoints/final_s1234_best.pt
+export DFD_THRESHOLD_FILE=configs/threshold_final.yaml
+export DEMO_CLIPS_DIR=<data>/demo_clips_final    # the same calls, verified on this model
 ```
 
 `demo_clips_final` is built by `scripts/prepare_demo_clips.py` with the final checkpoint and
@@ -585,8 +654,8 @@ this model does on each (the Tortoise demo call stays green for both models).
 pip install -r requirements.txt
 
 # The transliteration that makes the corpus readable (P-014)
-python -c "from src.data.transliteration import to_latin; \
-           print(to_latin('मुझे कल बैंक जाना है पैसे निकालने के लिए'))"
+python -c "from src.data.transliteration import to_roman; \
+           print(to_roman('मुझे कल बैंक जाना है पैसे निकालने के लिए'))"
 # -> mujhe kal baink jaanaa hai paise nikaalne ke lie
 
 # The firewalls that protect every number in the paper
@@ -644,6 +713,22 @@ python -m src.data.lowlevel_cue \
 #     The same gate asked of CM02 -- RVC conversions against the very source clips they
 #     were converted from, fit/score disjoint by source speaker, raw + normalised:
 python -m src.data.rvc_gate --clips <dir with the 1,500 rvc_*.wav> --data-root $DATA_ROOT
+
+# --- 9. Real calls (consent first: docs/real_calls/PROTOCOL.md) ---
+python -m src.data.real_call_pack pack --recordings <references> --out <kaggle pack>
+#     clone on a Kaggle GPU, then join the clones into playback files:
+python -m src.data.real_call_pack calls --clones <unzipped clones> --recordings <references> --out <playback>
+python -m src.inference.real_calls check --recordings <recorded calls> --playback <playback> \
+    --out <windows>/replay_check.csv            # each replay holds the file it should
+python -m src.inference.real_calls prepare --recordings <recorded calls> --out <scored>
+python -m src.inference.real_calls score --audio <scored> --deployed <deployed .pt> \
+    --final <final-recipe .pt> --out <windows>
+python -m src.inference.real_calls report --audio <scored> --windows <windows> \
+    --md <windows>/report.md
+python -m src.inference.real_call_codecs --references <references> --deployed <deployed .pt> \
+    --final <final-recipe .pt> --out <windows>/codec_chain.csv     # the call chain
+#     copy <windows> into experiments/results/real_calls_v1, then draw the figure:
+python -m src.reporting.real_call_figure       # -> experiments/figures/real_call_chain.{png,pdf}
 ```
 
 > `--data-root` is **required** for bundle-based manifests. Portable manifests store
@@ -658,7 +743,8 @@ python -m src.data.rvc_gate --clips <dir with the 1,500 rvc_*.wav> --data-root $
 IndicVoices, HiACC and the Tortoise clones are **evaluation-only** and must never
 enter a training manifest. HiACC **child** audio is excluded **entirely** — never
 bonafide, never a cloning reference, never in any manifest. Enforced by
-`tests/test_splits.py`, which runs before every training launch.
+`tests/test_config_guard.py` on every committed training config and by
+`tests/test_splits.py` on the checks themselves; both run before every training launch.
 
 ---
 
@@ -677,17 +763,22 @@ outside this repo.
 | **7–8** | — | ✅ **Gap matrix**, ✅ **LoRA gap closure** (53.71% → 1.34%), ✅ **channel-matched adaptation** (3.89%), ✅ **English-retention measured** | ✅ Channel-matched column reproduced independently on a Kaggle T4; ✅ **CM02 RVC generation** — 12 voice models, 1,500 conversions, archived + hash-verified; pitch measured, **P-019 corrected (P-021)** |
 | **9** | ✅ **Dataset datasheet** — composition, attack table with usable counts, spoof:real per split, exclusions, six stated limitations | ✅ **Publication figures** — system×condition heatmap, DET curves from 71,237 per-clip scores, shortcut-gate chart, tied to the measurements by test | ✅ **CM02 shortcut gate** (22.4%/22.3%, spectral not level — P-022); ✅ **CM01 recovered**: 4,000-clip log committed, 842 MB archived + verified, pitch re-measured and **P-021 corrected (P-023)**; ✅ **CM04 generated** — the held-out Tortoise attack, 500/500 clips over 15 eval-pool speakers, 91.6% QA pass, archived + metadata committed ([W4-T3](docs/W4T3_cm04_heldout_tortoise.md)) |
 | **10** | — | ✅ **Normalised retrain**: 4 LoRA adapters with and without RVC, per-set shortcut floors, RVC ablation (P-026, P-027); ✅ **S3 native training** scored beside S2 and on English — seen-tool ceiling, English at chance (P-028, P-030) | ✅ **Live detection system**: streaming scorer, verdict ladder, alerts, web demo, receiver dashboard, WebRTC calls, Twilio Media Streams + receiver-only warning + SMS; ✅ **demo threshold calibrated** on dev calls through the live path, validated on held-out calls (P-029, P-031) |
-| **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 over the channel, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
+| **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 on two of the three channel sets, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
-| **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
-| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads) ([W14](docs/W14_mounika_encoder_spontaneous.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; paper introduction and future work updated ([W14](docs/W14_krishna_live_final_recipe.md)) |
+| **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed on six of seven sets; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
+| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted; ✅ **conference paper at six pages** ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads); ✅ **viva preparation** and the demo script brought to week 14 ([W14](docs/W14_mounika_encoder_spontaneous.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; ✅ **real-call pilot**: consent, protocol, cloning packs, real calls scored, and the call chain that shows the mobile codec takes the deployed model below its threshold on average; ✅ **weights package** verified for the release decision ([W14](docs/W14_krishna_live_final_recipe.md)) |
 
-**Open:** fund the Twilio account and re-verify the phone demo on real numbers (trial
-credit exhausted, PSTN leg unproven since week 10); spontaneous speech is still rejected
+**Open:** run the final recipe as the live system's default (the real calls support it);
+fund the Twilio account and run the carrier on real numbers for the first time (trial
+credit exhausted; the carrier leg has never run on them); spontaneous speech is still rejected
 (every genuine 60 s spontaneous call is warned by both live models;
 [hiacc_final_v1](docs/results/hiacc_final_v1.md)), and fixing it needs spontaneous genuine
-speech in training; decide on publishing the weights ([MODEL_CARD](docs/MODEL_CARD.md));
-compile the paper and submit it.
+speech in training; real development calls, to set a stricter speech gate for the first
+seconds of a call together with the operating point (the quiet before the first word is
+scored as speech, and some early speech windows score as fake too);
+decide on publishing the weights (the package is ready, [release](docs/release.md)); settle
+the title, authors and venue, tag `paper-v1` (both papers point readers to it), then submit
+the paper.
 
 ---
 
@@ -700,7 +791,7 @@ compile the paper and submit it.
 | **SK** | K. Sai Krishna Reddy (D034) | **Systems/Demo** — live-call pipeline, streaming inference, ONNX, dashboard, spoof pilots |
 
 One branch per member per week off `main`, PRs into `main`, reviewed and merged by a
-teammate — never your own. (`dev` is kept as a mirror of `main` and is not the trunk.) Full rules in the team git rules doc (kept in the team drive).
+teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules in the team git rules doc (kept in the team drive).
 
 ---
 
@@ -708,7 +799,7 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 
 | Document | What is in it |
 |---|---|
-| [`docs/RESULTS.md`](docs/RESULTS.md) | **What is actually measured** — the milestone list, and what is not measured yet |
+| [`docs/RESULTS.md`](docs/RESULTS.md) | **What the project knows, on one page** — each question answered with its number and results file; the week-1 to 4 milestones below |
 | [`docs/results/gap_matrix_v1.md`](docs/results/gap_matrix_v1.md) | **The gap** — English 0.87% vs code-mixed 44.65%, and the failure mode behind it |
 | [`docs/results/gap_closure_v1.md`](docs/results/gap_closure_v1.md) | **Closing it** — LoRA 53.71% → 1.34%, seed variance, what it does not answer |
 | [`docs/results/channel_matched_v1.md`](docs/results/channel_matched_v1.md) | **The telephony finding** — why the clean adapter dies on a phone line |
@@ -724,7 +815,7 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/qa/rvc_generation_qa.md`](docs/qa/rvc_generation_qa.md) | CM02 mechanical quality screen: 1,404 / 1,500 pass, failure reasons |
 | [`docs/STAGE1_ASVSPOOF_RESULTS.md`](docs/STAGE1_ASVSPOOF_RESULTS.md) | Stage-1 baseline: EER/AUC/F1, per-attack breakdown, reproduction |
 | [`docs/lora_run_status.md`](docs/lora_run_status.md) | Step-by-step record of the Stage-2 run, including every trap hit |
-| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-031** with the problem that forced it |
+| [`docs/problems_and_decisions.md`](docs/problems_and_decisions.md) | Every decision **P-001 … P-034** with the problem that forced it |
 | [`Works updates.md`](Works%20updates.md) | HUMAN_TODO — everything only a person can do, ordered by what unblocks most |
 | [`docs/progress.md`](docs/progress.md) | One line per finished task: date, task, owner, branch |
 | [`docs/qa/child_quarantine_evidence.md`](docs/qa/child_quarantine_evidence.md) | The child-audio exclusion, verified on both machines |
@@ -742,8 +833,30 @@ teammate — never your own. (`dev` is kept as a mirror of `main` and is not the
 | [`docs/results/tradeoff_v1.md`](docs/results/tradeoff_v1.md) | **Phone line vs clean** — every adapter in the condition it was not trained in |
 | [`docs/results/english_channel_v1.md`](docs/results/english_channel_v1.md) | **English over the phone line** — 2.30% clean, 24.20% over the line |
 | [`docs/results/hiacc_false_alarm_v1.md`](docs/results/hiacc_false_alarm_v1.md) | **New speakers talking freely** — 54% of genuine HiACC speech called fake |
-| [`docs/results/encoder_ablation_v1.md`](docs/results/encoder_ablation_v1.md) | **XLSR-53 against wav2vec2-base** — the larger encoder does not carry over |
-| [`docs/references_verification.md`](docs/references_verification.md) | Where every one of the 38 references was checked |
+| [`docs/results/language_control_v1.md`](docs/results/language_control_v1.md) | **Code-mixing or recording domain?** — 183 unseen speakers, same recordings: genuine English rejected at least as often as mixed speech |
+| [`docs/results/cmi_bands_v1.md`](docs/results/cmi_bands_v1.md) | False alarms by Code-Mixing Index band — the score does not follow the amount of mixing |
+| [`docs/results/new_speakers_v1.md`](docs/results/new_speakers_v1.md) | **60 unseen speakers and a second unseen tool (IndicF5)** |
+| [`docs/results/amr_channel_v1.md`](docs/results/amr_channel_v1.md) | **The real AMR-NB codec** against the simulated G.711 line |
+| [`docs/results/naturalness_v1.md`](docs/results/naturalness_v1.md) | How natural the clones are (predicted MOS) — IndicF5 level with genuine speech |
+| [`docs/results/w13_runs_v1.md`](docs/results/w13_runs_v1.md) | **248 speakers against 21**, and AASIST against the adapter, seed for seed |
+| [`docs/results/final_recipe_v1.md`](docs/results/final_recipe_v1.md) | **The final recipe** — 248 speakers through G.711 and real AMR-NB, against the deployed adapter |
+| [`docs/results/floor_final_v1.md`](docs/results/floor_final_v1.md) | Shortcut floors for the final systems — every seed beats its floor on every set |
+| [`docs/results/floor_new_sets_v1.md`](docs/results/floor_new_sets_v1.md) | Detector against floor on the week-13 sets, and where the floor is a weak bar |
+| [`docs/results/ssl_aasist_v1.md`](docs/results/ssl_aasist_v1.md) | AASIST and SSL-AASIST as outside baselines |
+| [`docs/results/final_ssl_v1.md`](docs/results/final_ssl_v1.md), [`ssl_vs_adapter_v1.md`](docs/results/ssl_vs_adapter_v1.md) | **The larger encoder on the final data** — better than the adapter in every seed on 8 of 11 sets |
+| [`docs/results/hiacc_final_v1.md`](docs/results/hiacc_final_v1.md) | Spontaneous speech with the final recipe — still 43.9% called fake |
+| [`docs/results/classification_metrics_v1.md`](docs/results/classification_metrics_v1.md) | Accuracy, precision, recall and confusion matrices at the operating point |
+| [`docs/results/dataset_inventory_v1.md`](docs/results/dataset_inventory_v1.md) | Clips and hours for every corpus and attack |
+| [`docs/results/encoder_ablation_v1.md`](docs/results/encoder_ablation_v1.md) | **XLSR-53 against wav2vec2-base** — XLSR-53's frozen-feature advantage does not survive training in our LoRA/S3 recipes (separate from SSL-AASIST) |
+| [`docs/results/live_final_recipe_v1.md`](docs/results/live_final_recipe_v1.md) | **What a caller meets** — 60 s calls through the live path, deployed model against the final recipe |
+| [`docs/results/real_calls_v1.md`](docs/results/real_calls_v1.md) | **Real phone calls** — the pilot over a mobile network, and the call chain, in which the mobile codec is the largest single step in the deployed model's failure |
+| [`docs/real_calls/PROTOCOL.md`](docs/real_calls/PROTOCOL.md) | **How the real-call test is run** — consent, scripts, the 30-call plan, what is kept where |
+| [`docs/results/english_final_v1.md`](docs/results/english_final_v1.md) | **English with the final recipe** — it misses English fakes rather than rejecting English callers |
+| [`docs/results/encoder_spontaneous_v1.md`](docs/results/encoder_spontaneous_v1.md) | **The larger encoder** on spontaneous speech, and its speed on a live call |
+| [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | **Model card** for the final recipe (draft, not published) |
+| [`docs/release.md`](docs/release.md) | **What is published and what is not**, and the weights package ready for the release decision |
+| [`docs/viva/VIVA_QA.md`](docs/viva/VIVA_QA.md) | **Viva questions and answers**, with the numbers to remember |
+| [`docs/references_verification.md`](docs/references_verification.md) | Where every reference was checked |
 | `docs/W<week>_<member>_<work>.md` | **Per-member weekly records** — what each of us did that week, the numbers we got, and the limitations we know about. One per person per week, e.g. [`docs/W9_krishna_cm02_gate_cm01_recovery.md`](docs/W9_krishna_cm02_gate_cm01_recovery.md) |
 
 ---

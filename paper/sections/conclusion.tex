@@ -5,33 +5,42 @@
 
 An English-trained deepfake detector that reaches 0.85\% EER on ASVspoof does not
 work on Hindi--English telephone speech. It reaches 48.21\% EER on clean code-mixed
-audio and 58.42\% over the channel, with AUC below chance in the channel condition,
+audio and 58.42\% over the channel, with AUC below chance on two of the three channel sets,
 and its failure mode is the rejection of genuine speakers rather than the acceptance
 of clones. Low-rank adaptation over a frozen encoder, training 1.13\% of the
 parameters on speaker-disjoint code-mixed data and its clones, brings channel-matched
-error to 2.75\% EER while retaining 2.42\% on clean English. Full fine-tuning on identical
-data is better on the tool it saw (0.83\%) and collapses to chance on English; the
-adapters keep both, which is what a deployment needs.
+error to 2.75\% EER while retaining 2.42\% on clean English. Full fine-tuning from the
+self-supervised checkpoint on identical data is better on the tool it saw (0.83\%) and, never
+trained on English, at chance there; the channel-trained adapters, built on the English
+detector, keep English as well, which is what a deployment needs (the final recipe keeps less of English:
+13.44\%, one seed).
 
 The gap is not caused by code-mixing. Holding speaker and recording fixed, the
-English-trained detector rejects 183 unseen speakers' genuine English as often as
-their mixed speech, and the Code-Mixing Index does not predict its score; what it
+English-trained detector rejects 183 unseen speakers' genuine English at least as often
+as their mixed speech, and the Code-Mixing Index does not predict its score; what it
 fails on is the recording domain that code-mixed telephone speech brings with it. The
 closure holds on people the model has never heard: on 60 further unseen speakers the
 deployed model reaches 9.4\% EER on the seen tool over the channel, with a median
-speaker at 2.9\%. The largest single gain came from hearing more people: trained on 248
-genuine speakers instead of 21, the same recipe is better in every one of five seeds on
+speaker at 2.9\%. One of the two largest gains came from more training speakers: trained on 248
+genuine speakers (with seen-tool clones of them) instead of 21, the same recipe is better in every one of five seeds on
 new speakers (0.91\% against 10.75\%), on both unseen tools (Tortoise 13.59\% against
 29.82\% on new speakers, IndicF5 27.25\% against 35.40\%) and in false alarms (0.47\%
 against 3.40\%), with no unseen-tool audio in training. An established detector, AASIST, shows the same
 gap zero-shot (82.3\% of genuine speech rejected) and gains as much from the added
-voices; fine-tuned on them it is better than our adapter on Tortoise and worse on the seen
-tool, RVC and false alarms, so the voices matter more than the architecture. A larger encoder, SSL-AASIST, is stronger still: trained on the final-recipe data it reaches 0.51\% on new-speaker Tortoise over the real AMR-NB codec (the adapter: 6.04\%) and 12.86\% on Chatterbox (31.98\%, one adapter seed), over five seeds, and is better in every seed on eight of eleven sets. Its cost on a live call is affordable (1.14\,s per 2\,s hop on two CPU threads, 69\,ms on a GPU), so it is the system to deploy next; on spontaneous speech one of its trainings calls only 5.8\% of genuine clips fake and another 46.7\%, so it is a lead, not a fix. IndicF5 stays at 16--22\% for both.
+voices on most sets (not on IndicF5 or RVC); fine-tuned on them it is better than our
+adapter on Tortoise and worse on the seen tool, RVC and false alarms, so on most sets the
+voices matter more than the architecture. A larger encoder, SSL-AASIST, is stronger still: trained on the final-recipe data it reaches 0.51\% on new-speaker Tortoise over the real AMR-NB codec (the adapter: 6.04\%) and 12.86\% on Chatterbox (31.98\%, one adapter seed), and over five seeds it is better in every seed on eight of eleven sets. Its cost on a live call is affordable (1.14\,s per 2\,s hop on two CPU threads, 69\,ms on a GPU), so it is the candidate to deploy after the final recipe; on spontaneous speech one of its trainings calls only 5.8\% of genuine clips fake and another 46.7\%, so it is a lead, not a fix. IndicF5 stays at 16--22\% for both encoders.
 
 The detector runs on a live call. It scores four-second windows of the caller's
 speech, escalates only when consecutive windows agree, and warns the callee --- never
-the caller --- about ten seconds into the speech, using the same operating point the
-evaluation reports.
+the caller --- about ten seconds into the speech, at an operating point calibrated on
+development calls. On a pilot of 30 real mobile calls the deployed model warns genuine and
+cloned callers alike for two speakers of three, while the final recipe spares most genuine
+callers and catches five of six clones of the seen tool, for two speakers later in the call
+than offline, but none of an unseen one;
+rebuilding the call chain on direct
+recordings shows that the real mobile codec takes the deployed model below its threshold on average, so the final
+recipe is the model the live system should run now.
 
 \subsection{What we could not do}
 
@@ -41,11 +50,13 @@ against matched floors of 29.49--31.43\%, which is learning beyond the shortcut.
 the channel the deployed model averages 35.59\% across five training seeds against a
 matched floor of 37.79\% and beats it in no seed at the speaker level; its
 per-speaker error ranges from 6.4\% to 45.5\%, and the published single run
-(30.99\%) was a favourable draw. Only S3 trained on XTTS alone stays below its floor
-there in every seed (19.72\% against 33.64\%), and adding RVC to its training removes
-that. Randomising recording cues during training brings the deployed recipe to
-26.63\% over five seeds, but that variant was chosen after a test score had been seen
-and still does not clear the floor. A second unseen generator confirms the picture
+(30.99\%) was a favourable draw. Trained on XTTS alone, S3 is significantly below its
+floor there in three of five seeds (19.72\% against 33.64\%) and S2 in one (25.59\%); with
+RVC added to training (which also brings 13 more genuine speakers), neither is shown to beat
+the floor. A
+variant combining random crops, cue augmentation and a layer mix brings the deployed recipe
+to 26.63\% over five seeds, but it was chosen after a test score had been seen, its parts
+are not separated, and it still does not clear the floor. A second unseen generator confirms the picture
 rather than softening it: IndicF5, a recent flow-matching TTS, sits at 30.6\% over the
 channel for the deployed model, about where Tortoise does (29.4\% on the new
 speakers). We therefore have no conclusive evidence that the
@@ -57,15 +68,20 @@ Tortoise over the channel from 30.8\% to 8.8\%, and over the real AMR-NB codec f
 level in every seed, on new-speaker Tortoise over the channel (8.8\% against 36.5\%) as on
 every other set. A third unseen tool, Chatterbox, stays at 32.0\% for the adapter (one
 seed); the larger encoder lowers it to 12.9\%. The limitation narrows rather than
-disappears: the floors on CM04 and over AMR-NB are above chance and so weak bars, the final
-recipe is not the model that runs on live calls, and none of it has met a real phone call.
+disappears: three floors (CM04 over either codec, new-speaker Tortoise over AMR-NB) are
+above chance and so weak bars, the final
+recipe is not yet the model that runs on live calls, and its real-call test is a pilot of
+30 calls in the three authors' own voices (Sec.~\ref{sec:real-calls}).
 
-\textbf{New voices speaking freely are rejected.} Every code-mixed test set is read
+\textbf{New voices speaking freely are rejected.} Every test set except HiACC is read
 lecture audio. On 24 new speakers talking spontaneously (HiACC), the deployed model
 calls 54.37\% of genuine clips fake, against 0.89\% for the read lectures, and every
 speaker is above 10\%. Neither more read voices nor the real codec changes this: single
 models of the deployed and 248-speaker recipes call 38.5--54.4\% of that speech fake, and
-the final recipe 43.9\%.
+the final recipe 43.9\%. No operating point avoids it: sweeping the final recipe's live
+threshold over 60\,s calls, choosing nothing, every threshold that catches all Tortoise calls
+warns at least 38 of 41 genuine spontaneous calls, and the thresholds that warn fewer than
+half catch 4 of 18 unseen-tool calls or fewer.
 Adaptation taught the model what genuine lecture recordings sound like, not genuine
 Hindi--English speech in general.
 
@@ -77,11 +93,11 @@ most English clones through (13.44\% EER on clean English, one seed).
 
 \textbf{The attacks are ours, and most are not hard.} We made the code-mixed attacks
 because no benchmark provides them, so our numbers are against attacks of our own
-construction, screened by our own quality checks. The team rated the seen attack 1.5
-out of 5 for sounding human, and a MOS predictor puts it half a point below the
+construction, screened by our own quality checks. The team rated XTTS-v2 clones of the training pool
+1.5 out of 5 for sounding human, and a MOS predictor puts it half a point below the
 genuine speech of the same speakers. The exception is IndicF5, whose predicted
-naturalness is level with genuine speech --- and it is the tool no system detects
-reliably over the channel. Detector numbers against easy fakes are optimistic.
+naturalness is level with genuine speech --- and no system brings it below 15\% EER over
+the channel on average. Detector numbers against easy fakes are optimistic.
 
 \textbf{The telephone leg is simulated, and a real codec hurts.} The channel condition
 is an 8~kHz G.711 render with additive noise, validated by measurement and by ear. Through
@@ -89,21 +105,23 @@ the reference AMR-NB mobile codec instead, the deployed model's error on new spe
 with the seen tool rises from 9.4\% to 23.7\%, while an adapter trained on clean audio
 holds better (12.6\%): channel training fitted one chain, not telephone audio in
 general. Training on G.711 and AMR-NB together closes most of that loss (new-speaker
-XTTS 7.59\% on AMR-NB against 22.37\%, three seeds). The live system is implemented
-against a real telephony carrier, but the carrier leg has not been exercised on live
-numbers. The protocol this work was designed around
-is the telephone network, and that is the one leg not yet demonstrated end to end.
+XTTS 7.59\% on AMR-NB against 22.37\%, three seeds). Real mobile calls point the same way:
+the deployed model warns every replayed call and most genuine live callers, and the final
+recipe holds up on the seen tool (Sec.~\ref{sec:real-calls}). Those calls were recorded on a handset and scored offline;
+the live system is implemented against a real telephony carrier, but the carrier leg has
+not been exercised on live numbers, and that is the one leg not yet demonstrated end to
+end.
 
 \textbf{One live-call behaviour is unexplained.} A genuine caller occasionally loses
 consecutive windows on a live call that the same clip never loses offline. We tested
-the obvious explanation --- that the browser's codec degrades the audio --- by
-encoding each clip through that carrier offline and rescoring it, and it does not
-hold: both genuine clips keep every window. By elimination the cause lies in the
-real-time transport, and we have not isolated it.
+the obvious explanation --- that the codec degrades the audio --- by an offline Opus
+round trip with a default encoder, and it does not hold: both genuine clips keep every
+window. The real-time transport or the browser's own adaptive encoder, which that test
+did not reproduce, remain the likeliest causes, and we have not isolated it.
 
-\textbf{Interpretability covers two systems of three.} The probes could not be run on
-the fully fine-tuned system, and the probe set is five clips: enough to refute an
-explanation, not to characterise one.
+\textbf{Interpretability covers S1 and the deployed S2 only.} S3, the final recipe and
+SSL-AASIST were not probed, and the probe set is five calls (with 86 English clips for
+the language check): enough to refute an explanation, not to characterise one.
 
 \subsection{Future work}
 
@@ -117,18 +135,22 @@ English clones through, so a mixed-language service needs English telephone audi
 training or a language-identification step that routes English calls to S1.
 
 After those, the most valuable result is the one that would change a deployment decision:
-\emph{what makes an unseen tool detectable over a narrowband channel?} Our probing
-suggests a direction --- adaptation moved the model's evidence for genuine speech
-into the pitch-harmonic band that survives a codec --- so training explicitly for
-band-limited evidence, rather than merely training on band-limited audio, is worth
-testing. The augmentation lead of Sec.~\ref{sec:variants} should be confirmed on a
-second unseen tool, and it carries a lesson for model selection: the in-domain dev set
+\emph{what makes an unseen tool detectable over a narrowband channel?} A single-clip
+observation in our probing suggests a direction --- adaptation may have moved the model's
+evidence for genuine speech into the pitch-harmonic band that survives a codec --- so
+training explicitly for band-limited evidence, rather than merely training on band-limited
+audio, is worth testing. The exploratory variant of Sec.~\ref{sec:variants} (crops,
+augmentation and a layer mix together) should be confirmed on a second unseen tool and its
+parts separated, and it carries a lesson for model selection: the in-domain dev set
 did not register a 9-point gain on the unseen tool, so choosing among detectors needs
 a validation split built from a synthesis tool held out from training, separate from
 the one used for testing.
 
-Beyond that: exercising the telephony carrier on live numbers; calibrating a second
-operating point on real calls rather than on a simulated carrier; extending the
+Beyond that: running the final recipe in the live system, which the real calls support;
+exercising the telephony carrier on live numbers; real development calls, to set a stricter
+speech gate for the first seconds of a call and the operating point together, since the false
+alarms on genuine real calls start with the quiet before the first word but do not end there;
+extending the
 corpus beyond one code-mixed pair and one recording domain, since the present gap
 measures \emph{English studio to Hindi--English lecture} and not code-mixing in
 isolation; and harder attacks, since a detector is only ever as tested as the fakes

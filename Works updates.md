@@ -1,5 +1,30 @@
 # HUMAN_TODO — things only the team can do
 
+## Now (week 14)
+
+- [x] **Finish the real-call test**: all 30 calls recorded, checked (18 of 18 replays match
+      their playback file) and scored with all three speakers (`docs/results/real_calls_v1.md`).
+- [ ] **Record in the protocol** which phone recorded P1's live calls (C01-C04) and P1's first
+      two replays (C13, C14); everything else about the phones is recorded.
+- [ ] **Review and merge** the week-14 PRs in order: #61 (paper consistency, datasheet),
+      #60 (viva and demo script), #59 (weights package, real calls, README last). A different
+      member reviews each one; nobody merges their own.
+- [ ] **Decide**: run the final recipe as the live default (the real calls support it);
+      publish the weights or not (needs the mentor too; `docs/release.md`); the paper's title,
+      authors, affiliations and venue; how the paper states the use of writing and coding
+      tools, by the venue's own policy.
+- [ ] **Tag `paper-v1`** on `main` once all three PRs are merged. Both papers tell readers the
+      code and results are "at the tag paper-v1", and the tag does not exist yet.
+- [ ] **Overleaf**: upload the new zips once all three PRs are merged, and check the page count
+      of `paper/short/main.tex`. The v3 build was already 7 pages (the body ends on page 5,
+      references fill pages 6-7), and about 370 words and the call-chain figure were added
+      since. That fits a "6 pages + references" rule; a "6 pages including references" rule
+      needs about three quarters of a page cut. Decide the venue first.
+- [ ] **Within 30 days of the final evaluation**: delete the real-call recordings, the clones
+      and the private Kaggle datasets of our voices, as the consent form promises.
+
+## Earlier lists (weeks 1-3, kept as written; the project has moved past them)
+
 Week 1 code is done and committed on per-task branches under the correct
 identities. The items below need a human. **Bold = blocks pushing / Week 2.**
 

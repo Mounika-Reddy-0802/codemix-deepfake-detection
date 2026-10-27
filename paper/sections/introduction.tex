@@ -13,7 +13,8 @@ that carries no signal of who is really speaking.
 Detection research has answered with strong results. On ASVspoof 2019
 LA~\cite{todisco2019asvspoof}, self-supervised speech representations fine-tuned for
 anti-spoofing reach error rates below one percent~\cite{tak2022wav2vec}. Our own
-replication of that recipe reaches \textbf{0.85\% EER} on the evaluation partition.
+wav2vec~2.0 detector, trained on the same benchmark, reaches \textbf{0.85\% EER} on the
+evaluation partition.
 
 That number is measured on English studio speech. The people most exposed to voice
 fraud are not speaking English studio speech. In India, everyday conversation is
@@ -34,10 +35,10 @@ a 256-fold rise in the false-alarm rate on real speech. It has not become a weak
 detector of clones so much as a system that has stopped recognising real speakers.
 
 Is it the code-mixing? A language-controlled test settles this. For 183 speakers
-never used in training or testing, we take all-English, all-Hindi and mixed clips from
+held out of all training, we take all-English, all-Hindi and mixed clips from
 the \emph{same} lecture recordings, so only the language changes. The English-trained
-detector rejects their genuine English as often as their mixed speech (84.3\% and
-78.1\% on clean audio), and no amount of mixing, measured by the Code-Mixing Index,
+detector rejects their genuine English at least as often as their mixed speech (84.3\%
+and 78.1\% on clean audio), and no amount of mixing, measured by the Code-Mixing Index,
 predicts its score (Section~\ref{sec:res-language}). The gap is a recording-domain gap
 that code-mixed telephone speech carries, not a property of the language mix, and
 that is why adapting on in-domain audio can close it.
@@ -60,8 +61,8 @@ conditions, which fails it.
 
 \begin{enumerate}
   \item \textbf{A measured gap.} The English-trained detector fails on code-mixed
-    speech at 41.67--48.21\% EER clean and 44.15--58.42\% over the channel, far above
-    every shortcut floor, with the failure characterised as a
+    speech at 41.67--48.21\% EER clean and 44.15--58.42\% over the channel, above
+    the lowest shortcut floor of each set, with the failure characterised as a
     rejection of genuine speech rather than a loss of sensitivity to clones
     (Section~\ref{sec:gap}), and traced on a language-controlled set of 183 unseen
     speakers to the recording domain rather than to code-mixing
@@ -81,30 +82,40 @@ conditions, which fails it.
     ever allowed to see, the adapters generalise on clean audio (5.44\% EER against a
     29.49\% floor). Over the telephone channel the deployed model averages 35.59\%
     across five training seeds against a 37.79\% floor and beats it in \emph{no} seed
-    at the speaker level; full fine-tuning on a single attack family stays below its
-    floor in every seed (19.72\%). Randomising the recording cues during training
-    lowers the deployed recipe to 26.63\% over five seeds, which we report as
-    exploratory (Section~\ref{sec:variants}). We report the weak result as
+    at the speaker level; full fine-tuning on a single attack family is significantly
+    below its floor in three of five seeds (19.72\%). A variant combining random crops,
+    cue augmentation and a layer mix lowers the deployed recipe to 26.63\% over five
+    seeds, which we report as exploratory, its parts not separated
+    (Section~\ref{sec:variants}). We report the weak result as
     prominently as the strong one.
   \item \textbf{More voices and a real codec close most of the gap.} Training the same
     adapters on 248 genuine speakers instead of 21, over both the simulated G.711 line and
     the real AMR-NB codec, cuts error on unseen Tortoise clones from 30.8\% to 8.8\% over
     the line and from 36.3\% to 6.0\% over AMR-NB, better in every one of five seeds, with
-    no unseen-tool audio in training; every seed beats its shortcut floor on every test set
-    (Section~\ref{sec:res-final}). A larger encoder trained the same way is better still,
-    and three unseen generators show where the gap remains: IndicF5 and Chatterbox
-    (Section~\ref{sec:res-finalssl}).
-  \item \textbf{Adaptation beats full fine-tuning where it matters.} Training the
-    whole encoder on the same data reaches the lowest seen-tool error in the study
-    (0.83\%) and collapses to chance on English. The adapters keep both.
+    no unseen-tool audio in training; every seed beats its shortcut floor on every test set,
+    though three of those floors are above chance (Section~\ref{sec:res-final}). A larger encoder fine-tuned in full on the same data is better still,
+    and of the three unseen generators, IndicF5 and, for the adapters, Chatterbox show
+    where the gap remains (Section~\ref{sec:res-finalssl}).
+  \item \textbf{Adaptation keeps what full fine-tuning never learns.} Training the
+    whole encoder from the self-supervised checkpoint on the same data reaches the lowest
+    seen-tool error of S1--S3 (0.83\%) and is at chance on English, on which it is never
+    trained. The channel-trained adapters, built on the English detector, keep English as
+    well (2.42--2.55\% on clean English); the final recipe keeps less (13.44\%, one seed).
   \item \textbf{A deployed system, not an illustration.} The detector runs on a live
     call and warns the callee --- and only the callee --- roughly ten seconds into
-    the speech, using the same windowing and operating point the evaluation uses
-    (Section~\ref{sec:system}). Measured on whole calls through that path, the final
+    the speech, using the same encoder and four-second windows as the evaluation, at an
+    operating point calibrated on development calls (Section~\ref{sec:system}). Measured on whole calls through that path, the final
     recipe warns no genuine read-speech caller and catches every Tortoise call, while
     every genuine spontaneous call is still warned, the clearest limit of the work
-    (Section~\ref{sec:system-calls}).
+    (Section~\ref{sec:system-calls}). On a pilot of 30 real mobile calls in the
+    three authors' own voices, the deployed model warns every replayed call and most genuine
+    live callers, and the final recipe holds up on the seen tool (five of six clone calls
+    caught, one genuine live caller in four warned) but misses the unseen one; rebuilding the call chain
+    stage by stage shows the real mobile codec takes the deployed model below its threshold
+    on average
+    (Section~\ref{sec:real-calls}).
 \end{enumerate}
 
-The corpora, attacks, manifests, configurations and per-clip scores behind every
-number are committed, and each result table names the file it was read from.
+The manifests, configurations, attack metadata and checksums, and per-clip scores
+behind every number are committed (the cloned audio is not), and each table's source file
+is named in the LaTeX source.

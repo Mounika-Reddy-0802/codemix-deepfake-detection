@@ -1,14 +1,37 @@
 # Results — what is actually measured
 
-One page for anyone asking "what does this project *know* so far".
+One page for anyone asking "what does this project *know*". Every number is in the result
+file named beside it, under `docs/results/`, and in the paper (`paper/main.tex`). EER is
+the equal error rate; "over the channel" means the simulated G.711 telephone line. Seeds
+are training seeds.
 
-**There are no detection results yet.** No EER, no gap matrix, no LoRA number.
-Stage-1 has not trained, because ASVspoof 2019 LA is not on the GPU machine. What
-exists is a validated pipeline and four measured milestones, each reproducible from
-[`REPRODUCE.md`](../REPRODUCE.md).
+## Where the project stands (week 14)
 
-Read this alongside [`problems_and_decisions.md`](problems_and_decisions.md), which
-records *why* each of these came out the way it did.
+| Question | Answer | Source |
+|---|---|---|
+| Does an English-trained detector work on Hindi–English phone speech? | No: 0.85% EER on English, **58.42%** on Hindi–English over the channel, and on clean audio it calls 94.8% of genuine Hindi–English clips fake | `classification_metrics_v1.md`, `hiacc_false_alarm_v1.md` |
+| Is code-mixing the cause? | No. On 183 unseen speakers it rejects 84.3% of their genuine English and 78.1% of their mixed speech; the Code-Mixing Index does not predict its score | `language_control_v1.md`, `cmi_bands_v1.md` |
+| Does cheap adaptation fix it? | On the seen tool, yes: LoRA (1.13% of the weights) reaches **3.27 ± 1.17%** over the channel across five seeds, and keeps clean English at 2.42% | `seed_stability_v1.md`, `tradeoff_v1.md` |
+| And full fine-tuning? | From the self-supervised checkpoint, never trained on English: better on the seen tool (0.83%), at chance on English (50.9–56.4%) | `s3_native_v1.md` |
+| Does the deployed adapter catch an unseen tool over the channel? | No: Tortoise 35.59 ± 3.35% against a 37.79% shortcut floor, beaten in no seed | `seed_stability_v1.md` |
+| What closed most of that gap? | More voices: 248 genuine speakers (with seen-tool clones of them) instead of 21 take new-speaker Tortoise from 29.82% to 13.59% and false alarms from 3.40% to 0.47%, every seed, with no unseen-tool audio in training | `w13_runs_v1.md` |
+| The final recipe (248 speakers, G.711 and real AMR-NB) | New-speaker Tortoise **8.8%** over the channel and **6.0%** over AMR-NB (deployed: 30.8% and 36.3%); beats its shortcut floor in every seed on every set, though three of those floors are above chance | `final_recipe_v1.md`, `floor_final_v1.md` |
+| A larger encoder on the same data (SSL-AASIST) | 0.51% on new-speaker Tortoise over AMR-NB, 12.86% on Chatterbox (adapter: 31.98%, one seed); better in every seed on 8 of 11 sets | `ssl_vs_adapter_v1.md` |
+| What is still not solved | IndicF5 (15.8–21.8% for the two final systems); spontaneous speech (the final recipe calls 43.9% of genuine spontaneous clips fake, and no threshold fixes it: every one that catches all Tortoise calls warns at least 38 of 41 spontaneous calls); English over a phone line (24.20%; the final recipe misses English clones, 13.44% EER clean) | `ssl_vs_adapter_v1.md`, `hiacc_final_v1.md`, `spontaneous_tradeoff_v1.md`, `english_channel_v1.md`, `english_final_v1.md` |
+| What does a caller meet on the live system? | With the final recipe, no genuine read-speech call warned in any test set (new speakers: 44% to 0%), every Tortoise call caught; every genuine spontaneous call warned by either model | `live_final_recipe_v1.md` |
+| Real phone calls (pilot, 30 calls, three speakers) | The deployed model takes every replayed call and every live call of two speakers of three to "likely cloned"; for the speakers it fails on, the real mobile codec is the largest step. The final recipe warns 3 of 12 genuine live calls (all one speaker's) and takes 5 of 6 XTTS-v2 clone calls but none of 6 Chatterbox calls to "likely cloned" | `real_calls_v1.md` |
+
+The limits of each answer are in the README's "Honest limitations" and the paper's "What
+we could not do".
+
+---
+
+## Earlier milestones (weeks 1–4)
+
+The rest of this page is the week-4 record, kept as written: it describes how the pipeline
+was validated before any detection number existed, and why. Read it alongside
+[`problems_and_decisions.md`](problems_and_decisions.md), which records *why* each of these
+came out the way it did, and [`REPRODUCE.md`](../REPRODUCE.md).
 
 ---
 

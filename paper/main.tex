@@ -15,23 +15,24 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 \maketitle
 
 \begin{abstract}
-Audio deepfake detectors report error rates below one percent on English benchmarks.
-We ask what that means for Hindi--English code-mixed speech over a telephone line, where
-voice fraud happens. A wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\%
-equal error rate (EER) on English but 58.42\% over a simulated narrowband channel, because
-it rejects genuine speakers (94.8\% of genuine Hindi--English speech). A language-controlled
-test on 183 unseen speakers shows code-mixing is not the cause: genuine English is rejected
-as often as mixed speech. Low-rank adaptation of the encoder (1.13\% of the parameters)
-lowers channel-matched error to 2.75\%. The largest further gains come from more genuine
-voices and real codec audio: trained on 248 speakers over both simulated G.711 and real
-AMR-NB, error on unseen Tortoise clones over AMR-NB falls from 36.3\% to 6.0\% over five
-seeds, with no unseen-tool audio in training. A larger encoder (SSL-AASIST) trained the
-same way reaches 0.5\% there and 12.9\% on a third unseen generator, Chatterbox, while
-IndicF5 stays at 15.8--21.8\%. Both final systems beat a shortcut floor of cheap signal
-statistics in every seed on every test set, where the deployed model never did on the
-unseen tool over the channel; three of those floors are above chance and so weak bars. Spontaneous speech is still
-rejected. The detector runs on live calls and warns the callee about ten seconds into the
-speech.
+Deepfake detectors report errors below one percent on English benchmarks.
+We ask what that means for Hindi--English speech over a telephone line. A
+wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\% equal error rate on
+English but 58.42\% on code-mixed speech over a simulated narrowband channel, and calls
+94.8\% of clean genuine Hindi--English speech fake. A
+language-controlled test on 183 unseen speakers shows the gap follows the recording
+domain, not code-mixing. Low-rank adaptation of 1.13\% of the parameters lowers
+channel-matched error to 2.75\%, but this deployed model never beats an informative shortcut
+floor of cheap signal statistics on unseen Tortoise clones over the channel. More training speakers
+and real codec audio help most: trained on 248 speakers over simulated G.711 and real AMR-NB,
+error on new speakers' unseen Tortoise clones falls from 30.8\% to 8.8\% over the line,
+beating an informative floor, and from 36.3\% to 6.0\% over AMR-NB, in all five seeds, with
+no unseen-tool audio in training. A larger encoder (SSL-AASIST) fine-tuned on the same data
+reaches 0.5\% over AMR-NB and 12.9\% on Chatterbox, a third unseen generator, while the
+second, IndicF5, stays at 15.8--21.8\%. Spontaneous speech stays mostly rejected. The
+detector warns only the callee on live calls. On 30 real mobile calls the deployed model,
+failing mostly at the mobile codec, warns most genuine live callers, the final recipe one in
+four, catching five of six seen-tool clones but no unseen ones.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.
@@ -46,12 +47,13 @@ speech.
 \section*{Code and data availability}
 The code, configurations, frozen speaker pools, manifests, generation job tables, per-clip
 scores and results files behind every number in this paper are in the project repository,
-at the tag \texttt{paper-v1}; each table names the file it was read from. Training used the
+at the tag \texttt{paper-v1}; each table's source file is named in the LaTeX source. Training used the
 seeds 1234, 2025, 7, 42 and 99, and every split is checked mechanically before training
 (Sec.~\ref{sec:dataset}). The generated audio is not released, because it is cloned speech
 of identifiable people (Sec.~\ref{sec:dataset}); its metadata and checksums are. The
 genuine audio is MUCS 2021 and HiACC, available from their publishers, from which the
-repository rebuilds the normalised and telephone versions. The trained weights are not yet
+repository rebuilds the normalised and telephone versions. The English-only detector and two early adapters
+are in the repository through Git LFS; the deployed and final-recipe weights are not yet
 public.
 
 \bibliographystyle{IEEEtran}
