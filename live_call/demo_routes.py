@@ -208,11 +208,25 @@ def add_results_routes(api: FastAPI, stage_dir: Callable[[], Path]) -> None:
     @api.get("/api/stage_player")
     async def stage_player() -> JSONResponse:
         """One genuine corpus call through each stage of a phone call, and its scores
-        (prepared offline by ``scripts/prepare_stage_player.py``)."""
+        (prepared offline by ``scripts/prepare_stage_player.py``).
+
+        The audio is played from the data directory; the scores shown beside it are read
+        from the committed record (``experiments/results/stage_player_v1.json``) when it
+        describes the same recording, so the page's numbers are a committed result.
+        """
+        import json
+
         data = stage_index()
         if data is None:
             return JSONResponse({"available": False, "stages": []})
-        return JSONResponse({"available": True, **data})
+        record = results_view.RESULTS / "stage_player_v1.json"
+        source = "data directory"
+        if record.is_file():
+            committed = json.loads(record.read_text(encoding="utf-8"))
+            if committed.get("recording") == data.get("recording"):
+                data = {**committed, "stages": committed["stages"]}
+                source = "experiments/results/stage_player_v1.json"
+        return JSONResponse({"available": True, **data, "scores_from": source})
 
     @api.get("/api/stage_player/{stage}/audio")
     async def stage_audio(stage: str) -> FileResponse:

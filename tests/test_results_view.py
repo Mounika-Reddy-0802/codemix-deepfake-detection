@@ -160,6 +160,27 @@ def test_the_spontaneous_tradeoff_is_read_from_its_sweep():
     assert len(t["points"]) == len(rows)
 
 
+def test_the_stage_player_record_is_scores_only_and_on_the_live_thresholds():
+    path = ROOT / "experiments" / "results" / "stage_player_v1.json"
+    if not path.is_file():
+        pytest.skip("no stage player recorded on this branch")
+    record = json.loads(path.read_text(encoding="utf-8"))
+    assert record["speaker"] not in {"P1", "P2", "P3"}  # a corpus speaker, never the team
+    assert [s["key"] for s in record["stages"]] == [
+        "direct",
+        "g711",
+        "amr_nb",
+        "amr_nb_rec",
+        "amr_wb_rec",
+    ]
+    for stage in record["stages"]:
+        for model in ("deployed", "final"):
+            assert 0.0 <= stage[model]["mean_p_genuine"] <= 1.0 and stage[model]["windows"] > 0
+    ladders = rv.headline()["ladders"]
+    for model in ("deployed", "final"):
+        assert record["thresholds"][model]["value"] == ladders[model]["threshold"]["value"]
+
+
 SCENE_PAGES = [
     "demo.html",
     "threat.html",

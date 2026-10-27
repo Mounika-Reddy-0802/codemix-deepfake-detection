@@ -10,7 +10,9 @@ readings (``src.inference.real_call_codecs``):
 Every version is scored by the deployed adapter and the final recipe through the live
 streaming path (4 s windows every 2 s, -23 dBFS, EMA 0.5), exactly as the codec-chain
 results were. The audio and a ``stage_player.json`` index go to ``--out``, a data
-directory outside git; the scene-4 page reads them through ``STAGE_PLAYER_DIR``.
+directory outside git; the scene-4 page plays them through ``STAGE_PLAYER_DIR``. The scores
+alone are also written to ``experiments/results/stage_player_v1.json``, the committed record
+the page reads its numbers from.
 
 Run::
 
@@ -33,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 SR = 16_000
 GAP_SECONDS = 0.4
+RECORD = Path(__file__).resolve().parents[1] / "experiments" / "results" / "stage_player_v1.json"
 LABELS = {
     "direct": "Direct recording",
     "g711": "Simulated G.711 line",
@@ -133,8 +136,13 @@ def main() -> None:
         "thresholds": {name: {"value": t, "file": f} for name, (_, t, f) in models.items()},
         "stages": stages,
     }
-    (out / "stage_player.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
-    print("wrote", out / "stage_player.json")
+    text = json.dumps(index, indent=2) + "\n"
+    (out / "stage_player.json").write_text(text, encoding="utf-8")
+    # the scores (never the audio) are a result like any other: committed, and the page
+    # shows them from this file, not from the data directory
+    RECORD.parent.mkdir(parents=True, exist_ok=True)
+    RECORD.write_text(text, encoding="utf-8")
+    print("wrote", out / "stage_player.json", "and", RECORD)
 
 
 if __name__ == "__main__":
