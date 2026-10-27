@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live call</title>
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    main.scene { padding-top: 1.1rem; }
+    .head { display: flex; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .head h1.title { margin: 0; }
+    .head p.lede { margin: 0; font-size: 0.98rem; max-width: 44rem; }
+    .stagegrid { display: grid; grid-template-columns: minmax(330px, 0.85fr) minmax(0, 1.15fr); gap: 1.1rem; align-items: start; }
+    @media (max-width: 1100px) { .stagegrid { grid-template-columns: 1fr; } }
+    .side h3 { display: flex; align-items: center; gap: 0.5rem; }
+    .side h3 .badge { font-size: 0.68rem; letter-spacing: 0.5px; text-transform: none; padding: 0.15rem 0.5rem; border-radius: 999px; background: rgba(255, 255, 255, 0.07); color: var(--dim); }
+    iframe.caller { width: 100%; height: 640px; border: 0; border-radius: 18px; background: transparent; }
+    .phonecard { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; align-items: center; }
+    .qr { width: 176px; height: 176px; border-radius: 14px; background: #fff; display: grid; place-items: center; overflow: hidden; }
+    .qr img { width: 100%; height: 100%; }
+    .qr .noqr { color: #10203a; font-size: 0.8rem; padding: 0.8rem; text-align: center; }
+    .url { font-family: var(--mono); font-size: 0.92rem; word-break: break-all; color: #d7e5ff; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--line); border-radius: 10px; padding: 0.5rem 0.65rem; margin: 0.45rem 0; }
+    .conn { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+    .conn .light { width: 12px; height: 12px; }
+    .mirror { margin-top: 1rem; border-radius: 18px; padding: 1.2rem 1.3rem; background: var(--panel); border: 1px solid var(--line); transition: background 0.25s, border-color 0.25s, box-shadow 0.25s; }
+    .mirror.s-suspicious { background: rgba(255, 176, 46, 0.10); border-color: rgba(255, 176, 46, 0.6); }
+    .mirror.s-likely_fake { background: rgba(255, 79, 79, 0.13); border-color: rgba(255, 79, 79, 0.75); box-shadow: 0 0 46px rgba(255, 79, 79, 0.22); }
+    .mirror .big { display: flex; align-items: center; gap: 1rem; margin-top: 0.4rem; }
+    .mirror .big .light { width: 30px; height: 30px; }
+    .mirror .vword { font-size: 2.7rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.05; }
+    .mirror .advice { margin-top: 0.7rem; font-size: 1.08rem; color: #e4ecf8; min-height: 1.5em; }
+    .mirror .times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 1rem; }
+    .mirror .times div { background: rgba(0, 0, 0, 0.22); border-radius: 12px; padding: 0.6rem 0.75rem; }
+    .mirror .times b { display: block; font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+    .mirror .times span { color: var(--dim); font-size: 0.78rem; }
+    .mirror canvas { width: 100%; height: 90px; display: block; margin-top: 1rem; }
+    .fallback { margin-top: 1rem; display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; color: var(--dim); font-size: 0.9rem; }
+    .steps-list { margin: 0.4rem 0 0; padding-left: 1.2rem; color: var(--dim); font-size: 0.88rem; }
+    .steps-list li { margin: 0.15rem 0; }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <p class="kicker">Scene 3 · A live call</p>
+    <div class="head">
+      <h1 class="title">A clone calls. Only the receiver is warned.</h1>
+      <p class="lede">The caller's audio goes through the live detector every two seconds. The verdict goes
+        <b>only to the person being called</b>; the caller's screen never shows it, because a caller who
+        knows they were caught learns to evade.</p>
+    </div>
+
+    <div class="stagegrid">
+      <section class="side">
+        <h3>Caller · this laptop <span class="badge">sees no verdict</span></h3>
+        <iframe class="caller" id="callerFrame" title="Caller handset" allow="microphone; autoplay"></iframe>
+      </section>
+
+      <section class="side">
+        <h3>Receiver · the mentor's phone <span class="badge">verdicts arrive here</span></h3>
+        <div class="card phonecard">
+          <div class="qr" id="qr"><span class="noqr">looking for this laptop's address…</span></div>
+          <div>
+            <div class="conn" id="conn"><span class="light"></span><span>Waiting for the phone</span></div>
+            <div class="url" id="url">–</div>
+            <ol class="steps-list">
+              <li>Scan with the phone's camera; the receiver handset opens.</li>
+              <li>Pick the call on the left and press call. The phone rings: accept.</li>
+            </ol>
+            <div class="tiny faint" id="urlNote"></div>
+          </div>
+        </div>
+
+        <div class="mirror s-listening" id="mirror" aria-live="polite">
+          <h3 style="margin:0">What the phone shows now</h3>
+          <div class="big"><span class="light"></span><span class="vword" id="mword">No call yet</span></div>
+          <div class="advice" id="madvice">Place a call from the laptop.</div>
+          <div class="times">
+            <div><b id="mclock">–</b><span>into the call</span></div>
+            <div><b id="mcaution">–</b><span>first caution</span></div>
+            <div><b id="mlikely">–</b><span>likely-cloned warning</span></div>
+          </div>
+          <canvas id="mspark" aria-label="P(genuine) per window"></canvas>
+        </div>
+
+        <div class="fallback">
+          Phone or network misbehaving? Run the same call on one screen:
+          <a class="btn ghost" href="/console" target="_blank">Open the one-screen console</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/static/stage.js"></script>
+  <script>
+    const { make, json, word } = Stage;
+    Stage.mount("live");
+    const ROOM = new URLSearchParams(location.search).get("room") || "demo";
+    const $ = (id) => document.getElementById(id);
+    $("callerFrame").src = `/phone/caller?embed=1&room=${encodeURIComponent(ROOM)}&clip=xtts_clone`;
+
+    // ---------------------------------------------------------- where the phone goes
+    async function address() {
+      try {
+        const t = await json("/api/tunnel");
+        const base = t.url || (t.lan && t.lan[0]) || location.origin;
+        const link = `${base}/phone/receiver?room=${encodeURIComponent(ROOM)}`;
+        $("url").textContent = link;
+        $("urlNote").textContent = t.url
+          ? "Through the https tunnel: the phone gets its microphone and the call's audio."
+          : "Over this Wi-Fi (plain http): the phone listens and gets every verdict; start scripts/start_tunnel.py for https.";
+        const img = new Image();
+        img.alt = "QR code for the receiver handset";
+        img.onload = () => $("qr").replaceChildren(img);
+        img.onerror = () => $("qr").replaceChildren(make("span", { class: "noqr", text: "type the address shown" }));
+        img.src = "/api/qr?text=" + encodeURIComponent(link);
+      } catch (e) { $("url").textContent = "address unavailable: " + e.message; }
+    }
+    address();
+    setInterval(address, 15000);
+
+    // ---------------------------------------------------------- the line and its session
+    let session = null, lineState = "idle", points = [], threshold = null, caution = null, likely = null, connectedAt = null;
+    json("/api/health").then((h) => (threshold = h.detector.threshold)).catch(() => {});
+
+    async function pollLine() {
+      try {
+        const lines = await json("/api/lines");
+        const line = lines.find((l) => l.room === ROOM);
+        const rx = line && line.parties && line.parties.receiver;
+        const conn = $("conn");
+        conn.querySelector(".light").className = "light " + (rx ? "genuine" : "");
+        conn.lastChild.textContent = rx
+          ? `Phone connected: ${rx.name}` + (line.state !== "idle" ? ` · call ${line.state}` : "")
+          : "Waiting for the phone to open the link";
+        if (line) {
+          if (line.state === "connected" && line.connected && connectedAt === null) connectedAt = line.connected;
+          if (line.session && line.session !== session) { startSession(line.session); }
+          if (line.state === "ringing" && lineState !== "ringing") { reset("Ringing…", "The phone is ringing."); }
+          lineState = line.state;
+        }
+      } catch (e) { /* server restarting */ }
+    }
+    setInterval(pollLine, 1000);
+    pollLine();
+
+    function reset(wordText, advice) {
+      points = []; caution = likely = null;
+      $("mirror").className = "mirror s-listening";
+      $("mword").textContent = wordText;
+      $("madvice").textContent = advice;
+      $("mcaution").textContent = "–"; $("mlikely").textContent = "–"; $("mclock").textContent = "–";
+      draw();
+    }
+    function startSession(id) {
+      session = id;
+      reset("Listening…", "The caller is speaking; the first verdict comes within seconds.");
+    }
+
+    const mmss = (s) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+    const ADVICE = {
+      genuine: "Genuine voice: no warning.",
+      suspicious: "Caution: this voice may be synthetic. A warning tone plays on the phone.",
+      likely_fake: "Likely cloned: the phone turns red and speaks the warning.",
+    };
+
+    Stage.socket((m) => {
+      if (!session || m.session !== session) return;
+      if (m.type === "window") {
+        points.push({ t: m.t, score: m.score });
+        if (m.score !== null) {
+          $("mirror").className = "mirror s-" + m.state;
+          $("mword").textContent = word(m.state);
+          $("madvice").textContent = ADVICE[m.state] || "";
+        }
+        $("mclock").textContent = mmss(m.t);
+        draw();
+      } else if (m.type === "event" && (m.state === "suspicious" || m.state === "likely_fake")) {
+        if (caution === null) { caution = m.at; $("mcaution").textContent = mmss(m.at); }
+        if (m.state === "likely_fake" && likely === null) { likely = m.at; $("mlikely").textContent = mmss(m.at); }
+      } else if (m.type === "session_end") {
+        $("madvice").textContent = `Call ended. Strongest warning: ${word(m.peak_state).toLowerCase()}.`;
+      }
+    });
+
+    function draw() {
+      const c = $("mspark"), dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+      if (!w) return;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d");
+      ctx.scale(dpr, dpr);
+      const tMax = Math.max(46, ...points.map((p) => p.t));
+      const x = (t) => 6 + (w - 12) * (t / tMax), y = (v) => 6 + (h - 12) * (1 - v);
+      if (threshold !== null) {
+        ctx.setLineDash([6, 5]); ctx.strokeStyle = "rgba(230,238,250,0.6)";
+        ctx.beginPath(); ctx.moveTo(0, y(threshold)); ctx.lineTo(w, y(threshold)); ctx.stroke(); ctx.setLineDash([]);
+      }
+      for (const p of points.filter((q) => q.score !== null)) {
+        ctx.fillStyle = threshold !== null && p.score < threshold ? "#ff6b6b" : "#3ae48c";
+        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 4, 0, 7); ctx.fill();
+      }
+    }
+    window.addEventListener("resize", draw);
+    draw();
+  </script>
+</body>
+</html>

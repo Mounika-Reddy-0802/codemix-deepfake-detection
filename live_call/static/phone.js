@@ -143,7 +143,13 @@ class Media {
   // Connect to the server and start sending. onRemote gets the far end's audio.
   async connect({ room, role, name, monitor }, onRemote) {
     this.pc = new RTCPeerConnection(ICE);
-    this.stream.getTracks().forEach((t) => this.pc.addTrack(t, this.stream));
+    if (this.stream) {
+      this.stream.getTracks().forEach((t) => this.pc.addTrack(t, this.stream));
+    } else {
+      // No microphone (a phone on plain http over the room's Wi-Fi): join to listen only,
+      // so the receiver still hears the caller and still gets every verdict.
+      this.pc.addTransceiver("audio", { direction: "recvonly" });
+    }
     this.pc.ontrack = (ev) => onRemote(ev.streams[0]);
     const answer = await this.negotiate({ room, role, name, monitor });
     this.pcId = answer.pc_id;

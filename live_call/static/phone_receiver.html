@@ -2,167 +2,227 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#060a13" />
   <title>Receiver handset</title>
-  <link rel="stylesheet" href="/static/app.css" />
-  <link rel="stylesheet" href="/static/phone.css" />
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    body.stage { min-height: 100dvh; }
+    .rxhead {
+      display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1.1rem;
+      border-bottom: 1px solid var(--line); background: rgba(6, 10, 19, 0.85); position: sticky; top: 0; z-index: 5;
+    }
+    .rxhead .who b { display: block; font-size: 0.98rem; }
+    .rxhead .who small { color: var(--dim); font-size: 0.76rem; }
+    .rxhead .only {
+      margin-left: auto; font-size: 0.82rem; font-weight: 650; color: #bfe9d3;
+      background: rgba(34, 201, 122, 0.12); border: 1px solid rgba(34, 201, 122, 0.35);
+      padding: 0.3rem 0.7rem; border-radius: 999px; white-space: nowrap;
+    }
+    .rx { max-width: 560px; margin: 0 auto; padding: 1.1rem 1.1rem 2rem; display: flex; flex-direction: column; gap: 1rem; }
+    .net { display: flex; justify-content: space-between; color: var(--dim); font-size: 0.78rem; }
+    .caller { text-align: center; padding: 0.4rem 0 0.2rem; }
+    .avatar {
+      width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 0.7rem; display: grid; place-items: center;
+      font-size: 2.1rem; font-weight: 650; background: linear-gradient(145deg, #283b57, #18263a); border: 1px solid var(--line-2);
+    }
+    .avatar.ringing { animation: ring 1.1s ease-out infinite; }
+    @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(91, 149, 255, 0.55); } 70% { box-shadow: 0 0 0 24px rgba(91, 149, 255, 0); } 100% { box-shadow: none; } }
+    .caller .nm { font-size: 1.5rem; font-weight: 700; }
+    .caller .no { color: var(--dim); font-variant-numeric: tabular-nums; }
+    .caller .st { margin-top: 0.4rem; color: #b6c8e4; min-height: 1.3em; }
+    .caller .tm { font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 1px; min-height: 1.2em; }
+
+    .verdict { border-radius: 18px; padding: 1.1rem 1.15rem; background: var(--panel); border: 1px solid var(--line); transition: background 0.25s, border-color 0.25s; }
+    .verdict .head { display: flex; align-items: center; gap: 0.5rem; color: var(--dim); font-size: 0.74rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 650; }
+    .verdict .big { display: flex; align-items: center; gap: 0.85rem; margin-top: 0.55rem; }
+    .verdict .big .light { width: 26px; height: 26px; }
+    .verdict .vword { font-size: 2.05rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.3px; }
+    .verdict .sub { color: var(--dim); font-size: 0.9rem; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+    .verdict.s-suspicious { background: rgba(255, 176, 46, 0.10); border-color: rgba(255, 176, 46, 0.55); }
+    .verdict.s-likely_fake { background: rgba(255, 79, 79, 0.12); border-color: rgba(255, 79, 79, 0.7); }
+    .when { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.85rem; }
+    .when div { background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 0.55rem 0.7rem; }
+    .when b { display: block; font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+    .when span { color: var(--dim); font-size: 0.74rem; }
+    .verdict canvas { width: 100%; height: 76px; display: block; margin-top: 0.8rem; }
+    .advice { display: none; border-radius: 14px; padding: 0.85rem 1rem; font-size: 1rem; line-height: 1.45; }
+    .advice.show { display: block; }
+    .advice.suspicious { background: rgba(255, 176, 46, 0.14); border: 1px solid rgba(255, 176, 46, 0.5); color: #ffdca6; }
+    .advice.likely_fake { background: rgba(255, 79, 79, 0.16); border: 1px solid rgba(255, 79, 79, 0.55); color: #ffcaca; }
+    .advice b { display: block; font-size: 1.08rem; margin-bottom: 0.15rem; }
+
+    .keys { display: flex; justify-content: center; gap: 2.4rem; padding-top: 0.4rem; }
+    .key { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; color: var(--dim); font-size: 0.8rem; }
+    .key button {
+      width: 74px; height: 74px; border-radius: 50%; border: 0; color: #fff; font-size: 1.8rem; cursor: pointer;
+      display: grid; place-items: center; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4); transition: transform 0.08s, filter 0.15s;
+    }
+    .key button:active:not(:disabled) { transform: scale(0.94); }
+    .key button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .key .answer { background: linear-gradient(145deg, #1fbf72, #14955a); }
+    .key .end { background: linear-gradient(145deg, #ef5050, #c43535); }
+
+    .summary { display: none; }
+    .summary.show { display: block; }
+    .summary dl { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1rem; margin: 0.5rem 0 0; }
+    .summary dt { color: var(--dim); }
+    .summary dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* the moment that matters: the whole screen turns red and the phone speaks */
+    .alarm {
+      position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1rem; padding: 2rem; text-align: center; background: radial-gradient(circle at 50% 35%, #b42323, #5e0b0b 70%);
+      color: #fff;
+    }
+    .alarm.show { display: flex; animation: alarmin 0.25s ease-out; }
+    @keyframes alarmin { from { opacity: 0; transform: scale(1.03); } }
+    .alarm .icon { font-size: 4.2rem; line-height: 1; animation: shake 0.9s ease-in-out infinite; }
+    @keyframes shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+    .alarm h2 { font-size: 2.3rem; margin: 0; line-height: 1.1; }
+    .alarm p { font-size: 1.2rem; margin: 0; max-width: 28rem; color: #ffe1e1; }
+    .alarm .at { font-size: 1rem; color: #ffc7c7; font-variant-numeric: tabular-nums; }
+    .alarm button { margin-top: 0.6rem; font: inherit; font-weight: 650; color: #5e0b0b; background: #fff; border: 0; border-radius: 999px; padding: 0.75rem 1.6rem; cursor: pointer; }
+
+    details.ident { color: var(--dim); font-size: 0.85rem; }
+    details.ident summary { cursor: pointer; }
+    details.ident input { font: inherit; width: 100%; margin-top: 0.3rem; padding: 0.45rem 0.6rem; border-radius: 9px; border: 1px solid var(--line-2); background: #0e1626; color: var(--ink); }
+    details.ident label { display: block; margin-top: 0.6rem; }
+
+    /* on a laptop or projector the same page reads from across the room */
+    @media (min-width: 900px) and (min-height: 700px) {
+      .rx { max-width: 640px; }
+      .verdict .vword { font-size: 2.6rem; }
+      .when b { font-size: 1.8rem; }
+    }
+  </style>
 </head>
-<body>
-  <header class="top">
-    <div class="brand">Receiver handset<small>device B &mdash; the person being called, and the warning</small></div>
-    <nav>
-      <a href="/">Overview</a>
-      <a href="/demo">Live console</a>
-      <a href="/phone">Phone demo</a>
-      <a href="/phone/caller" target="_blank">Caller</a>
-      <a href="/phone/receiver" class="active">Receiver</a>
-      <a href="/dashboard" target="_blank">Dashboard</a>
-    </nav>
+<body class="stage">
+  <header class="rxhead">
+    <div class="who"><b>Receiver handset</b><small id="net">connecting…</small></div>
+    <span class="only">Verdicts reach only the receiver</span>
   </header>
 
-  <main>
-    <div class="stage">
-      <section class="device receiver">
-        <div class="notch"></div>
-        <div class="statusbar"><span id="net">connecting…</span><span>line <b id="roomTag">demo</b></span></div>
-        <div class="screen">
-          <span class="role-tag">Receiver</span>
+  <main class="rx">
+    <section class="caller">
+      <div class="avatar" id="avatar">?</div>
+      <div class="nm" id="peerName">Waiting for a call</div>
+      <div class="no" id="peerNumber">this handset is free</div>
+      <div class="st" id="callstate">Idle</div>
+      <div class="tm" id="timer"></div>
+    </section>
 
-          <div class="who">
-            <div class="avatar" id="avatar">?</div>
-            <div class="name" id="peerName">Waiting for a call</div>
-            <div class="number" id="peerNumber">this handset is free</div>
-            <div class="callstate" id="callstate">Idle</div>
-            <div class="timer" id="timer"></div>
-          </div>
-
-          <div class="detector listening" id="detector" hidden>
-            <div class="head"><span class="light"></span> Voice authenticity</div>
-            <div class="verdict-text" id="verdictText">Listening…</div>
-            <div class="score" id="scoreText">waiting for speech</div>
-            <div class="bar"><div id="scoreBar"></div></div>
-            <canvas id="spark"></canvas>
-          </div>
-
-          <div class="warn" id="warn"></div>
-
-          <div class="summary" id="summary" hidden>
-            <b>Call summary</b>
-            <dl>
-              <dt>Duration</dt><dd id="sumDuration">–</dd>
-              <dt>Worst verdict</dt><dd id="sumVerdict">–</dd>
-              <dt>Windows scored</dt><dd id="sumWindows">–</dd>
-              <dt>Fake-leaning</dt><dd id="sumFake">–</dd>
-            </dl>
-          </div>
-
-          <div class="keys">
-            <div class="keywrap">
-              <button class="key answer" id="acceptBtn" title="Accept" disabled>&#9742;</button>
-              <span class="label">Accept</span>
-            </div>
-            <div class="keywrap">
-              <button class="key end" id="endBtn" title="Decline / end" disabled>&#10006;</button>
-              <span class="label" id="endLabel">Decline</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div class="link">
-        <div class="state" id="linkState">Idle</div>
-        <div class="wire"></div>
-        <div class="hops">
-          <span class="hop" id="hop1">caller handset</span>
-          <span class="hop" id="hop2">detector</span>
-          <span class="hop" id="hop3">receiver handset</span>
-        </div>
-        <p class="small" style="margin-top:1rem">Only this side sees the verdict. The caller's screen shows
-          nothing, so a fraudster would not know they were detected.</p>
+    <section class="verdict s-listening" id="verdict" hidden>
+      <div class="head">Voice check on this call</div>
+      <div class="big"><span class="light"></span><span class="vword" id="vword">Listening…</span></div>
+      <div class="sub" id="vsub">waiting for the caller to speak</div>
+      <div class="when">
+        <div><b id="firstCaution">–</b><span>first caution</span></div>
+        <div><b id="firstLikely">–</b><span>likely-cloned warning</span></div>
       </div>
+      <canvas id="spark" aria-label="P(genuine) of each window"></canvas>
+    </section>
+
+    <div class="advice" id="advice" role="status"></div>
+
+    <section class="card summary" id="summary">
+      <h3>Call summary</h3>
+      <dl>
+        <dt>Duration</dt><dd id="sumDuration">–</dd>
+        <dt>Strongest warning</dt><dd id="sumVerdict">–</dd>
+        <dt>Windows scored</dt><dd id="sumWindows">–</dd>
+        <dt>Fake-leaning windows</dt><dd id="sumFake">–</dd>
+      </dl>
+    </section>
+
+    <div class="keys">
+      <div class="key"><button class="answer" id="acceptBtn" title="Accept" disabled>&#9742;</button><span>Accept</span></div>
+      <div class="key"><button class="end" id="endBtn" title="Decline or end" disabled>&#10006;</button><span id="endLabel">Decline</span></div>
     </div>
 
-    <div class="card" style="max-width:760px;margin:1.5rem auto 0">
-      <h2>Identity on this handset</h2>
-      <div class="grid two">
-        <label>Your name<br /><input type="text" id="myName" /></label>
-        <label>Your number<br /><input type="text" id="myNumber" /></label>
-      </div>
-      <label class="small"><input type="checkbox" id="sound" checked /> warning tone and ringtone</label>
-      <p class="small muted">Reload after changing these. The live dashboard shows the same call in full detail.</p>
-    </div>
+    <details class="ident">
+      <summary>This handset (name, number, sound)</summary>
+      <label>Name<input type="text" id="myName" /></label>
+      <label>Number<input type="text" id="myNumber" /></label>
+      <label><input type="checkbox" id="sound" checked style="width:auto" /> ringtone, warning tone and spoken warning</label>
+      <p class="tiny">Reload after changing the name or number. Line <b id="roomTag">demo</b>.</p>
+    </details>
   </main>
+
+  <div class="alarm" id="alarm" role="alertdialog" aria-labelledby="alarmTitle">
+    <div class="icon">&#9888;</div>
+    <h2 id="alarmTitle">Likely cloned voice</h2>
+    <p>Do not share codes, passwords or money. Hang up and call the person back on a number you know.</p>
+    <div class="at" id="alarmAt"></div>
+    <button type="button" id="alarmOk">I understand</button>
+  </div>
 
   <script src="/static/common.js"></script>
   <script src="/static/phone.js"></script>
+  <script src="/static/stage.js"></script>
   <script>
+    const $ = (id) => document.getElementById(id);
     const room = qs("room", "demo");
-    document.getElementById("roomTag").textContent = room;
-    const nameEl = document.getElementById("myName");
-    const numberEl = document.getElementById("myNumber");
-    nameEl.value = qs("name", "Priya Sharma");
-    numberEl.value = qs("number", "+91 98200 55678");
-
-    const ui = {
-      state: document.getElementById("callstate"),
-      timer: document.getElementById("timer"),
-      peerName: document.getElementById("peerName"),
-      peerNumber: document.getElementById("peerNumber"),
-      avatar: document.getElementById("avatar"),
-      accept: document.getElementById("acceptBtn"),
-      end: document.getElementById("endBtn"),
-      endLabel: document.getElementById("endLabel"),
-      net: document.getElementById("net"),
-      detector: document.getElementById("detector"),
-      verdictText: document.getElementById("verdictText"),
-      scoreText: document.getElementById("scoreText"),
-      scoreBar: document.getElementById("scoreBar"),
-      spark: document.getElementById("spark"),
-      warn: document.getElementById("warn"),
-      summary: document.getElementById("summary"),
-      linkState: document.getElementById("linkState"),
-    };
+    $("roomTag").textContent = room;
+    $("myName").value = qs("name", "Priya Sharma");
+    $("myNumber").value = qs("number", "+91 98200 55678");
 
     const media = new Media();
     const remote = new Audio();
     remote.autoplay = true;
-    let line = null, timerId = null, points = [], threshold = null, soundOn = true;
-    document.getElementById("sound").addEventListener("change", (e) => (soundOn = e.target.checked));
-
+    let line = null, timerId = null, points = [], threshold = null, soundOn = true, wakeLock = null;
+    let firstCaution = null, firstLikely = null, alarmShown = false;
+    $("sound").addEventListener("change", (e) => (soundOn = e.target.checked));
     getJSON("/api/health").then((h) => (threshold = h.detector.threshold)).catch(() => {});
 
-    function setHops(on) {
-      ["hop1", "hop2", "hop3"].forEach((id, i) =>
-        document.getElementById(id).classList.toggle("on", i < on));
+    const WORDS = { listening: "Listening…", genuine: "Genuine voice", suspicious: "Caution", likely_fake: "Likely cloned" };
+
+    // ------------------------------------------------------------- speech
+    function speak(text, volume = 1) {
+      try {
+        if (!soundOn || !window.speechSynthesis) return;
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95; u.volume = volume; u.lang = "en-IN";
+        speechSynthesis.speak(u);
+      } catch (e) { /* the banner still shows */ }
+    }
+    // phones allow speech only after a tap: the Accept tap unlocks it, silently
+    function unlockSpeech() { speak(" ", 0); }
+
+    async function keepAwake() {
+      try { if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); } catch (e) { /* not supported */ }
     }
 
+    // ------------------------------------------------------------- the call
     function resetCall() {
       clearInterval(timerId);
       stopRing();
       media.close();
-      points = [];
-      ui.timer.textContent = "";
-      ui.avatar.classList.remove("ringing");
-      ui.accept.disabled = true;
-      ui.end.disabled = true;
-      ui.endLabel.textContent = "Decline";
-      setHops(0);
-      ui.linkState.textContent = "Idle";
+      $("timer").textContent = "";
+      $("avatar").classList.remove("ringing");
+      $("acceptBtn").disabled = true;
+      $("endBtn").disabled = true;
+      $("endLabel").textContent = "Decline";
+      if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
     }
 
     function clearVerdict() {
-      ui.detector.hidden = true;
-      ui.detector.className = "detector listening";
-      ui.verdictText.textContent = "Listening…";
-      ui.scoreText.textContent = "waiting for speech";
-      ui.scoreBar.style.width = "0%";
-      ui.warn.className = "warn";
-      ui.warn.textContent = "";
-      ui.summary.hidden = true;
+      points = []; firstCaution = firstLikely = null; alarmShown = false;
+      $("verdict").hidden = true;
+      $("verdict").className = "verdict s-listening";
+      $("vword").textContent = WORDS.listening;
+      $("vsub").textContent = "waiting for the caller to speak";
+      $("firstCaution").textContent = "–";
+      $("firstLikely").textContent = "–";
+      $("advice").className = "advice";
+      $("summary").classList.remove("show");
+      $("alarm").classList.remove("show");
+      drawSpark();
     }
 
     async function openLine() {
-      line = new Line({ room, role: "receiver", name: nameEl.value, number: numberEl.value });
+      line = new Line({ room, role: "receiver", name: $("myName").value, number: $("myNumber").value });
       line
         .on("joined", onLine)
         .on("line", onLine)
@@ -170,99 +230,134 @@
         .on("connected", onConnected)
         .on("ended", onEnded)
         .on("verdict", onVerdict)
-        .on("renegotiate", () => media.negotiate({ room, role: "receiver", name: nameEl.value, monitor: false }))
-        .on("closed", () => (ui.net.textContent = "disconnected"));
+        .on("renegotiate", () => media.negotiate({ room, role: "receiver", name: $("myName").value, monitor: false }))
+        .on("closed", () => ($("net").textContent = "disconnected: reload the page"));
       await line.connect();
-      ui.net.textContent = "on the network";
+      $("net").textContent = "on the line · " + room;
     }
 
     function onLine(msg) {
       const peer = (msg.parties || {}).caller;
       if (msg.state === "idle" || msg.state === "ended") {
-        ui.peerName.textContent = peer ? "Waiting for a call" : "No caller handset";
-        ui.peerNumber.textContent = peer ? peer.number + " is on the line" : "open /phone/caller on the other device";
-        ui.avatar.textContent = "?";
+        $("peerName").textContent = peer ? "Waiting for a call" : "No caller yet";
+        $("peerNumber").textContent = peer ? peer.number + " is on the line" : "the caller opens /phone/caller";
+        $("avatar").textContent = "?";
       }
     }
 
     function onRinging(msg) {
       const caller = (msg.parties || {}).caller || { name: "Unknown", number: "" };
       clearVerdict();
-      ui.peerName.textContent = caller.name;
-      ui.peerNumber.textContent = caller.number;
-      ui.avatar.textContent = initials(caller.name);
-      ui.avatar.classList.add("ringing");
-      ui.state.textContent = "Incoming call…";
-      ui.accept.disabled = false;
-      ui.end.disabled = false;
-      ui.endLabel.textContent = "Decline";
-      ui.linkState.textContent = "Ringing";
-      setHops(1);
+      $("peerName").textContent = caller.name;
+      $("peerNumber").textContent = caller.number;
+      $("avatar").textContent = initials(caller.name);
+      $("avatar").classList.add("ringing");
+      $("callstate").textContent = "Incoming call…";
+      $("acceptBtn").disabled = false;
+      $("endBtn").disabled = false;
+      $("endLabel").textContent = "Decline";
       if (soundOn) startRing("ring");
+      if (navigator.vibrate) navigator.vibrate([300, 200, 300]);
     }
 
     async function onConnected(msg) {
       stopRing();
-      ui.avatar.classList.remove("ringing");
-      ui.state.textContent = "Connected";
-      ui.accept.disabled = true;
-      ui.end.disabled = false;
-      ui.endLabel.textContent = "End";
-      ui.detector.hidden = false;
-      timerId = startTimer(ui.timer, msg.connected);
-      ui.linkState.textContent = "In call";
-      setHops(3);
+      $("avatar").classList.remove("ringing");
+      $("callstate").textContent = "Connected · the caller's voice is being checked";
+      $("acceptBtn").disabled = true;
+      $("endBtn").disabled = false;
+      $("endLabel").textContent = "End";
+      $("verdict").hidden = false;
+      timerId = startTimer($("timer"), msg.connected);
+      keepAwake();
       try {
         await media.open("mic", {});
-        await media.connect({ room, role: "receiver", name: nameEl.value, monitor: false },
+      } catch (err) {
+        media.stream = null; // listen only: the caller is still heard and still checked
+        $("callstate").textContent = "Connected · listening only (this browser gives no microphone here)";
+      }
+      try {
+        await media.connect({ room, role: "receiver", name: $("myName").value, monitor: false },
                             (stream) => (remote.srcObject = stream));
         line.send("pc", { pc_id: media.pcId });
       } catch (err) {
-        ui.state.textContent = "Connected (no microphone: " + err.message + ")";
+        $("callstate").textContent = "Connected · no audio link (" + err.message + "); verdicts still arrive";
       }
     }
 
     function onVerdict(msg) {
       if (msg.state) {
-        ui.detector.className = "detector " + msg.state;
-        ui.verdictText.textContent = stateText(msg.state);
+        $("verdict").className = "verdict s-" + msg.state;
+        $("vword").textContent = WORDS[msg.state] || msg.state;
       }
       if (msg.score !== undefined && msg.score !== null && msg.t !== undefined) {
         points.push({ t: msg.t, score: msg.score, smoothed: msg.smoothed });
-        ui.scoreBar.style.width = Math.round(100 * msg.score) + "%";
-        ui.scoreText.textContent = "P(genuine) " + msg.score.toFixed(3) + " · " + Math.round(msg.t) + " s of speech";
-        drawTimeline(ui.spark, points, threshold);
+        $("vsub").textContent = "P(genuine) " + msg.score.toFixed(3) + " · " + Math.round(msg.t) + " s of speech checked";
+        drawSpark();
       }
-      // severity lives in state; kind names the channel the alert went out on
+      // severity is in state; kind names the channel the alert went out on
       if (msg.event === "event" && (msg.state === "suspicious" || msg.state === "likely_fake")) {
-        ui.warn.className = "warn show " + msg.state;
-        ui.warn.innerHTML = msg.state === "likely_fake"
-          ? "<b>Warning: this voice is likely cloned.</b>Do not share codes, passwords or money. Verify the caller another way."
-          : "<b>Caution: this voice may be synthetic.</b>Stay on the call but do not act on any request yet.";
-        if (soundOn) warningTone(msg.state === "likely_fake" ? "sms" : "beep");
+        const at = msg.at ?? (points.at(-1) || {}).t ?? 0;
+        if (firstCaution === null) { firstCaution = at; $("firstCaution").textContent = mmss(at); }
+        const advice = $("advice");
+        advice.className = "advice show " + msg.state;
+        if (msg.state === "likely_fake") {
+          if (firstLikely === null) { firstLikely = at; $("firstLikely").textContent = mmss(at); }
+          advice.innerHTML = "<b>Warning: this voice is likely cloned.</b>Do not share codes, passwords or money. Verify the caller another way.";
+          if (soundOn) warningTone("sms");
+          if (navigator.vibrate) navigator.vibrate([500, 150, 500, 150, 500]);
+          speak("Warning. This caller's voice is likely cloned. Do not share codes or money.");
+          if (!alarmShown) {
+            alarmShown = true;
+            $("alarmAt").textContent = "warned " + mmss(at) + " into the call";
+            $("alarm").classList.add("show");
+          }
+        } else {
+          advice.innerHTML = "<b>Caution: this voice may be synthetic.</b>Stay on the call, but do not act on any request yet.";
+          if (soundOn) warningTone("beep");
+          speak("Caution. This voice may be synthetic.");
+        }
       }
       if (msg.event === "session_end") {
-        document.getElementById("sumWindows").textContent = msg.scored_windows ?? "–";
-        document.getElementById("sumFake").textContent = msg.fake_leaning_windows ?? "–";
-        document.getElementById("sumVerdict").textContent = stateText(msg.peak_state || "listening");
-        ui.summary.hidden = false;
+        $("sumWindows").textContent = msg.scored_windows ?? "–";
+        $("sumFake").textContent = msg.fake_leaning_windows ?? "–";
+        $("sumVerdict").textContent = Stage.word(msg.peak_state || "listening");
+        $("summary").classList.add("show");
       }
     }
 
     function onEnded(msg) {
-      ui.state.textContent = "Call ended" + (msg.duration ? " · " + mmss(msg.duration) : "");
-      document.getElementById("sumDuration").textContent = mmss(msg.duration || 0);
-      ui.summary.hidden = false;
+      $("callstate").textContent = "Call ended" + (msg.duration ? " · " + mmss(msg.duration) : "");
+      $("sumDuration").textContent = mmss(msg.duration || 0);
+      $("summary").classList.add("show");
       resetCall();
     }
 
-    ui.accept.onclick = () => { unlockAudio(); line.send("accept"); };
-    ui.end.onclick = () => {
-      line.send(line.state === "ringing" ? "decline" : "hangup");
-      resetCall();
-    };
+    function drawSpark() {
+      const c = $("spark"), dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+      if (!w) return;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d");
+      ctx.scale(dpr, dpr);
+      const tMax = Math.max(30, ...points.map((p) => p.t));
+      const x = (t) => 4 + (w - 8) * (t / tMax), y = (v) => 4 + (h - 8) * (1 - v);
+      if (threshold !== null) {
+        ctx.setLineDash([5, 4]); ctx.strokeStyle = "rgba(230,238,250,0.55)";
+        ctx.beginPath(); ctx.moveTo(0, y(threshold)); ctx.lineTo(w, y(threshold)); ctx.stroke(); ctx.setLineDash([]);
+      }
+      for (const p of points) {
+        const low = threshold !== null && p.score < threshold;
+        ctx.fillStyle = low ? "#ff6b6b" : "#3ae48c";
+        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 3.2, 0, 7); ctx.fill();
+      }
+    }
 
-    openLine().catch(() => (ui.net.textContent = "server unreachable"));
+    $("acceptBtn").onclick = () => { unlockAudio(); unlockSpeech(); line.send("accept"); };
+    $("endBtn").onclick = () => { line.send(line.state === "ringing" ? "decline" : "hangup"); resetCall(); };
+    $("alarmOk").onclick = () => $("alarm").classList.remove("show");
+    window.addEventListener("resize", drawSpark);
+
+    openLine().catch(() => ($("net").textContent = "server unreachable"));
     window.addEventListener("beforeunload", () => media.close());
   </script>
 </body>

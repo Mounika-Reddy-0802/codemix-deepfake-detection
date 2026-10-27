@@ -358,6 +358,11 @@ def create_app(state: App | None = None) -> FastAPI:
         """Scene 2: three detectors on one call."""
         return page("lanes.html")
 
+    @api.get("/live")
+    async def live_page() -> HTMLResponse:
+        """Scene 3: the caller on this laptop, the receiver on the mentor's phone."""
+        return page("live.html")
+
     @api.get("/phone")
     async def phone_home() -> HTMLResponse:
         return page("phone.html")
@@ -502,6 +507,12 @@ def create_app(state: App | None = None) -> FastAPI:
 
     # ----------------------------------------------------------------- demo scenes
     demo_routes.add_lane_routes(api, shared, find_clip, clip_audio)
+    demo_routes.add_live_routes(
+        api,
+        lambda: Path(
+            os.environ.get("TUNNEL_URL_FILE", str(demo_clips_dir().parent / "tunnel_url.txt"))
+        ),
+    )
 
     # ----------------------------------------------------------------- dashboard push
     @api.websocket("/ws/dashboard")

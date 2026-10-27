@@ -54,8 +54,9 @@
         <div class="metric"><span class="mv" id="mScore">&ndash;</span><span class="ml">last P(genuine)</span></div>
         <div class="metric"><span class="mv" id="mLevel">&ndash;</span><span class="ml">line level</span></div>
       </div>
-      <p class="pathnote">Every 2 seconds the last 4 seconds of the caller's speech are scored. Two low
-        windows raise a caution, four raise the warning. Nothing about the call is sent anywhere else.</p>
+      <p class="pathnote">Every 2 seconds the last 4 seconds of the caller's speech are scored.
+        <span class="nC">2</span> low windows in a row raise a caution, <span class="nL">4</span> raise the warning.
+        Nothing about the call is sent anywhere else.</p>
     </section>
 
     <!-- ---------------------------------------------------------- receiver -->
@@ -96,8 +97,8 @@
       <div class="ladder">
         <div class="rung" id="rungListening"><span class="pip"></span> Listening for speech <span class="cnt" id="cntWindows">0 windows</span></div>
         <div class="rung" id="rungGenuine"><span class="pip"></span> Genuine &middot; score at or above threshold <span class="cnt" id="cntGenuine">&ndash;</span></div>
-        <div class="rung" id="rungSusp"><span class="pip"></span> Suspicious after 2 low windows <span class="cnt" id="cntSusp">0 / 2</span></div>
-        <div class="rung" id="rungFake"><span class="pip"></span> Likely cloned after 4 low windows <span class="cnt" id="cntFake">0 / 4</span></div>
+        <div class="rung" id="rungSusp"><span class="pip"></span> Suspicious after <span class="nC">2</span> low windows <span class="cnt" id="cntSusp">0 / 2</span></div>
+        <div class="rung" id="rungFake"><span class="pip"></span> Likely cloned after <span class="nL">4</span> low windows <span class="cnt" id="cntFake">0 / 4</span></div>
       </div>
       <div class="ribbon">
         <h2 style="margin-top:1rem">Measured on held-out data</h2>
@@ -133,10 +134,20 @@
     let callerLine = null, rxLine = null;
     let callerTimer = null, rxTimer = null;
     let points = [], threshold = 0.5, lowRun = 0, analyser = null, waveData = null;
+    // the ladder of the model being served: the final recipe warns after 3 and 5 low windows
+    let cautionAfter = 2, likelyAfter = 4;
 
     // ------------------------------------------------------------- top badges
     getJSON("/api/health").then((h) => {
       threshold = h.detector.threshold ?? 0.5;
+      if (h.detector.ladder) {
+        cautionAfter = h.detector.ladder.caution_after;
+        likelyAfter = h.detector.ladder.likely_after;
+        document.querySelectorAll(".nC").forEach((n) => (n.textContent = cautionAfter));
+        document.querySelectorAll(".nL").forEach((n) => (n.textContent = likelyAfter));
+        $("cntSusp").textContent = "0 / " + cautionAfter;
+        $("cntFake").textContent = "0 / " + likelyAfter;
+      }
       $("badges").replaceChildren(
         el("span", { class: "badge live", text: "detector running" }),
         el("span", { class: "badge", html: "" , text: "model: " + (h.detector.checkpoint || "?") }),
@@ -324,8 +335,8 @@
       $("verdictText").textContent = "Listening";
       $("verdictSub").textContent = "no speech scored yet";
       $("cntWindows").textContent = "0 windows";
-      $("cntSusp").textContent = "0 / 2";
-      $("cntFake").textContent = "0 / 4";
+      $("cntSusp").textContent = "0 / " + cautionAfter;
+      $("cntFake").textContent = "0 / " + likelyAfter;
       $("mWindows").textContent = "0";
       $("mFlag").textContent = "–"; $("mFlag").classList.remove("hot");
       $("mScore").textContent = "–"; $("mLevel").textContent = "–";
@@ -348,8 +359,8 @@
         points.push({ t: msg.t, score: msg.score });
         lowRun = msg.score < threshold ? lowRun + 1 : 0;
         $("cntWindows").textContent = points.length + (points.length === 1 ? " window" : " windows");
-        $("cntSusp").textContent = Math.min(lowRun, 2) + " / 2";
-        $("cntFake").textContent = Math.min(lowRun, 4) + " / 4";
+        $("cntSusp").textContent = Math.min(lowRun, cautionAfter) + " / " + cautionAfter;
+        $("cntFake").textContent = Math.min(lowRun, likelyAfter) + " / " + likelyAfter;
         $("verdictSub").textContent =
           "P(genuine) " + msg.score.toFixed(3) + " · window at " + Math.round(msg.t) + " s";
         $("mWindows").textContent = points.length;

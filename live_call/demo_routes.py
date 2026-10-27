@@ -4,7 +4,8 @@
 The routes here serve the demo's scenes on top of it, each in its own function so the
 server reads as a list of what it offers:
 
-- :func:`add_lane_routes`: scene 2, several detectors on one call (``live_call.lanes``).
+- :func:`add_lane_routes`: scene 2, several detectors on one call (``live_call.lanes``);
+- :func:`add_live_routes`: scene 3, the address and QR code the receiver's phone opens.
 
 Every route scores audio through the live path (``StreamingScorer`` + ``VerdictEngine``)
 or reads a committed result file; none holds a number of its own.
@@ -13,12 +14,16 @@ or reads a committed result file; none holds a number of its own.
 from __future__ import annotations
 
 import asyncio
+import io
 import logging
+import os
+import socket
 from collections.abc import Callable
+from pathlib import Path
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from live_call.lanes import new_run_id, score_lanes
 
@@ -122,3 +127,52 @@ def add_lane_routes(
         if stopped:
             shared.lanes_task.cancel()
         return JSONResponse({"stopped": stopped})
+
+
+def lan_addresses() -> list[str]:
+    """This laptop's addresses on the local network, best first (no packet is sent)."""
+    found: list[str] = []
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("192.0.2.1", 9))  # a documentation address: only picks the route
+            found.append(probe.getsockname()[0])
+    except OSError:
+        pass
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            address = info[4][0]
+            if address not in found:
+                found.append(address)
+    except OSError:
+        pass
+    return [a for a in found if not a.startswith("127.")]
+
+
+def add_live_routes(api: FastAPI, tunnel_file: Callable[[], Path]) -> None:
+    """Scene 3: ``GET /api/tunnel`` and ``GET /api/qr``, for the receiver's phone."""
+
+    @api.get("/api/tunnel")
+    async def tunnel() -> JSONResponse:
+        """Where the phone can reach this server: the https tunnel if one is open
+        (``scripts/start_tunnel.py`` writes it), else the laptop's Wi-Fi address."""
+        path = tunnel_file()
+        url = path.read_text(encoding="utf-8").strip() if path.is_file() else ""
+        port = int(os.environ.get("DFD_PORT", "8000"))
+        return JSONResponse(
+            {"url": url or None, "lan": [f"http://{a}:{port}" for a in lan_addresses()]}
+        )
+
+    @api.get("/api/qr")
+    async def qr(text: str) -> Response:
+        """A QR code (SVG) for a link, so the phone opens it without typing."""
+        if not text.startswith(("http://", "https://")) or len(text) > 300:
+            raise HTTPException(400, "only http(s) links up to 300 characters")
+        try:
+            import segno
+        except ImportError as exc:
+            raise HTTPException(404, "QR codes need the segno package") from exc
+        buffer = io.BytesIO()  # a standalone SVG (with its namespace), so an <img> renders it
+        segno.make(text, error="m").save(
+            buffer, kind="svg", scale=8, border=2, dark="#06101f", light="#ffffff", xmldecl=False
+        )
+        return Response(buffer.getvalue(), media_type="image/svg+xml")
