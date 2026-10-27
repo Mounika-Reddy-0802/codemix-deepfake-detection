@@ -54,8 +54,8 @@ raises its false-alarm rate on real speech by a factor of 256.
 Over the telephone channel the AUC falls
 below 0.5 on two of the three sets (0.381 and 0.425), so there the clones look \emph{more}
 genuine to S1 than the real speakers do.
-In a deployment this is the more damaging error: nearly every genuine caller would
-be flagged. The model's notion of genuine speech is tied to the recording conditions
+In a deployment this is the more damaging error: on clean audio nearly every genuine
+speaker is flagged, and over the phone line still about 45\%. The model's notion of genuine speech is tied to the recording conditions
 and language of its training data rather than to properties of synthesis. Because
 ASVspoof is studio read speech and MUCS is lecture audio, this gap combines language
 shift with recording-domain shift; the next subsection separates the two.
@@ -243,7 +243,7 @@ evidence is decided by the paired test of Table~\ref{tab:main}.}
 \label{fig:ablation}
 \end{figure}
 
-\textbf{4. Native training wins on its own data and has no English.} S3 is the most
+\textbf{4. Native training is most accurate on the seen tool and has no English.} S3 is the most
 accurate model on the seen tool, reaching 0.83\% clean with XTTS and RVC in training
 against 1.99\% for the matching S2. On English, on which it is never trained (it starts
 from the self-supervised checkpoint, not from S1), it sits at 50.90--56.42\% EER, which
@@ -388,7 +388,7 @@ Table~\ref{tab:new} scores every system in its own training condition.
 \centering
 \caption{EER (\%) on the week-13 sets, each system in its training condition; 95\%
 speaker-bootstrap intervals. New speakers: 60 speakers, 2{,}400 genuine clips.
-IndicF5: clones of 54 speakers, 651 all-Hindi genuine clips of 75.}
+IndicF5: clones of 54 speakers, 651 all-Hindi genuine clips of 75 speakers.}
 \label{tab:new}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -587,9 +587,9 @@ deployed recipe rests on the direction being the same in every seed. IndicF5 (21
 \subsection{A third unseen tool}
 \label{sec:res-chatterbox}
 
-Chatterbox (CM09) is a third generator family none of our training data resembles: XTTS-v2
-is an autoregressive decoder, Tortoise adds diffusion, IndicF5 uses flow matching, and
-Chatterbox is a recent multilingual cloner. We scored the same models on its 525 clips
+Chatterbox (CM09) is a third unseen generator, a recent multilingual cloner from another
+developer (XTTS-v2 is an autoregressive decoder, Tortoise adds diffusion and IndicF5 uses
+flow matching). We scored the same models on its 525 clips
 against the same 651 genuine all-Hindi clips as IndicF5 (Table~\ref{tab:chatterbox}).
 
 \begin{table}[t]
@@ -671,8 +671,8 @@ Mann--Whitney $p = 0.036$, the smallest possible for three against five seeds; n
 speakers 9.6\% against 13.6\%, $p = 0.14$) and level on IndicF5. The LoRA adapter is better on the
 seen tool (0.9\% against 1.8\%), on RVC (6.5\% against 13.5\%, $p = 0.036$) and in false
 alarms (0.5\% against 2.3\%, $p = 0.036$). With 21 speakers AASIST is also unstable: its
-false alarms range up to 47\% for one seed. On the seen tool, Tortoise and false
-alarms both systems gain far more from the 248 speakers than they differ from each
+false alarms range up to 47\% for one seed. On the seen tool and on new-speaker
+Tortoise both systems gain far more from the 248 speakers than they differ from each
 other, for example AASIST on new-speaker Tortoise falls from 26.9\% to 9.6\%; on
 IndicF5 AASIST barely moves (27.1\% to 26.4\%), and its RVC error doubles (6.7\% to
 13.5\%). On most sets the voices matter more than the architecture.

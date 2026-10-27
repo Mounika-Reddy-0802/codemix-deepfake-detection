@@ -56,7 +56,8 @@ any training manifest, and an automated test fails the build if it does.
 
 \begin{table}[t]
 \centering
-\caption{Code-mixed attack sets. Usable: clips kept after generation and screening.}
+\caption{Code-mixed attack sets. Usable: clips kept after generation and, for CM01, CM02 and
+CM04, a quality screen.}
 \label{tab:attacks}
 \small
 \begin{tabular}{@{}llrl@{}}
@@ -65,7 +66,7 @@ Set  & Tool      & Usable  & Role \\
 \midrule
 CM01 & XTTS-v2   & 3{,}998 & training pool, unused\textsuperscript{a} \\
 Eval pool & XTTS-v2 & 2{,}400 & test, seen tool \\
-CM02 & RVC       & 1{,}404 & split: train half, test half \\
+CM02 & RVC       & 1{,}404 & split by speaker; cross-half conversions dropped \\
 CM03 & XTTS-v2   & 1{,}600 & adaptation only \\
 CM04 & Tortoise  & 458     & test, unseen tool \\
 \bottomrule
