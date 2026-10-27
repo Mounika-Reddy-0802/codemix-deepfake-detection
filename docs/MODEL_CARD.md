@@ -15,9 +15,9 @@
   speakers (MUCS 2021 read lectures) and XTTS-v2 clones and RVC conversions of training
   speakers, every clip both over a simulated G.711 telephone line (20 dB) and through the
   real AMR-NB mobile codec (16,036 clips). Config: `configs/train_lora_final.yaml`.
-- **Operating point for calls.** Threshold 0.687 on smoothed window scores, warning after 3
-  fake-leaning windows and "likely fake" after 5 (`configs/threshold_final.yaml`), chosen on
-  the dev set only for at most 5% warnings on genuine 60 s calls.
+- **Operating point for calls.** Threshold 0.687 on smoothed window scores, a caution after 3
+  fake-leaning windows and "likely cloned" after 5 (`configs/threshold_final.yaml`), chosen on
+  the dev set only for at most 5% alerts of any level on genuine 60 s calls.
 
 ## Intended use
 
