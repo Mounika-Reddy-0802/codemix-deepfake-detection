@@ -58,9 +58,9 @@ XTTS, Tortoise and RVC call, half of the IndicF5 calls and one in six Chatterbox
 - Trained and tested on read lecture speech; spontaneous speech is out of scope (above).
 - The G.711 line is simulated; AMR-NB is a real codec run offline. On a real mobile network
   the evidence is a pilot of 30 calls in the voices of the three authors
-  (`docs/results/real_calls_v1.md`): it left nine of twelve genuine live callers unwarned (the
-  three warned are one speaker's), took five of six XTTS-v2 clone calls to "likely cloned" and
-  none of six Chatterbox clone calls (one was cautioned). Its false alarms on genuine calls come early in a call, starting with
+  (`docs/results/real_calls_v1.md`): it left nine of twelve genuine live calls unwarned (over G.711
+  the three warned are one speaker's), took five of six XTTS-v2 clone calls to "likely cloned" and
+  none of six Chatterbox clone calls (one was cautioned). Its false alarms on genuine live calls come early in a call, starting with
   the quiet before the caller speaks, and some continue into the caller's first seconds of
   speech.
 - IndicF5 and Chatterbox remain hard (21-32% EER for this adapter), and Chatterbox clones

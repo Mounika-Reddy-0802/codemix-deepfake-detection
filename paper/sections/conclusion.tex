@@ -35,11 +35,11 @@ The detector runs on a live call. It scores four-second windows of the caller's
 speech, escalates only when consecutive windows agree, and warns the callee --- never
 the caller --- about ten seconds into the speech, at an operating point calibrated on
 development calls. On a pilot of 30 real mobile calls the deployed model warns genuine and
-cloned callers alike for two speakers of three, while the final recipe spares most genuine
-callers and catches five of six clones of the seen tool, for two speakers later in the call
-than offline, but none of an unseen one;
+cloned calls alike for two speakers of three, while the final recipe spares most genuine
+calls and takes five of six clone calls of the seen tool to ``likely cloned'', for two speakers
+later in the call than offline, but none of an unseen one;
 rebuilding the call chain on direct
-recordings shows that the real mobile codec takes the deployed model below its threshold on average, so the final
+recordings shows that the real mobile codec takes the deployed model to its threshold on average, so the final
 recipe is the model the live system should run now.
 
 \subsection{What we could not do}
@@ -106,7 +106,7 @@ with the seen tool rises from 9.4\% to 23.7\%, while an adapter trained on clean
 holds better (12.6\%): channel training fitted one chain, not telephone audio in
 general. Training on G.711 and AMR-NB together closes most of that loss (new-speaker
 XTTS 7.59\% on AMR-NB against 22.37\%, three seeds). Real mobile calls point the same way:
-the deployed model warns every replayed call and most genuine live callers, and the final
+the deployed model warns every replayed call and most genuine live calls, and the final
 recipe holds up on the seen tool (Sec.~\ref{sec:real-calls}). Those calls were recorded on a handset and scored offline;
 the live system is implemented against a real telephony carrier, but the carrier leg has
 not been exercised on live numbers, and that is the one leg not yet demonstrated end to
@@ -149,7 +149,7 @@ the one used for testing.
 Beyond that: running the final recipe in the live system, which the real calls support;
 exercising the telephony carrier on live numbers; real development calls, to set a stricter
 speech gate for the first seconds of a call and the operating point together, since the false
-alarms on genuine real calls start with the quiet before the first word but do not end there;
+alarms on genuine live calls start with the quiet before the first word but do not end there;
 extending the
 corpus beyond one code-mixed pair and one recording domain, since the present gap
 measures \emph{English studio to Hindi--English lecture} and not code-mixing in

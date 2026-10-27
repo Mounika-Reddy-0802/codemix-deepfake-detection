@@ -232,7 +232,7 @@ genuine or cloned, to ``likely cloned'', and every live call of two speakers (me
 scores 0.02--0.22 and below 0.001), but none of the third speaker's four live calls, which it
 scores at 0.96--1.00 (Table~\ref{tab:realcalls}). Whether that speaker's voice or that speaker's
 handset and network is the difference, three speakers cannot say. \textbf{The final recipe holds up on
-the seen tool}: it warns three of twelve genuine live callers, one of them to ``likely cloned'',
+the seen tool}: it warns three of twelve genuine live calls, one of them to ``likely cloned'',
 all three the same speaker's calls; catches (takes to ``likely cloned'') five of six XTTS-v2
 clone calls; and catches none of the six Chatterbox calls, of which it cautions one, matching
 Chatterbox being the adapter's hardest unseen tool offline (Sec.~\ref{sec:res-chatterbox}).
@@ -240,7 +240,7 @@ Against the fair control, the genuine replays that share the clones' loudspeaker
 six reaches ``likely cloned''; the window-level EER of the final recipe against them is 19.0\%
 on XTTS-v2 and 50.0\% on Chatterbox. It is slower on real calls than offline for two speakers:
 their three caught XTTS-v2 calls reach a caution 18--32\,s in and ``likely cloned'' 30--46\,s
-in, where the five-window ladder could warn after 12\,s; the third speaker's two are caught at
+in, where the five-window ladder could reach ``likely cloned'' after 12\,s; the third speaker's two are caught at
 12 and 14\,s.
 
 \textbf{The final recipe's false alarms come early in a call.} Over the first 10\,s its mean
@@ -249,8 +249,9 @@ which spans the quiet before the first word (median $-30$\,dBFS, against $-21$ t
 speech that follows): in eleven of the twelve calls it passes the $-50$\,dBFS gate, is normalised
 and is scored as speech (mean 0.60), and the run of fake-leaning windows behind each warned genuine live call starts there.
 Only part, though: replaying the calls with that window treated as silence, a diagnostic that
-chooses nothing, clears two of the three warned genuine live calls over G.711 but none of the
-four as recorded, and one call still reaches ``likely cloned'' from speech windows 8--14\,s in.
+chooses nothing, clears two of the three warned genuine live calls over G.711, while as recorded
+it clears one of four and cautions another; and one call over G.711 (two as recorded) still
+reaches ``likely cloned'', its run including two speech windows 8--14\,s in.
 A stricter speech gate at the start of a call would help but not suffice, and both it and the
 operating point need real development calls, not these. The counts are small, and the intervals
 say so: five of six clone calls caught is a 95\% Wilson interval of 44--97\%, none of six is

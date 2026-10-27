@@ -168,7 +168,7 @@ at home in three places, so the setup changed, and these changes are part of the
   then deleted from the chat) or by USB cable (P3).
 - **P1 was unwell**, so her references, her live calls (C01-C04) and her replay calls (C13,
   C14, C19, C20, C25, C26) were made the next day, with her clones from a second Kaggle run.
-  That session's replays are about 9 dB louder than the other twelve (integrated loudness
+  That session's replays are about 9-10 dB louder than the other twelve (integrated loudness
   -29 to -33 LUFS against -33 to -47), so speaker and replay level are confounded within the
   replay calls.
 - **Clones.** XTTS-v2 passed 45 of 48 sentences and Chatterbox 47 of 48 for P2 and P3, and 24

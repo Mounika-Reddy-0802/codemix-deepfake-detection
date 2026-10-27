@@ -88,7 +88,7 @@ network: genuine live calls, our own readings replayed from a laptop speaker, an
 voices replayed the same way, recorded on the receiving handset and scored through the live path
 (`docs/results/real_calls_v1.md`). All 30 calls are in, from the three of us. The deployed
 model takes every replayed call and every live call of two of us to "likely cloned", but none of
-the third speaker's live calls. The final recipe warns three of twelve genuine live callers and
+the third speaker's live calls. The final recipe warns three of twelve genuine live calls and
 takes five of six XTTS-v2 clone calls to "likely cloned", but no Chatterbox call (it cautions
 one).
 
@@ -108,8 +108,9 @@ silence gate and is scored as speech. I first put the early false alarms down to
 noise suppression settling; the window levels said otherwise. I then said they came mostly from
 that first window, which was also too strong. Replaying the calls with the first window treated
 as silence (`without_first_window`, a diagnostic that chooses nothing) clears two of the three
-warned genuine calls over G.711, none as recorded, and one call still reaches "likely cloned"
-from speech 8-14 s in. So the quiet start is where every warned call's run begins, but not the
+warned genuine live calls over G.711; as recorded it clears one and cautions another, and one
+call still reaches "likely cloned" with two speech windows 8-14 s in. So the quiet start is where
+every warned live call's run begins, but not the
 whole cause, and the record now says exactly that.
 
 The chain is also a figure in both papers (`python -m src.reporting.real_call_figure`, copied to
@@ -196,7 +197,8 @@ The counts are small (6 to 41 calls per cell). The final recipe's live threshold
 seed. The real-call test is a pilot of 30 calls in our own voices; the live system's own
 telephone carrier is still unexercised, and spontaneous callers would be warned by either model.
 The real calls support running the final recipe as the live default, which is not yet done.
-On real calls the final recipe warns late (the XTTS-v2 calls it catches reach a caution 18-32 s
-in), its false alarms start with the quiet before the first word but do not end there, and the
-warned genuine live calls are one speaker's from one handset. A stricter speech gate and the
+On real calls the final recipe warns late for two speakers (their XTTS-v2 calls it catches reach
+a caution 18-32 s in), its false alarms on live calls start with the quiet before the first word
+but do not end there, and the warned genuine live calls over G.711 are one speaker's from one
+handset. A stricter speech gate and the
 operating point both need a separate set of real development calls.

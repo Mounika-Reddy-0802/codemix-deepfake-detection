@@ -34,7 +34,8 @@ another unseen generator. The main results are tested against a shortcut floor o
 signal statistics by a paired speaker bootstrap. Spontaneous speech, IndicF5 and, for the adapters, Chatterbox
 remain unsolved. The detector runs on live calls, warning only the callee. On 30 real mobile
 calls scored offline, the deployed model, failing mostly at the mobile codec, warns most
-genuine live callers, the final recipe one in four, catching five of six seen-tool clones.
+genuine live calls, the final recipe one in four, and flags five of six seen-tool clone calls as
+likely cloned.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -465,7 +466,7 @@ clones' loudspeaker path, one of six reaches ``likely cloned''. Rebuilding the c
 our direct recordings (Fig.~\ref{fig:realchain}) shows the real AMR-NB codec is the largest
 step in the deployed model's failure: averaged over six readings its mean P(genuine) is 0.75
 through the simulated line and 0.50 through AMR-NB (two readings cross the threshold there;
-one was below it before any codec; the third speaker's two never fall below 0.87), and 0.38
+one was below it before any codec; the third speaker's two stay at 0.87--1.00), and 0.38
 on the live calls. The final recipe stays above 0.8 at every stage; it adds more voices as
 well as AMR-NB, which these calls cannot separate.
 

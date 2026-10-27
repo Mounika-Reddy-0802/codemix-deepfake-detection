@@ -58,9 +58,10 @@ cloned"); no Chatterbox call caught (one cautioned), which matches Chatterbox be
 adapter's hardest unseen tool offline (32.0% EER for this adapter). Against the genuine replays,
 the fair control, one of six (a replay of P3's reading) reaches "likely cloned".
 
-**The warnings on genuine live calls are one speaker's.** Per speaker (`by_speaker` in the
-report), the three warned genuine live calls are all P2's (3 of 4; one reaches "likely
-cloned"), and none of P1's or P3's eight is warned. The XTTS-v2 call that was not caught and
+**Over G.711, the warnings on genuine live calls are one speaker's.** Per speaker (`by_speaker`
+in the report), the three warned genuine live calls are all P2's (3 of 4; one reaches "likely
+cloned"), and none of P1's or P3's eight is warned; as recorded, one of P3's is also
+cautioned. The XTTS-v2 call that was not caught and
 the one cautioned Chatterbox call are also P2's. With three speakers this says the rates above
 depend on who is calling, not what they are for a population.
 
@@ -80,22 +81,23 @@ together here and this pilot cannot separate them.
 | Chatterbox clones | 0.897 | 0.967 | 0.954 |
 
 Genuine live calls look least genuine in their first ten seconds. The first window spans the
-quiet before the first word: its level is a median -30 dBFS (-34 to -23) against -21 to -26
+quiet before the first word: its level is a median -30 dBFS (-34 to -23 where it is scored) against -21 to -26
 dBFS for the speech that follows; in eleven of the twelve calls it passes the -50 dBFS silence
 gate, is normalised and is scored as if it were speech, at a mean of 0.60 against 0.96 for the
 later windows. Loudness itself does not predict the score over the whole call (rank correlation
 0.00 over 352 windows). P1's XTTS-v2 clones are caught early (caution at 8 s, "likely cloned" at
 12 and 14 s), but the three caught calls of P2 and P3 reach a caution 18-32 s into the call and
 "likely cloned" 30-46 s in (`calls_final_g711.csv`), where the final recipe's five-window ladder
-could warn after 12 s. For two speakers of three the warning is late on real calls, and a scam
+could reach "likely cloned" after 12 s. For two speakers of three the warning is late on real calls, and a scam
 call could be well under way by then.
 
 The quiet start is part of the story, not all of it. In every warned genuine live call, in both
 conditions, the run of fake-leaning windows that raised the warning starts at the first window.
 But replaying the calls with that window treated as silence (`first_window_skipped`, a
 diagnostic in `summary.json` that chooses nothing) clears two of the three warned genuine live
-calls over G.711 and none of the four as recorded, and one call still reaches "likely cloned"
-from speech windows 8-14 s into the call (two windows at -22 dBFS scoring 0.01). A stricter
+calls over G.711; as recorded it clears one of the four (C10) but cautions another (C07), so
+the count stays at four. One call over G.711 (C05; two as recorded) still reaches "likely
+cloned", its run including two speech windows 8-14 s into the call (-22 dBFS, scoring 0.01). A stricter
 speech gate for the first seconds of a call would help but not suffice; it and the operating
 point should be set together on a separate set of real development calls, not on these.
 
@@ -136,7 +138,7 @@ figure is `experiments/figures/real_call_chain.pdf` (also `paper/figures/`).
   live calls "likely cloned" is [1.5, 35]% (Wilson intervals, in the report). Only the deployed
   model's failure on every replayed call and on two speakers' live calls is firm at this size.
 - Speaker, session and handset are confounded. P1's calls were made a day later, P1's replays
-  are about 9 dB louder than the other twelve, and two phones recorded the calls (P3's phone for
+  are about 9-10 dB louder than the other twelve, and two phones recorded the calls (P3's phone for
   C05-C08, P2's for C09-C12 and C15-C30; see the protocol).
 - The speakers are the authors, not the corpus speakers, and read prepared scripts in half the
   live calls.
