@@ -145,6 +145,21 @@ def test_limits_cite_their_numbers_and_say_what_landed():
             assert cited["source"].startswith(("experiments/", "configs/"))
 
 
+def test_the_spontaneous_tradeoff_is_read_from_its_sweep():
+    t = rv.tradeoff_curve()
+    if t is None:
+        pytest.skip("the spontaneous-speech trade-off is not committed on this branch")
+    assert t["source"].endswith("spontaneous_tradeoff_v1/tradeoff.csv") and not t.get("error")
+    rows = pd.read_csv(ROOT / t["source"])
+    live = t["live_threshold"]["value"]
+    at_live = rows[(rows["threshold"] - live).abs() < 1e-9].iloc[0]
+    point = next(p for p in t["points"] if abs(p["threshold"] - live) < 1e-9)
+    assert point["genuine_warned"] == at_live["hiacc_genuine_warned_pct"]
+    assert point["clones_caught"] == at_live["clones_caught_pct"]
+    assert point["unseen_caught"] == at_live["unseen_clones_caught_pct"]
+    assert len(t["points"]) == len(rows)
+
+
 SCENE_PAGES = [
     "demo.html",
     "threat.html",

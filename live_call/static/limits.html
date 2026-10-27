@@ -135,24 +135,38 @@
       $("tradeoffCard").hidden = false;
       const NS = "http://www.w3.org/2000/svg";
       const s = (tag, a = {}, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(a)) n.setAttribute(k, v); if (text !== undefined) n.textContent = text; return n; };
-      const W = 760, H = 260, L = 50, R = 14, T = 14, B = 40;
+      const W = 760, H = 270, L = 50, R = 14, T = 14, B = 42;
       const pts = [...t.points].sort((a, b) => a.threshold - b.threshold);
-      const xs = pts.map((p) => p.threshold), lo = Math.min(...xs), hi = Math.max(...xs);
       const scale = Math.max(...pts.flatMap((p) => [p.genuine_warned, p.clones_caught])) > 1.5 ? 100 : 1;
-      const x = (v) => L + (W - L - R) * ((v - lo) / (hi - lo || 1)), y = (v) => T + (H - T - B) * (1 - v / scale);
+      const x = (v) => L + (W - L - R) * v, y = (v) => T + (H - T - B) * (1 - v / scale);
       const root = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Share of genuine spontaneous calls warned and of clone calls caught, by threshold" });
-      for (const v of [0, 0.5, 1]) {
-        root.append(s("line", { x1: L, x2: W - R, y1: y(v * scale), y2: y(v * scale), stroke: "rgba(255,255,255,0.08)" }));
+      for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+        root.append(s("line", { x1: L, x2: W - R, y1: y(v * scale), y2: y(v * scale), stroke: "rgba(255,255,255,0.07)" }));
         root.append(s("text", { x: L - 8, y: y(v * scale) + 4, "text-anchor": "end", "font-size": 12, fill: "#8fa3c2" }, Math.round(v * 100) + "%"));
+        root.append(s("text", { x: x(v), y: H - 22, "text-anchor": "middle", "font-size": 12, fill: "#8fa3c2" }, v.toFixed(2)));
       }
-      root.append(s("text", { x: (W + L) / 2, y: H - 8, "text-anchor": "middle", "font-size": 12, fill: "#8fa3c2" }, "threshold"));
-      for (const [key, colour, label] of [["genuine_warned", "#ffb02e", "genuine spontaneous calls warned"], ["clones_caught", "#1baf7a", "clone calls caught"]]) {
-        root.append(s("polyline", { points: pts.map((p) => `${x(p.threshold)},${y(p[key])}`).join(" "), fill: "none", stroke: colour, "stroke-width": 3 }));
-        const last = pts.at(-1);
-        root.append(s("text", { x: x(last.threshold) - 4, y: y(last[key]) - 8, "text-anchor": "end", "font-size": 13, "font-weight": 600, fill: colour }, label));
+      root.append(s("text", { x: (W + L) / 2, y: H - 4, "text-anchor": "middle", "font-size": 12, fill: "#8fa3c2" }, "threshold on P(genuine): a call is warned when its windows fall below it"));
+      if (t.live_threshold) {
+        const lx = x(t.live_threshold.value);
+        root.append(s("line", { x1: lx, x2: lx, y1: T, y2: H - B, stroke: "rgba(230,238,250,0.7)", "stroke-dasharray": "5 4" }));
+        // labelled in the empty band between the lines, left of the marker
+        const lab = s("text", { x: lx - 6, y: y(0.36 * scale), "text-anchor": "end", "font-size": 12.5, "font-weight": 600, fill: "#e6eefa" }, "live threshold " + t.live_threshold.value.toFixed(3));
+        lab.append(s("title", {}, "read from " + t.live_threshold.source));
+        root.append(lab);
       }
-      $("tradeoff").replaceChildren(root);
-      $("tradeoffSrc").textContent = "read from " + t.source + " · it chooses nothing: no threshold removes the spontaneous false alarms without giving up the clones";
+      const SERIES = [
+        ["genuine_warned", "#ffb02e", "", "genuine spontaneous calls warned"],
+        ["read_genuine_warned", "#8a94a6", "2 5", "genuine read-speech calls warned (worst set)"],
+        ["clones_caught", "#1baf7a", "", "all clone calls caught"],
+        ["unseen_caught", "#1baf7a", "7 5", "unseen-tool clone calls caught"],
+      ].filter(([key]) => pts.every((p) => p[key] !== undefined));
+      for (const [key, colour, dash] of SERIES) {
+        root.append(s("polyline", { points: pts.map((p) => `${x(p.threshold)},${y(p[key])}`).join(" "), fill: "none", stroke: colour, "stroke-width": 3, "stroke-dasharray": dash, "stroke-linejoin": "round" }));
+      }
+      $("tradeoff").replaceChildren(root, make("div", { class: "row tiny", style: "gap:1rem;margin-top:0.4rem;color:var(--dim)" },
+        SERIES.map(([, colour, dash, label]) => make("span", {}, [
+          make("i", { style: `display:inline-block;width:22px;height:3px;vertical-align:middle;margin-right:0.35rem;background:${dash ? `repeating-linear-gradient(90deg,${colour} 0 6px,transparent 6px 10px)` : colour}` }), label]))));
+      $("tradeoffSrc").textContent = "read from " + t.source + " · it chooses nothing (HiACC is evaluation-only): lowering the bar until spontaneous speech passes gives up most of the unseen-tool clones";
     }
 
     // ------------------------------------------------------------------ try it

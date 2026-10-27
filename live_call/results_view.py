@@ -389,16 +389,34 @@ TONIGHT = {
 def _landed(key: str) -> dict:
     doc, stem = TONIGHT[key]
     path = ROOT / doc
+    results = ROOT / "experiments" / "results"
     data = sorted(
-        {p for p in (ROOT / "experiments" / "results").rglob(f"{stem}*") if p.is_file()}
+        {p for p in results.rglob(f"{stem}*") if p.is_file()}
+        | {p for p in (results / stem).glob("*") if p.is_file()}  # a results folder of its own
         | {p for p in (ROOT / "docs" / "results").glob(f"{stem}*.csv")}
     )
     out = {"doc": doc, "landed": path.is_file(), "data": [_rel(p) for p in data]}
     if path.is_file():
         lines = [ln.strip() for ln in path.read_text(encoding="utf-8").splitlines()]
         title = next((ln.lstrip("# ") for ln in lines if ln.startswith("#")), doc)
-        body = next((ln for ln in lines if ln and not ln.startswith(("#", "|", "-", "*", ">"))), "")
-        out.update({"title": title, "first_paragraph": body[:600]})
+        # the first prose paragraph, joined across its wrapped lines
+        start = next(
+            (
+                i
+                for i, ln in enumerate(lines)
+                if ln and not ln.startswith(("#", "|", "-", "*", ">"))
+            ),
+            None,
+        )
+        body = []
+        for ln in lines[start:] if start is not None else []:
+            if not ln:
+                break
+            body.append(ln)
+        paragraph = " ".join(body)
+        if len(paragraph) > 600:
+            paragraph = paragraph[:600].rsplit(" ", 1)[0] + " …"
+        out.update({"title": title, "first_paragraph": paragraph})
     return out
 
 
@@ -412,7 +430,8 @@ def tradeoff_curve() -> dict | None:
     files = [p for p in _landed("spontaneous")["data"] if p.endswith(".csv")]
     if not files:
         return None
-    path = ROOT / files[0]
+    # the sweep itself, not the per-call table it was counted from
+    path = ROOT / next((f for f in files if f.endswith("/tradeoff.csv")), files[0])
     rows = _csv(path)
     if not rows:
         return None
@@ -427,7 +446,9 @@ def tradeoff_curve() -> dict | None:
 
     threshold = pick("threshold")
     genuine = pick("hiacc") or pick("spontaneous") or pick("genuine", avoid=("clone",))
-    clones = pick("clone") or pick("caught") or pick("spoof")
+    clones = pick("clone", avoid=("unseen",)) or pick("caught") or pick("spoof")
+    unseen = pick("unseen")  # the tools no model trained on: the honest cost of a lower bar
+    read = pick("read_genuine")
     if not (threshold and genuine and clones):
         return {
             "source": _rel(path),
@@ -438,16 +459,21 @@ def tradeoff_curve() -> dict | None:
     points = []
     for r in rows:
         try:
-            points.append(
-                {
-                    "threshold": float(r[threshold]),
-                    "genuine_warned": float(r[genuine]),
-                    "clones_caught": float(r[clones]),
-                }
-            )
+            point = {
+                "threshold": float(r[threshold]),
+                "genuine_warned": float(r[genuine]),
+                "clones_caught": float(r[clones]),
+            }
+            if unseen:
+                point["unseen_caught"] = float(r[unseen])
+            if read:
+                point["read_genuine_warned"] = float(r[read])
+            points.append(point)
         except (TypeError, ValueError):
             continue
-    return {"source": _rel(path), "columns": [threshold, genuine, clones], "points": points}
+    live = _threshold("configs/threshold_final.yaml")["threshold"]
+    used = [c for c in (threshold, genuine, clones, unseen, read) if c]
+    return {"source": _rel(path), "columns": used, "points": points, "live_threshold": live}
 
 
 def limits() -> dict:
