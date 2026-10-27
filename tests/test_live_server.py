@@ -265,6 +265,37 @@ def test_declining_throws_away_the_held_audio(client):
             assert "t7" not in shared.pending
 
 
+def test_health_names_the_threshold_file_and_ladder(monkeypatch):
+    # the rehearsal refuses to run unless the server is on the final recipe's own file
+    monkeypatch.setenv("DFD_NO_APP", "1")
+    from live_call import server
+
+    detector = DetectorService(
+        DetectorSettings("", r"configs\threshold_final.yaml", "cpu"), score_fn=lambda w: 0.9
+    )
+    dispatcher = AlertDispatcher(settings=TwilioSettings("", "", "", "", ""))
+    with TestClient(server.create_app(server.App(detector=detector, dispatcher=dispatcher))) as c:
+        d = c.get("/api/health").json()["detector"]
+    assert d["threshold_source"] == "configs/threshold_final.yaml"  # forward slashes everywhere
+    assert d["threshold"] == pytest.approx(0.6868554928153753)
+    assert d["ladder"]["caution_after"] == 3 and d["ladder"]["likely_after"] == 5
+
+
+def test_replay_can_wait_for_the_verdict(client, tmp_path, monkeypatch):
+    """The rehearsal path: a prepared call played as fast as it scores, verdict returned."""
+    import json
+
+    (tmp_path / "call.wav").write_bytes(_wav_bytes(12.0))
+    index = [{"id": "call", "file": "call.wav", "title": "A call", "label": "spoof"}]
+    (tmp_path / "demo_clips.json").write_text(json.dumps(index), encoding="utf-8")
+    monkeypatch.setenv("DEMO_CLIPS_DIR", str(tmp_path))
+    body = client.post("/api/replay/call", params={"realtime": "false", "wait": "true"}).json()
+    # the stand-in detector scores every window 0.05 against a 0.5 threshold
+    assert body["peak_state"] == "likely_fake" and body["scored_windows"] == 5
+    assert body["first_caution_s"] == 6.0 and body["first_likely_s"] == 10.0
+    assert client.post("/api/replay/nope", params={"wait": "true"}).status_code == 404
+
+
 def _silent_source():
     """A PcmFrameSource that ends immediately, for tests that only need an object."""
 

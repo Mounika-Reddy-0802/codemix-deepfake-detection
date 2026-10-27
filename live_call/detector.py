@@ -77,10 +77,17 @@ class DetectorService:
         return self._score_fn
 
     def status(self) -> dict:
+        ladder = None
         try:
-            threshold = self.config().threshold
-            threshold_error = None
-        except FileNotFoundError as exc:
+            config = self.config()
+            threshold, threshold_error = config.threshold, None
+            ladder = {
+                "caution_after": config.suspicious_after,
+                "likely_after": config.fake_after,
+                "recover_after": config.recover_after,
+                "min_windows": config.min_windows,
+            }
+        except (FileNotFoundError, ValueError) as exc:
             threshold, threshold_error = None, str(exc)
         return {
             "checkpoint": Path(self.settings.checkpoint).name if self.settings.checkpoint else None,
@@ -89,5 +96,10 @@ class DetectorService:
             "model_loaded": self.loaded,
             "device": self.settings.device,
             "threshold": threshold,
+            # forward slashes, so the same file reads the same on every machine
+            "threshold_source": Path(self.settings.threshold_file).as_posix()
+            if self.settings.threshold_file
+            else None,
             "threshold_error": threshold_error,
+            "ladder": ladder,
         }

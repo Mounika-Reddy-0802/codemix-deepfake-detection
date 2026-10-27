@@ -60,6 +60,7 @@ from live_call.media_handler import TwilioStreamSource
 from live_call.phone import CALLER, RECEIVER, CallState, Exchange
 from live_call.replay import FileSource
 from live_call.session import CallSession, Hub, SessionInfo, SessionRegistry, new_session_id
+from live_call.verdict_engine import State
 
 log = logging.getLogger("live_call")
 
@@ -119,6 +120,7 @@ class App:
         )
         self.sessions.add(session)
         task = asyncio.create_task(session.run(source))
+        session.task = task  # so a caller that needs the verdict can wait for the call to end
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
         return session
@@ -229,6 +231,19 @@ def list_demo_clips(directory: Path | None = None) -> list[dict]:
     return [c for c in clips if (directory / c["file"]).is_file()]
 
 
+def find_clip(clip_id: str) -> dict:
+    """The prepared demo call with this id, or a 404."""
+    clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
+    if clip is None:
+        raise HTTPException(404, "unknown clip")
+    return clip
+
+
+def clip_audio(clip: dict) -> np.ndarray:
+    """A prepared call's audio at 16 kHz mono."""
+    return decode_audio((demo_clips_dir() / clip["file"]).read_bytes(), clip["file"])
+
+
 def create_app(state: App | None = None) -> FastAPI:
     shared: App = state or App()
 
@@ -243,8 +258,8 @@ def create_app(state: App | None = None) -> FastAPI:
             ``/offer``, which blocked the event loop and timed the caller out. It
             runs on the detector's own thread, so the server serves pages meanwhile.
             """
+            loop = asyncio.get_running_loop()
             try:
-                loop = asyncio.get_running_loop()
                 await loop.run_in_executor(shared.detector.executor, shared.detector.score_fn)
                 log.info("detector ready")
             except Exception as exc:  # no checkpoint on this machine: pages still work
@@ -331,6 +346,7 @@ def create_app(state: App | None = None) -> FastAPI:
                 "live_sessions": sum(not s.ended for s in shared.sessions.all()),
                 "dashboards": shared.hub.subscribers,
                 "demo_clips": len(list_demo_clips()),
+                "demo_clips_dir": demo_clips_dir().name,
             }
         )
 
@@ -401,25 +417,47 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/api/demo-clips/{clip_id}/audio")
     async def demo_clip_audio(clip_id: str) -> FileResponse:
-        clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
-        if clip is None:
-            raise HTTPException(404, "unknown clip")
-        return FileResponse(demo_clips_dir() / clip["file"])
+        return FileResponse(demo_clips_dir() / find_clip(clip_id)["file"])
 
     @api.post("/api/replay/{clip_id}")
-    async def replay_clip(clip_id: str) -> JSONResponse:
-        clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
-        if clip is None:
-            raise HTTPException(404, "unknown clip")
-        audio = decode_audio((demo_clips_dir() / clip["file"]).read_bytes(), clip["file"])
+    async def replay_clip(clip_id: str, realtime: bool = True, wait: bool = False) -> JSONResponse:
+        """Play a prepared clip as a live call through the live path.
+
+        ``wait=true`` returns the verdict once the call ends; with ``realtime=false`` the
+        clip is played as fast as it can be scored. That is how the rehearsal check runs
+        every demo call through the exact live path in seconds, not minutes.
+        """
+        clip = find_clip(clip_id)
+        audio = clip_audio(clip)
         info = SessionInfo(
             new_session_id("replay"),
             "replay",
             clip["title"],
             meta={"clip": clip_id, "truth": clip["label"], "tool": clip.get("tool")},
         )
-        session = shared.start_session(info, FileSource(audio, realtime=True))
-        return JSONResponse({"session": session.info.session_id})
+        session = shared.start_session(info, FileSource(audio, realtime=realtime))
+        if not wait:
+            return JSONResponse({"session": session.info.session_id})
+        await session.task
+        summary = session.engine.summary
+        caution = next(
+            (at for at, s in summary.timeline if s in (State.SUSPICIOUS, State.LIKELY_FAKE)), None
+        )
+        likely = next((at for at, s in summary.timeline if s is State.LIKELY_FAKE), None)
+        return JSONResponse(
+            {
+                "session": session.info.session_id,
+                "clip": clip_id,
+                "peak_state": summary.peak_state.value,
+                "first_caution_s": caution,
+                "first_likely_s": likely,
+                "scored_windows": summary.scored_windows,
+                "fake_leaning_windows": summary.fake_leaning_windows,
+                "duration": summary.duration_seconds,
+                "threshold": session.engine.config.threshold,
+                "checkpoint": shared.detector.status()["checkpoint"],
+            }
+        )
 
     # ----------------------------------------------------------------- dashboard push
     @api.websocket("/ws/dashboard")

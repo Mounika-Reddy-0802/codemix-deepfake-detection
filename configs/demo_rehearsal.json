@@ -1,0 +1,87 @@
+{
+  "about": "Expected verdict of every call the final-review demo plays, under the final recipe (primary) and in each lane of the three-detector view. Checked by tests/test_demo_rehearsal.py and scripts/rehearse_demo.py through the exact live path. Every call is a held-out corpus speaker; no team audio. Peak states: genuine, suspicious (caution), likely_fake (likely cloned).",
+  "demo_clips_dir": "demo_calls_v2",
+  "primary": {
+    "checkpoint": "final_s1234_best.pt",
+    "threshold_file": "configs/threshold_final.yaml"
+  },
+  "lanes": {
+    "s1": {"checkpoint": "best.pt", "threshold_file": "configs/threshold.yaml"},
+    "deployed": {"checkpoint": "lora_norm_rvc_channel_best.pt", "threshold_file": "configs/threshold.yaml"},
+    "final": {"checkpoint": "final_s1234_best.pt", "threshold_file": "configs/threshold_final.yaml"}
+  },
+  "calls": [
+    {
+      "id": "genuine",
+      "truth": "bonafide",
+      "scenes": [3],
+      "use": "the genuine call on the receiver's phone: no banner for the whole call",
+      "primary": {"peak": "genuine"},
+      "lanes": {"s1": {"peak": "likely_fake"}, "deployed": {"peak": "genuine"}, "final": {"peak": "genuine"}}
+    },
+    {
+      "id": "genuine_new_speaker",
+      "truth": "bonafide",
+      "scenes": [2, 5],
+      "use": "scene 2's genuine call: the English-only lane goes red within 10 s, the final recipe stays green",
+      "primary": {"peak": "genuine"},
+      "lanes": {
+        "s1": {"peak": "likely_fake", "max_first_likely_s": 10},
+        "deployed": {"peak": "genuine"},
+        "final": {"peak": "genuine"}
+      }
+    },
+    {
+      "id": "xtts_clone",
+      "truth": "spoof",
+      "scenes": [3, 5],
+      "use": "the clone on the receiver's phone: caution, then the likely-cloned banner by 12 s",
+      "primary": {"peak": "likely_fake", "max_first_likely_s": 12},
+      "lanes": {"s1": {"peak": "suspicious"}, "deployed": {"peak": "likely_fake"}, "final": {"peak": "likely_fake"}}
+    },
+    {
+      "id": "rvc_genuine",
+      "truth": "bonafide",
+      "scenes": [],
+      "use": "spare genuine call (the source speaker of the RVC conversions)",
+      "primary": {"peak": "genuine"},
+      "lanes": {"s1": {"peak": "likely_fake"}, "deployed": {"peak": "genuine"}, "final": {"peak": "genuine"}}
+    },
+    {
+      "id": "rvc_conversion",
+      "truth": "spoof",
+      "scenes": [],
+      "use": "spare cloned call (RVC voice conversion, unseen speakers)",
+      "primary": {"peak": "likely_fake"},
+      "lanes": {"s1": {"peak": "likely_fake"}, "deployed": {"peak": "likely_fake"}, "final": {"peak": "likely_fake"}}
+    },
+    {
+      "id": "tortoise_caught",
+      "truth": "spoof",
+      "scenes": [2],
+      "use": "scene 2's unseen-tool call: only the final recipe reaches likely cloned (caution 8 s in); the deployed adapter stops at a caution",
+      "primary": {"peak": "likely_fake", "max_first_caution_s": 8},
+      "lanes": {
+        "s1": {"peak": "likely_fake"},
+        "deployed": {"peak": "suspicious"},
+        "final": {"peak": "likely_fake", "max_first_caution_s": 8}
+      }
+    },
+    {
+      "id": "tortoise_clone",
+      "truth": "spoof",
+      "scenes": [6],
+      "use": "a known limit: a Tortoise call the final recipe lets through (kept, not swapped for one it catches)",
+      "primary": {"peak": "genuine"},
+      "lanes": {"s1": {"peak": "likely_fake"}, "deployed": {"peak": "genuine"}, "final": {"peak": "genuine"}}
+    },
+    {
+      "id": "hiacc_spontaneous",
+      "truth": "bonafide",
+      "scenes": [6],
+      "use": "a known limit: a genuine caller speaking freely, wrongly warned by both models",
+      "primary": {"peak": "likely_fake"},
+      "lanes": {"s1": {"peak": "likely_fake"}, "deployed": {"peak": "likely_fake"}, "final": {"peak": "likely_fake"}}
+    }
+  ]
+}
