@@ -189,7 +189,8 @@ A caller who learns they have been detected learns how to evade the detector.
 **Q30. How fast is it?**
 With the deployed model the first caution comes near 6 seconds of speech and the warning near
 10 seconds; the final recipe's ladder (3 and 5 windows) puts them near 8 and 12 seconds. On the
-real calls the final recipe took the XTTS-v2 clones to "likely cloned" only 30-46 s in.
+real calls the final recipe took one speaker's XTTS-v2 clones to "likely cloned" 12-14 s in,
+and the other two speakers' only 30-46 s in.
 wav2vec2-base scores a window in 25 ms on a T4 GPU and 0.40 s on two CPU threads.
 
 **Q31. Is the system the same as the evaluation?**
@@ -197,17 +198,18 @@ The same encoder, windows, silence gate and normalisation, at an operating point
 development calls through the live path, which is why a demonstration
 counts as evidence and not just an illustration.
 
-**Q31a. In the demo, why does the Tortoise call stay green even with the final recipe?**
-Because one call is not the rate. Over all the Tortoise test calls the final recipe catches
-every one (on CM04 the deployed model catches one in three), but on this speaker's demo
-call only 2 of 22 windows lean fake, too few for a warning. We kept the call that fails
-rather than pick one that works. The upload box can still call the same file "spoof", because it judges a clip by
+**Q31a. In the demo, why does one Tortoise call stay green even with the final recipe?**
+Because one call is not the rate. Over the mixed 60 s Tortoise test calls the final recipe
+catches every one (on CM04 the deployed model catches one in three); built per speaker, 45 s
+calls from 12 of the 15 CM04 Tortoise speakers are caught. The demo has one of each: a caught
+call (the caught speaker with the most clips, warned 8 s in) and a missed one, where only 2 of
+22 windows lean fake, too few for a warning. We kept the call that fails rather than show only
+one that works. The upload box can still call the same file "spoof", because it judges a clip by
 its single lowest window, while a call needs several fake-leaning windows in a row.
 
 ## 7. The real phone-call test
 
-These are the first 20 of the 30 planned calls (two of the three speakers); the numbers are
-updated when the last speaker's calls are in (`docs/results/real_calls_v1.md`).
+All 30 planned calls, from the three of us (`docs/results/real_calls_v1.md`).
 
 **Q32. Did you test on real phone calls?**
 Yes, as a pilot. With written consent from all three of us and the mentor's approval, we made
@@ -218,21 +220,25 @@ Every call was scored through the live path at each model's frozen operating poi
 threshold was chosen on these calls.
 
 **Q33. What happened?**
-The deployed model warned every call, genuine or cloned: on real calls it cannot tell them
-apart. The final recipe held up. As the live system's carrier would deliver the audio, it took
-one of eight genuine live calls to "likely cloned" and cautioned two more, took three of four
-XTTS-v2 clone calls to "likely cloned", and none of the four Chatterbox clone calls (it only
-cautioned one), which matches
-Chatterbox being the adapter's hardest unseen tool offline.
+The deployed model took every replayed call, genuine or cloned, to "likely cloned", and every
+live call of two of us; the third speaker's four live calls passed. For two speakers of three
+it cannot tell real from cloned. The final recipe held up on the seen tool. As the live
+system's carrier would deliver the audio, it warned three of twelve genuine live calls (all
+the same speaker's; one reached "likely cloned"), took five of six XTTS-v2 clone calls to
+"likely cloned", and none of the six Chatterbox clone calls (it only cautioned one), which
+matches Chatterbox being the adapter's hardest unseen tool offline. With twelve calls a
+percentage moves in steps of 8 points: one of twelve is a 95% interval of 1.5-35%.
 
 **Q34. Why does the deployed model fail on real calls?**
-We rebuilt the call chain on each speaker's direct recordings, one stage at a time. The deployed
-model's mean P(genuine) goes from 0.77 (direct) and 0.63 (simulated G.711 line) to 0.29 through
-the real AMR-NB mobile codec; the call recorder adds little. The final recipe, which trained on
-AMR-NB, stays at 0.91-0.98 through every stage. So on average the real mobile codec takes
-the deployed model below its threshold (per reading: two of four cross it at AMR-NB, one
-stays above, one was below it before any codec) (the live calls cost it more still, so the network and handset add
-damage too), as the paper's offline AMR-NB result predicted. If asked whether the real codec
+We rebuilt the call chain on each speaker's direct recordings, one stage at a time. Over the six
+readings, the deployed model's mean P(genuine) goes from 0.83 (direct) and 0.75 (simulated G.711
+line) to 0.50 through the real AMR-NB mobile codec, its threshold; the call recorder adds
+little. The final recipe, which trained on AMR-NB, stays at 0.82-1.00 for every reading at
+every stage. Per reading: two of six cross the deployed threshold at AMR-NB, one stays above,
+one was below it before any codec, and the third speaker's two stay at 0.87-1.00 throughout.
+So the codec is the largest step for the speakers the model fails on, not a failure of every
+voice; the live calls cost it more still (0.38 on the genuine live calls), so the network and
+handset add damage too, as the paper's offline AMR-NB result predicted. If asked whether the real codec
 in training is what fixes it: the final recipe also has more voices, so the calls cannot
 separate the two; offline, adding AMR-NB alone to the deployed recipe's training recovers
 most of the loss (new-speaker XTTS over AMR-NB 7.59% against 22.37%, three seeds).
@@ -241,7 +247,7 @@ most of the loss (new-speaker XTTS over AMR-NB 7.59% against 22.37%, three seeds
 It is the strongest evidence for the final recipe: with real codec audio and more voices in
 training it holds up on the seen tool on real calls (not on Chatterbox), though the calls cannot
 say which change did it, so the final recipe should replace the deployed adapter in the live
-system. False alarms on genuine calls come early in a call (mean score 0.73
+system. False alarms on genuine calls come early in a call (mean score 0.79
 in the first ten seconds against 0.98 after twenty). Part of the reason is the very first
 window, which covers the quiet before the caller's first word: it is just loud enough to pass
 the -50 dBFS gate, gets normalised, and is scored as if it were speech. But it is not the whole
@@ -250,9 +256,9 @@ a stricter speech gate for the first seconds and the operating point together. C
 tools remain the open problem.
 
 **Q35a. How much of the early false alarms is the quiet start?**
-Part, not all. On the genuine live calls the first window averages about -30 dBFS, against -20
-to -26 dBFS for the rest of each call, and it is the lowest-scoring window (mean 0.48; every
-later window averages 0.69 or more). In every warned genuine call, the run of fake-leaning
+Part, not all. On the genuine live calls the first window sits at a median -30 dBFS, against
+-21 to -26 dBFS for the rest of each call; in eleven of twelve calls it passes the -50 dBFS gate
+and is scored as speech, at a mean of 0.60 against 0.96 for the later windows. In every warned genuine call, the run of fake-leaning
 windows that raised the warning starts there. But when we replay the calls with that window
 treated as silence, as a check that chooses nothing, two of the three warned calls clear over
 G.711, none clear as recorded, and one call still reaches "likely cloned" from speech windows
@@ -269,8 +275,11 @@ floors are above chance and so weak bars.
 **Q37. What about natural conversation?**
 All code-mixed training speech is read lectures. On spontaneous HiACC speech the deployed model
 calls 54.37% of genuine clips fake (0.89% for read lectures) and the final recipe 43.9%, one
-seed inside the 38.5-54.4% spread of single trainings, so not evidence of a gain. The first
-future step is spontaneous genuine speech in training.
+seed inside the 38.5-54.4% spread of single trainings, so not evidence of a gain. A different
+threshold does not fix it either: sweeping the final recipe's threshold over 60 s calls,
+choosing nothing, every threshold that catches all Tortoise calls warns at least 38 of the 41
+genuine spontaneous calls (`docs/results/spontaneous_tradeoff_v1.md`). The first future step is
+spontaneous genuine speech in training.
 
 **Q38. Are your fakes realistic?**
 They are our own, made with open tools, and most are not hard: the seen tool sits half a MOS point

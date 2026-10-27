@@ -88,8 +88,9 @@ The Twilio telephone leg is implemented and unit-tested but cannot be shown live
 trial credit ran out. Show instead the real-call test we ran over a normal mobile network
 (`docs/results/real_calls_v1.md`): genuine calls from the team and clones of our own
 voices played into a call, recorded on the receiving phone and scored through the same
-live path. "On real calls the deployed model warns genuine callers too, and the final
-recipe holds up on the seen tool (not yet on Chatterbox). That is why the final recipe is the model to deploy
+live path. "Over 30 real calls the deployed model warns every replayed call and every live
+call of two of us, and the final recipe holds up on the seen tool, five of six clone calls
+caught (not yet on Chatterbox). That is why the final recipe is the model to deploy
 next." Section 7 of `VIVA_QA.md` has the numbers.
 
 ---
