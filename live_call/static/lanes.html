@@ -177,7 +177,9 @@
         select.id = "otherCalls";
         box.append(select);
       }
-      if (clips.length) choose((featured[0] || clips[0]).id);
+      // /lanes?clip=<id> opens on that call (scene 6 links its known-limit calls here)
+      const wanted = new URLSearchParams(location.search).get("clip");
+      if (clips.length) choose(clips.some((c) => c.id === wanted) ? wanted : (featured[0] || clips[0]).id);
     }
 
     function choose(id) {

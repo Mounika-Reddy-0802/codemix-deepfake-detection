@@ -8,7 +8,8 @@ server reads as a list of what it offers:
 - :func:`add_live_routes`: scene 3, the address and QR code the receiver's phone opens;
 - :func:`add_results_routes`: scenes 1, 4 and 6, numbers read from committed results
   (``live_call.results_view``) and the stage player's prepared audio;
-- :func:`add_shuffle_routes`: scene 5, the same call with its words shuffled away.
+- :func:`add_shuffle_routes`: scene 5, the same call with its words shuffled away;
+- :func:`add_try_routes`: scene 6, a microphone recording judged exactly as a call is.
 
 Every route scores audio through the live path (``StreamingScorer`` + ``VerdictEngine``)
 or reads a committed result file; none holds a number of its own.
@@ -23,9 +24,10 @@ import os
 import socket
 from collections.abc import Callable
 from pathlib import Path
+from typing import Annotated
 
 import numpy as np
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, Response
 
 from live_call import results_view
@@ -292,3 +294,32 @@ def add_shuffle_routes(
             pcm = (np.clip(audio, -1.0, 32767 / 32768) * 32768).astype("<i2")
             wav.writeframes(pcm.tobytes())
         return Response(buffer.getvalue(), media_type="audio/wav")
+
+
+def add_try_routes(api: FastAPI, shared, decode: Callable[[bytes, str], np.ndarray]) -> None:
+    """Scene 6's try it: ``POST /api/try``, a recording judged exactly as a live call is."""
+    from live_call.lanes import primary_lane
+
+    @api.post("/api/try")
+    async def try_it(file: Annotated[UploadFile, File()]) -> JSONResponse:
+        """Score a microphone recording through the live path: the same windows, threshold
+        and warning ladder as a call, so a single low window cannot condemn a real voice."""
+        data = await file.read()
+        if len(data) > 10 * 1024 * 1024:
+            raise HTTPException(413, "recording larger than 10 MB")
+        try:
+            audio = decode(data, file.filename or "")
+        except Exception as exc:
+            raise HTTPException(400, f"could not decode audio: {exc}") from exc
+        if audio.size < 16000 * 4:
+            raise HTTPException(400, "record at least 4 seconds: one window is 4 s of speech")
+        lane = primary_lane(shared.detector, "Live model")
+        result = (await score_lanes(audio, [lane], shared.detector.executor))[0]
+        return JSONResponse(
+            {
+                **result.summary(),
+                "windows": result.windows,
+                "seconds": round(audio.size / 16000, 2),
+                "checkpoint": shared.detector.status()["checkpoint"],
+            }
+        )

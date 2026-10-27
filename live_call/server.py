@@ -344,9 +344,19 @@ def create_app(state: App | None = None) -> FastAPI:
         return page("call.html")
 
     @api.get("/demo")
-    async def demo_console() -> HTMLResponse:
-        """One-screen console for a live evaluation: both handsets and the analysis."""
-        return page("console.html")
+    async def demo_flow() -> HTMLResponse:
+        """The final review's guided flow: six scenes in order, with the presenter's lines."""
+        return page("demo.html")
+
+    @api.get("/threat")
+    async def threat_page() -> HTMLResponse:
+        """Scene 1: the threat."""
+        return page("threat.html")
+
+    @api.get("/limits")
+    async def limits_page() -> HTMLResponse:
+        """Scene 6: the limits, what was done about each, and try it."""
+        return page("limits.html")
 
     @api.get("/console")
     async def console_page() -> HTMLResponse:
@@ -530,6 +540,7 @@ def create_app(state: App | None = None) -> FastAPI:
         ),
     )
     demo_routes.add_shuffle_routes(api, shared, find_clip, clip_audio)
+    demo_routes.add_try_routes(api, shared, decode_audio)
 
     # ----------------------------------------------------------------- dashboard push
     @api.websocket("/ws/dashboard")

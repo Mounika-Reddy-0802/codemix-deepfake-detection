@@ -84,19 +84,23 @@ const Stage = (() => {
   }
   const pct = (digits = 1) => (v) => Number(v).toFixed(digits) + "%";
 
-  async function sayData() {
+  // One request shared by every caller (the drawer and the overview's cards ask at once).
+  function sayData() {
     if (data) return data;
-    data = { s1Fake: "most", xttsCaught: "most", xttsCalls: "the" };
-    try {
-      const h = await json("/api/headline");
-      data.s1Fake = h.s1.genuine_called_fake_pct.value.toFixed(1) + "%";
-    } catch (e) { /* notes still read without the number */ }
-    try {
-      const r = await json("/api/real_calls");
-      const row = r.table.find((x) => x.kind === "clone_replay" && x.tool === "xtts_v2");
-      data.xttsCaught = row.final.likely.value;
-      data.xttsCalls = row.final.calls.value;
-    } catch (e) { /* idem */ }
+    data = (async () => {
+      const out = { s1Fake: "most", xttsCaught: "most", xttsCalls: "the" };
+      try {
+        const h = await json("/api/headline");
+        out.s1Fake = h.s1.genuine_called_fake_pct.value.toFixed(1) + "%";
+      } catch (e) { /* notes still read without the number */ }
+      try {
+        const r = await json("/api/real_calls");
+        const row = r.table.find((x) => x.kind === "clone_replay" && x.tool === "xtts_v2");
+        out.xttsCaught = row.final.likely.value;
+        out.xttsCalls = row.final.calls.value;
+      } catch (e) { /* idem */ }
+      return out;
+    })();
     return data;
   }
 
@@ -224,6 +228,7 @@ const Stage = (() => {
     keys(key);
     pills();
     setInterval(pills, 10000);
+    if (key === "home") return; // the project overview is not a scene: no presenter notes
     await presenter(key);
     let open = false;
     try { open = localStorage.getItem("stage.notes") === "1"; } catch (e) { /* private window */ }
@@ -248,5 +253,10 @@ const Stage = (() => {
   const WORDS = { listening: "Listening", genuine: "Genuine", suspicious: "Caution", likely_fake: "Likely cloned" };
   const word = (state) => WORDS[state] || state || "Listening";
 
-  return { SCENES, mount, make, json, cite, pct, toast, socket, word, shortModel };
+  // The presenter's lines for one scene, numbers filled from the results API.
+  async function lines(key) {
+    return (SAY[key] || (() => []))(await sayData());
+  }
+
+  return { SCENES, mount, make, json, cite, pct, toast, socket, word, shortModel, lines };
 })();

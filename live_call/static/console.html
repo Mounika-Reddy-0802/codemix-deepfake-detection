@@ -97,8 +97,8 @@
       <div class="ladder">
         <div class="rung" id="rungListening"><span class="pip"></span> Listening for speech <span class="cnt" id="cntWindows">0 windows</span></div>
         <div class="rung" id="rungGenuine"><span class="pip"></span> Genuine &middot; score at or above threshold <span class="cnt" id="cntGenuine">&ndash;</span></div>
-        <div class="rung" id="rungSusp"><span class="pip"></span> Suspicious after <span class="nC">2</span> low windows <span class="cnt" id="cntSusp">0 / 2</span></div>
-        <div class="rung" id="rungFake"><span class="pip"></span> Likely cloned after <span class="nL">4</span> low windows <span class="cnt" id="cntFake">0 / 4</span></div>
+        <div class="rung" id="rungSusp"><span class="pip"></span> <span>Suspicious after <b class="nC">2</b> low windows</span> <span class="cnt" id="cntSusp">0 / 2</span></div>
+        <div class="rung" id="rungFake"><span class="pip"></span> <span>Likely cloned after <b class="nL">4</b> low windows</span> <span class="cnt" id="cntFake">0 / 4</span></div>
       </div>
       <div class="ribbon">
         <h2 style="margin-top:1rem">Measured on held-out data</h2>
@@ -159,38 +159,31 @@
     }).catch(() => {});
 
     // -------------------------------------------------------------- results
-    getJSON("/api/results").then((r) => {
-      const cells = ((r.systems || {}).cells) || [];
-      const pick = (system, variant, condition, set) =>
-        cells.find((c) => c.system === system && c.variant === variant &&
-                          c.condition === condition && c.set === set);
-      const deployed = (set) => pick("S2 LoRA", "xtts+rvc", "channel", set);
-      const s1 = (set) => pick("S1 English-only", "asvspoof", "channel", set);
+    // the final recipe, the live model, against each set's shortcut floor (committed results)
+    getJSON("/api/headline").then((h) => {
+      const f = h.final;
       const rows = [
-        ["Seen cloning tool (XTTS)", deployed("eval_pool"), s1("eval_pool")],
-        ["Voice conversion (RVC)", deployed("rvc_test"), s1("rvc_test")],
-        ["Unseen tool (Tortoise)", deployed("cm04"), s1("cm04")],
-        ["English (ASVspoof LA)", deployed("english"), s1("english")],
+        ["Seen cloning tool (XTTS-v2)", f.seen_tool],
+        ["Unseen tool (Tortoise), new speakers", f.new_tortoise],
+        ["Tortoise over a real AMR-NB codec", f.new_tortoise_amr],
+        ["Unseen tool (IndicF5)", f.indicf5],
+        ["Unseen tool (Chatterbox)", f.chatterbox],
       ];
       const table = el("table");
-      const head = el("tr", {}, [el("th", { text: "Test set" }), el("th", { text: "Our system" }),
-                                 el("th", { text: "English-only baseline" })]);
+      const head = el("tr", {}, [el("th", { text: "Test set" }), el("th", { text: "Final recipe" }),
+                                 el("th", { text: "Cheap-statistics floor" })]);
       const body = [head];
-      for (const [label, ours, base] of rows) {
-        if (!ours) continue;
-        const ok = ours.clears_floor !== false;
-        body.push(el("tr", {}, [
-          el("td", { text: label }),
-          el("td", { class: ok ? "good" : "bad", text: ours.eer.toFixed(2) + "% EER" }),
-          el("td", { text: base ? base.eer.toFixed(2) + "%" : "—" }),
-        ]));
+      for (const [label, r] of rows) {
+        const cell = el("td", { class: "good", text: r.eer.value.toFixed(1) + "% EER" });
+        cell.title = "read from " + r.eer.source;
+        body.push(el("tr", {}, [el("td", { text: label }), cell, el("td", { text: r.floor.value.toFixed(1) + "%" })]));
       }
       table.append(el("tbody", {}, body));
       $("results").replaceWith(table);
       table.id = "results";
       $("resultsNote").textContent =
-        "Equal error rate, lower is better. Deployed model: adapted on code-mixed speech in the " +
-        "telephone condition. The unseen-tool row is the limitation we report openly.";
+        "Equal error rate, lower is better; mean over seeds. A result counts only when it beats the floor " +
+        "eight cheap signal statistics reach on the same clips. Chatterbox is the limit we report openly.";
     }).catch(() => {});
 
     // ---------------------------------------------------------------- clips

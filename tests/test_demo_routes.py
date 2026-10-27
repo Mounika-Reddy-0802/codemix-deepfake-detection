@@ -67,10 +67,13 @@ def client(monkeypatch, tmp_path):
 
 def test_scene_pages_are_served(client):
     pages = (
-        "/live",
+        "/demo",
+        "/threat",
         "/lanes",
+        "/live",
         "/network",
         "/trust",
+        "/limits",
         "/console",
         "/phone/receiver",
         "/phone/caller",
@@ -153,6 +156,43 @@ def test_shuffle_proof_scores_both_versions(client):
     assert audio.status_code == 200 and audio.content[:4] == b"RIFF"
     assert client.post("/api/shuffle/call", params={"chunk_ms": 1}).status_code == 400
     assert client.post("/api/shuffle/nope").status_code == 404
+
+
+def test_the_guided_flow_links_every_scene_in_order(client):
+    stage = client.get("/static/stage.js").text
+    hrefs = ["/threat", "/lanes", "/live", "/network", "/trust", "/limits"]
+    positions = [stage.index(f'href: "{h}"') for h in hrefs]
+    assert positions == sorted(positions), "the six scenes must be in plan order"
+    assert client.get("/demo").status_code == 200 and "Start the demo" in client.get("/demo").text
+
+
+def test_try_it_judges_a_recording_like_a_call(client):
+    import io
+    import wave
+
+    import numpy as np
+
+    t = np.arange(16000 * 12) / 16000
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes((0.2 * np.sin(2 * np.pi * 220 * t) * 32767).astype("<i2").tobytes())
+    body = client.post(
+        "/api/try", files={"file": ("me.wav", buffer.getvalue(), "audio/wav")}
+    ).json()
+    # the stand-in detector says 0.95 against 0.687: five windows, no warning
+    assert body["peak_state"] == "genuine" and body["scored_windows"] == 5
+    assert len(body["windows"]) == 5 and body["first_caution_s"] is None
+    short = io.BytesIO()
+    with wave.open(short, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes(b"\x00\x00" * 16000)
+    too_short = client.post("/api/try", files={"file": ("s.wav", short.getvalue(), "audio/wav")})
+    assert too_short.status_code == 400 and "4 seconds" in too_short.json()["detail"]
 
 
 def test_qr_codes_are_standalone_svg(client):
