@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pandas as pd
+import pytest
 
 from src.reporting import spontaneous_tradeoff as st
 
@@ -56,6 +57,7 @@ def test_sweep_reads_every_set_and_rates_rise_with_the_threshold(tmp_path):
 
 
 def test_figure_is_written(tmp_path):
+    pytest.importorskip("matplotlib")
     _write_sets(tmp_path)
     table = st.summary(st.sweep(st.stitched_sets(tmp_path), st.GRID))
     out = st.figure(table, 0.687, out_dir=str(tmp_path))
