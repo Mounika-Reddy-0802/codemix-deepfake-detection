@@ -33,6 +33,17 @@ for this reason.
 The results chapter, the conclusion and the four-page version now report the speed and the
 spontaneous result.
 
+**No threshold fixes spontaneous speech.** The team decided not to calibrate anything on HiACC,
+so I measured the trade-off instead and chose nothing (`src/reporting/spontaneous_tradeoff.py`,
+`docs/results/spontaneous_tradeoff_v1.md`). The final recipe's cached live-path window scores
+are stitched into 60 s calls exactly as the call study does and replayed at every threshold
+from 0.05 to 0.95; at the live threshold this reproduces the call study's table. Every
+threshold that catches all six Tortoise calls warns at least 38 of the 41 genuine spontaneous
+calls; the thresholds that warn fewer than half catch at most 4 of the 18 unseen-tool calls.
+The median spontaneous genuine window scores 0.62, below the median Tortoise clone window
+(0.92): a ranking problem, so the fix is spontaneous speech in training, not an operating
+point.
+
 ## Viva preparation
 
 `docs/viva/VIVA_QA.md` holds the questions an examiner is likely to ask, each with a short
@@ -45,8 +56,7 @@ the final recipe, says plainly that the Twilio leg cannot be shown live because 
 credit ran out, points to the real-call test instead, and states the threshold rule correctly
 (at most 5% warnings on genuine development calls, not "zero false alarms").
 
-The real-call answers use the first 20 of 30 calls and are updated when the last speaker's
-calls are in.
+The real-call answers now use all 30 calls from the three of us.
 
 Two answers were wrong and are corrected. The early false alarms on genuine calls were first
 put down to the phone's noise suppression, then to the quiet before the first word alone;
@@ -119,7 +129,8 @@ The viva answers and the demo script were then checked against the corrected pap
 we will say them out loud. Fifteen answers changed: which attack is hardest depends on the
 detector (Chatterbox for our adapters, IndicF5 for the larger encoder); the -0.01 correlation
 is on the evaluation pool, not the 183 control speakers; the final recipe warns later than
-the deployed model (about 8 s and 12 s, and 30-46 s on the real calls); the 43.9%
+the deployed model (about 8 s and 12 s, and on the real calls 12-14 s for one speaker,
+30-46 s for the other two); section 7 now carries all 30 real calls; the 43.9%
 spontaneous figure is one seed and not a gain; LoRA's own weights are about 0.6% of the
 model; S3 never trained on English; the Opus test used a default encoder; and the
 "tuned on test sets?" answer now prepares the follow-up that the final recipe joins two
