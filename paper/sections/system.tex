@@ -5,9 +5,10 @@
 
 The evaluation protocol in Section~\ref{sec:method} scores four-second windows
 of narrowband telephone audio. The deployed system is that protocol running on a
-live call rather than on a manifest: the same encoder, the same windowing, the same
-operating point. Nothing about the detector changes between the two, which is what
-lets a demonstration stand as evidence rather than as illustration.
+live call rather than on a manifest: the same encoder and the same four-second windows,
+with an operating point calibrated on development calls through this path. The detector
+itself does not change between the two, which is what lets a demonstration stand as
+evidence rather than as illustration.
 
 \subsection{Requirements}
 
@@ -64,7 +65,8 @@ than its session description contained, which fails negotiation outright.
 \emph{Twilio Media Streams} (\texttt{live\_call/media\_handler.py}) carries calls
 from the public telephone network. Twilio opens a WebSocket and pushes base64
 G.711 $\mu$-law at 8\,kHz; the handler decodes and resamples to the same contract.
-Requests are authenticated by HMAC signature before any audio is accepted.
+Twilio's webhook requests are verified by HMAC signature; the media WebSocket itself is not
+authenticated.
 
 \subsubsection{Detection core}
 
@@ -83,17 +85,19 @@ the previous window has finished.
 \subsubsection{The escalation ladder}
 
 A per-window score is too noisy to act on. The verdict engine
-(\texttt{live\_call/verdict\_engine.py}) requires agreement across consecutive
+(\texttt{live\_call/verdict\_engine.py}) smooths the window scores (an exponential
+moving average with weight 0.5) and requires agreement across consecutive smoothed
 windows before it escalates:
 
 \begin{itemize}
-  \item \textbf{Listening} until the first window is scored.
+  \item \textbf{Listening} until two windows are scored.
   \item \textbf{Suspicious} after two consecutive windows below the threshold: an
     audible tone and a caution on the receiver's handset.
   \item \textbf{Likely cloned} after four: a spoken warning to the receiver's leg of
     the call and, on the telephone carrier, an SMS.
-  \item Recovery after three consecutive windows above the threshold, so a single
-    noisy stretch does not leave a call marked for its duration.
+  \item Recovery after three consecutive windows at or above a bound halfway between
+    the threshold and 1, so a single noisy stretch does not leave a call marked for its
+    duration.
 \end{itemize}
 
 With a two-second hop this places the first caution near six seconds of speech and
@@ -122,8 +126,8 @@ A browser-based console presents both handsets, the signal path and the live
 analysis on one screen; separate caller and receiver pages run the same code on two
 devices. A dashboard exposes every scored window for inspection. The evaluation
 endpoints (\texttt{/api/predict}, \texttt{/api/replay}) score a file through the
-identical path, which is how the operating point was calibrated and how the
-demonstration clips were verified.
+identical path, which is how the demonstration clips were verified; the operating point
+was calibrated offline through the same scoring path (\texttt{src.inference.calibrate}).
 
 \subsection{Verification}
 
@@ -147,14 +151,14 @@ Clip-level EER is not what a caller experiences. We replayed test clips through 
 scoring path (4\,s windows every 2\,s, smoothed, through the escalation ladder) and
 stitched clips of one label into 60\,s calls. The final recipe's operating point was
 chosen on the dev set by the rule used for the deployed model (the most sensitive setting
-whose genuine 60\,s dev calls raise at most 5\% warnings): a threshold of 0.687, a warning
-after three fake-leaning windows; the same rule reproduces the deployed model's published
-threshold exactly (Table~\ref{tab:calls}).
+whose genuine 60\,s dev calls raise at most 5\% alerts of any level): a threshold of 0.687,
+a caution after three fake-leaning windows and ``likely cloned'' after five; the same rule
+reproduces the deployed model's published threshold exactly (Table~\ref{tab:calls}).
 
 \begin{table}[t]
 \centering
 \caption{60\,s calls through the live path: share of genuine calls warned and of fake calls
-caught (reaching at least a warning). Counts are small (6--41 calls per cell).}
+caught, each meaning a caution or worse. Counts are small (6--41 calls per cell).}
 \label{tab:calls}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -178,10 +182,107 @@ HiACC, spontaneous & 100\% & 100\% & --- & --- \\
 On read speech the final recipe is the better live model: it no longer warns genuine new
 speakers (44\% of their calls to none) and it catches every Tortoise call (33\% to 100\%),
 while catching fewer IndicF5 and Chatterbox calls. Spontaneous speech is worse at the call
-level than per clip: one short clip is rarely warned (2.8\% final, 8.6\% deployed), but over
-a minute its fake-leaning windows add up and every genuine spontaneous call raises a
-warning with either model. Neither system should be put in front of spontaneous callers
+level than per clip: one short clip replayed through the live ladder is rarely warned
+(2.8\% final, 8.6\% deployed), but over
+a minute its fake-leaning windows add up and every genuine spontaneous call is warned by
+either model. Neither system should be put in front of spontaneous callers
 before it has heard spontaneous genuine speech in training.
+
+\subsection{Real phone calls}
+\label{sec:real-calls}
+
+Every result so far passes audio through a simulated line or a reference codec offline. As a
+pilot on the real network, we made calls among ourselves, with written consent and our
+faculty mentor's approval, over a commercial mobile network and recorded them on the receiving
+handset, whose call recorder writes 8\,kHz mono AAC: 30 calls from three speakers. Twelve
+calls are genuine and live, the speaker reading a prepared code-mixed script or talking freely;
+six replay each speaker's own reading from a laptop loudspeaker into the calling phone; and
+twelve replay clones of the same speakers saying the same scripts, made with XTTS-v2 (the seen
+tool) and Chatterbox (an unseen one) from about 20\,s of reference speech. Genuine and cloned
+replays share the loudspeaker path, so their comparison isolates the synthesis. Every replay
+recording was matched back to the file played into it by the correlation of their
+speech-activity tracks (0.54--0.95, against at most 0.40 for any other file), so no call
+carries the wrong label. Each recording is scored offline through the live path at each
+model's frozen operating point, as recorded and after a G.711 round trip (what the carrier
+delivers); no threshold is chosen on these calls (\texttt{docs/real\_calls/PROTOCOL.md}).
+
+\begin{table}[t]
+\centering
+\caption{Real mobile calls, scored as the carrier delivers them (G.711): number of calls warned
+(caution or worse) and reaching ``likely cloned''. 30 calls from three speakers.}
+\label{tab:realcalls}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & & Deployed & \multicolumn{2}{c}{Final recipe} \\
+Calls & $n$ & likely cloned & warned & likely cloned \\
+\midrule
+Genuine, live & 12 & 8 & 3 & 1 \\
+Genuine, replayed & 6 & 6 & 1 & 1 \\
+XTTS-v2 clones, replayed & 6 & 6 & 5 & 5 \\
+Chatterbox clones, replayed & 6 & 6 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+% docs/results/real_calls_v1.md
+\end{table}
+
+\textbf{The deployed model fails for two speakers of three.} It takes every replayed call,
+genuine or cloned, to ``likely cloned'', and every live call of two speakers (mean window
+scores 0.02--0.22 and below 0.001), but none of the third speaker's four live calls, which it
+scores at 0.96--1.00 (Table~\ref{tab:realcalls}). Whether that speaker's voice or that speaker's
+handset and network is the difference, three speakers cannot say. \textbf{The final recipe holds up on
+the seen tool}: it warns three of twelve genuine live calls, one of them to ``likely cloned'',
+all three the same speaker's calls; catches (takes to ``likely cloned'') five of six XTTS-v2
+clone calls; and catches none of the six Chatterbox calls, of which it cautions one, matching
+Chatterbox being the adapter's hardest unseen tool offline (Sec.~\ref{sec:res-chatterbox}).
+Against the fair control, the genuine replays that share the clones' loudspeaker path, one of
+six reaches ``likely cloned''; the window-level EER of the final recipe against them is 19.0\%
+on XTTS-v2 and 50.0\% on Chatterbox. It is slower on real calls than offline for two speakers:
+their three caught XTTS-v2 calls reach a caution 18--32\,s in and ``likely cloned'' 30--46\,s
+in, where the five-window ladder could reach ``likely cloned'' after 12\,s; the third speaker's two are caught at
+12 and 14\,s.
+
+\textbf{The final recipe's false alarms come early in a call.} Over the first 10\,s its mean
+score on genuine live calls is 0.79, after 20\,s 0.98. Part of the cause is the first window,
+which spans the quiet before the first word (median $-30$\,dBFS, against $-21$ to $-26$ for the
+speech that follows): in eleven of the twelve calls it passes the $-50$\,dBFS gate, is normalised
+and is scored as speech (mean 0.60), and the run of fake-leaning windows behind each warned genuine live call starts there.
+Only part, though: replaying the calls with that window treated as silence, a diagnostic that
+chooses nothing, clears two of the three warned genuine live calls over G.711, while as recorded
+it clears one of four and cautions another; and one call over G.711 (two as recorded) still
+reaches ``likely cloned'', its run including two speech windows 8--14\,s in.
+A stricter speech gate at the start of a call would help but not suffice, and both it and the
+operating point need real development calls, not these. The counts are small, and the intervals
+say so: five of six clone calls caught is a 95\% Wilson interval of 44--97\%, none of six is
+0--39\%, one of twelve genuine live calls ``likely cloned'' is 1.5--35\%.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/real_call_chain.pdf}
+\caption{Mean P(genuine) of each speaker's direct recordings through the stages of a phone
+call, and of the genuine live calls as the carrier delivers them. On average the deployed
+adapter falls to its threshold at the mobile codec; the final recipe, trained through AMR-NB,
+stays above its own. Dashed lines: each model's frozen live threshold.}
+\label{fig:realchain}
+\end{figure}
+
+\textbf{The mobile codec is the largest single step in the deployed model's failure, for the
+speakers it fails on.} We rebuilt the call chain on each speaker's direct recordings of the same
+scripts, one stage at a time (Fig.~\ref{fig:realchain}). Averaged over the six readings, the
+deployed model's mean P(genuine) falls from 0.83 on the direct recordings and 0.75 through the
+simulated G.711 line to 0.50 through the reference AMR-NB codec, with the call recorder adding
+little (0.49) and the 4G codec (AMR-WB) behaving alike (0.52). Per reading, two of the six cross
+the threshold at AMR-NB (0.66 to 0.28 and 0.74 to 0.11), one stays above it (0.92 to 0.74),
+one is below it before any codec (0.28), and the third speaker's two stay at 0.87--1.00 at
+every stage, so the codec is the largest step for the speakers the model fails on, not a failure
+of every voice. The final recipe stays at 0.82--1.00 through every stage for all six readings.
+The real network costs the deployed model more still (0.38 on the genuine live calls, against
+0.94 for the final recipe), but the direction is the one the offline AMR-NB results predicted
+(Sec.~\ref{sec:res-new}). The final recipe changes two things at once, more voices and the real
+codec, so these calls cannot separate them; offline, adding AMR-NB alone to the deployed
+recipe's training recovers most of the codec loss (Sec.~\ref{sec:res-new}). The chain is
+rebuilt by \texttt{src.inference.real\_call\_codecs}.
 
 \subsection{Deployment status}
 
@@ -191,18 +292,19 @@ rather than inferred from offline scores, because the two disagree: on a live ca
 genuine caller can lose several consecutive windows that the same clip never loses
 offline.
 
-We tested the obvious explanation and it does not hold. Encoding each clip through
-the browser's carrier offline --- resample to 48\,kHz, Opus~\cite{valin2012opus} encode and decode,
-resample back --- and rescoring through the identical streaming path leaves both
-genuine clips at zero windows below the threshold, with a worst window of 0.984
-against the 0.001 seen live. Both seen attacks stay fully detected through every
-carrier. The codec, and the resampling around it, therefore do not account for the
-live degradation, and clone detection does not depend on codec artefacts.\footnote{%
+We tested the obvious explanation and it does not hold as far as we could test it.
+An offline Opus~\cite{valin2012opus} round trip --- resample to 48\,kHz, encode and decode
+with libsndfile's default encoder (not a browser's adaptive one), resample back --- and
+rescoring through the identical streaming path leaves both genuine clips at zero windows
+below the threshold, with a worst window of 0.984 against the 0.001 seen live. Both seen
+attacks stay detected (the RVC clip loses 2 of 24 windows over G.711). An offline codec
+round trip therefore does not reproduce the live degradation, and clone detection does
+not depend on codec artefacts.\footnote{%
 \texttt{docs/results/carrier\_effect\_v1.md}; reproduce with
 \texttt{python -m src.inference.carrier\_sim}.}
 
-By elimination the cause lies in the real-time transport rather than in the coding:
-jitter buffering, packet-loss concealment, or the bitrate adaptation a browser
+The likeliest remaining causes are the real-time transport and the browser's own adaptive
+encoder, which this test did not reproduce: jitter buffering, packet-loss concealment, or the bitrate adaptation a browser
 applies while a connection is still settling. Concealment is the candidate we would
 test first, because it synthesises audio to fill gaps, and a detector reporting that
 machine-generated audio is not human would produce exactly this signature. That
@@ -211,6 +313,7 @@ discontinuous transmission disabled, which is sensible for a demonstration, but 
 dip survived that change and it should not be presented as the remedy.
 
 The Twilio carrier is implemented and unit-tested but has not been verified on live
-numbers, because the account's trial credit was exhausted. This is the clearest
-piece of remaining work: the protocol the system was designed around is the
-telephone network, and the telephone leg is the one leg not yet demonstrated.
+numbers, because the account's trial credit was exhausted. Real mobile calls have been
+recorded on a handset and scored offline through the same path (Sec.~\ref{sec:real-calls}),
+but the carrier itself, which would deliver those calls to the detector as they happen, is
+the one leg not yet demonstrated end to end.

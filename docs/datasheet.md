@@ -11,7 +11,9 @@ manifests and generation metadata; the commands that reproduce them are at the e
 Where a row is not yet generated it says so instead of carrying a target figure —
 `docs/attack_taxonomy.md` holds the targets, this file holds what exists.
 
-Last measured: 2026-09-06.
+Last measured: 2026-09-06; the pools and the attack table (sections 1.2 and 2) brought up to
+date from the committed manifests on 2026-10-27. Sections 2.1-2.4 are the original
+write-ups of CM01-CM04.
 
 ---
 
@@ -28,8 +30,10 @@ It has three parts:
    rather than an artefact of mixed training data.
 2. **Code-mixed bonafide speech** — MUCS 2021 Hindi-English (NPTEL lecture audio) and
    HiACC adult (spontaneous), indexed to real speaker identities.
-3. **Code-mixed spoofs we generated** — XTTS-v2 zero-shot clones (CM01) and RVC
-   per-speaker voice conversions (CM02), both built only from train-pool speakers.
+3. **Code-mixed spoofs we made** — XTTS-v2 zero-shot clones, RVC per-speaker voice
+   conversions, and three tools no model is trained on (Tortoise-TTS, IndicF5, Chatterbox),
+   each built from a committed job table and only from the speakers of its own pool
+   (section 2).
 
 ### 1.1 Bonafide sources, as indexed
 
@@ -59,9 +63,13 @@ into three **disjoint** pools and frozen:
 
 | Pool | Speakers | Used for |
 |---|---:|---|
-| train | 25 | S3 native training; CM01 + CM02 generation |
-| adaptation | 10 | S2 LoRA adaptation only (CM03) |
+| train | 25 | CM01 + CM02 generation; the 13 source speakers of the RVC train half train S2 and S3 |
+| adaptation | 10 | S2 and S3 adaptation (CM03): 8 for training, 2 for development |
 | eval | 15 | every evaluation column; held-out attacks |
+
+Later extensions were set aside the same way, before any of their audio was scored: 60 new
+test speakers (CM05, CM06), 183 language-control speakers, and 227 extra adaptation speakers
+(CM08) that grow the training set from 21 to 248 genuine speakers.
 
 Frozen at `data/manifests/speaker_pools.csv`,
 SHA-256 `f57e0d85dbd3c8f5b96ad6af59edae7218104b0167807eae6433314947063e7b`.
@@ -76,17 +84,26 @@ would be void. `speaker_pools.verify_frozen()` re-checks the hash before use, an
 
 ## 2. Attacks — what has actually been generated
 
-| ID | Type | Model | Base data | Clips | Usable | Targets | Split | Seen by |
+| ID | Type | Model | Base data | Clips | Usable | Speakers | Split | Seen by |
 |---|---|---|---|---:|---:|---:|---|---|
-| **CM01** | TTS (zero-shot clone) | XTTS-v2 | MUCS train pool | 4,000 | **3,998** (99.95%) | 25 spk × 160 | train | S3 |
-| **CM02** | VC (per-speaker models) | RVC v2 | MUCS train pool | 1,500 | **1,404** (93.6%) | 12 spk × 125 | train | S3 |
-| **CM03** | TTS (zero-shot clone) | XTTS-v2 | MUCS adaptation pool | 1,600 | 1,600 \* | 10 spk | adaptation | S2 (LoRA) |
-| **CM04** | TTS (zero-shot clone) | Tortoise-TTS | MUCS eval pool | 500 | **458** (91.6%) | 15 spk × 33–34 | test | **nothing** |
-| CM05 | VC | kNN-VC *(optional)* | eval pool | **0 — not generated** | — | — | test | nothing |
-| CM06–CM08 | TTS | IndicTTS-Deepfake / IndicSynth | mono-Hindi, mono-Tamil | **0 — not indexed yet** | — | — | test | nothing |
-| CM09 | mixed | AffectDF subset | ESD / MSP-Podcast | **0 — not fetched** | — | — | test (external) | nothing |
+| **CM01** | TTS (zero-shot clone) | XTTS-v2 | MUCS train pool | 4,000 | **3,998** (99.95%) | 25 × 160 | train pool, unused | nothing (kept out so S2 and S3 train on the same data, P-028) |
+| Eval pool | TTS (zero-shot clone) | XTTS-v2 | MUCS eval pool | 2,400 | 2,400 | 15 | test (seen tool) | nothing |
+| **CM02** | VC (per-speaker models) | RVC v2 | MUCS train pool | 1,500 | **1,404** (93.6%) | 12 × 125 | split: train half, test half | S2 and S3 (train half only) |
+| **CM03** | TTS (zero-shot clone) | XTTS-v2 | MUCS adaptation pool | 1,600 | 1,600 \* | 10 | adaptation | S2 and S3 |
+| **CM04** | TTS (zero-shot clone) | Tortoise-TTS | MUCS eval pool | 500 | **458** (91.6%) | 15 × 33–34 | test | **nothing** |
+| **CM05** | TTS (zero-shot clone) | XTTS-v2 | 60 new test speakers | 1,800 | **1,770** (98.3%) | 60 | test (seen tool) | nothing |
+| **CM06** | TTS (zero-shot clone) | Tortoise-TTS | the same 60 speakers | 240 | **222** (92.5%) | 60 | test | **nothing** |
+| **CM07** | TTS (flow matching) | IndicF5 | all-Hindi MUCS references | 610 | **526** (86.2%) | 54 of 61 | test | **nothing** |
+| **CM08** | TTS (zero-shot clone) | XTTS-v2 | 227 extra adaptation speakers | 1,816 | **1,759** (96.9%) | 227 | train | extended and final recipes |
+| **CM09** | TTS (zero-shot clone) | Chatterbox Multilingual | as CM07 | 610 | **525** (86.1%) | 61 | test | **nothing** |
 
 \* CM03's usable count is the number that reached the adaptation manifests (1,280 train + 320 dev); it was not screened separately the way CM01 and CM02 were.
+
+The IDs CM05-CM09 were first reserved for kNN-VC, IndicTTS-Deepfake / IndicSynth and an
+AffectDF subset. None of those was built, and the IDs were reused in week 13 for the sets
+above. CM07 and CM09 share 651 genuine all-Hindi clips of 75 speakers. Clones of the team's
+own voices for the real-call test are evaluation-only, private and never committed
+(`docs/real_calls/PROTOCOL.md`).
 
 **CM04 now exists, and has been scored.** It is the only genuinely unseen attack —
 the one tool no model is ever allowed to see — so it is what turns "these results are
@@ -358,6 +375,12 @@ python -m src.data.speaker_pools --verify f57e0d85dbd3c8f5b96ad6af59edae7218104b
 # 2.2 CM02 counts, QA and pitch
 python -c "import json; d=json.load(open('outputs/rvc_generation_summary.json')); \
 print(d['stats']); print(d['qa']['clips'], d['qa']['failed']); print(d['pitch']['converted'])"
+
+# 2. CM05-CM09: jobs in the committed table, usable clips and speakers in the manifest
+python -c "import pandas as pd; m='data/manifests/'; \
+[print(c, len(pd.read_csv(m+j+'.csv')), len(pd.read_csv(m+c+'.csv')), pd.read_csv(m+c+'.csv').speaker.nunique()) \
+for c, j in [('cm05','eval_ext_xtts_jobs'), ('cm06','eval_ext_tortoise_jobs'), \
+('cm07','indicf5_generation_jobs'), ('cm08','adapt_ext_xtts_jobs'), ('cm09','chatterbox_generation_jobs')]]"
 
 # 4. quarantine
 python -m src.data.quarantine --root "$DATA_ROOT/raw/hiacc"

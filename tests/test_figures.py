@@ -190,3 +190,14 @@ def test_systems_figure_writes_a_png(tmp_path):
 def test_systems_figure_refuses_a_missing_source(tmp_path):
     with pytest.raises(fg.FigureDataError, match="not built"):
         fg.systems_figure(str(tmp_path), source=str(tmp_path / "absent.json"))
+
+
+def test_pdf_figures_embed_truetype_fonts(tmp_path):
+    plt = pytest.importorskip("matplotlib.pyplot")
+    fg._style()
+    fig, ax = plt.subplots()
+    ax.set_title("EER")
+    path = tmp_path / "f.pdf"
+    fig.savefig(path)
+    plt.close(fig)
+    assert b"/Type3" not in path.read_bytes()  # IEEE PDF eXpress rejects Type 3 fonts

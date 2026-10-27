@@ -88,6 +88,9 @@ def draw(out_dir: str = OUT_DIR) -> list[str]:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    from src.reporting.figures import PDF_FONTS
+
+    plt.rcParams.update(PDF_FONTS)  # TrueType in the PDF, which IEEE PDF eXpress accepts
     fig, ax = plt.subplots(figsize=(9.6, 5.2))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)

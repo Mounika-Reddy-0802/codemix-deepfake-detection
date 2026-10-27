@@ -15,9 +15,9 @@
   speakers (MUCS 2021 read lectures) and XTTS-v2 clones and RVC conversions of training
   speakers, every clip both over a simulated G.711 telephone line (20 dB) and through the
   real AMR-NB mobile codec (16,036 clips). Config: `configs/train_lora_final.yaml`.
-- **Operating point for calls.** Threshold 0.687 on smoothed window scores, warning after 3
-  fake-leaning windows and "likely fake" after 5 (`configs/threshold_final.yaml`), chosen on
-  the dev set only for at most 5% warnings on genuine 60 s calls.
+- **Operating point for calls.** Threshold 0.687 on smoothed window scores, a caution after 3
+  fake-leaning windows and "likely cloned" after 5 (`configs/threshold_final.yaml`), chosen on
+  the dev set only for at most 5% alerts of any level on genuine 60 s calls.
 
 ## Intended use
 
@@ -56,9 +56,15 @@ XTTS, Tortoise and RVC call, half of the IndicF5 calls and one in six Chatterbox
 ## Limitations
 
 - Trained and tested on read lecture speech; spontaneous speech is out of scope (above).
-- The G.711 line is simulated; AMR-NB is a real codec run offline. No real phone network
-  was used.
-- IndicF5 and Chatterbox remain hard (16-32% EER).
+- The G.711 line is simulated; AMR-NB is a real codec run offline. On a real mobile network
+  the evidence is a pilot of 30 calls in the voices of the three authors
+  (`docs/results/real_calls_v1.md`): it left nine of twelve genuine live calls unwarned (over G.711
+  the three warned are one speaker's), took five of six XTTS-v2 clone calls to "likely cloned" and
+  none of six Chatterbox clone calls (one was cautioned). Its false alarms on genuine live calls come early in a call, starting with
+  the quiet before the caller speaks, and some continue into the caller's first seconds of
+  speech.
+- IndicF5 and Chatterbox remain hard (21-32% EER for this adapter), and Chatterbox clones
+  passed on real calls.
 - All attacks were made by the project with open tools; commercial cloning services were
   not tested.
 - A larger encoder (SSL-AASIST, XLS-R 300M) trained on the same data is better on eight of

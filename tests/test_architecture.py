@@ -24,3 +24,5 @@ def test_the_figure_is_written_in_both_formats(tmp_path):
     assert {Path(p).suffix for p in written} == {".pdf", ".png"}
     for path in written:
         assert Path(path).stat().st_size > 5_000, f"{path} looks empty"
+    pdf = next(Path(p) for p in written if p.endswith(".pdf")).read_bytes()
+    assert b"/Type3" not in pdf  # IEEE PDF eXpress rejects Type 3 fonts

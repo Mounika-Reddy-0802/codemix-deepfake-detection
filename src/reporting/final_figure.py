@@ -4,7 +4,8 @@ The paper reports the final systems in several tables; this figure puts them sid
 Two panels share one y-axis (EER, %): the simulated G.711 phone line and the real AMR-NB
 mobile codec. In each panel, one group of bars per attack tool, one bar per system:
 
-* S1, the English-only detector (no AMR-NB scores exist for it, so it appears only on the left);
+* S1, the English-only detector (drawn on the left only; its AMR-NB scores, 40-50%, are in
+  docs/results/amr_channel_v1.md);
 * the deployed adapter (21 speakers, G.711 training);
 * the final-recipe adapter (248 speakers, G.711 + AMR-NB training);
 * SSL-AASIST, the larger encoder, trained on the final-recipe data.
