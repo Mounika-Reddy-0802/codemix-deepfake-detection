@@ -233,6 +233,7 @@
         document.querySelector(".kicker").textContent = `Scene 2 · ${word} detectors on one call`;
         document.querySelector("h1.title").textContent = `Same call. ${word} detectors.`;
         document.title = `${word} detectors on one call`;
+        Stage.retitle("lanes", `${word} detectors`);
       }
       box.replaceChildren(...lanes.map((l, i) => {
         const ladder = l.ladder ? ` · caution ${l.ladder.caution_after}, warning ${l.ladder.likely_after} low windows` : "";

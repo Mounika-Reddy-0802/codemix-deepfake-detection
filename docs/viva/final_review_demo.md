@@ -41,6 +41,13 @@ exist. Every number on screen is read from a committed result file; hover it to 
 
 The deployed adapter does not waver on the genuine corpus calls; do not say it does.
 
+**With the larger encoder as a fourth lane** (SSL-AASIST, when its weights are on the laptop,
+at its own threshold chosen on dev): green on both genuine calls; "likely cloned" on the
+Tortoise call 2 s sooner than the final recipe (caution 6 s, likely cloned 10 s); it also
+catches the Tortoise call the final recipe misses, and stops at a caution on the spontaneous
+caller. Say what that is: one checkpoint on eight calls chosen for the final recipe, the next
+candidate and not a replacement. The 30 real calls in scene 6 are the evidence.
+
 ## If something goes wrong
 
 - **The phone does not ring or the page will not load:** open `/console` (scene 3 on one

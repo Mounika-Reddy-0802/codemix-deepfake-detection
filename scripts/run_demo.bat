@@ -37,10 +37,10 @@ rem ---------------------------------------------------------------- scene 2: th
 set "DFD_LANES=S1 (English only)=checkpoints\baseline\best.pt=configs\threshold.yaml,Deployed adapter=%DFD_DATA%\checkpoints\lora_norm_rvc_channel_best.pt=configs\threshold.yaml,Final recipe=%DFD_DATA%\checkpoints\final_s1234_best.pt=configs\threshold_final.yaml"
 
 rem the larger encoder (SSL-AASIST, #63) joins as a fourth lane when its weights are on this laptop;
-rem its threshold was chosen on the same dev clips by the same rule (configs	hreshold_ssl_aasist.yaml)
+rem its threshold was chosen on the same dev clips by the same rule (configs\threshold_ssl_aasist.yaml)
 set "SSL_CKPT=%DFD_DATA%\checkpoints\ssl_aasist_final_s1234_fp16.pt"
 if not exist "%SSL_CKPT%" set "SSL_CKPT=%DFD_DATA%\checkpoints\ssl_aasist_final_s1234.pt"
-if exist "%SSL_CKPT%" set "DFD_LANES=%DFD_LANES%,SSL-AASIST (next candidate)=%SSL_CKPT%=configs	hreshold_ssl_aasist.yaml"
+if exist "%SSL_CKPT%" set "DFD_LANES=%DFD_LANES%,SSL-AASIST (next candidate)=%SSL_CKPT%=configs\threshold_ssl_aasist.yaml"
 if not exist "%SSL_CKPT%" echo note: no SSL-AASIST weights in %DFD_DATA%\checkpoints, scene 2 runs three lanes
 
 rem wav2vec2-base is cached after the first run: never wait on the network in the room

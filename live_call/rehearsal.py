@@ -40,6 +40,12 @@ def load(path: str | Path = REHEARSAL_FILE) -> dict:
     return plan
 
 
+def optional_roles(plan: dict) -> set[str]:
+    """Lanes checked only when the server runs them (SSL-AASIST needs weights not every
+    laptop has); their rows are skipped, not failed, when the lane is absent."""
+    return {role for role, spec in plan.get("lanes", {}).items() if spec.get("optional")}
+
+
 @dataclass(frozen=True)
 class Row:
     """One call in one detector: what the file expects and what the live path did."""
@@ -114,6 +120,7 @@ def rows(
     does not list (a fourth lane added on the night) are reported, not judged.
     """
     out = []
+    optional = optional_roles(plan)
     for call in plan["calls"]:
         cid = call["id"]
         out.append(check(cid, "primary", call["primary"], primary.get(cid)))
@@ -121,7 +128,23 @@ def rows(
             continue
         observed = {lane["role"]: lane for lane in lanes.get(cid, [])}
         for role, expect in call.get("lanes", {}).items():
+            if role in optional and role not in observed:
+                continue
             out.append(check(cid, role, expect, observed.get(role)))
+        for role in sorted(set(observed) - set(call.get("lanes", {}))):
+            seen = observed[role]
+            out.append(
+                Row(
+                    cid,
+                    role,
+                    "-",
+                    seen.get("peak_state"),
+                    seen.get("first_caution_s"),
+                    seen.get("first_likely_s"),
+                    True,
+                    "no expected verdict in the file: shown, not judged",
+                )
+            )
     return out
 
 
@@ -140,6 +163,7 @@ __all__ = [
     "check",
     "check_clips",
     "load",
+    "optional_roles",
     "rows",
     "table",
 ]

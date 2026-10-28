@@ -79,6 +79,7 @@ def main() -> int:
     lanes_info = response.json() if response.status_code == 200 else {"lanes": []}
     roles = {lane["role"] for lane in lanes_info["lanes"]}
     wanted = {role for call in plan["calls"] for role in call.get("lanes", {})}
+    wanted -= rehearsal.optional_roles(plan)  # the fourth lane is checked when it runs
     with_lanes = not args.no_lanes and wanted <= roles
     if not args.no_lanes and not with_lanes:
         problems.append(

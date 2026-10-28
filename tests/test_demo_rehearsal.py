@@ -25,7 +25,7 @@ def test_the_rehearsal_file_covers_every_call_and_lane():
     assert len(ids) == len(set(ids)) == 8
     for call in PLAN["calls"]:
         assert call["truth"] in ("bonafide", "spoof")
-        assert set(call["lanes"]) == {"s1", "deployed", "final"}
+        assert set(call["lanes"]) - rehearsal.optional_roles(PLAN) == {"s1", "deployed", "final"}
         # the final-recipe lane and the live model are the same model and threshold
         assert call["lanes"]["final"]["peak"] == call["primary"]["peak"]
     assert PLAN["primary"]["threshold_file"] == "configs/threshold_final.yaml"
@@ -64,6 +64,36 @@ def test_rows_report_a_missing_lane_as_a_failure():
     out = rehearsal.rows(plan, {"a": {"peak_state": "genuine"}}, {"a": []})
     assert [r.ok for r in out] == [True, False]
     assert "not scored" in rehearsal.table(out)
+
+
+def test_an_optional_lane_is_checked_when_it_runs_and_skipped_when_it_does_not():
+    plan = {
+        "lanes": {"s1": {}, "ssl": {"optional": True}},
+        "calls": [
+            {
+                "id": "a",
+                "primary": {"peak": "genuine"},
+                "lanes": {"s1": {"peak": "likely_fake"}, "ssl": {"peak": "genuine"}},
+            }
+        ],
+    }
+    assert rehearsal.optional_roles(plan) == {"ssl"}
+    s1 = {"role": "s1", "peak_state": "likely_fake"}
+    three = rehearsal.rows(plan, {"a": {"peak_state": "genuine"}}, {"a": [s1]})
+    assert [(r.detector, r.ok) for r in three] == [("primary", True), ("s1", True)]
+    four = rehearsal.rows(
+        plan,
+        {"a": {"peak_state": "genuine"}},
+        {"a": [s1, {"role": "ssl", "peak_state": "suspicious"}]},
+    )
+    assert [(r.detector, r.ok) for r in four] == [("primary", True), ("s1", True), ("ssl", False)]
+
+
+def test_a_lane_the_file_does_not_list_is_shown_not_judged():
+    plan = {"calls": [{"id": "a", "primary": {"peak": "genuine"}, "lanes": {}}]}
+    extra = {"role": "other", "peak_state": "likely_fake", "first_caution_s": 6.0}
+    out = rehearsal.rows(plan, {"a": {"peak_state": "genuine"}}, {"a": [extra]})
+    assert out[1].detector == "other" and out[1].ok and "not judged" in out[1].why
 
 
 def test_the_demo_folder_check_refuses_team_audio_and_unplanned_calls():

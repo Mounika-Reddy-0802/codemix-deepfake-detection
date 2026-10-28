@@ -22,6 +22,7 @@ const Stage = (() => {
     lanes: () => [
       "Same call, three detectors. The English one rejects a real person. Our adapter fixes that.",
       "The final recipe, trained on far more voices and a real mobile codec, also catches the tool none of them ever saw.",
+      "If a fourth lane is showing: the larger encoder at its own threshold. One checkpoint, our next candidate, not a replacement.",
     ],
     live: () => [
       "Please hold this phone. A clone is calling you. [amber] A caution. [red, spoken] Likely cloned.",
@@ -262,5 +263,19 @@ const Stage = (() => {
     return (SAY[key] || (() => []))(await sayData());
   }
 
-  return { SCENES, mount, make, json, cite, pct, toast, socket, word, shortModel, lines };
+  // A scene renamed by its page (scene 2 counts the lanes it was given): stepper and notes.
+  function retitle(key, title) {
+    const s = SCENES.find((x) => x.key === key);
+    if (!s) return;
+    s.title = title;
+    const step = document.querySelector(`.steps a[href="${s.href}"]`);
+    if (step) {
+      step.querySelector(".t").textContent = title;
+      step.title = `Scene ${s.n}: ${title} (${s.minutes})`;
+    }
+    const handle = document.querySelector("#presenter .handle b");
+    if (handle && current && current.key === key) handle.textContent = `Scene ${s.n} · ${title}`;
+  }
+
+  return { SCENES, mount, make, json, cite, pct, toast, socket, word, shortModel, lines, retitle };
 })();
