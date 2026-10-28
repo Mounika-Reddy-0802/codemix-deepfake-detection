@@ -189,7 +189,10 @@ unchanged.
 - *Check audio (`/try`) grew from a microphone button into a checker.* Upload a file (drag and
   drop), record a line, or pick one of the prepared samples; the result is the verdict, what
   to do about it, three facts, the window timeline against the threshold and a player for what
-  was checked, with the spontaneous-speech limit under it.
+  was checked, with the spontaneous-speech limit under it. A recording shorter than the
+  ladder's first two windows (6 s) is refused with that reason and the page reads "Too short to
+  judge": a 5 s upload used to come back with the word "Listening" and no advice, because one
+  window can never reach a verdict.
 - *Performance leads with what it catches* (the three results above, as cards) before the
   three limits, which stay as they were, with Details below.
 - *Prepared calls are named for what they are, never for how they turned out*: "Tortoise cloned
@@ -225,7 +228,8 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
 | Track 2: screens checked at 1366x768 and 1920x1080 | each scene's default view reads on one screen at 1366x768, scene 2's Details view included; no page errors on any page |
 | Product: click-through in two headless browsers (1366x768) | 28 of 28 checks: samples judged (XTTS-v2 likely cloned, genuine caller genuine), an uploaded RVC conversion likely cloned, a test call in the log as "clone caught", the Overview's status and recent calls, keys 1-6 and the walkthrough arrows, Performance's tabs and six headline numbers, the live call over WebRTC (phone and mirror "Likely cloned", caller never told) and the call in the log; no page errors |
 | Product: rehearsal after the redesign (live model + 4 detectors) | 40 of 40 rows PASS, twice in a row: "PASS on every row, 2 rounds in a row." Round 1 took 425 s; round 2 took 3,946 s, a stall most likely from the laptop sleeping mid-round, and every row still passed |
-| Product: backup recording | `backup_demo.mp4` (3:51, 1920x1080, the four Track 2 scenes with the call audio laid back in and the phone beside the laptop in the live call); to be recorded again on the product pages |
+| Product: backup recording | `backup_demo.mp4` recorded again on the product pages (3:51, 1920x1080): the walkthrough's four pages, then the call log and Check audio, with the call audio laid back in and the phone beside the laptop in the live call; 9 of 9 checks, every lane's outcome on time (45.3 s for the 45.1 s Tortoise call). The four-scene recording is kept as `backup_demo_four_scenes.mp4` |
+| Product: Check audio, a 5.3 s upload | refused with "record at least 6 seconds" and shown as "Too short to judge"; a prepared sample still judged (headless, 1366x768, no page errors) |
 
 ## Honest limitations
 
@@ -281,7 +285,6 @@ pytest tests -q --deselect tests/test_env_check.py
 ## What's next
 
 Krishna's review of the product pages, then the human part of B7: two timed rehearsals with
-the phone in hand, and the backup recording made again on the product pages (the script that
-made the first one is ready). Show the product once to someone outside the team and change any
-sentence they have to ask about. Four detectors need the laptop on mains power; without the
+the phone in hand. Show the product once to someone outside the team and change any sentence
+they have to ask about. Four detectors need the laptop on mains power; without the
 larger encoder's weights Compare falls back to three and says so.

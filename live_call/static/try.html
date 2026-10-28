@@ -71,7 +71,7 @@
           <label class="drop" id="drop">
             <span class="ic" id="dropIc"></span>
             <b>Drop an audio file here, or click to choose one</b>
-            <span class="small muted">WAV, MP3, M4A, OGG or WebM · at least 4 seconds · up to 10 MB</span>
+            <span class="small muted">WAV, MP3, M4A, OGG or WebM · at least 6 seconds, 12 or more is best · up to 10 MB</span>
             <input type="file" id="file" accept="audio/*,.m4a,.webm" hidden />
           </label>
         </div>
@@ -125,6 +125,10 @@
         $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: "No speech heard" }), "Try a louder or longer recording."])]));
         return;
       }
+      if (r.peak_state === "listening") {  // speech in too few windows for the ladder to judge
+        $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: "Too short to judge" }), `Only ${r.scored_windows === 1 ? "one window" : r.scored_windows + " windows"} of speech heard, too little for a verdict. Try a recording of 12 seconds or more.`])]));
+        return;
+      }
       const state = r.peak_state;
       const canvas = make("canvas", { id: "tl" });
       $("result").replaceChildren(
@@ -168,7 +172,8 @@
       try {
         show(await json("/api/try", { method: "POST", body: form }), blob, what);
       } catch (e) {
-        $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: "Could not check it" }), e.message])]));
+        const short = e.message.startsWith("record at least");
+        $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: short ? "Too short to judge" : "Could not check it" }), short ? e.message[0].toUpperCase() + e.message.slice(1) + "." : e.message])]));
       }
     }
 

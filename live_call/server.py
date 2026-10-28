@@ -537,7 +537,7 @@ def create_app(state: App | None = None) -> FastAPI:
             }
         )
 
-    # ----------------------------------------------------------------- demo scenes
+    # ------------------------------------------------------------------ demo pages
     demo_routes.add_lane_routes(api, shared, find_clip, clip_audio)
     demo_routes.add_live_routes(
         api,

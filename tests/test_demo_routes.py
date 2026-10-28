@@ -272,9 +272,12 @@ def test_try_it_judges_a_recording_like_a_call(client):
         w.setnchannels(1)
         w.setsampwidth(2)
         w.setframerate(16000)
-        w.writeframes(b"\x00\x00" * 16000)
+        w.writeframes(b"\x00\x00" * 16000 * 5)
+    # 5 s holds one window: no verdict could come of it, so it is refused with the reason
     too_short = client.post("/api/try", files={"file": ("s.wav", short.getvalue(), "audio/wav")})
-    assert too_short.status_code == 400 and "4 seconds" in too_short.json()["detail"]
+    assert too_short.status_code == 400 and "6 seconds" in too_short.json()["detail"]
+    page = (ROOT / "live_call" / "static" / "try.html").read_text(encoding="utf-8")
+    assert "Too short to judge" in page and "at least 6 seconds" in page
 
 
 def test_qr_codes_are_standalone_svg(client):
