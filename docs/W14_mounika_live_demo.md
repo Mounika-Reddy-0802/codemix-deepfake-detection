@@ -86,7 +86,28 @@ loads it through Krishna's `predict.load_score_fn(kind="ssl_aasist")` (my own lo
 and `run_demo.bat` adds it as a fourth lane at its own threshold
 (`configs/threshold_ssl_aasist.yaml`) as soon as `ssl_aasist_final_s1234_fp16.pt` is in
 `C:\dfdata\checkpoints`; scene 2 then reads "Four detectors" and fits four lanes on a
-768-line projector (checked with a stand-in fourth lane).
+768-line projector.
+
+**The fourth lane on the real checkpoint (morning of 28 October).** With the weights copied
+over, every demo call was replayed twice through all four lanes and the SSL-AASIST verdicts
+were identical both times: green on the three genuine calls, likely cloned on the four
+clone calls (caution 6 s, likely cloned 10 s, two seconds ahead of the final recipe each
+time), including the Tortoise call the final recipe lets through, and only a caution (16 s)
+on the spontaneous caller. Those observed verdicts are now the lane's expectations in
+`configs/demo_rehearsal.json`, marked optional: the rehearsal judges the lane when the server
+runs it and skips it on a laptop without the weights. They are eight calls chosen for the
+final recipe, so they are a rehearsal check, not evidence; the evidence is the real-call
+table in scene 6. Wiring it in also found a bug of mine: `run_demo.bat` had a tab where
+`configs\threshold_ssl_aasist.yaml` needed a backslash, so the lane loaded with no threshold.
+The stand-in check had set the lanes by hand and missed it; the rehearsal through the script
+caught it.
+
+**The early-warning study, as it landed (on main).** Krishna's stricter gate for the first
+10 s of a call, set on dev only, is now on scene 6's third card, without and with the gate,
+from `experiments/results/early_warning_v1/summary.json`: over G.711 it clears two of the
+final recipe's three warned genuine live calls, but as recorded it warns one more, it delays
+the first caution on the XTTS-v2 calls, and it silences 83 of the 120 early windows, speech
+included. The card ends with Krishna's conclusion: the gate needs real development calls.
 
 **One rule for every page.** No page holds a number. They ask `/api/headline`,
 `/api/real_calls` and `/api/limits`, which answer from `live_call/results_view.py` with each
@@ -101,6 +122,7 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
 | Check | Result |
 |---|---|
 | Rehearsal, 8 calls x (live model + 3 lanes) | 32 of 32 rows PASS, twice in a row (about 150 s a round) |
+| Rehearsal, 8 calls x (live model + 4 lanes, SSL-AASIST weights present) | 40 of 40 rows PASS, twice in a row (about 300 s a round) |
 | Scene 2, genuine new speaker | English-only: caution 6 s, likely cloned 10 s; deployed and final: no low window |
 | Scene 2, Tortoise call (unseen tool) | final: caution 8 s, likely cloned 12 s; deployed: caution 12 s, never likely cloned; English-only: likely cloned 16 s |
 | Scene 3, XTTS clone through WebRTC (two headless browsers) | receiver: caution 0:08, likely cloned 0:12, full-screen alarm; caller page: no verdict |
@@ -109,6 +131,7 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
 | Scene 5, shuffle into 100 ms pieces | XTTS clone: 23 of 23 windows low before and after (likely cloned); genuine new speaker: 0 of 21 low before, 1 of 21 after (genuine both times) |
 | Cold start of `run_demo.bat` | `/demo` served at 1.2 s, all three models loaded at 8.4 s |
 | CPU cost of three lanes | about 0.6 s per 2 s hop (one 46 s call scored in 13-16 s offline) |
+| CPU cost of four lanes | about 1.3 s per 2 s hop (the 45 s Tortoise call scored in 27 s offline) |
 | Test suite | 1,110 passing, the console's browser tests included (run against the live server) |
 
 ## Honest limitations
@@ -126,10 +149,12 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
   WebRTC path was checked once per call type, not twice per call.
 - **The deployed adapter does not "waver" on the genuine corpus calls**, as the plan
   expected: it stays green. The presenter's line says only what happens.
-- **The fourth lane is untested on the real checkpoint**: the weights are on Krishna's laptop,
-  not this one. Its threshold file is committed; the lane, the layout and the rehearsal
-  (a lane the file does not list is reported, not judged) were checked with a stand-in.
-- **The early-warning study is still pending**; scene 6 says so until its file is committed.
+- **Four lanes leave less headroom.** SSL-AASIST is the slowest model: one 45 s call scores
+  through all four lanes in 27 s offline, about 1.3 s of every 2 s hop, against 0.6 s for
+  three. Scene 2 keeps up on this laptop on mains power; on battery, or if the timelines lag
+  the audio, start the server without the weights (three lanes).
+- **The SSL-AASIST lane's expectations were observed, not predicted**: written down after two
+  identical replays, unlike the other lanes, whose verdicts were stated before the check.
 - **The stage player starts from the speaker's clean MUCS recording**, the source of the demo
   call, not from the exact clips joined into it.
 
@@ -149,7 +174,6 @@ pytest tests -q --deselect tests/test_env_check.py
 ## What's next
 
 The human part of B7: two timed rehearsals with the phone in hand, the backup screen
-recording, then review and merge (#63 first: this branch carries its commit). Copy
-`ssl_aasist_final_s1234_fp16.pt` from Krishna's laptop into `C:\dfdata\checkpoints`, rehearse
-once to see what the fourth lane does on each call, and only then write its expectations into
-`configs/demo_rehearsal.json`.
+recording, then review and merge. Decide before the review whether scene 2 shows three
+lanes or four: four tells the "next candidate" story on the call itself, three keeps the
+scene to the plan and to two minutes.
