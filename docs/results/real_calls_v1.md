@@ -130,7 +130,10 @@ calls over G.711; as recorded it clears one of the four (C10) but cautions anoth
 the count stays at four. One call over G.711 (C05; two as recorded) still reaches "likely
 cloned", its run including two speech windows 8-14 s into the call (-22 dBFS, scoring 0.01). A stricter
 speech gate for the first seconds of a call would help but not suffice; it and the operating
-point should be set together on a separate set of real development calls, not on these.
+point should be set together on a separate set of real development calls, not on these. Set on
+the dev clips alone, such a gate clears two of the three over G.711 but warns one call more as
+recorded, delays every model's warnings and silences most early speech, because these calls are
+far quieter than the normalised dev clips (`early_warning_v1.md`).
 
 ## Why the deployed model fails: the call chain, one stage at a time
 

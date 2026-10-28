@@ -278,7 +278,11 @@ windows that raised the warning starts there. But when we replay the calls with 
 treated as silence, as a check that chooses nothing, two of the three warned calls clear over
 G.711; as recorded one clears but another call is cautioned instead, and one call still reaches
 "likely cloned", its run including two speech windows 8-14 seconds in. We first guessed the phone's noise suppression, then the silence alone; the
-data corrected us both times, and we say so.
+data corrected us both times, and we say so. If asked why we did not just raise the gate: we
+tried one set on the dev clips only (the first 10 s, quieter than -29.9 dBFS treated as
+silence). Over G.711 it clears two of the three warned calls, but as recorded it warns one
+more, it delays every model's warnings by 2-5 s, and it silences most early speech, because
+real calls are much quieter than the dev clips. So the gate needs real development calls.
 
 ## 8. Limitations, said plainly
 

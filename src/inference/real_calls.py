@@ -379,8 +379,13 @@ def without_first_window(windows: pd.DataFrame, alpha: float = EMA_ALPHA) -> pd.
     how much of each verdict rests on the window that spans the quiet before the first
     word. It is not an operating rule, and nothing is chosen with it.
     """
+    return as_silence(windows, windows["window"] == 0, alpha)
+
+
+def as_silence(windows: pd.DataFrame, mask: pd.Series, alpha: float = EMA_ALPHA) -> pd.DataFrame:
+    """The same calls with the masked windows treated as silence, re-smoothed as live."""
     out = windows.copy()
-    out.loc[out["window"] == 0, ["score", "smoothed"]] = np.nan
+    out.loc[mask, ["score", "smoothed"]] = np.nan
     smoothed = pd.Series(np.nan, index=out.index)
     for _, call in out.sort_values(["filepath", "window"]).groupby("filepath", sort=False):
         ema = None
