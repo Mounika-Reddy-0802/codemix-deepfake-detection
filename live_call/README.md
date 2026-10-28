@@ -24,10 +24,10 @@ caller audio ──▶ 16 kHz PCM frames ──▶ 4 s windows every 2 s ──�
 | `webrtc_harness/rtc_server.py` | aiortc signalling; one audio source per participant |
 | `replay.py` | a file played as a call through the same path |
 | `lanes.py` | several detectors on one call, each the live path with its own model and threshold (`DFD_LANES`) |
-| `demo_routes.py` | the final-review scenes' routes: lanes, the phone's address and QR code, results, shuffle proof, try it |
-| `results_view.py` | every number the scene pages show, read from a committed result file with its source |
+| `demo_routes.py` | the product pages' APIs: lanes, the phone's address and QR code, results, shuffle proof, check a recording |
+| `results_view.py` | every number the product pages show, read from a committed result file with its source |
 | `rehearsal.py` | compares every demo call's observed verdict with `configs/demo_rehearsal.json` |
-| `static/` | the six scene pages and their shared look (`stage.css`, `stage.js`), overview, dashboard, handsets, console |
+| `static/` | the product's pages and their shared shell (`stage.css`, `stage.js`), evaluator home, dashboard, handsets, console |
 
 ---
 
@@ -85,7 +85,7 @@ window scores in under a second, faster than the 2 s hop.
 | Page | What it shows |
 |---|---|
 | `/` | overview, the measured results of every system (final recipe first), **try a clip** judged as a call, **play a prepared call** |
-| `/demo` | the final review's guided flow: four scenes in order with the presenter's lines (section 5) |
+| `/demo` | the product's overview, the first of its six pages (section 5) |
 | `/console` | both handsets, the signal path and the live analysis on one screen |
 | `/dashboard` | every live call: verdict light, P(genuine) timeline against the threshold, warning tone and banner, alert log |
 | `/phone/caller`, `/phone/receiver` | the two handsets on two devices; only the receiver sees a verdict |
@@ -213,25 +213,28 @@ stand-in detector, so it needs no checkpoint.
 `demo_calls_v2\` (or `demo_clips_final\`) and `stage_player\`; the English-only checkpoint
 comes from Git LFS (`checkpoints/baseline/best.pt`).
 
-| Scene | Page | Routes behind it |
+| Rail | Page | Routes behind it |
 |---|---|---|
-| 1 The threat | `/threat` | `GET /api/headline` |
-| 2 Four detectors | `/lanes` | `GET /api/lanes`, `POST /api/replay_lanes/{id}` (real time, streamed to `/ws/dashboard` tagged by lane and run; `?realtime=false` returns every lane's series), `POST /api/replay_lanes_stop` |
-| 3 Live call | `/live`, `/phone/receiver` | `GET /api/tunnel` (the https tunnel, else this laptop's Wi-Fi address), `GET /api/qr?text=` |
-| 4 Limits | `/limits` | `GET /api/limits`, `GET /api/headline`, `GET /api/real_calls` |
-| More: Real network | `/network` | `GET /api/real_calls`, `GET /api/stage_player`, `GET /api/stage_player/{stage}/audio` |
-| More: Why trust it | `/trust` | `POST /api/shuffle/{id}`, `GET /api/shuffle/{id}/audio`, `GET /api/headline` |
-| More: Try it | `/try` | `POST /api/try` |
+| Overview | `/demo` | `GET /api/health`, `GET /api/lanes`, `GET /api/tunnel`, `GET /api/sessions`, `GET /api/headline`, `GET /api/real_calls` |
+| Live call | `/live`, `/phone/receiver` | `GET /api/tunnel` (the https tunnel, else this laptop's Wi-Fi address), `GET /api/qr?text=` |
+| Check audio | `/try` | `POST /api/try` (a file, a recording or a prepared sample, judged by the live model's windows and ladder), `GET /api/demo-clips` |
+| Call log | `/history` | `GET /api/sessions` (each call's `peak_state`, `first_warning_s`, `duration`), `POST /api/replay/{id}?realtime=false&wait=true` (run a test call), `/ws/dashboard` |
+| Compare | `/lanes` | `GET /api/lanes`, `POST /api/replay_lanes/{id}` (real time, streamed to `/ws/dashboard` tagged by lane and run; `?realtime=false` returns every lane's series), `POST /api/replay_lanes_stop` |
+| Performance | `/limits` | `GET /api/limits`, `GET /api/headline`, `GET /api/real_calls` |
+| Performance tab | `/threat` | `GET /api/headline` |
+| Performance tab | `/network` | `GET /api/real_calls`, `GET /api/stage_player`, `GET /api/stage_player/{stage}/audio` |
+| Performance tab | `/trust` | `POST /api/shuffle/{id}`, `GET /api/shuffle/{id}/audio`, `GET /api/headline` |
 
-Every page follows the same rules: one sentence at the top, at most three numbers on screen
-and the rest behind **Details** (`Stage.details`), the four names from `Stage.NAMES` whatever a
-lane is called in `DFD_LANES`, and the verdict key drawn by `stage.js` at the foot of the page.
-`tests/test_demo_routes.py` checks the flow, the one-sentence titles, the key line, and that no
-page shows a system code or a checkpoint name.
+Every page follows the same rules: a plain title naming the feature, the rest of a long result
+behind **Details** (`Stage.details`), the four names from `Stage.NAMES` whatever a lane is
+called in `DFD_LANES`, prepared calls named for what they are (`Stage.callName`), and the
+verdict key drawn by `stage.js` at the foot of the page. `tests/test_demo_routes.py` checks the
+rail's order, the walkthrough, a title and the key line on every page, and that no page shows
+a system code, a checkpoint name or the word "scene".
 
 | Variable | What it sets |
 |---|---|
-| `DFD_LANES` | the scene-2 detectors, `name=checkpoint=threshold_file` separated by commas; a checkpoint with `ssl` in its name loads as SSL-AASIST (`predict.load_score_fn(kind="ssl_aasist")`); `run_demo.bat` adds it as a fourth lane when its weights are present |
+| `DFD_LANES` | the detectors on Compare, `name=checkpoint=threshold_file` separated by commas; a checkpoint with `ssl` in its name loads as SSL-AASIST (`predict.load_score_fn(kind="ssl_aasist")`); `run_demo.bat` adds it as a fourth lane when its weights are present |
 | `STAGE_PLAYER_DIR` | the stage player's audio (`scripts/prepare_stage_player.py`); its scores are committed in `experiments/results/stage_player_v1.json` |
 | `TUNNEL_URL_FILE` | where `scripts/start_tunnel.py` writes the tunnel's https address |
 

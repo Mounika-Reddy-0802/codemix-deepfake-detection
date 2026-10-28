@@ -6,7 +6,8 @@ misfire in front of the mentor and the external reviewer. Track B of the review 
 it on the final recipe, every number read from a committed result file, every call checked
 against a written-down verdict before it is shown. On 28 October, after the morning's
 feedback ("confusing, too much information"), Track 2 cut it to four scenes with one message
-each; that part is at the end of the next section.
+each; in the afternoon the scenes became a working product, Asli, whose pages are named for
+what they do. Both parts are at the end of the next section.
 
 ## What I did, and why it is built this way
 
@@ -159,6 +160,46 @@ reads did.
   `week14-mounika-demo`, fast-forwarded to main after #62 merged: the same starting point,
   without a third week-14 branch.
 
+**The product: Asli (28 October, afternoon, after #64 merged).** Shown the four scenes, the
+question was why the demo reads like slides ("Scene 1, 2, 3, 4") and not like a working
+project. So the same pages became one product with the features a user would look for. The
+detector, the live path, the thresholds, the call set and `configs/demo_rehearsal.json` are
+unchanged.
+
+- *A navigation rail instead of a scene stepper.* Six pages named for what they do: Overview,
+  Live call, Check audio, Call log, Compare, Performance; the status light (Ready) sits at the
+  bottom of the rail. No page says "scene"; a test now fails if one does. The evidence pages
+  (why it is needed, the real phone network, the trust check) are tabs inside Performance.
+  The presenter keeps the eight-minute walkthrough on the arrow keys (Overview, Compare, Live
+  call, Performance) and the notes on `N`; keys `1`-`6` open the rail's pages.
+- *An Overview that is a home screen.* What it does in one line, two actions (start a
+  protected call, check a recording), a Protection card (on or off, the live model, the four
+  detectors, how the phone pairs, how many calls it has judged), three measured results with
+  their files (94.8% of genuine Hindi-English speech called fake by the English-only detector;
+  5 of 6 XTTS-v2 calls over a real mobile network warned; 6 of 6 Tortoise clones warned in 60 s
+  calls), the first limit in one line, the features as tiles, the five latest calls and how it
+  works in four steps.
+- *A call log (`/history`, new).* Every call the server has judged, newest first: its
+  strongest warning (not the light it ended on), the time of the first warning, suspicious
+  windows and length; for a prepared call, whose truth is known, whether the clone was caught
+  or the real caller let through. "Run a test call" plays a prepared call through the live
+  path and the row arrives with its verdict. To keep the strongest warning, the session
+  snapshot (`live_call/session.py`) now also reports `peak_state`, `duration` and
+  `first_warning_s`; a test covers it.
+- *Check audio (`/try`) grew from a microphone button into a checker.* Upload a file (drag and
+  drop), record a line, or pick one of the prepared samples; the result is the verdict, what
+  to do about it, three facts, the window timeline against the threshold and a player for what
+  was checked, with the spontaneous-speech limit under it. A recording shorter than the
+  ladder's first two windows (6 s) is refused with that reason and the page reads "Too short to
+  judge": a 5 s upload used to come back with the word "Listening" and no advice, because one
+  window can never reach a verdict.
+- *Performance leads with what it catches* (the three results above, as cards) before the
+  three limits, which stay as they were, with Details below.
+- *Prepared calls are named for what they are, never for how they turned out*: "Tortoise cloned
+  voice, call 1" and "call 2", not "caught" and "it misses", wherever a title is shown.
+- *The name.* "Asli" (असली, genuine) is one constant in `stage.js`; the team can change it in
+  one line.
+
 **One rule for every page.** No page holds a number. They ask `/api/headline`,
 `/api/real_calls` and `/api/limits`, which answer from `live_call/results_view.py` with each
 value's file and field; `tests/test_results_view.py` resolves every cited field in its file,
@@ -182,9 +223,13 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
 | Cold start of `run_demo.bat` | `/demo` served at 1.2 s, all three models loaded at 8.4 s |
 | CPU cost of three lanes | about 0.6 s per 2 s hop (one 46 s call scored in 13-16 s offline) |
 | CPU cost of four lanes | about 1.3 s per 2 s hop (the 45 s Tortoise call scored in 27 s offline) |
-| Test suite | 1,133 passing after Track 2, the console's browser tests included (run against the live server) |
+| Test suite | 1,133 passing after Track 2; 1,136 after the product redesign, the console's browser tests included (run against the live server) |
 | Track 2: rehearsal after the simplification (live model + 4 detectors) | 40 of 40 rows PASS, twice in a row (243 s and 285 s): "PASS on every row, 2 rounds in a row." |
 | Track 2: screens checked at 1366x768 and 1920x1080 | each scene's default view reads on one screen at 1366x768, scene 2's Details view included; no page errors on any page |
+| Product: click-through in two headless browsers (1366x768) | 28 of 28 checks: samples judged (XTTS-v2 likely cloned, genuine caller genuine), an uploaded RVC conversion likely cloned, a test call in the log as "clone caught", the Overview's status and recent calls, keys 1-6 and the walkthrough arrows, Performance's tabs and six headline numbers, the live call over WebRTC (phone and mirror "Likely cloned", caller never told) and the call in the log; no page errors |
+| Product: rehearsal after the redesign (live model + 4 detectors) | 40 of 40 rows PASS, twice in a row: "PASS on every row, 2 rounds in a row." Round 1 took 425 s; round 2 took 3,946 s, a stall most likely from the laptop sleeping mid-round, and every row still passed |
+| Product: backup recording | `backup_demo.mp4` recorded again on the product pages (3:51, 1920x1080): the walkthrough's four pages, then the call log and Check audio, with the call audio laid back in and the phone beside the laptop in the live call; 9 of 9 checks, every lane's outcome on time (45.3 s for the 45.1 s Tortoise call). The four-scene recording is kept as `backup_demo_four_scenes.mp4` |
+| Product: Check audio, a 5.3 s upload | refused with "record at least 6 seconds" and shown as "Too short to judge"; a prepared sample still judged (headless, 1366x768, no page errors) |
 
 ## Honest limitations
 
@@ -194,9 +239,15 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
 - **The tunnel tool is not installed on this laptop.** Downloading cloudflared was not done
   tonight; without it the phone uses the laptop's Wi-Fi address over plain http, listen-only
   (checked headlessly). Windows may ask to allow Python through the firewall on first run.
-- **"Try it" has not heard a real voice.** It records from the laptop microphone, clean,
-  while the final recipe was trained on phone-line audio. Try it with your own voice before
-  the review; if it warns, leave it out.
+- **Check audio's recorder has not heard a real voice.** It records from the laptop
+  microphone, clean, while the final recipe was trained on phone-line audio. Try it with your
+  own voice before the review; if it warns, show uploads and samples only. Uploads and samples
+  were checked headlessly.
+- **The call log lives in memory.** It lists the calls since the server started (the last
+  twenty that ended, plus any live), not a history kept across restarts.
+- **The product redesign came after Track 2's freeze.** #64 merged at 13:10 with the four
+  scenes; this redesign needs Krishna's review before it replaces them, and the four-scene
+  version on main stays the fallback until then.
 - **The rehearsal checks file replay, the room uses WebRTC.** Opus can move a score; the
   WebRTC path was checked once per call type, not twice per call.
 - **The deployed adapter does not "waver" on the genuine corpus calls**, as the plan
@@ -233,8 +284,7 @@ pytest tests -q --deselect tests/test_env_check.py
 
 ## What's next
 
-The human part of B7: two timed rehearsals with the phone in hand, the backup screen
-recording, then review and merge (Krishna, by the 15:30 freeze). Show the simplified flow once
-to someone outside the team and change any sentence they have to ask about. Four detectors
-need the laptop on mains power; without the larger encoder's weights scene 2 falls back to
-three and says so in its title.
+Krishna's review of the product pages, then the human part of B7: two timed rehearsals with
+the phone in hand. Show the product once to someone outside the team and change any sentence
+they have to ask about. Four detectors need the laptop on mains power; without the
+larger encoder's weights Compare falls back to three and says so.

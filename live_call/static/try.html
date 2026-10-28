@@ -3,51 +3,188 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Try it</title>
+  <title>Check a recording</title>
   <link rel="stylesheet" href="/static/stage.css" />
   <style>
-    .tryit { max-width: 860px; }
-    .tryit .script { font-size: 1.6rem; line-height: 1.45; font-weight: 600; padding: 1.1rem 1.3rem; border-radius: 14px; background: rgba(91, 149, 255, 0.10); border: 1px solid rgba(91, 149, 255, 0.4); margin: 0.9rem 0; }
-    .tryit .verdict { display: flex; align-items: center; gap: 1rem; margin-top: 1.1rem; }
-    .tryit .verdict .light { width: 40px; height: 40px; }
-    .tryit .verdict .vword { font-size: 2.4rem; font-weight: 800; }
-    .tryit canvas { width: 100%; height: 80px; display: block; margin-top: 0.8rem; }
-    .meter { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 0.8rem; }
-    .meter > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--fake), #ff9d9d); transition: width 0.2s linear; }
-    .why { margin-top: 1.2rem; }
-    .tryit [hidden] { display: none !important; }
+    .checker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 1.1rem; align-items: start; }
+    @media (max-width: 1050px) { .checker { grid-template-columns: 1fr; } }
+    .seg { display: inline-flex; padding: 0.22rem; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); margin-bottom: 1rem; }
+    .seg button { font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--dim); background: none; border: 0; padding: 0.5rem 1rem; border-radius: 9px; cursor: pointer; }
+    .seg button[aria-selected="true"] { background: rgba(91, 149, 255, 0.2); color: var(--ink); }
+    .panel[hidden] { display: none !important; }
+    .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center;
+      min-height: 15rem; border: 2px dashed var(--line-2); border-radius: 16px; padding: 1.4rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .drop:hover, .drop.over { border-color: rgba(91, 149, 255, 0.7); background: rgba(91, 149, 255, 0.06); }
+    .drop .ic { width: 3rem; height: 3rem; border-radius: 50%; display: grid; place-items: center; background: rgba(91, 149, 255, 0.14); color: #a9c7ff; }
+    .drop .ic svg { width: 1.5rem; height: 1.5rem; }
+    .drop b { font-size: 1.1rem; }
+    .script { font-size: 1.3rem; line-height: 1.45; font-weight: 600; padding: 1rem 1.2rem; border-radius: 14px; background: rgba(91, 149, 255, 0.10); border: 1px solid rgba(91, 149, 255, 0.4); margin: 0 0 0.9rem; }
+    .meter { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 0.9rem; }
+    .meter > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--genuine), var(--caution)); transition: width 0.1s linear; }
+    .samples { display: flex; flex-direction: column; }
+    .sample { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid var(--line); }
+    .sample:last-child { border-bottom: 0; }
+    .sample b { display: block; font-size: 0.98rem; }
+    .sample .tags { display: flex; gap: 0.35rem; margin-top: 0.25rem; flex-wrap: wrap; }
+    .sample .btn { padding: 0.5rem 0.95rem; font-size: 0.86rem; }
+
+    .result { min-height: 24rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    .result .waiting { flex: 1; display: grid; place-items: center; text-align: center; color: var(--dim); }
+    .result .waiting b { display: block; color: var(--ink); font-size: 1.1rem; margin-bottom: 0.3rem; }
+    .verdict { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.1rem; border-radius: 16px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); }
+    .verdict .light { width: 2.4rem; height: 2.4rem; }
+    .verdict .vword { font-size: 2.3rem; font-weight: 800; line-height: 1.05; }
+    .verdict .what { color: var(--dim); font-size: 0.9rem; margin-top: 0.2rem; }
+    .verdict.s-genuine { border-color: rgba(34, 201, 122, 0.4); background: rgba(34, 201, 122, 0.06); }
+    .verdict.s-suspicious { border-color: rgba(255, 176, 46, 0.45); background: rgba(255, 176, 46, 0.06); }
+    .verdict.s-likely_fake { border-color: rgba(255, 79, 79, 0.5); background: rgba(255, 79, 79, 0.07); }
+    .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
+    .facts div { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); border-radius: 12px; padding: 0.6rem 0.75rem; }
+    .facts b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+    .facts span { color: var(--dim); font-size: 0.8rem; }
+    .result canvas { width: 100%; height: 110px; display: block; }
+    .result audio { width: 100%; }
+    .busy { display: flex; align-items: center; gap: 0.7rem; color: var(--dim); }
+    .spin { width: 1.2rem; height: 1.2rem; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.15); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <main class="scene">
-    <a class="backlink" href="/limits">← Back to the limits</a>
-    <p class="kicker">For questions · Try it</p>
-    <h1 class="title one">Read a line: it is judged exactly as a live call.</h1>
-    <section class="card tryit">
-      <p class="muted" style="margin:0">Read this line into the laptop's microphone, twice if it is short. The same
-        windows, threshold and warning ladder as a call.</p>
-      <div class="script" id="script"></div>
-      <div class="row">
-        <button class="btn go big" id="rec">● Record</button>
-        <button class="btn ghost" id="next">Another line</button>
+    <header class="page-head">
+      <div>
+        <h1 class="title one">Check a recording</h1>
+        <p class="lede">Upload a voice note or call recording, record one now, or pick a prepared sample. It is judged
+          exactly like a live call: the same windows, threshold and warning ladder.</p>
       </div>
-      <div class="meter"><div id="level"></div></div>
-      <div class="verdict s-listening" id="tryVerdict" hidden><span class="light still"></span><span class="vword" id="tryWord"></span></div>
-      <div class="small muted" id="tryDetail"></div>
-      <canvas id="tryCanvas" hidden></canvas>
-      <div class="note limit why">It was trained on read Hindi-English speech that went through a phone line. A clean
-        laptop microphone, or speaking freely instead of reading, can be warned: that is the spontaneous-speech limit
-        on the previous page.</div>
-    </section>
+    </header>
+
+    <div class="checker">
+      <section class="card">
+        <div class="seg" role="tablist" aria-label="Where the audio comes from">
+          <button type="button" role="tab" data-p="upload" aria-selected="true">Upload a file</button>
+          <button type="button" role="tab" data-p="record" aria-selected="false">Record</button>
+          <button type="button" role="tab" data-p="samples" aria-selected="false">Samples</button>
+        </div>
+
+        <div class="panel" id="p-upload">
+          <label class="drop" id="drop">
+            <span class="ic" id="dropIc"></span>
+            <b>Drop an audio file here, or click to choose one</b>
+            <span class="small muted">WAV, MP3, M4A, OGG or WebM · at least 6 seconds, 12 or more is best · up to 10 MB</span>
+            <input type="file" id="file" accept="audio/*,.m4a,.webm" hidden />
+          </label>
+        </div>
+
+        <div class="panel" id="p-record" hidden>
+          <p class="small muted" style="margin-top:0">Read this line aloud into the laptop's microphone.</p>
+          <div class="script" id="script"></div>
+          <div class="row">
+            <button class="btn go" id="rec" type="button">● Record</button>
+            <button class="btn ghost" id="next" type="button">Another line</button>
+          </div>
+          <div class="meter"><div id="level"></div></div>
+        </div>
+
+        <div class="panel" id="p-samples" hidden>
+          <p class="small muted" style="margin-top:0">Prepared calls whose truth is known: real speakers and voices cloned with four different tools.</p>
+          <div class="samples" id="samples"><span class="muted small">Loading…</span></div>
+        </div>
+      </section>
+
+      <section class="card result" id="result" aria-live="polite">
+        <div class="waiting"><div><b>The verdict appears here</b>Choose a file, record a line or pick a sample.</div></div>
+      </section>
+    </div>
   </main>
 
   <script src="/static/stage.js"></script>
   <script>
-    const { json } = Stage;
+    const { make, json } = Stage;
     Stage.mount("try");
     const $ = (id) => document.getElementById(id);
+    $("dropIc").innerHTML = Stage.svg('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>');
 
-    // Read-speech lines in Hindi-English, like the training data (never free talk).
+    // ---- tabs
+    document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+      document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+      document.querySelectorAll(".panel").forEach((p) => (p.hidden = p.id !== "p-" + b.dataset.p));
+    }));
+
+    // ---- the result
+    const ADVICE = {
+      genuine: "No warning: the voice sounded genuine throughout.",
+      suspicious: "A few suspicious seconds in a row. Be careful: verify who is speaking before acting on it.",
+      likely_fake: "Likely cloned. Do not share codes or money; call the person back on a number you know.",
+    };
+    function busy(what) {
+      $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", { class: "busy" }, [make("span", { class: "spin" }), "Checking " + what + "…"])]));
+    }
+    function show(r, blob, what) {
+      if (!r.scored_windows) {
+        $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: "No speech heard" }), "Try a louder or longer recording."])]));
+        return;
+      }
+      if (r.peak_state === "listening") {  // speech in too few windows for the ladder to judge
+        $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: "Too short to judge" }), `Only ${r.scored_windows === 1 ? "one window" : r.scored_windows + " windows"} of speech heard, too little for a verdict. Try a recording of 12 seconds or more.`])]));
+        return;
+      }
+      const state = r.peak_state;
+      const canvas = make("canvas", { id: "tl" });
+      $("result").replaceChildren(
+        make("div", { class: "verdict s-" + state }, [
+          make("span", { class: "light" + (state === "likely_fake" ? " still" : "") }),
+          make("div", {}, [make("div", { class: "vword", text: Stage.word(state) }), make("div", { class: "what", text: what })]),
+        ]),
+        make("div", { class: "small", text: ADVICE[state] || "" }),
+        make("div", { class: "facts" }, [
+          make("div", {}, [make("b", { text: `${r.fake_leaning_windows} of ${r.scored_windows}` }), make("span", { text: "windows sounded cloned" })]),
+          make("div", {}, [make("b", { text: Stage.secs(r.first_caution_s) }), make("span", { text: "first warning" })]),
+          make("div", {}, [make("b", { text: Stage.secs(r.seconds) }), make("span", { text: "length checked" })]),
+        ]),
+        canvas,
+        blob ? make("audio", { controls: true, src: URL.createObjectURL(blob) }) : null,
+        make("div", { class: "note limit small", text: "It learned from read Hindi-English speech over a phone line. Free conversation, or a clean studio microphone, can be warned: that is a known limit on the Performance page." }),
+      );
+      drawTimeline(canvas, r.windows, r.threshold, r.seconds);
+    }
+    function drawTimeline(c, windows, t, seconds) {
+      const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d"); ctx.scale(dpr, dpr);
+      const tMax = Math.max(seconds || 0, ...windows.map((p) => p.t), 4);
+      const x = (v) => 8 + (w - 16) * (v / tMax), y = (v) => 8 + (h - 24) * (1 - v);
+      ctx.fillStyle = "rgba(147,166,195,0.8)"; ctx.font = "11px Segoe UI, sans-serif";
+      ctx.fillText("sounds genuine", 8, 14); ctx.fillText("sounds cloned", 8, h - 20);
+      ctx.setLineDash([5, 4]); ctx.strokeStyle = "rgba(230,238,250,0.5)";
+      ctx.beginPath(); ctx.moveTo(0, y(t)); ctx.lineTo(w, y(t)); ctx.stroke(); ctx.setLineDash([]);
+      for (const p of windows.filter((q) => q.score !== null)) {
+        ctx.fillStyle = p.score < t ? "#ff6b6b" : "#3ae48c";
+        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 5, 0, 7); ctx.fill();
+      }
+      ctx.fillStyle = "rgba(147,166,195,0.8)";
+      ctx.fillText("0:00", 8, h - 4); const end = Stage.secs(tMax); ctx.fillText(end, w - 8 - ctx.measureText(end).width, h - 4);
+    }
+    async function check(blob, filename, what) {
+      busy(what);
+      const form = new FormData();
+      form.append("file", blob, filename);
+      try {
+        show(await json("/api/try", { method: "POST", body: form }), blob, what);
+      } catch (e) {
+        const short = e.message.startsWith("record at least");
+        $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: short ? "Too short to judge" : "Could not check it" }), short ? e.message[0].toUpperCase() + e.message.slice(1) + "." : e.message])]));
+      }
+    }
+
+    // ---- upload
+    const drop = $("drop");
+    $("file").addEventListener("change", () => { const f = $("file").files[0]; if (f) check(f, f.name, f.name); $("file").value = ""; });
+    ["dragenter", "dragover"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add("over"); }));
+    ["dragleave", "drop"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove("over"); }));
+    drop.addEventListener("drop", (ev) => { const f = ev.dataTransfer.files[0]; if (f) check(f, f.name, f.name); });
+
+    // ---- record: read-speech lines in Hindi-English, like the training data (never free talk)
     const LINES = [
       "Main aaj office thoda late pahunchunga, kyunki traffic bahut zyada hai aur meeting bhi postpone ho gayi.",
       "Kal shaam ko hum sab dinner ke liye bahar ja rahe hain, tum bhi aa jao, bahut maza aayega.",
@@ -57,8 +194,7 @@
     const showLine = () => ($("script").textContent = "“" + LINES[line % LINES.length] + "”");
     $("next").onclick = () => { line += 1; showLine(); };
     showLine();
-
-    // long enough for the whole ladder: a caution needs 3 low windows, a warning 5 (2 s apart)
+    // long enough for the whole ladder: a caution needs a few low windows, a warning more (2 s apart)
     const SECONDS = 12;
     $("rec").textContent = `● Record ${SECONDS} seconds`;
     $("rec").onclick = async () => {
@@ -74,44 +210,40 @@
       meter();
       const rec = new MediaRecorder(stream), chunks = [];
       rec.ondataavailable = (e) => chunks.push(e.data);
-      rec.onstop = async () => {
+      rec.onstop = () => {
         cancelAnimationFrame(raf); $("level").style.width = "0%";
         stream.getTracks().forEach((t) => t.stop()); ctx.close();
-        btn.textContent = "Scoring…";
-        const form = new FormData();
-        form.append("file", new Blob(chunks, { type: rec.mimeType }), "recording.webm");
-        try {
-          // judged exactly as a live call: the same windows, threshold and warning ladder
-          const r = await json("/api/try", { method: "POST", body: form });
-          const state = r.scored_windows ? r.peak_state : "listening";
-          $("tryVerdict").hidden = false;
-          $("tryVerdict").className = "verdict s-" + state;
-          $("tryWord").textContent = r.scored_windows ? Stage.word(state) : "No speech heard";
-          $("tryDetail").textContent = !r.scored_windows ? "Speak a little louder and try again." :
-            `${r.fake_leaning_windows} of ${r.scored_windows} windows below the threshold` +
-            (r.first_caution_s !== null ? ` · first caution at ${Math.round(r.first_caution_s)} s` : " · no warning");
-          drawTry(r.windows, r.threshold);
-        } catch (e) { Stage.toast("Could not score the recording: " + e.message); }
         btn.disabled = false; btn.textContent = `● Record ${SECONDS} seconds`;
+        check(new Blob(chunks, { type: rec.mimeType }), "recording.webm", "Your recording");
       };
       rec.start(); btn.disabled = true;
       let left = SECONDS; btn.textContent = `Recording… ${left}`;
       const tick = setInterval(() => { left -= 1; btn.textContent = `Recording… ${left}`; if (left <= 0) { clearInterval(tick); rec.stop(); } }, 1000);
     };
-    function drawTry(windows, t) {
-      const c = $("tryCanvas"); c.hidden = false;
-      const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
-      c.width = w * dpr; c.height = h * dpr;
-      const ctx = c.getContext("2d"); ctx.scale(dpr, dpr);
-      const tMax = Math.max(SECONDS, ...windows.map((p) => p.t));
-      const x = (v) => 6 + (w - 12) * (v / tMax), y = (v) => 6 + (h - 12) * (1 - v);
-      ctx.setLineDash([5, 4]); ctx.strokeStyle = "rgba(230,238,250,0.6)";
-      ctx.beginPath(); ctx.moveTo(0, y(t)); ctx.lineTo(w, y(t)); ctx.stroke(); ctx.setLineDash([]);
-      for (const p of windows.filter((q) => q.score !== null)) {
-        ctx.fillStyle = p.score < t ? "#ff6b6b" : "#3ae48c";
-        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 5, 0, 7); ctx.fill();
-      }
-    }
+
+    // ---- samples: the prepared calls, whose truth is known
+    const TOOL = { xtts_v2: "XTTS-v2", rvc: "RVC", tortoise: "Tortoise", chatterbox: "Chatterbox", indicf5: "IndicF5" };
+    (async () => {
+      try {
+        const clips = await json("/api/demo-clips");
+        $("samples").replaceChildren(...clips.map((c) => make("div", { class: "sample" }, [
+          make("div", {}, [
+            make("b", { text: Stage.callName(c.id, c.title) }),
+            make("div", { class: "tags" }, [
+              make("span", { class: "tag " + (c.label === "spoof" ? "cloned" : "real"), text: c.label === "spoof" ? "cloned voice" : "real voice" }),
+              c.label === "spoof" && TOOL[c.tool] ? make("span", { class: "tag tool", text: TOOL[c.tool] }) : null,
+              c.seconds ? make("span", { class: "tag tool", text: Stage.secs(c.seconds) }) : null,
+            ]),
+          ]),
+          make("button", { class: "btn ghost", type: "button", text: "Check", onclick: async () => {
+            const title = Stage.callName(c.id, c.title);
+            busy(title);
+            const blob = await (await fetch(`/api/demo-clips/${c.id}/audio`)).blob();
+            check(blob, c.file || c.id + ".wav", title);
+          } }),
+        ])));
+      } catch (e) { $("samples").replaceChildren(make("span", { class: "muted small", text: "No prepared samples on this laptop." })); }
+    })();
   </script>
 </body>
 </html>

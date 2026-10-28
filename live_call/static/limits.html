@@ -3,17 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>What it cannot do yet</title>
+  <title>Performance</title>
   <link rel="stylesheet" href="/static/stage.css" />
   <style>
     main.scene { padding-top: 1.1rem; }
-    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 0.7rem; }
     @media (max-width: 1000px) { .cards { grid-template-columns: 1fr; } }
+    .sec { display: flex; align-items: baseline; gap: 0.8rem; margin: 1.3rem 0 0; }
+    .sec h2 { margin: 0; font-size: 1.2rem; }
+    .sec span { color: var(--dim); font-size: 0.88rem; }
+    .cards.wins .lim-like::before { background: var(--genuine); }
+    .lim-like { position: relative; overflow: hidden; border-radius: 20px; padding: 1.1rem 1.3rem 1.05rem; background: var(--panel); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.5rem; }
+    .lim-like::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; opacity: 0.85; }
+    .lim-like .what { font-size: 0.78rem; letter-spacing: 1.6px; text-transform: uppercase; color: #8ff0c0; font-weight: 700; }
+    .lim-like .head { font-size: 3.4rem; font-weight: 850; letter-spacing: -1.2px; line-height: 1; font-variant-numeric: tabular-nums; color: #fff; }
+    .lim-like .head .of { font-size: 1.7rem; font-weight: 700; color: var(--dim); letter-spacing: -0.5px; }
+    .lim-like .head .cite { border-bottom: 0; }
+    .lim-like .lbl { font-size: 1rem; line-height: 1.35; color: #e4ecf8; }
     .lim { position: relative; overflow: hidden; border-radius: 20px; padding: 1.2rem 1.3rem 1.15rem; background: var(--panel); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.55rem; }
     .lim::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--caution); opacity: 0.85; }
     .lim .what { font-size: 0.78rem; letter-spacing: 1.6px; text-transform: uppercase; color: #ffd18a; font-weight: 700; }
-    .lim .head { font-size: 4.1rem; font-weight: 850; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; color: #fff; }
-    .lim .head .of { font-size: 2rem; font-weight: 700; color: var(--dim); letter-spacing: -0.5px; }
+    .lim .head { font-size: 3.4rem; font-weight: 850; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; color: #fff; }
+    .lim .head .of { font-size: 1.7rem; font-weight: 700; color: var(--dim); letter-spacing: -0.5px; }
     .lim .head .cite { border-bottom: 0; }
     .lim .lbl { font-size: 1.05rem; line-height: 1.35; color: #e4ecf8; }
     .lim .next { margin-top: 0.2rem; padding: 0.5rem 0.7rem; border-radius: 12px; background: rgba(139, 108, 255, 0.10); border: 1px solid rgba(139, 108, 255, 0.35); color: #d9d0ff; font-size: 0.95rem; }
@@ -21,8 +32,6 @@
     .lim .ctx { color: var(--dim); font-size: 0.9rem; margin-top: auto; }
     .codec { margin-top: 1rem; font-size: 1.05rem; color: #cfe0f8; }
     .codec b { color: #fff; }
-    .bottom { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.2rem; }
-    .bottom .more { margin-left: auto; }
 
     .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
     @media (max-width: 1000px) { .detail-grid { grid-template-columns: 1fr; } }
@@ -45,15 +54,40 @@
       .lim .head .of { font-size: 1.6rem; }
       .lim .lbl { font-size: 0.98rem; }
       .codec { margin-top: 0.7rem; font-size: 0.98rem; }
-      .bottom { margin-top: 0.8rem; }
     }
   </style>
 </head>
 <body>
   <main class="scene">
-    <p class="kicker">Scene 4 · Limits</p>
-    <h1 class="title one">What it cannot do yet, with numbers.</h1>
+    <header class="page-head">
+      <div>
+        <h1 class="title one">Performance</h1>
+        <p class="lede">Measured on real mobile calls and on speakers and tools it never trained on, at thresholds fixed
+          beforehand. Hover any number to see the file it was read from.</p>
+      </div>
+      <div class="actions"><button class="btn details-btn" id="detailsBtn" type="button">Details</button></div>
+    </header>
 
+    <div class="sec"><h2>What it catches</h2><span>the final recipe, which judges every live call</span></div>
+    <section class="cards wins">
+      <article class="lim-like">
+        <div class="what">Real mobile network</div>
+        <div class="head" id="winReal">–</div>
+        <div class="lbl">XTTS-v2 cloned calls over a real mobile network got the red "likely cloned" warning</div>
+      </article>
+      <article class="lim-like">
+        <div class="what">A tool it never saw</div>
+        <div class="head" id="winUnseen">–</div>
+        <div class="lbl">Tortoise clones warned in 60-second calls; Tortoise is kept out of every training set</div>
+      </article>
+      <article class="lim-like">
+        <div class="what">Real people reading</div>
+        <div class="head" id="winGenuine">–</div>
+        <div class="lbl">genuine callers it had never heard, reading Hindi-English, were warned in 60-second calls</div>
+      </article>
+    </section>
+
+    <div class="sec"><h2>What it cannot do yet</h2><span>kept on screen on purpose</span></div>
     <section class="cards">
       <article class="lim">
         <div class="what">Spontaneous speech</div>
@@ -80,10 +114,6 @@
     <p class="codec" id="codec">On the 30 real mobile calls, the phone codec alone takes the deployed adapter down to its
       threshold; the final recipe holds.</p>
 
-    <div class="bottom">
-      <button class="btn details-btn" id="detailsBtn" type="button">Details</button>
-      <nav class="more" id="more" aria-label="More, for questions"><span>More, for questions:</span></nav>
-    </div>
 
     <section class="detail-grid" data-details hidden>
       <div class="card" id="sslCard"><h3>The larger encoder on the 30 real calls</h3><div class="muted">Loading…</div></div>
@@ -114,7 +144,6 @@
     const p1 = (v) => Number(v).toFixed(1) + "%";
     const p0 = (v) => Math.round(v) + "%";
     Stage.details($("detailsBtn"));
-    $("more").append(...Stage.MORE.map((m) => make("a", { href: m.href }, [make("b", { text: m.title }), make("small", { text: m.what })])));
 
     // "x of n", the count read as the stored share of the stored number of calls
     function ofCalls(pctEntry, callsEntry) {
@@ -131,6 +160,13 @@
         [limits, headline, real] = await Promise.all([json("/api/limits"), json("/api/headline"), json("/api/real_calls")]);
       } catch (e) { Stage.toast("Could not read the results: " + e.message); return; }
       const by = Object.fromEntries(limits.limits.map((l) => [l.key, l]));
+
+      // what it catches: the final recipe's stored results, each read as "x of n"
+      const xtts = real.table.find((x) => x.kind === "clone_replay" && x.tool === "xtts_v2");
+      if (xtts) $("winReal").replaceChildren(...countOf(xtts.final.likely, xtts.final.calls));
+      const c60 = headline.calls_60s_final;
+      $("winUnseen").replaceChildren(...ofCalls(c60.tortoise.fake_likely_pct, c60.tortoise.fake_calls));
+      $("winGenuine").replaceChildren(...ofCalls(c60.genuine_read.real_alerted_pct, c60.genuine_read.real_calls));
 
       const sp = by.spontaneous;
       $("spontHead").replaceChildren(...ofCalls(sp.numbers.final_genuine_warned_pct, sp.numbers.final_calls));

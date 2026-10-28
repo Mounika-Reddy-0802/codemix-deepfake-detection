@@ -1,4 +1,4 @@
-/* The final-review demo's stage: one projector-first look for every scene page.
+/* The product's look: one projector-first style for every page.
    Large type that reads from three metres, the paper's model colours, and verdict
    colours that keep their meaning everywhere (green genuine, amber caution, red cloned). */
 
@@ -51,50 +51,38 @@ a { color: #a9c7ff; }
 a:hover { color: #d2e2ff; }
 ::selection { background: rgba(91, 149, 255, 0.4); }
 
-/* ------------------------------------------------------------------ top bar */
-.topbar {
-  position: sticky; top: 0; z-index: 20;
-  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem;
-  padding: 0.6rem 1.4rem;
-  background: rgba(6, 10, 19, 0.82);
+/* --------------------------------------------------------------- the rail */
+:root { --rail: 6.1rem; }
+body.stage { padding-left: var(--rail); }
+.rail {
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 25; width: var(--rail);
+  display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem;
+  padding: 0.9rem 0.45rem 3.2rem;
+  background: rgba(8, 13, 24, 0.92); border-right: 1px solid var(--line);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
 }
-.brand { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; color: var(--ink); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; text-decoration: none; color: var(--ink); margin-bottom: 0.8rem; }
 .brand .mark {
-  width: 34px; height: 34px; border-radius: 10px; flex: none;
+  width: 2.5rem; height: 2.5rem; border-radius: 0.8rem; flex: none;
   display: grid; place-items: center;
   background: linear-gradient(140deg, #2a63e8, #19a56b);
   box-shadow: 0 6px 18px rgba(42, 99, 232, 0.35);
 }
-.brand .mark svg { width: 20px; height: 20px; }
-.brand b { font-size: 0.98rem; font-weight: 650; letter-spacing: 0.1px; display: block; line-height: 1.15; }
-.brand small { color: var(--dim); font-size: 0.74rem; display: block; }
-
-.steps { display: flex; gap: 0.15rem; flex-wrap: nowrap; justify-content: center; min-width: 0; }
-.steps a {
-  display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;
-  padding: 0.34rem 0.65rem 0.34rem 0.38rem; border-radius: 999px;
-  color: var(--dim); text-decoration: none; font-size: 0.8rem; font-weight: 550;
-  border: 1px solid transparent; transition: background 0.15s, color 0.15s, border-color 0.15s;
+.brand .mark svg { width: 1.45rem; height: 1.45rem; }
+.brand b { font-size: 0.95rem; font-weight: 750; letter-spacing: 0.3px; }
+.rail .nav { display: flex; flex-direction: column; gap: 0.25rem; }
+.rail .nav a {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.28rem;
+  padding: 0.6rem 0.2rem 0.5rem; border-radius: 0.8rem; text-decoration: none;
+  color: var(--dim); font-size: 0.7rem; font-weight: 600; text-align: center; line-height: 1.15;
+  transition: background 0.15s, color 0.15s;
 }
-.steps a .n {
-  width: 1.45rem; height: 1.45rem; border-radius: 50%; display: grid; place-items: center;
-  background: rgba(255, 255, 255, 0.07); color: var(--ink); font-size: 0.74rem; font-weight: 700;
-}
-.steps a:hover { color: var(--ink); background: var(--panel); }
-.steps a.on { color: var(--ink); background: rgba(91, 149, 255, 0.14); border-color: rgba(91, 149, 255, 0.45); }
-.steps a.on .n { background: var(--accent); color: #fff; }
-.steps a.done .n { background: rgba(34, 201, 122, 0.25); color: #9ff0c8; }
-/* narrower screens keep the current scene's name and number the others */
-@media (max-width: 1100px) { .steps a:not(.on) .t { display: none; } .steps a:not(.on) { padding-right: 0.38rem; } }
-@media (max-width: 760px) {
-  .topbar { grid-template-columns: 1fr auto; }
-  .steps { grid-column: 1 / -1; order: 3; justify-content: flex-start; overflow-x: auto; }
-  .brand small { display: none; }
-}
-
-.pills { display: flex; gap: 0.35rem; flex-wrap: nowrap; justify-content: flex-end; }
+.rail .nav a .ic svg { width: 1.35rem; height: 1.35rem; display: block; }
+.rail .nav a:hover { color: var(--ink); background: var(--panel-2); }
+.rail .nav a.on { color: #fff; background: rgba(91, 149, 255, 0.16); }
+.rail .nav a.on .ic { color: #a9c7ff; }
+.rail .nav a.on::before { content: ""; position: absolute; left: -0.45rem; top: 22%; bottom: 22%; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.rail .status { margin-top: auto; display: flex; justify-content: center; }
 .pill {
   display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 0.72rem; padding: 0.24rem 0.6rem; border-radius: 999px;
@@ -105,10 +93,33 @@ a:hover { color: #d2e2ff; }
 .pill.ok::before { background: var(--genuine); box-shadow: 0 0 8px rgba(34, 201, 122, 0.8); }
 .pill.warn::before { background: var(--caution); }
 .pill.bad::before { background: var(--fake); }
-.pill.plain::before { display: none; }
+.rail .status .pill { font-size: 0.68rem; padding: 0.22rem 0.5rem; }
+@media (max-width: 760px) {
+  body.stage { padding-left: 0; padding-top: 3.6rem; }
+  .rail { bottom: auto; right: 0; width: auto; height: 3.6rem; flex-direction: row; align-items: center; padding: 0 0.6rem; overflow-x: auto; }
+  .brand { flex-direction: row; margin: 0 0.4rem 0 0; }
+  .brand b { display: none; }
+  .rail .nav { flex-direction: row; }
+  .rail .nav a { padding: 0.35rem 0.45rem; }
+  .rail .nav a.on::before { display: none; }
+  .rail .status { margin: 0 0 0 auto; }
+  .presenter { left: 0; }
+}
+
+/* the tab strip of the evidence pages under Performance */
+.tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; margin: 0 0 1.2rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--line); }
+.tabs a { padding: 0.42rem 0.85rem; border-radius: 999px; font-size: 0.86rem; font-weight: 600; color: var(--dim); text-decoration: none; border: 1px solid transparent; }
+.tabs a:hover { color: var(--ink); background: var(--panel); }
+.tabs a.on { color: var(--ink); background: rgba(91, 149, 255, 0.14); border-color: rgba(91, 149, 255, 0.45); }
 
 /* -------------------------------------------------------------------- page */
-main.scene { max-width: 1480px; margin: 0 auto; padding: 1.6rem 1.6rem 6rem; }
+main.scene { max-width: 1480px; margin: 0 auto; padding: 1.5rem 1.8rem 6rem; }
+/* a page's header: what this feature is, in a line, and its actions on the right */
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem 1.6rem; flex-wrap: wrap; margin-bottom: 1.3rem; }
+.page-head > div:first-child { min-width: 0; flex: 1 1 32rem; }
+.page-head h1.title { margin-bottom: 0.3rem; }
+.page-head p.lede { margin: 0; }
+.page-head .actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
 @media (min-width: 1900px) { main.scene { max-width: 1720px; } }
 .kicker {
   font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
@@ -215,7 +226,7 @@ table.data tr.hl td { background: rgba(91, 149, 255, 0.06); }
 
 /* ------------------------------------------------------ presenter drawer */
 .presenter {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  position: fixed; left: var(--rail); right: 0; bottom: 0; z-index: 30;
   transform: translateY(calc(100% - 2.4rem)); transition: transform 0.25s ease;
   background: rgba(10, 16, 28, 0.96); border-top: 1px solid var(--line-2);
   backdrop-filter: blur(10px);
@@ -245,8 +256,8 @@ table.data tr.hl td { background: rgba(91, 149, 255, 0.06); }
 .light.still { animation: none !important; }
 @media (max-width: 900px) { .vkey .means { display: none; } }
 
-/* the one sentence a page exists to say */
-h1.title.one { font-size: 2.35rem; max-width: 62rem; letter-spacing: -0.4px; }
+/* a page's name: the feature, said plainly */
+h1.title.one { font-size: 2.1rem; max-width: 62rem; letter-spacing: -0.4px; }
 h1.title.one .cite { border-bottom-color: rgba(255, 143, 143, 0.6); }
 @media (max-height: 820px) and (min-width: 1101px) { h1.title.one { font-size: 1.9rem; } }
 
@@ -256,6 +267,15 @@ h1.title.one .cite { border-bottom-color: rgba(255, 143, 143, 0.6); }
 .btn.details-btn:hover:not(:disabled) { color: var(--ink); background: rgba(255, 255, 255, 0.1); }
 .btn.details-btn[aria-expanded="true"] { color: var(--ink); border-color: rgba(91, 149, 255, 0.6); background: rgba(91, 149, 255, 0.12); }
 [data-details][hidden] { display: none !important; }
+
+/* a verdict as a chip: light and word, for tables and lists */
+.vchip { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 650; font-size: 0.86rem; padding: 0.2rem 0.65rem 0.2rem 0.5rem;
+  border-radius: 999px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); white-space: nowrap; }
+.vchip .light { width: 9px; height: 9px; }
+.vchip.s-genuine { color: #8ff0c0; border-color: rgba(34, 201, 122, 0.35); background: rgba(34, 201, 122, 0.08); }
+.vchip.s-suspicious { color: #ffd18a; border-color: rgba(255, 176, 46, 0.4); background: rgba(255, 176, 46, 0.08); }
+.vchip.s-likely_fake { color: #ffa3a3; border-color: rgba(255, 79, 79, 0.45); background: rgba(255, 79, 79, 0.09); }
+.vchip.s-listening { color: var(--dim); }
 
 /* "More", for questions: the pages kept out of the main flow */
 .more { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; color: var(--dim); font-size: 0.88rem; }
@@ -268,7 +288,7 @@ h1.title.one .cite { border-bottom-color: rgba(255, 143, 143, 0.6); }
 .backlink:hover { color: var(--ink); }
 
 .toast {
-  position: fixed; top: 4.6rem; right: 1.4rem; z-index: 40; max-width: 30rem;
+  position: fixed; top: 1.2rem; right: 1.4rem; z-index: 40; max-width: 30rem;
   background: #2a1214; border: 1px solid rgba(255, 79, 79, 0.5); color: #ffc9c9;
   padding: 0.75rem 1rem; border-radius: 12px; box-shadow: var(--shadow); display: none;
 }
@@ -282,5 +302,4 @@ h1.title.one .cite { border-bottom-color: rgba(255, 143, 143, 0.6); }
   main.scene { padding: 1rem 1rem 5rem; }
   h1.title { font-size: 1.6rem; }
   .grid.two { grid-template-columns: 1fr; }
-  .topbar { padding: 0.6rem 1rem; }
 }

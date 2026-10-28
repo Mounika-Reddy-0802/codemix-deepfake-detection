@@ -1,15 +1,15 @@
-"""The final-review demo's scene routes, added to the live-call server by ``create_app``.
+"""The demo product's page routes, added to the live-call server by ``create_app``.
 
 ``server.py`` serves the live system itself: calls, handsets, Twilio, the dashboard.
-The routes here serve the demo's scenes on top of it, each in its own function so the
+The routes here serve the product's pages on top of it, each in its own function so the
 server reads as a list of what it offers:
 
-- :func:`add_lane_routes`: scene 2, several detectors on one call (``live_call.lanes``);
-- :func:`add_live_routes`: scene 3, the address and QR code the receiver's phone opens;
-- :func:`add_results_routes`: scenes 1, 4 and 6, numbers read from committed results
+- :func:`add_lane_routes`: Compare, several detectors on one call (``live_call.lanes``);
+- :func:`add_live_routes`: Live call, the address and QR code the receiver's phone opens;
+- :func:`add_results_routes`: Overview and Performance, numbers read from committed results
   (``live_call.results_view``) and the stage player's prepared audio;
-- :func:`add_shuffle_routes`: scene 5, the same call with its words shuffled away;
-- :func:`add_try_routes`: scene 6, a microphone recording judged exactly as a call is.
+- :func:`add_shuffle_routes`: the trust check, the same call with its words shuffled away;
+- :func:`add_try_routes`: Check audio, a recording judged exactly as a call is.
 
 Every route scores audio through the live path (``StreamingScorer`` + ``VerdictEngine``)
 or reads a committed result file; none holds a number of its own.
@@ -42,7 +42,7 @@ def add_lane_routes(
     find_clip: Callable[[str], dict],
     clip_audio: Callable[[dict], np.ndarray],
 ) -> None:
-    """Scene 2: ``GET /api/lanes``, ``POST /api/replay_lanes/{id}``, ``POST /api/replay_lanes_stop``."""
+    """Compare: ``GET /api/lanes``, ``POST /api/replay_lanes/{id}``, ``POST /api/replay_lanes_stop``."""
 
     @api.get("/api/lanes")
     async def lanes() -> JSONResponse:
@@ -155,7 +155,7 @@ def lan_addresses() -> list[str]:
 
 
 def add_live_routes(api: FastAPI, tunnel_file: Callable[[], Path]) -> None:
-    """Scene 3: ``GET /api/tunnel`` and ``GET /api/qr``, for the receiver's phone."""
+    """Live call: ``GET /api/tunnel`` and ``GET /api/qr``, for the receiver's phone."""
 
     @api.get("/api/tunnel")
     async def tunnel() -> JSONResponse:
@@ -185,7 +185,7 @@ def add_live_routes(api: FastAPI, tunnel_file: Callable[[], Path]) -> None:
 
 
 def add_results_routes(api: FastAPI, stage_dir: Callable[[], Path]) -> None:
-    """Committed results for the scene pages, and the stage player's prepared audio."""
+    """Committed results for the product pages, and the stage player's prepared audio."""
 
     @api.get("/api/headline")
     async def headline() -> JSONResponse:
@@ -243,7 +243,7 @@ def add_shuffle_routes(
     find_clip: Callable[[str], dict],
     clip_audio: Callable[[dict], np.ndarray],
 ) -> None:
-    """Scene 5: ``POST /api/shuffle/{id}`` and ``GET /api/shuffle/{id}/audio``."""
+    """Trust check: ``POST /api/shuffle/{id}`` and ``GET /api/shuffle/{id}/audio``."""
     from live_call.lanes import primary_lane
 
     cache: dict[tuple[str, int, float], np.ndarray] = {}
@@ -311,8 +311,9 @@ def add_shuffle_routes(
 
 
 def add_try_routes(api: FastAPI, shared, decode: Callable[[bytes, str], np.ndarray]) -> None:
-    """Scene 6's try it: ``POST /api/try``, a recording judged exactly as a live call is."""
+    """Check a recording: ``POST /api/try``, a recording judged exactly as a live call is."""
     from live_call.lanes import primary_lane
+    from src.inference.streaming import HOP_SECONDS, WINDOW_SECONDS
 
     @api.post("/api/try")
     async def try_it(file: Annotated[UploadFile, File()]) -> JSONResponse:
@@ -325,9 +326,17 @@ def add_try_routes(api: FastAPI, shared, decode: Callable[[bytes, str], np.ndarr
             audio = decode(data, file.filename or "")
         except Exception as exc:
             raise HTTPException(400, f"could not decode audio: {exc}") from exc
-        if audio.size < 16000 * 4:
-            raise HTTPException(400, "record at least 4 seconds: one window is 4 s of speech")
         lane = primary_lane(shared.detector, "Live model")
+        # no verdict before the ladder's first windows (6 s at 4 s windows, 2 s apart, two of
+        # them): a shorter recording would come back with no answer at all
+        windows = lane.config.min_windows
+        need = WINDOW_SECONDS + HOP_SECONDS * (windows - 1)
+        if audio.size < 16000 * need:
+            raise HTTPException(
+                400,
+                f"record at least {need:g} seconds: a verdict needs {windows} windows of "
+                f"{WINDOW_SECONDS:g} s, {HOP_SECONDS:g} s apart",
+            )
         result = (await score_lanes(audio, [lane], shared.detector.executor))[0]
         return JSONResponse(
             {
