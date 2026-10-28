@@ -400,6 +400,38 @@ SSL_CHECKPOINT = RESULTS / "ssl_checkpoint_v1" / "summary.json"
 SSL_CALIBRATION = RESULTS / "threshold_calibration_ssl_aasist.json"
 
 
+EARLY = RESULTS / "early_warning_v1" / "summary.json"
+
+
+def _early_row(model: str, gate: str, kind: str, tool: str) -> tuple[dict, str]:
+    rows = _json(EARLY)["models"][model][gate]
+    i = next(n for n, r in enumerate(rows) if r["kind"] == kind and r["tool"] == tool)
+    return rows[i], f"models.{model}.{gate}[{i}]"
+
+
+def _early_result() -> dict:
+    """The stricter early-call gate on the final recipe: without and with it, as #63's
+    follow-up measured it on the real calls (set on dev only, chooses nothing)."""
+    out = {}
+    for key, model, kind, tool, field in (
+        ("genuine_warned_g711", "final_g711", "genuine_live", "none", "warned"),
+        ("genuine_warned_recorded", "final_recorded", "genuine_live", "none", "warned"),
+        ("xtts_first_caution_s", "final_g711", "clone_replay", "xtts_v2", "median_first_caution_s"),
+    ):
+        pair = {}
+        for gate in ("without_gate", "with_gate"):
+            row, at = _early_row(model, gate, kind, tool)
+            pair[gate] = cite(row[field], EARLY, f"{at}.{field}")
+        pair["calls"] = cite(row["calls"], EARLY, f"{at}.calls")
+        out[key] = pair
+    final = _json(EARLY)["models"]["final_g711"]
+    out["early_windows"] = cite(final["early_windows"], EARLY, "models.final_g711.early_windows")
+    out["early_windows_gated"] = cite(
+        final["early_windows_gated"], EARLY, "models.final_g711.early_windows_gated"
+    )
+    return out
+
+
 def _ssl_landed() -> dict:
     """SSL-AASIST on the 30 real calls and the held-out calls, beside the final recipe."""
     files = (SSL_CALLS, SSL_CHECKPOINT, SSL_CALIBRATION)
@@ -607,6 +639,15 @@ def limits() -> dict:
                     "what": "A stricter speech gate for the first seconds of a call, chosen on simulated "
                     "development calls only, then time-to-warn measured on the 30 real calls.",
                     **_landed("late"),
+                    **(
+                        {
+                            "result": _early_result(),
+                            "caveat": "The real calls are far quieter than the normalised dev clips, "
+                            "so the gate also silences speech: it needs real development calls.",
+                        }
+                        if EARLY.is_file()
+                        else {}
+                    ),
                 },
                 "fix": "An early-call speech gate set relative to the caller's own level.",
             },

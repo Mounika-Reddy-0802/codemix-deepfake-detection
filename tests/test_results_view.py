@@ -179,6 +179,27 @@ def test_the_larger_encoder_landed_with_the_reviewed_real_call_counts():
             )
 
 
+def test_the_early_call_gate_landed_with_the_reviewed_counts():
+    """The stricter early gate on the final recipe, without and with it, from its summary."""
+    late = {lim["key"]: lim["tonight"] for lim in rv.limits()["limits"]}["late"]
+    assert late["landed"] and late["doc"] == "docs/results/early_warning_v1.md"
+    r = late["result"]
+    g711, recorded = r["genuine_warned_g711"], r["genuine_warned_recorded"]
+    # over the phone line it clears two of three warned genuine live calls; as recorded it adds one
+    assert (g711["without_gate"]["value"], g711["with_gate"]["value"], g711["calls"]["value"]) == (
+        3,
+        1,
+        12,
+    )
+    assert (recorded["without_gate"]["value"], recorded["with_gate"]["value"]) == (4, 5)
+    xtts = r["xtts_first_caution_s"]
+    assert xtts["with_gate"]["value"] > xtts["without_gate"]["value"]  # the gate delays warnings
+    assert (r["early_windows_gated"]["value"], r["early_windows"]["value"]) == (83, 120)
+    assert "real development calls" in late["caveat"]
+    for entry in _cited(r):
+        assert entry["value"] == _resolve(entry["source"])
+
+
 def test_the_spontaneous_tradeoff_is_read_from_its_sweep():
     t = rv.tradeoff_curve()
     if t is None:

@@ -24,8 +24,10 @@
     .limit .ssl { margin-top: 0.35rem; padding-left: 0.55rem; border-left: 3px solid #8b6cff; color: #d9d0ff; }
     .sslt { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 0.84rem; }
     .sslt th, .sslt td { text-align: left; padding: 0.18rem 0.3rem; border-bottom: 1px solid var(--line); font-weight: 500; }
+    .sslt td:not(:first-child) { white-space: nowrap; }
     .sslt th { color: var(--faint); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
     .sslt .v { color: #c9bcff; font-weight: 700; }
+    .sslt.gate .v { color: #ffd18a; }
     .limit .doc[title] { cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
     .limit .caveat { margin-top: 0.3rem; color: #ffd18a; font-size: 0.8rem; }
     .tradeoff svg { width: 100%; height: auto; display: block; }
@@ -120,6 +122,7 @@
           make("b", {}, [cite(t.ssl.real_alerted_pct, p0)]), " of ", cite(t.ssl.real_calls), " of the same calls."]));
       }
       if (limit.key === "chatterbox" && landed && t.result) body.push(sslCalls(t));
+      if (limit.key === "late" && landed && t.result) body.push(earlyGate(t));
       else if (limit.key === "chatterbox") {
         body.push(make("div", { class: "faint", style: "margin-top:0.3rem" },
           ["Offline already: SSL-AASIST reaches ", cite(limit.numbers.ssl_eer, p1), " EER on Chatterbox (", cite(limit.numbers.ssl_seeds), " seeds)."]));
@@ -146,6 +149,27 @@
         make("div", { class: "faint", style: "margin-top:0.3rem" }, ["Held-out 60 s Chatterbox calls: warns ",
           cite(t.held_out.fake_alerted_pct, p0), ", likely cloned ", cite(t.held_out.fake_likely_pct, p0),
           ". This checkpoint's offline Chatterbox EER: ", cite(r.checkpoint_chatterbox_eer, p1), "."]),
+        make("div", { class: "caveat", text: t.caveat }),
+      ]);
+    }
+    // The early-call gate on the final recipe: without and with it (set on dev only).
+    function earlyGate(t) {
+      const r = t.result;
+      const secs = (v) => Math.round(v) + " s";
+      const row = (label, pair, format = (v) => v, total = true) => make("tr", {}, [
+        make("td", { text: label }),
+        make("td", {}, [cite(pair.without_gate, format)].concat(total ? [" / ", cite(pair.calls)] : [])),
+        make("td", { class: "v" }, [cite(pair.with_gate, format)].concat(total ? [" / ", cite(pair.calls)] : [])),
+      ]);
+      return make("div", {}, [
+        make("table", { class: "sslt gate" }, [
+          make("tr", {}, [make("th", { text: "Final recipe" }), make("th", { text: "No gate" }), make("th", { class: "v", text: "Gate" })]),
+          row("Genuine live warned, phone line", r.genuine_warned_g711),
+          row("Genuine live warned, as recorded", r.genuine_warned_recorded),
+          row("XTTS-v2 first caution (median)", r.xtts_first_caution_s, secs, false),
+        ]),
+        make("div", { class: "faint", style: "margin-top:0.3rem" }, ["Early windows the gate treats as silence: ",
+          cite(r.early_windows_gated), " of ", cite(r.early_windows), ", speech included."]),
         make("div", { class: "caveat", text: t.caveat }),
       ]);
     }
