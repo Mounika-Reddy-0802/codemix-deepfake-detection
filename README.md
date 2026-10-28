@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Mounika-Reddy-0802/codemix-deepfake-detection/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Phase](https://img.shields.io/badge/phase-week%2014-green)
-![Tests](https://img.shields.io/badge/tests-1133%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1136%20passing-brightgreen)
 ![Ethics](https://img.shields.io/badge/ethics%20gate-open-brightgreen)
 
 An audio deepfake detector trained on English is quietly worse at Hinglish. This
@@ -639,23 +639,21 @@ scripts\run_demo.bat                                          :: server + browse
 python scripts\rehearse_demo.py --server http://localhost:8000 --rounds 2  :: every call, every detector
 ```
 
-`/demo` is the guided flow: four scenes, about eight minutes, one message each. Every page
-says its point in one sentence, shows at most three numbers and keeps the rest behind
-**Details**; the same four names (English-only, Deployed adapter, Final recipe, Larger
-encoder) and the same three verdicts (Genuine, Caution, Likely cloned, with their key at the
-foot of every page) throughout. Keys `1`-`4` jump to a scene, `N` opens the presenter's lines,
-and every number shows its committed file on hover.
+The demo is the system as a product, **Asli**: six pages on a navigation rail, each named
+for what it does, with the same four detector names (English-only, Deployed adapter, Final
+recipe, Larger encoder) and the same three verdicts (Genuine, Caution, Likely cloned, with
+their key at the foot of every page) throughout. Every number shows its committed file on
+hover. The review's eight-minute walkthrough is Overview, Compare, Live call, Performance
+(arrow keys; `N` opens the presenter's lines; `1`-`6` open a page).
 
-| Scene | Page | The one sentence on screen |
+| Page | Route | What it does |
 |---|---|---|
-| 1 The threat | `/threat` | A familiar voice calls in Hindi-English and asks for an OTP. The usual detector cannot help: it calls 94.8% of genuine Hindi-English speech fake. |
-| 2 Four detectors | `/lanes` | Same call, four detectors: a big light and two times each (first caution, likely cloned); the timelines open under Details |
-| 3 Live call | `/live` + `/phone/receiver` | A clone is calling your phone. Only the receiver is warned. (fallback: `/console`) |
-| 4 Limits | `/limits` | What it cannot do yet, with numbers: spontaneous speech, unseen cloning tools, English over the phone line; the real-call tables, the early-call gate and the trade-off under Details |
-
-For questions, scene 4's **More** menu opens `/network` (the 30 real calls, the call chain and
-a stage player through the real codecs), `/trust` (a call shuffled into 100 ms pieces keeps its
-verdict) and `/try` (read a line into the microphone, judged as a call).
+| Overview | `/demo` | protection status, three measured results, the features, the latest calls, how it works |
+| Live call | `/live` + `/phone/receiver` | a test caller on the laptop calls the protected phone; only the phone is warned (fallback: `/console`) |
+| Check audio | `/try` | upload a file, record a line or pick a prepared sample; judged exactly like a call, with the window timeline |
+| Call log | `/history` | every call judged since the server started, with its strongest warning; prepared calls marked "clone caught" or "false alarm"; run a test call |
+| Compare | `/lanes` | one call through the four detectors: a big light and two times each; the timelines open under Details |
+| Performance | `/limits`, `/threat`, `/network`, `/trust` | what it catches and what it cannot do yet; tabs for why it is needed (94.8% of genuine Hindi-English speech called fake by the English-only detector), the 30 real calls with the call chain and stage player, and the 100 ms shuffle check |
 
 Every call the demo plays has its expected verdict in `configs/demo_rehearsal.json`, checked
 through the exact live path; the demo is shown only when every row passes twice in a row
@@ -801,7 +799,7 @@ outside this repo.
 | **11** | — | ✅ **S1 measured on the normalised sets** — fails all six, AUC below 0.5 on two of the three channel sets, 256x false-alarm rise on real speech (P-032); ✅ **interpretability probes** for S1 and S2, evasion finding withdrawn as a bug (P-033, P-034); ✅ methodology and results sections drafted ([W11](docs/W11_mounika_interpretability_and_s1_gap.md)) | ✅ **Two-handset phone demo**: call state machine with receiver-only verdicts, caller and receiver handsets, one-screen evaluation console; ✅ **every demo clip verified through the live call path**, four live-path defects fixed including a false caution on a genuine caller ([W11](docs/W11_krishna_phone_demo.md)) |
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
 | **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed on six of seven sets; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
-| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted; ✅ **conference paper at six pages** ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads); ✅ **viva preparation** and the demo script brought to week 14 ([W14](docs/W14_mounika_encoder_spontaneous.md)); ✅ **live demo for the final review**: four scenes in eight minutes, one sentence and at most three numbers per screen, four detectors on one call, the receiver's phone, the limits with their numbers, the rest under Details; every demo call checked against a written-down verdict through the live path, every number on screen read from its committed file ([W14](docs/W14_mounika_live_demo.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; ✅ **real-call pilot**: consent, protocol, cloning packs, real calls scored, and the call chain that shows the mobile codec takes the deployed model to its threshold on average; ✅ **weights package** verified for the release decision; ✅ **the larger encoder on the real calls**, at its own dev-chosen operating point (better than the final recipe there and on spontaneous calls, one checkpoint) ([W14](docs/W14_krishna_live_final_recipe.md)) |
+| **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted; ✅ **conference paper at six pages** ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads); ✅ **viva preparation** and the demo script brought to week 14 ([W14](docs/W14_mounika_encoder_spontaneous.md)); ✅ **live demo for the final review**, built as a product (Asli): live call protection on the receiver's phone, check a recording, a call log, four detectors on one call, performance with the limits and their numbers; every demo call checked against a written-down verdict through the live path, every number on screen read from its committed file ([W14](docs/W14_mounika_live_demo.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; ✅ **real-call pilot**: consent, protocol, cloning packs, real calls scored, and the call chain that shows the mobile codec takes the deployed model to its threshold on average; ✅ **weights package** verified for the release decision; ✅ **the larger encoder on the real calls**, at its own dev-chosen operating point (better than the final recipe there and on spontaneous calls, one checkpoint) ([W14](docs/W14_krishna_live_final_recipe.md)) |
 
 **Open:** run the final recipe as the live system's default everywhere (the demo already runs it,
 `scripts/run_demo.bat`; the real calls support it), and score a second SSL-AASIST checkpoint on the
@@ -848,8 +846,8 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/lowlevel_cue_check_cm02_v1.md`](docs/results/lowlevel_cue_check_cm02_v1.md) | **CM02 shortcut gate** — 22.3% EER, and why the tell is spectral rather than level |
 | [`docs/results/w10_norm_rvc.md`](docs/results/w10_norm_rvc.md) | **W10 adapters** — normalised retrain, with and without RVC, every EER against its floor |
 | [`docs/results/s3_native_v1.md`](docs/results/s3_native_v1.md) | **S1 / S2 / S3** — native training as the ceiling, and English at chance |
-| [`live_call/README.md`](live_call/README.md) | **Live demo** — running the server, the final-review scenes and their routes, WebRTC calls, Twilio setup, the demo threshold |
-| [`docs/W14_mounika_live_demo.md`](docs/W14_mounika_live_demo.md) | **The final-review demo** — four scenes, the rehearsal check, what was measured, and what a person still has to test |
+| [`live_call/README.md`](live_call/README.md) | **Live demo** — running the server, the product's pages and their routes, WebRTC calls, Twilio setup, the demo threshold |
+| [`docs/W14_mounika_live_demo.md`](docs/W14_mounika_live_demo.md) | **The final-review demo** — the product's pages, the rehearsal check, what was measured, and what a person still has to test |
 | [`docs/viva/demo_script.md`](docs/viva/demo_script.md) | **Evaluator demo script** — what to open, what to play, what to say |
 | [`docs/results/cm01_recovery_v1.md`](docs/results/cm01_recovery_v1.md) | **CM01 recovered** — the 4,000-clip run described in git, archived, and its pitch corrected |
 | [`docs/datasheet.md`](docs/datasheet.md) | **Dataset datasheet** — composition, attacks with usable counts, exclusions, licensing, limitations |

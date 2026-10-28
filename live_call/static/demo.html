@@ -3,42 +3,67 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Final review demo</title>
+  <title>Overview</title>
   <link rel="stylesheet" href="/static/stage.css" />
   <style>
-    .hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr); gap: 1.6rem; align-items: center; margin: 0.6rem 0 1.6rem; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr); gap: 1.6rem; align-items: stretch; margin: 0.4rem 0 1.3rem; }
     @media (max-width: 1100px) { .hero { grid-template-columns: 1fr; } }
-    .hero h1.title.one { font-size: 3rem; line-height: 1.08; }
-    .hero p.lede { font-size: 1.2rem; }
-    .ready { display: flex; flex-direction: column; gap: 0.5rem; }
-    .ready h3 { margin-bottom: 0.2rem; }
-    .check { display: grid; grid-template-columns: 18px 1fr; gap: 0.5rem; align-items: start; font-size: 0.92rem; }
-    .check .dot { width: 11px; height: 11px; border-radius: 50%; margin-top: 0.32rem; background: var(--faint); }
-    .check.ok .dot { background: var(--genuine); box-shadow: 0 0 8px rgba(34, 201, 122, 0.7); }
-    .check.warn .dot { background: var(--caution); }
-    .check.bad .dot { background: var(--fake); }
-    .check small { display: block; color: var(--dim); font-size: 0.78rem; }
-    .scenes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-    @media (max-width: 1150px) { .scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 640px) { .scenes { grid-template-columns: 1fr; } }
-    .scene-card {
-      position: relative; overflow: hidden;
-      display: flex; flex-direction: column; gap: 0.7rem; text-decoration: none; color: var(--ink);
-      background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 1.2rem 1.25rem 1.1rem;
+    .hero .pitch { display: flex; flex-direction: column; justify-content: center; }
+    .hero h1.title.one { font-size: 2.7rem; line-height: 1.08; max-width: 48rem; }
+    @media (max-height: 820px) and (min-width: 1101px) { .hero h1.title.one { font-size: 2.3rem; } }
+    .hero p.lede { font-size: 1.15rem; max-width: 46rem; margin-bottom: 1.2rem; }
+    .cta { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+
+    .statuscard { display: flex; flex-direction: column; gap: 0.75rem; }
+    .statuscard .on { display: flex; align-items: center; gap: 0.7rem; font-size: 1.35rem; font-weight: 750; }
+    .statuscard .on .light { width: 16px; height: 16px; }
+    .srow { display: grid; grid-template-columns: 7.2rem 1fr; gap: 0.6rem; font-size: 0.9rem; align-items: baseline; }
+    .srow .k { color: var(--dim); }
+    .srow .v small { display: block; color: var(--faint); font-size: 0.76rem; }
+
+    .why { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    @media (max-width: 1000px) { .why { grid-template-columns: 1fr; } }
+    .why .stat .v { font-size: 2.15rem; }
+    .why .stat .l { font-size: 0.92rem; color: #c9d6ea; }
+    .limitline { margin: 0.8rem 0 0; font-size: 0.88rem; color: var(--dim); }
+    .limitline a { font-weight: 600; }
+
+    .features { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-top: 1.3rem; }
+    @media (max-width: 1150px) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
+    .feature {
+      display: flex; flex-direction: column; gap: 0.5rem; text-decoration: none; color: var(--ink);
+      background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 1.05rem 1.1rem 1rem;
       transition: border-color 0.15s, background 0.15s, transform 0.1s;
     }
-    .scene-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #2a63e8, #19a56b); opacity: 0.8; }
-    .scene-card:hover { border-color: rgba(91, 149, 255, 0.55); background: var(--panel-2); color: var(--ink); transform: translateY(-2px); }
-    .scene-card .top { display: flex; align-items: center; gap: 0.7rem; }
-    .scene-card .n { width: 2.3rem; height: 2.3rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--accent); color: #fff; flex: none; }
-    .scene-card .t { font-size: 1.25rem; font-weight: 700; }
-    .scene-card .m { margin-left: auto; color: var(--dim); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
-    .scene-card .one { font-size: 1.08rem; line-height: 1.4; color: #e4ecf8; }
-    .scene-card .open { margin-top: auto; color: #a9c7ff; font-size: 0.86rem; font-weight: 600; }
-    .startrow { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; margin-top: 1.2rem; }
-    .moreline { margin-top: 1.3rem; }
+    .feature:hover { border-color: rgba(91, 149, 255, 0.55); background: var(--panel-2); color: var(--ink); transform: translateY(-2px); }
+    .feature .ic { width: 2.4rem; height: 2.4rem; border-radius: 0.75rem; display: grid; place-items: center; background: rgba(91, 149, 255, 0.14); color: #a9c7ff; }
+    .feature .ic svg { width: 1.3rem; height: 1.3rem; }
+    .feature b { font-size: 1.08rem; }
+    .feature span.d { color: var(--dim); font-size: 0.9rem; line-height: 1.4; }
+    .feature .open { margin-top: auto; color: #a9c7ff; font-size: 0.84rem; font-weight: 600; }
+
+    .lower { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem; margin-top: 1.3rem; }
+    @media (max-width: 1100px) { .lower { grid-template-columns: 1fr; } }
+    .recent { display: flex; flex-direction: column; }
+    .recent .rc { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) auto; gap: 0.8rem; align-items: center; padding: 0.55rem 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+    .recent .rc:last-child { border-bottom: 0; }
+    .recent .rc .t { color: var(--faint); font-variant-numeric: tabular-nums; font-size: 0.82rem; }
+    .recent .rc .n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .recent .rc .n small { color: var(--faint); margin-left: 0.4rem; }
+    .recent .empty { color: var(--dim); font-size: 0.92rem; padding: 0.6rem 0; }
+    .ptitle { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+    .ptitle a { font-size: 0.84rem; font-weight: 600; text-decoration: none; }
+
+    .how { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
+    .how .s { display: grid; grid-template-columns: 2rem 1fr; gap: 0.6rem; align-items: start; }
+    .how .s .n { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-weight: 750; font-size: 0.9rem; background: rgba(255, 255, 255, 0.07); }
+    .how .s b { display: block; font-size: 0.96rem; }
+    .how .s span { color: var(--dim); font-size: 0.85rem; }
+    .how .s.last .n { background: rgba(255, 79, 79, 0.18); color: #ffb0b0; }
+
     details.prep { margin-top: 1.3rem; }
-    details.prep summary { cursor: pointer; color: var(--dim); font-size: 0.9rem; }
+    details.prep summary { cursor: pointer; color: var(--faint); font-size: 0.85rem; }
     .tips { margin-top: 0.8rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
     code.cmd { display: block; font-family: var(--mono); font-size: 0.82rem; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line); border-radius: 10px; padding: 0.55rem 0.7rem; color: #d7e5ff; margin-top: 0.4rem; overflow-x: auto; white-space: nowrap; }
   </style>
@@ -46,43 +71,67 @@
 <body>
   <main class="scene">
     <section class="hero">
-      <div>
-        <p class="kicker">Final review · live demo</p>
-        <h1 class="title one">Is the voice on this call real, or cloned?</h1>
-        <p class="lede">A detector that listens to a Hindi-English phone call as it happens and warns
-          <b>only the person being called</b>. Four scenes, about eight minutes.</p>
-        <div class="startrow">
-          <a class="btn go big" href="/threat">Start the demo →</a>
-          <span class="small muted">or press <kbd>1</kbd>–<kbd>4</kbd> for a scene, <kbd>→</kbd> for the next</span>
+      <div class="pitch">
+        <h1 class="title one">Know if the voice on a call is cloned, while the call is still going.</h1>
+        <p class="lede">Asli listens to a Hindi-English phone call as it happens, checks every two seconds of
+          speech, and warns <b>only the person receiving the call</b>.</p>
+        <div class="cta">
+          <a class="btn go big" href="/live">Start a protected call</a>
+          <a class="btn ghost big" href="/try">Check a recording</a>
         </div>
       </div>
-      <div class="card ready" id="ready">
-        <h3>Ready to present?</h3>
+      <aside class="card statuscard" id="status" aria-live="polite">
+        <h3>Protection</h3>
         <div class="muted small">checking…</div>
+      </aside>
+    </section>
+
+    <section class="card">
+      <div class="why">
+        <div class="stat bad"><span class="v" id="s1Fake">–</span><span class="l">of genuine Hindi-English speech is called fake by the usual detector, trained on English</span></div>
+        <div class="stat good"><span class="v" id="realCaught">–</span><span class="l">cloned calls over a real mobile network got Asli's red warning</span></div>
+        <div class="stat good"><span class="v" id="unseen">–</span><span class="l">clones from a tool it never trained on were warned, in 60-second calls</span></div>
+      </div>
+      <p class="limitline">Known limit: genuine callers speaking freely, rather than reading, are often warned.
+        <a href="/limits">See performance →</a></p>
+    </section>
+
+    <section class="features" id="features"></section>
+
+    <section class="lower">
+      <div class="card recent">
+        <div class="ptitle"><h2>Recent calls</h2><a href="/history">Open the call log →</a></div>
+        <div id="recent"><div class="empty">Loading…</div></div>
+      </div>
+      <div class="card">
+        <h2>How it works</h2>
+        <div class="how">
+          <div class="s"><span class="n">1</span><div><b>The caller speaks</b><span>a real person, or a voice cloned from a few seconds of audio</span></div></div>
+          <div class="s"><span class="n">2</span><div><b>Over the phone line</b><span>narrowband audio, as a real call sounds</span></div></div>
+          <div class="s"><span class="n">3</span><div><b>Checked every two seconds</b><span>each four-second window of speech gets a score</span></div></div>
+          <div class="s last"><span class="n">4</span><div><b>Only the receiver is warned</b><span>Caution, then Likely cloned; the caller sees nothing</span></div></div>
+        </div>
       </div>
     </section>
 
-    <section class="scenes" id="scenes"></section>
-
-    <nav class="more moreline" id="more" aria-label="More, for questions"><span>For questions, from scene 4:</span></nav>
-
     <details class="prep">
-      <summary>Before the review</summary>
+      <summary>Presenter checklist</summary>
       <section class="tips">
         <div class="card tight">
           <h3>Rehearse</h3>
-          <div class="small muted">Every call must replay to its written-down verdict, twice in a row:</div>
+          <div class="small muted">Every prepared call must replay to its written-down verdict, twice in a row:</div>
           <code class="cmd">python scripts/rehearse_demo.py --server http://localhost:8000 --rounds 2</code>
         </div>
         <div class="card tight">
-          <h3>The phone scene</h3>
+          <h3>The phone</h3>
           <div class="small muted">For https on the mentor's phone, open a tunnel in its own terminal (or use the room's Wi-Fi):</div>
           <code class="cmd">python scripts/start_tunnel.py</code>
         </div>
         <div class="card tight">
           <h3>If anything misbehaves</h3>
-          <div class="small muted">Scene 3 runs on one screen at <a href="/console">/console</a>; the recorded run is
-            <b>backup_demo.mp4</b> on the desktop.</div>
+          <div class="small muted">The live call runs on one screen at <a href="/console">/console</a>; the recorded run is
+            <b>backup_demo.mp4</b> on the desktop. Keys: <kbd>1</kbd>–<kbd>6</kbd> open a page, <kbd>→</kbd> the next step,
+            <kbd>N</kbd> the notes.</div>
         </div>
       </section>
     </details>
@@ -90,52 +139,80 @@
 
   <script src="/static/stage.js"></script>
   <script>
-    const { make, json, SCENES, MORE, NAMES } = Stage;
-    Stage.mount("hub");
-    // The one sentence each scene exists to say.
-    const ONE = {
-      threat: "A familiar voice calls in Hindi-English and asks for an OTP. The usual detector cannot help.",
-      lanes: "Same call, four detectors: which of them protects a real person, and which catches the clone.",
-      live: "A clone is calling the mentor's phone. Only the receiver is warned.",
-      limits: "What it cannot do yet, with numbers.",
-    };
+    const { make, json, cite, NAV, NAMES } = Stage;
+    Stage.mount("home");
+    const $ = (id) => document.getElementById(id);
 
-    document.getElementById("scenes").replaceChildren(...SCENES.map((s) => make("a", { class: "scene-card", href: s.href }, [
-      make("div", { class: "top" }, [make("span", { class: "n", text: s.n }), make("span", { class: "t", text: s.title }), make("span", { class: "m", text: s.minutes })]),
-      make("div", { class: "one", text: ONE[s.key] }),
-      make("span", { class: "open", text: "Open scene " + s.n + " →" }),
+    // the four things a user can do, as tiles
+    const TILES = { live: "Live call protection", try: "Check a recording", history: "Call log", lanes: "Compare detectors" };
+    $("features").replaceChildren(...NAV.filter((n) => TILES[n.key]).map((n) => make("a", { class: "feature", href: n.href }, [
+      make("span", { class: "ic", html: Stage.svg(Stage.ICONS[n.icon]) }),
+      make("b", { text: TILES[n.key] }),
+      make("span", { class: "d", text: n.what[0].toUpperCase() + n.what.slice(1) + "." }),
+      make("span", { class: "open", text: "Open →" }),
     ])));
-    document.getElementById("more").append(...MORE.map((m) => make("a", { href: m.href }, [make("b", { text: m.title }), make("small", { text: m.what })])));
 
-    function check(level, text, detail) {
-      return make("div", { class: "check " + level }, [make("span", { class: "dot" }), make("div", {}, [text, detail ? make("small", { text: detail }) : null])]);
+    const ofCalls = (pctEntry, callsEntry) => ({
+      value: `${Math.round((pctEntry.value * callsEntry.value) / 100)} of ${callsEntry.value}`,
+      source: pctEntry.source,
+    });
+    (async () => {
+      try {
+        const h = await json("/api/headline");
+        $("s1Fake").replaceChildren(cite(h.s1.genuine_called_fake_pct, Stage.pct(1)));
+        const t = h.calls_60s_final.tortoise;
+        $("unseen").replaceChildren(cite(ofCalls(t.fake_likely_pct, t.fake_calls)));
+      } catch (e) { /* the tiles keep their dash */ }
+      try {
+        const r = await json("/api/real_calls");
+        const row = r.table.find((x) => x.kind === "clone_replay" && x.tool === "xtts_v2");
+        $("realCaught").replaceChildren(cite({ value: `${row.final.likely.value} of ${row.final.calls.value}`, source: row.final.likely.source }));
+      } catch (e) { /* idem */ }
+    })();
+
+    function srow(k, v, small) {
+      return make("div", { class: "srow" }, [make("span", { class: "k", text: k }), make("span", { class: "v" }, [v, small ? make("small", { text: small }) : null])]);
     }
-
-    async function readiness() {
-      const out = [make("h3", { text: "Ready to present?" })];
+    async function status() {
+      const out = [make("h3", { text: "Protection" })];
       try {
         const h = await json("/api/health");
         const d = h.detector;
-        const final = (d.checkpoint || "").startsWith("final_");
-        out.push(check(d.model_loaded && final ? "ok" : d.checkpoint_found ? "warn" : "bad",
-          `Live model: ${Stage.shortModel(d.checkpoint)}${d.model_loaded ? "" : " (still loading)"}`,
-          final ? `threshold from ${d.threshold_source}` : "the demo expects the final recipe (scripts/run_demo.bat)"));
-        out.push(check(h.demo_clips >= 8 ? "ok" : h.demo_clips ? "warn" : "bad", `${h.demo_clips} prepared calls`, h.demo_clips_dir));
-        const l = await json("/api/lanes");
-        out.push(check(l.problems.length ? "bad" : l.lanes.length >= 3 ? "ok" : "warn",
-          `${l.lanes.length} detectors for scene 2`,
-          l.problems.length ? l.problems[0] : l.lanes.map((x) => NAMES[x.role] || x.name).join(" · ")));
-        const t = await json("/api/tunnel");
-        out.push(check(t.url ? "ok" : t.lan.length ? "warn" : "bad", t.url ? "Phone tunnel open (https)" : "No tunnel: the phone uses this Wi-Fi",
-          t.url || (t.lan[0] ? t.lan[0] + "/phone/receiver" : "no network address")));
+        const ready = d.model_loaded && d.threshold !== null;
+        out.push(make("div", { class: "on " + (ready ? "s-genuine" : d.checkpoint_found ? "s-suspicious" : "s-likely_fake") }, [
+          make("span", { class: "light still" }), ready ? "On" : d.checkpoint_found ? "Starting…" : "Off: model missing",
+        ]));
+        out.push(srow("Detector", Stage.shortModel(d.checkpoint), "judges every live call"));
+        const l = await json("/api/lanes").catch(() => null);
+        if (l) out.push(srow("Comparison", `${l.lanes.length} detectors ready`, l.lanes.map((x) => NAMES[x.role] || x.name).join(" · ")));
+        const t = await json("/api/tunnel").catch(() => null);
+        if (t) out.push(srow("Phone pairing", t.url ? "Secure link open" : t.lan.length ? "Same Wi-Fi" : "No network", t.url ? "any network, https" : "scan the code on Live call"));
+        const calls = await json("/api/sessions").catch(() => []);
+        out.push(srow("Calls judged", String(calls.length), "since it started"));
+        recent(calls);
       } catch (e) {
-        out.push(check("bad", "Server not answering", e.message));
+        out.push(make("div", { class: "on s-likely_fake" }, [make("span", { class: "light still" }), "Off: server not answering"]));
       }
-      document.getElementById("ready").replaceChildren(...out);
+      $("status").replaceChildren(...out);
     }
-
-    readiness();
-    setInterval(readiness, 10000);
+    function recent(calls) {
+      const rows = calls.slice().sort((a, b) => b.started - a.started).slice(0, 5);
+      if (!rows.length) {
+        $("recent").replaceChildren(make("div", { class: "empty" }, ["No calls yet. ", make("a", { href: "/live", text: "Start a protected call" }), " or ", make("a", { href: "/try", text: "check a recording" }), "."]));
+        return;
+      }
+      $("recent").replaceChildren(...rows.map((s) => {
+        const info = Stage.callInfo(s);
+        const state = s.ended ? s.peak_state : s.state;
+        return make("div", { class: "rc" }, [
+          make("span", { class: "t", text: Stage.clock(s.started) }),
+          make("span", { class: "n", title: info.title }, [info.title, make("small", { text: info.source })]),
+          Stage.chip(state, s.ended ? null : "Live · " + Stage.word(state)),
+        ]);
+      }));
+    }
+    status();
+    setInterval(status, 8000);
   </script>
 </body>
 </html>

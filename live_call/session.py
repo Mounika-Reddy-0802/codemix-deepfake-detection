@@ -110,6 +110,12 @@ class CallSession:
             "scored_windows": s.scored_windows,
             "fake_leaning_windows": s.fake_leaning_windows,
             "threshold": self.engine.config.threshold,
+            # for the call log: the strongest warning, not the light the call ended on
+            "peak_state": s.peak_state.value,
+            "duration": round(s.duration_seconds, 1),
+            "first_warning_s": next(
+                (at for at, st in s.timeline if st in (State.SUSPICIOUS, State.LIKELY_FAKE)), None
+            ),
         }
 
     async def _alert(self, event: Event) -> None:

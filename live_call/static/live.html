@@ -42,7 +42,7 @@
       main.scene { padding-top: 0.7rem; }
       .head { margin-bottom: 0.6rem; }
       .head h1.title { font-size: 1.7rem; }
-      .head p.lede { display: none; }
+      .head p.lede { font-size: 0.88rem; }
       iframe.caller { height: calc(100vh - 190px); min-height: 470px; }
       .qr { width: 132px; height: 132px; }
       .phonecard { gap: 0.8rem; }
@@ -57,20 +57,20 @@
 </head>
 <body>
   <main class="scene">
-    <p class="kicker">Scene 3 · A live call</p>
     <div class="head">
-      <h1 class="title one">A clone is calling your phone. Only the receiver is warned.</h1>
-      <p class="lede">The caller's screen never shows the verdict: a caller who knows they were caught learns to evade.</p>
+      <h1 class="title one">Live call protection</h1>
+      <p class="lede">Call the protected phone with any voice. Asli listens as the call happens and warns only the person
+        receiving it: a caller who knows they were caught learns to evade.</p>
     </div>
 
     <div class="stagegrid">
       <section class="side">
-        <h3>Caller · this laptop <span class="badge">sees no verdict</span></h3>
+        <h3>Test caller · this laptop <span class="badge">sees no verdict</span></h3>
         <iframe class="caller" id="callerFrame" title="Caller handset" allow="microphone; autoplay"></iframe>
       </section>
 
       <section class="side">
-        <h3>Receiver · the mentor's phone <span class="badge">verdicts arrive here</span></h3>
+        <h3>Protected phone · scan to pair <span class="badge">verdicts arrive here</span></h3>
         <div class="card phonecard">
           <div class="qr" id="qr"><span class="noqr">looking for this laptop's address…</span></div>
           <div>

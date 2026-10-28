@@ -43,6 +43,16 @@ def test_cloned_call_publishes_windows_alerts_and_summary():
     assert all(a.channel == "dashboard" for a in dispatcher.sent)  # not a phone call
 
 
+def test_the_snapshot_keeps_the_strongest_warning_for_the_call_log():
+    cloned, _, _ = _run(0.05)
+    snap = cloned.snapshot()
+    assert snap["peak_state"] == "likely_fake" and snap["first_warning_s"] is not None
+    assert snap["duration"] > 0
+    genuine, _, _ = _run(0.95)
+    assert genuine.snapshot()["peak_state"] == "genuine"
+    assert genuine.snapshot()["first_warning_s"] is None
+
+
 def test_genuine_call_sends_no_alerts():
     session, dispatcher, messages = _run(0.95)
     assert not [m for m in messages if m["type"] == "event"]

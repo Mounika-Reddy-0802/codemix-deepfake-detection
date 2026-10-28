@@ -1,4 +1,4 @@
-"""The demo scenes' routes: the phone's address and QR code, the scene pages, the tunnel script."""
+"""The product's pages and routes: the phone's address and QR code, the pages, the tunnel script."""
 
 from __future__ import annotations
 
@@ -75,6 +75,7 @@ def test_scene_pages_are_served(client):
         "/trust",
         "/limits",
         "/try",
+        "/history",
         "/console",
         "/phone/receiver",
         "/phone/caller",
@@ -159,22 +160,48 @@ def test_shuffle_proof_scores_both_versions(client):
     assert client.post("/api/shuffle/nope").status_code == 404
 
 
-def test_the_guided_flow_links_every_scene_in_order(client):
+def _block(stage: str, name: str) -> str:
+    return stage.split(f"const {name} = [")[1].split("];")[0]
+
+
+def test_the_navigation_names_every_feature_in_order(client):
     stage = client.get("/static/stage.js").text
-    scenes, more = stage.split("const MORE")
-    hrefs = ["/threat", "/lanes", "/live", "/limits"]
-    positions = [scenes.index(f'href: "{h}"') for h in hrefs]
-    assert positions == sorted(positions), "the four scenes must be in plan order"
-    assert scenes.count('href: "/') == 4, "four scenes in the flow, not six"
-    for page in ("/network", "/trust", "/try"):  # kept for questions, out of the flow
-        assert f'href: "{page}"' in more.split("];")[0]
-    assert client.get("/demo").status_code == 200 and "Start the demo" in client.get("/demo").text
+    nav = _block(stage, "NAV")
+    hrefs = ["/demo", "/live", "/try", "/history", "/lanes", "/limits"]
+    positions = [nav.index(f'href: "{h}"') for h in hrefs]
+    assert positions == sorted(positions) and nav.count('href: "/') == len(hrefs)
+    evidence = _block(stage, "EVIDENCE")  # the pages inside Performance, as tabs
+    assert all(f'href: "{h}"' in evidence for h in ("/limits", "/threat", "/network", "/trust"))
+    flow = _block(stage, "FLOW")  # the review's walkthrough, which the arrow keys follow
+    at = [flow.index(f'key: "{k}"') for k in ("home", "lanes", "live", "limits")]
+    assert at == sorted(at)
+    assert "Start a protected call" in client.get("/demo").text
 
 
-FLOW = ["demo.html", "threat.html", "lanes.html", "live.html", "limits.html"]
-QUESTIONS = ["network.html", "trust.html", "try.html"]
-#: What a first-time viewer must never read: system codes and checkpoint names.
-BANNED = [r"\bS1\b", r"\bS2\b", r"\bS3\b", r"SSL-AASIST", r"\b[\w-]+\.pt\b", r"\bwav2vec"]
+def test_the_call_log_keeps_each_calls_strongest_warning(client):
+    _call(client.data / "demo_calls_v2")
+    client.post("/api/replay/call", params={"realtime": "false", "wait": "true"})
+    log = client.get("/api/sessions").json()
+    assert len(log) == 1 and log[0]["ended"] and log[0]["meta"]["truth"] == "spoof"
+    # the stand-in detector says 0.95 against 0.687: genuine all the way, no warning
+    assert log[0]["peak_state"] == "genuine" and log[0]["first_warning_s"] is None
+    assert log[0]["duration"] > 0
+    page = client.get("/history").text
+    assert "/api/sessions" in page and "peak_state" in page
+
+
+PAGES = ["demo.html", "live.html", "try.html", "history.html", "lanes.html", "limits.html"]
+EVIDENCE = ["threat.html", "network.html", "trust.html"]
+#: What a first-time viewer must never read: system codes, checkpoint names, slide talk.
+BANNED = [
+    r"\bS1\b",
+    r"\bS2\b",
+    r"\bS3\b",
+    r"SSL-AASIST",
+    r"\b[\w-]+\.pt\b",
+    r"\bwav2vec",
+    r"\b[Ss]cene \d",
+]
 
 
 def _visible(text: str) -> str:
@@ -187,7 +214,7 @@ def _visible(text: str) -> str:
     return "\n".join(ln for ln in text.splitlines() if not ln.strip().startswith("//"))
 
 
-@pytest.mark.parametrize("page", [*FLOW, *QUESTIONS, "stage.js"])
+@pytest.mark.parametrize("page", [*PAGES, *EVIDENCE, "stage.js"])
 def test_no_page_shows_system_codes_or_checkpoint_names(page):
     import re
 
@@ -198,24 +225,26 @@ def test_no_page_shows_system_codes_or_checkpoint_names(page):
     ), f"{page} shows {found}: use English-only, Deployed adapter, Final recipe, Larger encoder"
 
 
-def test_every_page_says_its_one_sentence_under_the_same_verdict_key():
+def test_every_page_has_a_title_and_the_same_verdict_key():
     stage = (ROOT / "live_call" / "static" / "stage.js").read_text(encoding="utf-8")
     # the key line is drawn by the shared shell, so every page that mounts it carries it
     assert "Caution = a few suspicious seconds in a row. Likely cloned = more of them." in stage
     for name in ("English-only", "Deployed adapter", "Final recipe", "Larger encoder"):
         assert f'"{name}"' in stage
-    for page in [*FLOW, *QUESTIONS]:
+    for page in [*PAGES, *EVIDENCE]:
         html = (ROOT / "live_call" / "static" / page).read_text(encoding="utf-8")
-        assert 'class="title one"' in html, f"{page} has no one-sentence title"
+        assert 'class="title one"' in html, f"{page} has no title"
         assert "Stage.mount(" in html, f"{page} does not mount the shell (and its key line)"
 
 
-def test_scene_two_hides_its_timelines_until_details():
+def test_compare_hides_its_timelines_until_details():
     lanes = (ROOT / "live_call" / "static" / "lanes.html").read_text(encoding="utf-8")
     assert 'make("div", { class: "tl", "data-details": ""' in lanes  # timelines live under Details
     assert 'id="detailsBtn"' in lanes and "Stage.details(" in lanes
     limits = (ROOT / "live_call" / "static" / "limits.html").read_text(encoding="utf-8")
-    assert limits.count('class="lim"') == 3, "scene 4 shows three limits, the rest under Details"
+    assert (
+        limits.count('class="lim"') == 3
+    ), "Performance shows three limits, the rest under Details"
     assert '<section class="detail-grid" data-details hidden>' in limits
 
 
