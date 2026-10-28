@@ -146,7 +146,7 @@
     json("/api/headline").then((h) => {
       const f = h.final, s = h.ssl, d = h.deployed;
       $("systems").replaceChildren(
-        sys("#8a94a6", "English-only detector (S1)", "Trained on ASVspoof 2019 LA, English only.", [
+        sys("#8a94a6", "English-only detector", "Trained on ASVspoof 2019 LA, English only.", [
           [make("b", {}, [cite(h.s1.english_eer, p2)]), " EER on English"],
           [make("b", {}, [cite(h.s1.codemix_line_eer, p2)]), " EER on Hindi-English over a phone line"],
           ["calls ", make("b", {}, [cite(h.s1.genuine_called_fake_pct, p1)]), " of genuine Hindi-English speech fake"],
@@ -161,7 +161,7 @@
           ["over real AMR-NB: ", make("b", {}, [cite(f.new_tortoise_amr.eer, p1)])],
           ["IndicF5 ", cite(f.indicf5.eer, p1), " · Chatterbox ", cite(f.chatterbox.eer, p1), " (", cite(f.chatterbox.seeds), " seed)"],
         ], "the better fix: unseen tools too", "good"),
-        sys("#8b6cff", "Larger encoder (SSL-AASIST)", "The same final-recipe data, a larger self-supervised encoder.", [
+        sys("#8b6cff", "Larger encoder", "The same final-recipe data, a larger self-supervised encoder.", [
           ["Tortoise over AMR-NB: ", make("b", {}, [cite(s.new_tortoise_amr.eer, p1)])],
           ["Chatterbox: ", make("b", {}, [cite(s.chatterbox.eer, p1)])],
           [cite(s.cpu_ms_per_hop, (v) => (v / 1000).toFixed(2) + " s"), " per 2 s window on ", cite(s.cpu_threads), " CPU threads: live-capable"],

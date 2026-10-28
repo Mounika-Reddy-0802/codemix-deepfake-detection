@@ -87,7 +87,7 @@ a:hover { color: #d2e2ff; }
 .steps a.on .n { background: var(--accent); color: #fff; }
 .steps a.done .n { background: rgba(34, 201, 122, 0.25); color: #9ff0c8; }
 /* narrower screens keep the current scene's name and number the others */
-@media (max-width: 1450px) { .steps a:not(.on) .t { display: none; } .steps a:not(.on) { padding-right: 0.38rem; } }
+@media (max-width: 1100px) { .steps a:not(.on) .t { display: none; } .steps a:not(.on) { padding-right: 0.38rem; } }
 @media (max-width: 760px) {
   .topbar { grid-template-columns: 1fr auto; }
   .steps { grid-column: 1 / -1; order: 3; justify-content: flex-start; overflow-x: auto; }
@@ -109,6 +109,7 @@ a:hover { color: #d2e2ff; }
 
 /* -------------------------------------------------------------------- page */
 main.scene { max-width: 1480px; margin: 0 auto; padding: 1.6rem 1.6rem 6rem; }
+@media (min-width: 1900px) { main.scene { max-width: 1720px; } }
 .kicker {
   font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
   font-weight: 700; margin: 0 0 0.45rem;
@@ -222,14 +223,49 @@ table.data tr.hl td { background: rgba(91, 149, 255, 0.06); }
 .presenter.open { transform: none; }
 .presenter .handle {
   height: 2.4rem; display: flex; align-items: center; gap: 0.8rem; padding: 0 1.4rem;
-  color: var(--dim); font-size: 0.8rem; cursor: pointer; user-select: none;
+  color: var(--dim); font-size: 0.8rem; user-select: none;
 }
-.presenter .handle b { color: var(--ink); font-weight: 600; }
-.presenter .body { padding: 0.2rem 1.4rem 1.1rem; display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: start; }
+.presenter .notes-btn {
+  font: inherit; font-size: 0.74rem; color: var(--faint); background: none; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.3rem;
+}
+.presenter .notes-btn:hover { color: var(--ink); }
+.presenter .body { padding: 0.3rem 1.4rem 1.1rem; display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: end; }
 .presenter .say { font-size: 1.12rem; line-height: 1.5; max-width: 70rem; }
 .presenter .say p { margin: 0 0 0.45rem; }
-.presenter .meta { color: var(--dim); font-size: 0.82rem; text-align: right; white-space: nowrap; }
-.presenter .navs { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.6rem; }
+.presenter .meta { color: var(--accent); font-size: 0.74rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 0.35rem; }
+.presenter .navs { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+/* the verdict key: the same three words and colours at the foot of every page */
+.vkey { display: flex; align-items: center; gap: 1.1rem; flex-wrap: nowrap; min-width: 0; white-space: nowrap; }
+.vkey .k { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 650; font-size: 0.82rem; }
+.vkey .k .light { width: 11px; height: 11px; }
+.vkey .k.s-genuine { color: #8ff0c0; } .vkey .k.s-suspicious { color: #ffd18a; } .vkey .k.s-likely_fake { color: #ffa3a3; }
+.vkey .means { color: var(--dim); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; }
+.light.still { animation: none !important; }
+@media (max-width: 900px) { .vkey .means { display: none; } }
+
+/* the one sentence a page exists to say */
+h1.title.one { font-size: 2.35rem; max-width: 62rem; letter-spacing: -0.4px; }
+h1.title.one .cite { border-bottom-color: rgba(255, 143, 143, 0.6); }
+@media (max-height: 820px) and (min-width: 1101px) { h1.title.one { font-size: 1.9rem; } }
+
+/* "Details": everything a first-time viewer does not need, one click away */
+.btn.details-btn { font-size: 0.86rem; padding: 0.45rem 0.9rem; border-radius: 999px; box-shadow: none;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line-2); color: var(--dim); }
+.btn.details-btn:hover:not(:disabled) { color: var(--ink); background: rgba(255, 255, 255, 0.1); }
+.btn.details-btn[aria-expanded="true"] { color: var(--ink); border-color: rgba(91, 149, 255, 0.6); background: rgba(91, 149, 255, 0.12); }
+[data-details][hidden] { display: none !important; }
+
+/* "More", for questions: the pages kept out of the main flow */
+.more { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; color: var(--dim); font-size: 0.88rem; }
+.more a { display: inline-flex; flex-direction: column; text-decoration: none; color: var(--ink); padding: 0.55rem 0.85rem;
+  border-radius: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); transition: border-color 0.15s, background 0.15s; }
+.more a:hover { border-color: rgba(91, 149, 255, 0.55); background: rgba(91, 149, 255, 0.08); color: var(--ink); }
+.more a b { font-size: 0.92rem; }
+.more a small { color: var(--dim); font-size: 0.74rem; }
+.backlink { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.84rem; color: var(--dim); text-decoration: none; margin-bottom: 0.6rem; }
+.backlink:hover { color: var(--ink); }
 
 .toast {
   position: fixed; top: 4.6rem; right: 1.4rem; z-index: 40; max-width: 30rem;

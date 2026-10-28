@@ -1,62 +1,66 @@
-# Final review: the ten-minute demo (presenter's sheet)
+# Final review: the eight-minute demo (presenter's sheet)
 
-Print this. It is the plan's presenter script (section 6) set against the pages that now
-exist. Every number on screen is read from a committed result file; hover it to show which.
+Print this. Four scenes, one message each. Every page says its point in one sentence at the
+top, shows at most three numbers, and keeps the rest behind **Details**. Every number on screen
+is read from a committed result file; hover it to show which. The same four names everywhere:
+**English-only, Deployed adapter, Final recipe, Larger encoder**; the same three verdicts:
+**Genuine** (green), **Caution** (amber), **Likely cloned** (red), with the key at the foot of
+every page: "Caution = a few suspicious seconds in a row. Likely cloned = more of them."
 
 ## Before anyone arrives (30 minutes)
 
 1. Double-click `scripts\run_demo.bat`. Chrome opens `/demo`; wait until every line of
-   **Ready to present?** is green (amber "no tunnel" is fine if the phone uses the Wi-Fi).
-2. In a second terminal: `python scripts\rehearse_demo.py --server http://localhost:8000`.
+   **Ready to present?** is green (amber "no tunnel" is fine if the phone uses the Wi-Fi), and
+   the light at the top right reads **Ready**.
+2. In a second terminal: `python scripts\rehearse_demo.py --server http://localhost:8000 --rounds 2`.
    It must end with **PASS on every row, 2 rounds in a row**. If any row fails, do not show
    that scene; tell Krishna.
 3. The phone: on `/live`, scan the QR code with the mentor's phone (same Wi-Fi as the laptop,
    or `python scripts\start_tunnel.py` for https). The receiver page opens; tap once anywhere
    so it may play sound. `/live` must read **Phone connected**.
 4. Press `F` for full screen. `N` opens these lines on screen; arrow keys move between
-   scenes; `1`-`6` jump to a scene.
-5. Laptop and phone charged, hotspot tested, `backup_demo.mp4` on the desktop.
+   scenes; `1`-`4` jump to a scene.
+5. Laptop on mains power (four detectors use most of the CPU), phone charged, hotspot tested,
+   `backup_demo.mp4` on the desktop.
 
-## The six scenes
+## The four scenes (8 minutes)
 
-| # | Time | Page | Do | Say (one breath each) |
-|---|---|---|---|---|
-| 1 | 0:30 | `/threat` | nothing: the call script appears by itself | A familiar voice calls in Hindi-English and asks for an OTP. An English-trained detector calls most real Hindi-English speakers fake (read the number on screen), so it cannot protect this call. |
-| 2 | 2:00 | `/lanes` | play **Genuine caller, a new speaker**, then **Tortoise cloned voice, caught** | Same call, three detectors. The English one rejects a real person. Our adapter fixes that. The final recipe also catches the tool none of them ever saw. |
-| 3 | 3:00 | `/live` | hand the phone over; on the laptop pick **XTTS-v2 cloned voice**, press call; the mentor accepts | Please hold this phone. A clone is calling you. [amber] A caution. [red, spoken] Likely cloned. The caller sees nothing, because a caller who knows they were caught learns to evade. |
-| 4 | 2:00 | `/network` | point at the chart; press **AMR-NB** then **Direct** in *Hear it* | We called each other over a real mobile network. Hear what the codec does. For two of us the old model collapses at the codec; the final recipe holds for all three, and catches most seen-tool clones (read the table). Scores only; we never play our own voices. |
-| 5 | 1:00 | `/trust` | **Shuffle into 100 ms pieces and score both** on the XTTS clone | Scramble the words: same verdict. It reads how the voice was produced, not what is said. Every number is tested against a cheap-statistics floor. |
-| 6 | 1:30 | `/limits` | point at each limit; then **Record 12 seconds** while the mentor reads the line | What it cannot do yet, with numbers, and what we did about each overnight. Now read this line into the microphone. |
+| # | Time | Page | The one sentence on screen | Do | Say (one breath each) |
+|---|---|---|---|---|---|
+| 1 | 0:45 | `/threat` | A familiar voice calls in Hindi-English and asks for an OTP. The usual detector cannot help: it calls (number) of genuine Hindi-English speech fake. | read the sentence; point at the big number | The usual detector, trained on English, calls almost every real Hindi-English caller fake. It cannot protect this call. |
+| 2 | 2:00 | `/lanes` | Same call, four detectors. | click **A genuine caller**; when it ends, click **A Tortoise clone**; read the four lights | The English-only detector rejects a real person; ours let them through. Now a clone made with a tool none of them was trained on: the final recipe catches it. The larger encoder is one checkpoint, our next candidate. |
+| 3 | 3:00 | `/live` | A clone is calling your phone. Only the receiver is warned. | hand the phone over; on the laptop the XTTS-v2 call is already chosen: press call; the mentor accepts | Please hold this phone. A clone is calling you. [amber] A caution. [red, spoken] Likely cloned. The caller sees nothing, because a caller who knows they were caught learns to evade. |
+| 4 | 2:00 | `/limits` | What it cannot do yet, with numbers. | read the three cards left to right | Genuine callers speaking freely are still warned; Chatterbox, a tool it never saw, gets through on real calls; and the deployed adapter's English collapses over a phone line. The larger encoder does better on the first two, but it is one checkpoint. |
+
+Scene 4's **Details** opens the larger encoder's real-call table, the early-call gate study,
+the 30-call table and the spontaneous-speech trade-off chart. Its **More** menu, for
+questions only: **Real network** (call chain and stage player), **Why trust it** (the 100 ms
+shuffle and the floors), **Try it** (read a line into the microphone). Try it is not the last
+thing the panel sees: it warns most real voices speaking freely, which is the first limit.
 
 ## What each call must do (checked by the rehearsal)
 
 | Scene | Call | Must show |
 |---|---|---|
-| 2 | Genuine caller, a new speaker | English-only lane red by 10 s; deployed and final lanes green throughout |
-| 2 | Tortoise cloned voice, caught | final lane "likely cloned", first caution at 8 s; deployed lane only a caution; English-only red |
+| 2 | A genuine caller (new speaker) | English-only red by 10 s; Deployed adapter, Final recipe and Larger encoder green throughout |
+| 2 | A Tortoise clone | Final recipe "likely cloned", first caution 8 s, likely cloned 12 s; Deployed adapter only a caution; Larger encoder likely cloned at 10 s; English-only red, but it warns real callers too |
 | 3 | XTTS-v2 cloned voice | caution, then the red "likely cloned" screen on the phone by 12 s; nothing on the caller's screen |
 | 3 | Genuine caller | no warning for the whole call |
-| 6 | Genuine caller speaking freely | warned by all three: the spontaneous-speech limit (open it from scene 6) |
-| 6 | Tortoise cloned voice it misses | green on the final recipe: kept on purpose, never swapped |
+| Details | Genuine caller speaking freely | warned by the three earlier models, a caution from the larger encoder: the spontaneous-speech limit |
+| Details | Tortoise clone it misses | green on the final recipe (kept on purpose, never swapped); the larger encoder catches it |
 
-The deployed adapter does not waver on the genuine corpus calls; do not say it does.
-
-**With the larger encoder as a fourth lane** (SSL-AASIST, when its weights are on the laptop,
-at its own threshold chosen on dev): green on both genuine calls; "likely cloned" on the
-Tortoise call 2 s sooner than the final recipe (caution 6 s, likely cloned 10 s); it also
-catches the Tortoise call the final recipe misses, and stops at a caution on the spontaneous
-caller. Say what that is: one checkpoint on eight calls chosen for the final recipe, the next
-candidate and not a replacement. The 30 real calls in scene 6 are the evidence.
+The deployed adapter does not waver on the genuine corpus calls; do not say it does. The
+larger encoder's lights are one checkpoint on eight calls chosen for the final recipe: a
+rehearsal check, not evidence. The 30 real calls on scene 4 are the evidence.
 
 ## If something goes wrong
 
 - **The phone does not ring or the page will not load:** open `/console` (scene 3 on one
   screen: both handsets side by side) and play the same XTTS call there.
-- **A lane or page shows an error:** move on to the next scene; the numbers are the same in
-  the papers.
-- **"Try it" warns the mentor's real voice:** say so plainly. It is the spontaneous-speech
-  and laptop-microphone limit of scene 6: the model was trained on read speech over phone
-  lines. (Try it yourself before the review; if it warns you, skip it.)
+- **The four lights lag the audio:** the laptop is on battery or busy; restart
+  `run_demo.bat` without the larger encoder's weights in `C:\dfdata\checkpoints` and scene 2
+  reads "Same call, three detectors."
+- **A page shows an error:** move on to the next scene; the numbers are the same in the papers.
 - **Anything else:** play `backup_demo.mp4`.
 
 ## Say it honestly
@@ -65,4 +69,6 @@ candidate and not a replacement. The 30 real calls in scene 6 are the evidence.
   numbers."
 - The real calls are a pilot: 30 calls, three speakers, recorded on the receiving phone and
   scored offline through the same path, at thresholds fixed before the calls.
+- The larger encoder: one checkpoint, offline the weakest of six trainings on Chatterbox; the
+  next candidate, not a replacement.
 - Questions and answers: [`VIVA_QA.md`](VIVA_QA.md).

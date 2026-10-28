@@ -128,6 +128,34 @@ def _s1_false_alarm() -> dict:
     raise KeyError("S1 eval_pool run missing from classification_metrics.json")
 
 
+def _s1_false_alarm_counts() -> dict:
+    """How the headline rate was measured: genuine clips, and how many were called fake."""
+    path = RESULTS / "classification_metrics.json"
+    for i, run in enumerate(_json(path)["runs"]):
+        if run["run"] == "stage1" and run["set"] == "eval_pool":
+            return {
+                "genuine_clips": cite(run["bonafide"], path, f"runs[{i}].bonafide"),
+                "called_fake": cite(
+                    run["deployed"]["confusion"]["fp"], path, f"runs[{i}].deployed.confusion.fp"
+                ),
+                "threshold": cite(
+                    round(run["deployed"]["threshold"], 3), path, f"runs[{i}].deployed.threshold"
+                ),
+            }
+    raise KeyError("S1 eval_pool run missing from classification_metrics.json")
+
+
+def _english_line(model: str = "deployed_s2") -> dict:
+    """English speech over the phone line: the same English clips, clean and through G.711."""
+    path = RESULTS / "english_channel_v1" / "summary.json"
+    cells = _json(path)["cells"][model]
+    return {
+        "clean_eer": cite(cells["clean"]["eer"], path, f"cells.{model}.clean.eer"),
+        "line_eer": cite(cells["channel"]["eer"], path, f"cells.{model}.channel.eer"),
+        "clips": cite(cells["channel"]["clips"], path, f"cells.{model}.channel.clips"),
+    }
+
+
 def _calls_60s(file: str, key: str) -> dict:
     path = RESULTS / file
     v = _json(path)["validation"][key]["calls_60s"]
@@ -165,7 +193,9 @@ def headline() -> dict:
             "english_eer": cite(s1_en["eer"], systems, f"cells[{i_en}].eer"),
             "codemix_line_eer": cite(s1_line["eer"], systems, f"cells[{i_line}].eer"),
             "genuine_called_fake_pct": _s1_false_alarm(),
+            **_s1_false_alarm_counts(),
         },
+        "english_line_deployed": _english_line(),
         "deployed": {
             "line_eer_mean": cite(
                 round(dep["eval_pool"]["eer"]["mean"], 2), seeds, "deployed.sets.eval_pool.eer.mean"

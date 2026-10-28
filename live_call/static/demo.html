@@ -6,35 +6,40 @@
   <title>Final review demo</title>
   <link rel="stylesheet" href="/static/stage.css" />
   <style>
-    .hero { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr); gap: 1.4rem; align-items: end; margin-bottom: 1.4rem; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr); gap: 1.6rem; align-items: center; margin: 0.6rem 0 1.6rem; }
     @media (max-width: 1100px) { .hero { grid-template-columns: 1fr; } }
-    .hero h1.title { font-size: 2.6rem; }
-    .ready { display: flex; flex-direction: column; gap: 0.45rem; }
+    .hero h1.title.one { font-size: 3rem; line-height: 1.08; }
+    .hero p.lede { font-size: 1.2rem; }
+    .ready { display: flex; flex-direction: column; gap: 0.5rem; }
     .ready h3 { margin-bottom: 0.2rem; }
-    .check { display: grid; grid-template-columns: 22px 1fr; gap: 0.5rem; align-items: start; font-size: 0.9rem; }
-    .check .dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 0.3rem; background: var(--faint); }
+    .check { display: grid; grid-template-columns: 18px 1fr; gap: 0.5rem; align-items: start; font-size: 0.92rem; }
+    .check .dot { width: 11px; height: 11px; border-radius: 50%; margin-top: 0.32rem; background: var(--faint); }
     .check.ok .dot { background: var(--genuine); box-shadow: 0 0 8px rgba(34, 201, 122, 0.7); }
     .check.warn .dot { background: var(--caution); }
     .check.bad .dot { background: var(--fake); }
     .check small { display: block; color: var(--dim); font-size: 0.78rem; }
-    .scenes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    .scenes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
     @media (max-width: 1150px) { .scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 720px) { .scenes { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .scenes { grid-template-columns: 1fr; } }
     .scene-card {
-      display: flex; flex-direction: column; gap: 0.6rem; text-decoration: none; color: var(--ink);
-      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 0.7rem; text-decoration: none; color: var(--ink);
+      background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 1.2rem 1.25rem 1.1rem;
       transition: border-color 0.15s, background 0.15s, transform 0.1s;
     }
+    .scene-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #2a63e8, #19a56b); opacity: 0.8; }
     .scene-card:hover { border-color: rgba(91, 149, 255, 0.55); background: var(--panel-2); color: var(--ink); transform: translateY(-2px); }
     .scene-card .top { display: flex; align-items: center; gap: 0.7rem; }
-    .scene-card .n { width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--accent); color: #fff; flex: none; }
-    .scene-card .t { font-size: 1.2rem; font-weight: 700; }
+    .scene-card .n { width: 2.3rem; height: 2.3rem; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--accent); color: #fff; flex: none; }
+    .scene-card .t { font-size: 1.25rem; font-weight: 700; }
     .scene-card .m { margin-left: auto; color: var(--dim); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
-    .scene-card .what { color: #c6d4ea; font-size: 0.92rem; }
-    .scene-card .say { color: var(--dim); font-size: 0.86rem; border-left: 3px solid rgba(91, 149, 255, 0.45); padding-left: 0.65rem; font-style: italic; }
+    .scene-card .one { font-size: 1.08rem; line-height: 1.4; color: #e4ecf8; }
     .scene-card .open { margin-top: auto; color: #a9c7ff; font-size: 0.86rem; font-weight: 600; }
-    .startrow { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
-    .tips { margin-top: 1.4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+    .startrow { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; margin-top: 1.2rem; }
+    .moreline { margin-top: 1.3rem; }
+    details.prep { margin-top: 1.3rem; }
+    details.prep summary { cursor: pointer; color: var(--dim); font-size: 0.9rem; }
+    .tips { margin-top: 0.8rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
     code.cmd { display: block; font-family: var(--mono); font-size: 0.82rem; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line); border-radius: 10px; padding: 0.55rem 0.7rem; color: #d7e5ff; margin-top: 0.4rem; overflow-x: auto; white-space: nowrap; }
   </style>
 </head>
@@ -43,13 +48,12 @@
     <section class="hero">
       <div>
         <p class="kicker">Final review · live demo</p>
-        <h1 class="title">Is the voice on this call real, or cloned?</h1>
+        <h1 class="title one">Is the voice on this call real, or cloned?</h1>
         <p class="lede">A detector that listens to a Hindi-English phone call as it happens and warns
-          <b>only the person being called</b>. Six scenes, about ten minutes, every number read from the
-          project's committed results.</p>
+          <b>only the person being called</b>. Four scenes, about eight minutes.</p>
         <div class="startrow">
           <a class="btn go big" href="/threat">Start the demo →</a>
-          <span class="small muted">or press <kbd>1</kbd>–<kbd>6</kbd> for any scene, <kbd>→</kbd> for the next</span>
+          <span class="small muted">or press <kbd>1</kbd>–<kbd>4</kbd> for a scene, <kbd>→</kbd> for the next</span>
         </div>
       </div>
       <div class="card ready" id="ready">
@@ -60,51 +64,48 @@
 
     <section class="scenes" id="scenes"></section>
 
-    <section class="tips">
-      <div class="card tight">
-        <h3>Before showing it</h3>
-        <div class="small muted">Every call must replay to its written-down verdict, twice in a row:</div>
-        <code class="cmd">python scripts/rehearse_demo.py --server http://localhost:8000</code>
-      </div>
-      <div class="card tight">
-        <h3>The phone scene</h3>
-        <div class="small muted">For https on the mentor's phone, open a tunnel in its own terminal (or use the room's Wi-Fi):</div>
-        <code class="cmd">python scripts/start_tunnel.py</code>
-      </div>
-      <div class="card tight">
-        <h3>If anything misbehaves</h3>
-        <div class="small muted">Scene 3 runs on one screen at <a href="/console">/console</a>; the recorded run is
-          <b>backup_demo.mp4</b> on the desktop.</div>
-      </div>
-    </section>
+    <nav class="more moreline" id="more" aria-label="More, for questions"><span>For questions, from scene 4:</span></nav>
+
+    <details class="prep">
+      <summary>Before the review</summary>
+      <section class="tips">
+        <div class="card tight">
+          <h3>Rehearse</h3>
+          <div class="small muted">Every call must replay to its written-down verdict, twice in a row:</div>
+          <code class="cmd">python scripts/rehearse_demo.py --server http://localhost:8000 --rounds 2</code>
+        </div>
+        <div class="card tight">
+          <h3>The phone scene</h3>
+          <div class="small muted">For https on the mentor's phone, open a tunnel in its own terminal (or use the room's Wi-Fi):</div>
+          <code class="cmd">python scripts/start_tunnel.py</code>
+        </div>
+        <div class="card tight">
+          <h3>If anything misbehaves</h3>
+          <div class="small muted">Scene 3 runs on one screen at <a href="/console">/console</a>; the recorded run is
+            <b>backup_demo.mp4</b> on the desktop.</div>
+        </div>
+      </section>
+    </details>
   </main>
 
   <script src="/static/stage.js"></script>
   <script>
-    const { make, json, SCENES } = Stage;
+    const { make, json, SCENES, MORE, NAMES } = Stage;
     Stage.mount("hub");
-    const WHAT = {
-      threat: "Opening card: a fraud call in Hindi-English asks for an OTP; why an English-trained detector cannot help.",
-      lanes: "One call, three detectors on one timeline: English-only, the deployed adapter, the final recipe.",
-      live: "The mentor holds a phone that rings with a cloned voice and then warns them. The caller sees nothing.",
-      network: "Thirty real mobile calls, scores only: the call chain, a stage player to hear the codec, the table.",
-      trust: "Shuffle the call into 100 ms pieces: same verdict. Every result against its cheap-statistics floor.",
-      limits: "What it cannot do yet, with numbers, and what was done about each overnight. Then try it.",
+    // The one sentence each scene exists to say.
+    const ONE = {
+      threat: "A familiar voice calls in Hindi-English and asks for an OTP. The usual detector cannot help.",
+      lanes: "Same call, four detectors: which of them protects a real person, and which catches the clone.",
+      live: "A clone is calling the mentor's phone. Only the receiver is warned.",
+      limits: "What it cannot do yet, with numbers.",
     };
 
-    async function scenes() {
-      const cards = [];
-      for (const s of SCENES) {
-        const said = await Stage.lines(s.key);
-        cards.push(make("a", { class: "scene-card", href: s.href }, [
-          make("div", { class: "top" }, [make("span", { class: "n", text: s.n }), make("span", { class: "t", text: s.title }), make("span", { class: "m", text: s.minutes })]),
-          make("div", { class: "what", text: WHAT[s.key] }),
-          make("div", { class: "say", text: "“" + said.join(" ") + "”" }),
-          make("span", { class: "open", text: "Open scene " + s.n + " →" }),
-        ]));
-      }
-      document.getElementById("scenes").replaceChildren(...cards);
-    }
+    document.getElementById("scenes").replaceChildren(...SCENES.map((s) => make("a", { class: "scene-card", href: s.href }, [
+      make("div", { class: "top" }, [make("span", { class: "n", text: s.n }), make("span", { class: "t", text: s.title }), make("span", { class: "m", text: s.minutes })]),
+      make("div", { class: "one", text: ONE[s.key] }),
+      make("span", { class: "open", text: "Open scene " + s.n + " →" }),
+    ])));
+    document.getElementById("more").append(...MORE.map((m) => make("a", { href: m.href }, [make("b", { text: m.title }), make("small", { text: m.what })])));
 
     function check(level, text, detail) {
       return make("div", { class: "check " + level }, [make("span", { class: "dot" }), make("div", {}, [text, detail ? make("small", { text: detail }) : null])]);
@@ -118,15 +119,12 @@
         const final = (d.checkpoint || "").startsWith("final_");
         out.push(check(d.model_loaded && final ? "ok" : d.checkpoint_found ? "warn" : "bad",
           `Live model: ${Stage.shortModel(d.checkpoint)}${d.model_loaded ? "" : " (still loading)"}`,
-          final ? `threshold ${d.threshold.toFixed(3)} from ${d.threshold_source}` : "the demo expects the final recipe (scripts/run_demo.bat)"));
+          final ? `threshold from ${d.threshold_source}` : "the demo expects the final recipe (scripts/run_demo.bat)"));
         out.push(check(h.demo_clips >= 8 ? "ok" : h.demo_clips ? "warn" : "bad", `${h.demo_clips} prepared calls`, h.demo_clips_dir));
         const l = await json("/api/lanes");
         out.push(check(l.problems.length ? "bad" : l.lanes.length >= 3 ? "ok" : "warn",
-          `${l.lanes.length} detector lane(s) for scene 2`,
-          l.problems.length ? l.problems[0] : l.lanes.map((x) => x.name).join(" · ")));
-        const p = await json("/api/stage_player");
-        out.push(check(p.available ? "ok" : "warn", p.available ? "Stage player prepared" : "Stage player not prepared",
-          p.available ? `${p.stages.length} stages of a phone call` : "scripts/prepare_stage_player.py"));
+          `${l.lanes.length} detectors for scene 2`,
+          l.problems.length ? l.problems[0] : l.lanes.map((x) => NAMES[x.role] || x.name).join(" · ")));
         const t = await json("/api/tunnel");
         out.push(check(t.url ? "ok" : t.lan.length ? "warn" : "bad", t.url ? "Phone tunnel open (https)" : "No tunnel: the phone uses this Wi-Fi",
           t.url || (t.lan[0] ? t.lan[0] + "/phone/receiver" : "no network address")));
@@ -136,7 +134,6 @@
       document.getElementById("ready").replaceChildren(...out);
     }
 
-    scenes();
     readiness();
     setInterval(readiness, 10000);
   </script>

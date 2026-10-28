@@ -92,7 +92,7 @@ def test_a_cloned_caller_warns_the_receiver_and_never_the_caller(browser):
     try:
         page.wait_for_selector("#alertBox.show.likely_fake", timeout=WARNING_BUDGET_MS)
         assert "likely cloned" in page.inner_text("#alertBox").lower()
-        assert page.inner_text("#verdictText") == "Likely cloned voice"
+        assert page.inner_text("#verdictText") == "Likely cloned"
 
         # The whole point: the caller's side must carry no verdict. Checked on the
         # elements that could show one -- not on the panel text, which legitimately
@@ -112,7 +112,7 @@ def test_a_cloned_caller_warns_the_receiver_and_never_the_caller(browser):
 def test_a_genuine_caller_raises_no_alarm(browser):
     page, errors = _place_call(browser, "rvc_genuine", "e2e-genuine", hold_ms=18_000)
     try:
-        assert page.inner_text("#verdictText") == "Genuine voice"
+        assert page.inner_text("#verdictText") == "Genuine"
         assert "show" not in (page.get_attribute("#alertBox", "class") or "")
         assert page.inner_text("#cntFake").startswith("0"), "no window should be fake-leaning"
         assert not errors, f"javascript errors: {errors[:3]}"

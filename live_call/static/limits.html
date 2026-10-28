@@ -3,188 +3,239 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Limits and try it</title>
+  <title>What it cannot do yet</title>
   <link rel="stylesheet" href="/static/stage.css" />
   <style>
     main.scene { padding-top: 1.1rem; }
-    .layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); gap: 1.1rem; align-items: start; }
-    @media (max-width: 1150px) { .layout { grid-template-columns: 1fr; } }
-    .limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; align-items: start; }
-    @media (max-width: 800px) { .limits { grid-template-columns: 1fr; } }
-    .limit { display: flex; flex-direction: column; gap: 0.5rem; }
-    .limit .lh { display: flex; align-items: center; gap: 0.6rem; }
-    .limit .lh .k { width: 1.8rem; height: 1.8rem; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 176, 46, 0.18); color: #ffd18a; font-weight: 800; font-size: 0.9rem; flex: none; }
-    .limit .lh h2 { margin: 0; font-size: 1.08rem; }
-    .limit .num { font-size: 0.98rem; line-height: 1.5; }
-    .limit .num b { font-size: 1.12rem; }
-    .limit .tonight { margin-top: auto; border-radius: 12px; padding: 0.6rem 0.75rem; background: rgba(0, 0, 0, 0.22); border: 1px solid var(--line); font-size: 0.86rem; }
-    .limit .tonight .st { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; font-size: 0.74rem; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 0.25rem; }
-    .st.landed { color: #8ff0c0; } .st.pending { color: #ffd18a; }
-    .limit .fix { color: var(--dim); font-size: 0.84rem; }
-    .limit .ssl { margin-top: 0.35rem; padding-left: 0.55rem; border-left: 3px solid #8b6cff; color: #d9d0ff; }
-    .sslt { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 0.84rem; }
-    .sslt th, .sslt td { text-align: left; padding: 0.18rem 0.3rem; border-bottom: 1px solid var(--line); font-weight: 500; }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+    @media (max-width: 1000px) { .cards { grid-template-columns: 1fr; } }
+    .lim { position: relative; overflow: hidden; border-radius: 20px; padding: 1.2rem 1.3rem 1.15rem; background: var(--panel); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 0.55rem; }
+    .lim::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--caution); opacity: 0.85; }
+    .lim .what { font-size: 0.78rem; letter-spacing: 1.6px; text-transform: uppercase; color: #ffd18a; font-weight: 700; }
+    .lim .head { font-size: 4.1rem; font-weight: 850; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; color: #fff; }
+    .lim .head .of { font-size: 2rem; font-weight: 700; color: var(--dim); letter-spacing: -0.5px; }
+    .lim .head .cite { border-bottom: 0; }
+    .lim .lbl { font-size: 1.05rem; line-height: 1.35; color: #e4ecf8; }
+    .lim .next { margin-top: 0.2rem; padding: 0.5rem 0.7rem; border-radius: 12px; background: rgba(139, 108, 255, 0.10); border: 1px solid rgba(139, 108, 255, 0.35); color: #d9d0ff; font-size: 0.95rem; }
+    .lim .next b { color: #fff; }
+    .lim .ctx { color: var(--dim); font-size: 0.9rem; margin-top: auto; }
+    .codec { margin-top: 1rem; font-size: 1.05rem; color: #cfe0f8; }
+    .codec b { color: #fff; }
+    .bottom { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.2rem; }
+    .bottom .more { margin-left: auto; }
+
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+    @media (max-width: 1000px) { .detail-grid { grid-template-columns: 1fr; } }
+    .detail-grid .wide { grid-column: 1 / -1; }
+    .sslt { width: 100%; border-collapse: collapse; margin-top: 0.4rem; font-size: 0.9rem; }
+    .sslt th, .sslt td { text-align: left; padding: 0.32rem 0.4rem; border-bottom: 1px solid var(--line); font-weight: 500; }
     .sslt td:not(:first-child) { white-space: nowrap; }
     .sslt th { color: var(--faint); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
     .sslt .v { color: #c9bcff; font-weight: 700; }
     .sslt.gate .v { color: #ffd18a; }
-    .limit .doc[title] { cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
-    .limit .caveat { margin-top: 0.3rem; color: #ffd18a; font-size: 0.8rem; }
+    .caveat { margin-top: 0.45rem; color: #ffd18a; font-size: 0.86rem; }
+    .src { margin-top: 0.4rem; color: var(--faint); font-size: 0.76rem; font-family: var(--mono); }
     .tradeoff svg { width: 100%; height: auto; display: block; }
-    .tryit .script { font-size: 1.25rem; line-height: 1.45; font-weight: 600; padding: 0.9rem 1rem; border-radius: 12px; background: rgba(91, 149, 255, 0.10); border: 1px solid rgba(91, 149, 255, 0.4); margin: 0.6rem 0; }
-    .tryit .verdict { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.9rem; }
-    .tryit .verdict .vword { font-size: 1.7rem; font-weight: 800; }
-    .tryit canvas { width: 100%; height: 70px; display: block; margin-top: 0.6rem; }
     .known { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.6rem; }
-    .meter { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 0.6rem; }
-    .meter > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--fake), #ff9d9d); transition: width 0.2s linear; }
+    @media (max-height: 820px) and (min-width: 1101px) {
+      main.scene { padding-top: 0.8rem; }
+      .cards { margin-top: 0.8rem; }
+      .lim { padding: 0.95rem 1.1rem; }
+      .lim .head { font-size: 3.3rem; }
+      .lim .head .of { font-size: 1.6rem; }
+      .lim .lbl { font-size: 0.98rem; }
+      .codec { margin-top: 0.7rem; font-size: 0.98rem; }
+      .bottom { margin-top: 0.8rem; }
+    }
   </style>
 </head>
 <body>
   <main class="scene">
-    <p class="kicker">Scene 6 · What it cannot do yet</p>
-    <h1 class="title">Four limits, measured, and what we did about each.</h1>
+    <p class="kicker">Scene 4 · Limits</p>
+    <h1 class="title one">What it cannot do yet, with numbers.</h1>
 
-    <div class="layout">
-      <section>
-        <div class="limits" id="limits"><div class="card muted">Loading…</div></div>
-        <div class="card tradeoff" id="tradeoffCard" style="margin-top:0.9rem" hidden>
-          <h3>Spontaneous speech: no threshold fixes it</h3>
-          <div id="tradeoff"></div>
-          <div class="tiny faint" id="tradeoffSrc"></div>
-        </div>
-      </section>
+    <section class="cards">
+      <article class="lim">
+        <div class="what">Spontaneous speech</div>
+        <div class="head" id="spontHead">–</div>
+        <div class="lbl">genuine callers speaking freely are warned by the final recipe <span class="muted">(60 s calls)</span></div>
+        <div class="next" id="spontNext">Larger encoder: –</div>
+        <div class="ctx">It learned from read speech; free conversation sounds different to it.</div>
+      </article>
+      <article class="lim">
+        <div class="what">Unseen cloning tools</div>
+        <div class="head" id="toolHead">–</div>
+        <div class="lbl">real-network Chatterbox clone calls caught by the final recipe</div>
+        <div class="next" id="toolNext">Larger encoder: –</div>
+        <div class="ctx">Chatterbox is a cloning tool none of the models was trained on.</div>
+      </article>
+      <article class="lim">
+        <div class="what">English over the phone line</div>
+        <div class="head" id="engHead">–</div>
+        <div class="lbl">error (EER) of the deployed adapter on English speech over a phone line</div>
+        <div class="ctx" id="engCtx">On the same English clips without the phone line: –</div>
+      </article>
+    </section>
 
-      <aside>
-        <section class="card tryit">
-          <h3>Try it</h3>
-          <p class="small muted" style="margin:0">Read this line into the laptop's microphone, twice if it is short.
-            The recording is judged exactly as a live call: the same windows, threshold and warning ladder.
-            Read speech, as the detector was trained on.</p>
-          <div class="script" id="script"></div>
-          <div class="row">
-            <button class="btn go" id="rec">● Record 8 seconds</button>
-            <button class="btn ghost" id="next">Another line</button>
-          </div>
-          <div class="meter"><div id="level"></div></div>
-          <div class="verdict s-listening" id="tryVerdict" hidden><span class="light"></span><span class="vword" id="tryWord"></span></div>
-          <div class="small muted" id="tryDetail"></div>
-          <canvas id="tryCanvas" hidden></canvas>
-        </section>
+    <p class="codec" id="codec">On the 30 real mobile calls, the phone codec alone takes the deployed adapter down to its
+      threshold; the final recipe holds.</p>
 
-        <section class="card" style="margin-top:0.9rem">
-          <h3>The known limits, as calls</h3>
-          <p class="small muted" style="margin:0">Kept in the demo on purpose, never swapped for calls that look better.</p>
-          <div class="known">
-            <a class="btn ghost" href="/lanes?clip=hiacc_spontaneous">A genuine caller speaking freely</a>
-            <a class="btn ghost" href="/lanes?clip=tortoise_clone">A Tortoise clone it lets through</a>
-          </div>
-        </section>
-      </aside>
+    <div class="bottom">
+      <button class="btn details-btn" id="detailsBtn" type="button">Details</button>
+      <nav class="more" id="more" aria-label="More, for questions"><span>More, for questions:</span></nav>
     </div>
+
+    <section class="detail-grid" data-details hidden>
+      <div class="card" id="sslCard"><h3>The larger encoder on the 30 real calls</h3><div class="muted">Loading…</div></div>
+      <div class="card" id="lateCard"><h3>Late warnings, and a stricter gate for the first seconds</h3><div class="muted">Loading…</div></div>
+      <div class="card" id="callsCard"><h3>The 30 real mobile calls</h3><div class="muted">Loading…</div></div>
+      <div class="card">
+        <h3>The known limits, as calls</h3>
+        <p class="small muted" style="margin:0">Kept in the demo on purpose, never swapped for calls that look better.</p>
+        <div class="known">
+          <a class="btn ghost" href="/lanes?clip=hiacc_spontaneous">A genuine caller speaking freely</a>
+          <a class="btn ghost" href="/lanes?clip=tortoise_clone">A Tortoise clone the final recipe lets through</a>
+        </div>
+        <p class="small muted" id="carrier" style="margin:0.9rem 0 0"></p>
+      </div>
+      <div class="card tradeoff wide" id="tradeoffCard" hidden>
+        <h3>Spontaneous speech: no threshold fixes it</h3>
+        <div id="tradeoff"></div>
+        <div class="tiny faint" id="tradeoffSrc"></div>
+      </div>
+    </section>
   </main>
 
   <script src="/static/stage.js"></script>
   <script>
-    const { make, json, cite } = Stage;
+    const { make, json, cite, NAMES } = Stage;
     Stage.mount("limits");
     const $ = (id) => document.getElementById(id);
     const p1 = (v) => Number(v).toFixed(1) + "%";
     const p0 = (v) => Math.round(v) + "%";
+    Stage.details($("detailsBtn"));
+    $("more").append(...Stage.MORE.map((m) => make("a", { href: m.href }, [make("b", { text: m.title }), make("small", { text: m.what })])));
 
-    // ------------------------------------------------------------------ limits
-    function numbers(limit) {
-      const n = limit.numbers;
-      switch (limit.key) {
-        case "spontaneous":
-          return ["The final recipe warns ", make("b", {}, [cite(n.final_genuine_warned_pct, p0)]), " of ",
-            cite(n.final_calls), " genuine spontaneous 60 s calls; the deployed adapter ", cite(n.deployed_genuine_warned_pct, p0), "."];
-        case "chatterbox":
-          return ["Final recipe: ", make("b", {}, [cite(n.final_eer, p1)]), " EER (floor ", cite(n.final_floor, p1), ", ",
-            cite(n.final_seeds), " seed); catches ", cite(n.final_calls_caught_pct, p0), " of 60 s Chatterbox calls and ",
-            cite(n.real_calls_likely), " of ", cite(n.real_calls), " real-network Chatterbox calls."];
-        case "late": {
-          const times = n.xtts_likely_times_s.value.map((t) => Math.round(t) + " s").join(", ");
-          return ["Real XTTS-v2 clone calls: first caution at a median of ", make("b", {}, [cite(n.xtts_median_first_caution_s, (v) => Math.round(v) + " s")]),
-            "; likely cloned at ", make("span", { class: "cite", title: "read from " + n.xtts_likely_times_s.source, text: times }),
-            " (", cite(n.xtts_caught), " of ", cite(n.xtts_calls), " caught)."];
-        }
-        default:
-          return [limit.said];
-      }
+    // "x of n", the count read as the stored share of the stored number of calls
+    function ofCalls(pctEntry, callsEntry) {
+      const n = callsEntry.value, k = Math.round((pctEntry.value * n) / 100);
+      return [make("span", { class: "cite", title: `read from ${pctEntry.source} (${p1(pctEntry.value)} of ${n})`, text: String(k) }),
+        make("span", { class: "of" }, [" of ", cite(callsEntry)])];
     }
-    function tonight(t, limit) {
-      const landed = t.landed && limit.key !== "carrier";
-      const status = limit.key === "carrier" ? ["pending", "stated honestly"] : landed ? ["landed", "done tonight"] : ["pending", "running tonight"];
-      const body = [make("div", { class: "st " + status[0], text: status[1] }), make("div", { text: t.what })];
-      if (limit.key === "spontaneous" && t.ssl) {
-        body.push(make("div", { class: "ssl" }, ["The larger encoder, at its own threshold chosen on dev, warns ",
-          make("b", {}, [cite(t.ssl.real_alerted_pct, p0)]), " of ", cite(t.ssl.real_calls), " of the same calls."]));
-      }
-      if (limit.key === "chatterbox" && landed && t.result) body.push(sslCalls(t));
-      if (limit.key === "late" && landed && t.result) body.push(earlyGate(t));
-      else if (limit.key === "chatterbox") {
-        body.push(make("div", { class: "faint", style: "margin-top:0.3rem" },
-          ["Offline already: SSL-AASIST reaches ", cite(limit.numbers.ssl_eer, p1), " EER on Chatterbox (", cite(limit.numbers.ssl_seeds), " seeds)."]));
-      }
-      // the result doc's own summary stays one hover away, so the card shows the result first
-      body.push(make("div", { class: "faint tiny doc", style: "margin-top:0.25rem", title: landed && t.first_paragraph ? t.first_paragraph : null, text: t.doc }));
-      return make("div", { class: "tonight" }, body);
-    }
-    // The larger encoder beside the final recipe on the 30 real calls (#63).
-    function sslCalls(t) {
-      const r = t.result;
-      const row = (label, key, field) => make("tr", {}, [
-        make("td", { text: label }),
-        make("td", {}, [cite(r.final[key][field]), " / ", cite(r.final[key].calls)]),
-        make("td", { class: "v" }, [cite(r.ssl[key][field]), " / ", cite(r.ssl[key].calls)]),
-      ]);
-      return make("div", {}, [
-        make("table", { class: "sslt" }, [
-          make("tr", {}, [make("th", { text: "Real calls" }), make("th", { text: "Final" }), make("th", { class: "v", text: "SSL-AASIST" })]),
-          row("Chatterbox, likely cloned", "chatterbox", "likely"),
-          row("XTTS-v2, likely cloned", "xtts", "likely"),
-          row("Genuine live, warned", "genuine_live", "warned"),
-        ]),
-        make("div", { class: "faint", style: "margin-top:0.3rem" }, ["Held-out 60 s Chatterbox calls: warns ",
-          cite(t.held_out.fake_alerted_pct, p0), ", likely cloned ", cite(t.held_out.fake_likely_pct, p0),
-          ". This checkpoint's offline Chatterbox EER: ", cite(r.checkpoint_chatterbox_eer, p1), "."]),
-        make("div", { class: "caveat", text: t.caveat }),
-      ]);
-    }
-    // The early-call gate on the final recipe: without and with it (set on dev only).
-    function earlyGate(t) {
-      const r = t.result;
-      const secs = (v) => Math.round(v) + " s";
-      const row = (label, pair, format = (v) => v, total = true) => make("tr", {}, [
-        make("td", { text: label }),
-        make("td", {}, [cite(pair.without_gate, format)].concat(total ? [" / ", cite(pair.calls)] : [])),
-        make("td", { class: "v" }, [cite(pair.with_gate, format)].concat(total ? [" / ", cite(pair.calls)] : [])),
-      ]);
-      return make("div", {}, [
-        make("table", { class: "sslt gate" }, [
-          make("tr", {}, [make("th", { text: "Final recipe" }), make("th", { text: "No gate" }), make("th", { class: "v", text: "Gate" })]),
-          row("Genuine live warned, phone line", r.genuine_warned_g711),
-          row("Genuine live warned, as recorded", r.genuine_warned_recorded),
-          row("XTTS-v2 first caution (median)", r.xtts_first_caution_s, secs, false),
-        ]),
-        make("div", { class: "faint", style: "margin-top:0.3rem" }, ["Early windows the gate treats as silence: ",
-          cite(r.early_windows_gated), " of ", cite(r.early_windows), ", speech included."]),
-        make("div", { class: "caveat", text: t.caveat }),
-      ]);
-    }
-    async function loadLimits() {
+    const countOf = (entry, total) => [cite(entry), make("span", { class: "of" }, [" of ", cite(total)])];
+
+    // ------------------------------------------------------------------ the three cards
+    async function load() {
+      let limits, headline, real;
       try {
-        const data = await json("/api/limits");
-        $("limits").replaceChildren(...data.limits.map((limit, i) => make("article", { class: "card limit" }, [
-          make("div", { class: "lh" }, [make("span", { class: "k", text: i + 1 }), make("h2", { text: limit.title })]),
-          make("div", { class: "num" }, numbers(limit)),
-          limit.key !== "carrier" ? make("div", { class: "small muted", text: limit.said }) : null,
-          tonight(limit.tonight, limit),
-          make("div", { class: "fix", text: "The fix: " + limit.fix }),
-        ])));
-        drawTradeoff(data.tradeoff);
-      } catch (e) { $("limits").replaceChildren(make("div", { class: "card", text: "Could not read the limits: " + e.message })); }
+        [limits, headline, real] = await Promise.all([json("/api/limits"), json("/api/headline"), json("/api/real_calls")]);
+      } catch (e) { Stage.toast("Could not read the results: " + e.message); return; }
+      const by = Object.fromEntries(limits.limits.map((l) => [l.key, l]));
+
+      const sp = by.spontaneous;
+      $("spontHead").replaceChildren(...ofCalls(sp.numbers.final_genuine_warned_pct, sp.numbers.final_calls));
+      if (sp.tonight.ssl) {
+        $("spontNext").replaceChildren(make("b", { text: NAMES.ssl + ": " }),
+          ...ofCalls(sp.tonight.ssl.real_alerted_pct, sp.tonight.ssl.real_calls).map((n) => { n.classList?.remove("of"); return n; }),
+          " · one checkpoint, the next candidate");
+      } else $("spontNext").remove();
+
+      const cb = by.chatterbox;
+      const r = cb.tonight.result;
+      if (r) {
+        $("toolHead").replaceChildren(...countOf(r.final.chatterbox.likely, r.final.chatterbox.calls));
+        $("toolNext").replaceChildren(make("b", { text: NAMES.ssl + ": " }),
+          cite(r.ssl.chatterbox.likely), " of ", cite(r.ssl.chatterbox.calls), " · one checkpoint, the next candidate");
+      } else {
+        $("toolHead").replaceChildren(...countOf(cb.numbers.real_calls_likely, cb.numbers.real_calls));
+        $("toolNext").remove();
+      }
+
+      const en = headline.english_line_deployed;
+      $("engHead").replaceChildren(cite(en.line_eer, p1));
+      $("engCtx").replaceChildren("On the same English clips without the phone line: ", cite(en.clean_eer, p1), ".");
+
+      // the call chain's one result, as a sentence; the values sit in its tooltip
+      const stage = real.chain.stages.find((s) => s.key === "amr_nb");
+      const thr = real.chain.models.deployed.threshold;
+      if (stage && stage.deployed && stage.deployed.value !== null) {
+        $("codec").title = `${NAMES.deployed}: mean P(genuine) ${stage.deployed.value.toFixed(2)} after the real AMR-NB codec ` +
+          `against its threshold ${thr.value.toFixed(2)}; ${NAMES.final}: ${stage.final.value.toFixed(2)} (read from ${stage.deployed.source})`;
+        $("codec").classList.add("cite");
+      }
+
+      details(by, real, limits.tradeoff);
+    }
+
+    // ------------------------------------------------------------------ Details
+    function details(by, real, tradeoff) {
+      const cb = by.chatterbox.tonight;
+      if (cb.result) {
+        const r = cb.result;
+        const row = (label, key, field) => make("tr", {}, [
+          make("td", { text: label }),
+          make("td", {}, [cite(r.final[key][field]), " / ", cite(r.final[key].calls)]),
+          make("td", { class: "v" }, [cite(r.ssl[key][field]), " / ", cite(r.ssl[key].calls)]),
+        ]);
+        $("sslCard").replaceChildren(make("h3", { text: "The larger encoder on the 30 real calls" }),
+          make("table", { class: "sslt" }, [
+            make("tr", {}, [make("th", { text: "Real calls" }), make("th", { text: NAMES.final }), make("th", { class: "v", text: NAMES.ssl })]),
+            row("Chatterbox clones, likely cloned", "chatterbox", "likely"),
+            row("XTTS-v2 clones, likely cloned", "xtts", "likely"),
+            row("Genuine live calls, warned", "genuine_live", "warned"),
+          ]),
+          make("div", { class: "small muted", style: "margin-top:0.5rem" }, ["Held-out 60 s Chatterbox calls: warned ",
+            cite(cb.held_out.fake_alerted_pct, p0), ", likely cloned ", cite(cb.held_out.fake_likely_pct, p0),
+            ". Its own threshold was chosen on development calls (", cite(r.ladder.threshold, (v) => v.toFixed(3)), ")."]),
+          make("div", { class: "caveat", text: cb.caveat }),
+          make("div", { class: "src", text: cb.doc }));
+      } else $("sslCard").remove();
+
+      const late = by.late;
+      const lt = late.tonight;
+      const n = late.numbers;
+      const body = [make("h3", { text: "Late warnings, and a stricter gate for the first seconds" }),
+        make("div", { class: "small" }, ["Real XTTS-v2 clone calls: first caution at a median of ",
+          cite(n.xtts_median_first_caution_s, (v) => Math.round(v) + " s"), "; ", cite(n.xtts_caught), " of ",
+          cite(n.xtts_calls), " reach likely cloned."])];
+      if (lt.landed && lt.result) {
+        const g = lt.result;
+        const secs = (v) => Math.round(v) + " s";
+        const row = (label, pair, format = (v) => v, total = true) => make("tr", {}, [
+          make("td", { text: label }),
+          make("td", {}, [cite(pair.without_gate, format)].concat(total ? [" / ", cite(pair.calls)] : [])),
+          make("td", { class: "v" }, [cite(pair.with_gate, format)].concat(total ? [" / ", cite(pair.calls)] : [])),
+        ]);
+        body.push(make("table", { class: "sslt gate" }, [
+          make("tr", {}, [make("th", { text: NAMES.final }), make("th", { text: "No gate" }), make("th", { class: "v", text: "Gate" })]),
+          row("Genuine live calls warned, phone line", g.genuine_warned_g711),
+          row("Genuine live calls warned, as recorded", g.genuine_warned_recorded),
+          row("XTTS-v2 first caution (median)", g.xtts_first_caution_s, secs, false),
+        ]), make("div", { class: "small muted", style: "margin-top:0.5rem" }, ["Early windows the gate treats as silence: ",
+          cite(g.early_windows_gated), " of ", cite(g.early_windows), ", speech included."]),
+        make("div", { class: "caveat", text: lt.caveat }));
+      }
+      body.push(make("div", { class: "src", text: lt.doc }));
+      $("lateCard").replaceChildren(...body);
+
+      const rows = real.table.map((t) => make("tr", {}, [
+        make("td", { text: t.label }),
+        make("td", {}, [cite(t.final.calls)]),
+        make("td", {}, [cite(t.deployed.likely)]),
+        make("td", {}, [cite(t.final.warned)]),
+        make("td", {}, [cite(t.final.likely)]),
+      ]));
+      $("callsCard").replaceChildren(make("h3", { text: "The 30 real mobile calls" }),
+        make("table", { class: "sslt" }, [
+          make("tr", {}, [make("th", { text: "Calls" }), make("th", { text: "n" }), make("th", { text: NAMES.deployed + ": likely cloned" }),
+            make("th", { text: NAMES.final + ": warned" }), make("th", { text: "likely cloned" })]),
+          ...rows,
+        ]),
+        make("div", { class: "small muted", style: "margin-top:0.5rem", text: real.note }),
+        make("div", { class: "src" }, [make("a", { href: "/network", text: "The call chain and the stage player →" })]));
+
+      $("carrier").textContent = "Not yet on a live phone number: " + by.carrier.said;
+      drawTradeoff(tradeoff);
     }
 
     function drawTradeoff(t) {
@@ -192,7 +243,7 @@
       $("tradeoffCard").hidden = false;
       const NS = "http://www.w3.org/2000/svg";
       const s = (tag, a = {}, text) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(a)) n.setAttribute(k, v); if (text !== undefined) n.textContent = text; return n; };
-      const W = 760, H = 270, L = 50, R = 14, T = 14, B = 42;
+      const W = 900, H = 270, L = 50, R = 14, T = 14, B = 42;
       const pts = [...t.points].sort((a, b) => a.threshold - b.threshold);
       const scale = Math.max(...pts.flatMap((p) => [p.genuine_warned, p.clones_caught])) > 1.5 ? 100 : 1;
       const x = (v) => L + (W - L - R) * v, y = (v) => T + (H - T - B) * (1 - v / scale);
@@ -206,7 +257,6 @@
       if (t.live_threshold) {
         const lx = x(t.live_threshold.value);
         root.append(s("line", { x1: lx, x2: lx, y1: T, y2: H - B, stroke: "rgba(230,238,250,0.7)", "stroke-dasharray": "5 4" }));
-        // labelled in the empty band between the lines, left of the marker
         const lab = s("text", { x: lx - 6, y: y(0.36 * scale), "text-anchor": "end", "font-size": 12.5, "font-weight": 600, fill: "#e6eefa" }, "live threshold " + t.live_threshold.value.toFixed(3));
         lab.append(s("title", {}, "read from " + t.live_threshold.source));
         root.append(lab);
@@ -226,74 +276,7 @@
       $("tradeoffSrc").textContent = "read from " + t.source + " · it chooses nothing (HiACC is evaluation-only): lowering the bar until spontaneous speech passes gives up most of the unseen-tool clones";
     }
 
-    // ------------------------------------------------------------------ try it
-    // Read-speech lines in Hindi-English, like the training data (never free talk).
-    const LINES = [
-      "Main aaj office thoda late pahunchunga, kyunki traffic bahut zyada hai aur meeting bhi postpone ho gayi.",
-      "Kal shaam ko hum sab dinner ke liye bahar ja rahe hain, tum bhi aa jao, bahut maza aayega.",
-      "Please apna account number confirm kar dijiye, main details email pe bhej deta hoon.",
-    ];
-    let line = 0;
-    const showLine = () => ($("script").textContent = "“" + LINES[line % LINES.length] + "”");
-    $("next").onclick = () => { line += 1; showLine(); };
-    showLine();
-
-    // long enough for the whole ladder: a caution needs 3 low windows, a warning 5 (2 s apart)
-    const SECONDS = 12;
-    $("rec").textContent = `● Record ${SECONDS} seconds`;
-    $("rec").onclick = async () => {
-      const btn = $("rec");
-      let stream;
-      try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
-      catch (e) { Stage.toast("Microphone not available: " + e.message); return; }
-      const ctx = new AudioContext(), src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser();
-      an.fftSize = 512; src.connect(an);
-      const data = new Uint8Array(an.fftSize);
-      let raf = 0;
-      const meter = () => { an.getByteTimeDomainData(data); let sum = 0; for (const v of data) { const q = (v - 128) / 128; sum += q * q; } $("level").style.width = Math.min(100, Math.sqrt(sum / data.length) * 320) + "%"; raf = requestAnimationFrame(meter); };
-      meter();
-      const rec = new MediaRecorder(stream), chunks = [];
-      rec.ondataavailable = (e) => chunks.push(e.data);
-      rec.onstop = async () => {
-        cancelAnimationFrame(raf); $("level").style.width = "0%";
-        stream.getTracks().forEach((t) => t.stop()); ctx.close();
-        btn.textContent = "Scoring…";
-        const form = new FormData();
-        form.append("file", new Blob(chunks, { type: rec.mimeType }), "recording.webm");
-        try {
-          // judged exactly as a live call: the same windows, threshold and warning ladder
-          const r = await json("/api/try", { method: "POST", body: form });
-          const state = r.scored_windows ? r.peak_state : "listening";
-          $("tryVerdict").hidden = false;
-          $("tryVerdict").className = "verdict s-" + state;
-          $("tryWord").textContent = r.scored_windows ? Stage.word(state) : "No speech heard";
-          $("tryDetail").textContent = !r.scored_windows ? "Speak a little louder and try again." :
-            `${r.fake_leaning_windows} of ${r.scored_windows} windows below the threshold ${r.threshold.toFixed(3)}` +
-            (r.first_caution_s !== null ? ` · first caution at ${Math.round(r.first_caution_s)} s` : " · no warning");
-          drawTry(r.windows, r.threshold);
-        } catch (e) { Stage.toast("Could not score the recording: " + e.message); }
-        btn.disabled = false; btn.textContent = `● Record ${SECONDS} seconds`;
-      };
-      rec.start(); btn.disabled = true;
-      let left = SECONDS; btn.textContent = `Recording… ${left}`;
-      const tick = setInterval(() => { left -= 1; btn.textContent = `Recording… ${left}`; if (left <= 0) { clearInterval(tick); rec.stop(); } }, 1000);
-    };
-    function drawTry(windows, t) {
-      const c = $("tryCanvas"); c.hidden = false;
-      const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
-      c.width = w * dpr; c.height = h * dpr;
-      const ctx = c.getContext("2d"); ctx.scale(dpr, dpr);
-      const tMax = Math.max(SECONDS, ...windows.map((p) => p.t));
-      const x = (v) => 6 + (w - 12) * (v / tMax), y = (v) => 6 + (h - 12) * (1 - v);
-      ctx.setLineDash([5, 4]); ctx.strokeStyle = "rgba(230,238,250,0.6)";
-      ctx.beginPath(); ctx.moveTo(0, y(t)); ctx.lineTo(w, y(t)); ctx.stroke(); ctx.setLineDash([]);
-      for (const p of windows.filter((q) => q.score !== null)) {
-        ctx.fillStyle = p.score < t ? "#ff6b6b" : "#3ae48c";
-        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 5, 0, 7); ctx.fill();
-      }
-    }
-
-    loadLimits();
+    load();
   </script>
 </body>
 </html>

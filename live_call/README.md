@@ -85,7 +85,7 @@ window scores in under a second, faster than the 2 s hop.
 | Page | What it shows |
 |---|---|
 | `/` | overview, the measured results of every system (final recipe first), **try a clip** judged as a call, **play a prepared call** |
-| `/demo` | the final review's guided flow: six scenes in order with the presenter's lines (section 5) |
+| `/demo` | the final review's guided flow: four scenes in order with the presenter's lines (section 5) |
 | `/console` | both handsets, the signal path and the live analysis on one screen |
 | `/dashboard` | every live call: verdict light, P(genuine) timeline against the threshold, warning tone and banner, alert log |
 | `/phone/caller`, `/phone/receiver` | the two handsets on two devices; only the receiver sees a verdict |
@@ -216,11 +216,18 @@ comes from Git LFS (`checkpoints/baseline/best.pt`).
 | Scene | Page | Routes behind it |
 |---|---|---|
 | 1 The threat | `/threat` | `GET /api/headline` |
-| 2 Three detectors | `/lanes` | `GET /api/lanes`, `POST /api/replay_lanes/{id}` (real time, streamed to `/ws/dashboard` tagged by lane and run; `?realtime=false` returns every lane's series), `POST /api/replay_lanes_stop` |
+| 2 Four detectors | `/lanes` | `GET /api/lanes`, `POST /api/replay_lanes/{id}` (real time, streamed to `/ws/dashboard` tagged by lane and run; `?realtime=false` returns every lane's series), `POST /api/replay_lanes_stop` |
 | 3 Live call | `/live`, `/phone/receiver` | `GET /api/tunnel` (the https tunnel, else this laptop's Wi-Fi address), `GET /api/qr?text=` |
-| 4 Real network | `/network` | `GET /api/real_calls`, `GET /api/stage_player`, `GET /api/stage_player/{stage}/audio` |
-| 5 Why trust it | `/trust` | `POST /api/shuffle/{id}`, `GET /api/shuffle/{id}/audio`, `GET /api/headline` |
-| 6 Limits + try it | `/limits` | `GET /api/limits`, `POST /api/try` |
+| 4 Limits | `/limits` | `GET /api/limits`, `GET /api/headline`, `GET /api/real_calls` |
+| More: Real network | `/network` | `GET /api/real_calls`, `GET /api/stage_player`, `GET /api/stage_player/{stage}/audio` |
+| More: Why trust it | `/trust` | `POST /api/shuffle/{id}`, `GET /api/shuffle/{id}/audio`, `GET /api/headline` |
+| More: Try it | `/try` | `POST /api/try` |
+
+Every page follows the same rules: one sentence at the top, at most three numbers on screen
+and the rest behind **Details** (`Stage.details`), the four names from `Stage.NAMES` whatever a
+lane is called in `DFD_LANES`, and the verdict key drawn by `stage.js` at the foot of the page.
+`tests/test_demo_routes.py` checks the flow, the one-sentence titles, the key line, and that no
+page shows a system code or a checkpoint name.
 
 | Variable | What it sets |
 |---|---|
