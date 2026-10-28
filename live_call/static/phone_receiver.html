@@ -121,7 +121,7 @@
       <div class="sub" id="vsub">waiting for the caller to speak</div>
       <div class="when">
         <div><b id="firstCaution">–</b><span>first caution</span></div>
-        <div><b id="firstLikely">–</b><span>likely-cloned warning</span></div>
+        <div><b id="firstLikely">–</b><span>likely cloned</span></div>
       </div>
       <canvas id="spark" aria-label="P(genuine) of each window"></canvas>
     </section>
@@ -154,7 +154,7 @@
 
   <div class="alarm" id="alarm" role="alertdialog" aria-labelledby="alarmTitle">
     <div class="icon">&#9888;</div>
-    <h2 id="alarmTitle">Likely cloned voice</h2>
+    <h2 id="alarmTitle">Likely cloned</h2>
     <p>Do not share codes, passwords or money. Hang up and call the person back on a number you know.</p>
     <div class="at" id="alarmAt"></div>
     <button type="button" id="alarmOk">I understand</button>
@@ -178,7 +178,7 @@
     $("sound").addEventListener("change", (e) => (soundOn = e.target.checked));
     getJSON("/api/health").then((h) => (threshold = h.detector.threshold)).catch(() => {});
 
-    const WORDS = { listening: "Listening…", genuine: "Genuine voice", suspicious: "Caution", likely_fake: "Likely cloned" };
+    const WORDS = { listening: "Listening…", genuine: "Genuine", suspicious: "Caution", likely_fake: "Likely cloned" };
 
     // ------------------------------------------------------------- speech
     function speak(text, volume = 1) {

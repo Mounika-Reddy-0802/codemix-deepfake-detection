@@ -74,6 +74,7 @@ def test_scene_pages_are_served(client):
         "/network",
         "/trust",
         "/limits",
+        "/try",
         "/console",
         "/phone/receiver",
         "/phone/caller",
@@ -160,10 +161,62 @@ def test_shuffle_proof_scores_both_versions(client):
 
 def test_the_guided_flow_links_every_scene_in_order(client):
     stage = client.get("/static/stage.js").text
-    hrefs = ["/threat", "/lanes", "/live", "/network", "/trust", "/limits"]
-    positions = [stage.index(f'href: "{h}"') for h in hrefs]
-    assert positions == sorted(positions), "the six scenes must be in plan order"
+    scenes, more = stage.split("const MORE")
+    hrefs = ["/threat", "/lanes", "/live", "/limits"]
+    positions = [scenes.index(f'href: "{h}"') for h in hrefs]
+    assert positions == sorted(positions), "the four scenes must be in plan order"
+    assert scenes.count('href: "/') == 4, "four scenes in the flow, not six"
+    for page in ("/network", "/trust", "/try"):  # kept for questions, out of the flow
+        assert f'href: "{page}"' in more.split("];")[0]
     assert client.get("/demo").status_code == 200 and "Start the demo" in client.get("/demo").text
+
+
+FLOW = ["demo.html", "threat.html", "lanes.html", "live.html", "limits.html"]
+QUESTIONS = ["network.html", "trust.html", "try.html"]
+#: What a first-time viewer must never read: system codes and checkpoint names.
+BANNED = [r"\bS1\b", r"\bS2\b", r"\bS3\b", r"SSL-AASIST", r"\b[\w-]+\.pt\b", r"\bwav2vec"]
+
+
+def _visible(text: str) -> str:
+    """The page without its styles and comments, where no viewer reads."""
+    import re
+
+    text = re.sub(r"<style>.*?</style>", "", text, flags=re.S)
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    return "\n".join(ln for ln in text.splitlines() if not ln.strip().startswith("//"))
+
+
+@pytest.mark.parametrize("page", [*FLOW, *QUESTIONS, "stage.js"])
+def test_no_page_shows_system_codes_or_checkpoint_names(page):
+    import re
+
+    text = _visible((ROOT / "live_call" / "static" / page).read_text(encoding="utf-8"))
+    found = [b for b in BANNED if re.search(b, text)]
+    assert (
+        not found
+    ), f"{page} shows {found}: use English-only, Deployed adapter, Final recipe, Larger encoder"
+
+
+def test_every_page_says_its_one_sentence_under_the_same_verdict_key():
+    stage = (ROOT / "live_call" / "static" / "stage.js").read_text(encoding="utf-8")
+    # the key line is drawn by the shared shell, so every page that mounts it carries it
+    assert "Caution = a few suspicious seconds in a row. Likely cloned = more of them." in stage
+    for name in ("English-only", "Deployed adapter", "Final recipe", "Larger encoder"):
+        assert f'"{name}"' in stage
+    for page in [*FLOW, *QUESTIONS]:
+        html = (ROOT / "live_call" / "static" / page).read_text(encoding="utf-8")
+        assert 'class="title one"' in html, f"{page} has no one-sentence title"
+        assert "Stage.mount(" in html, f"{page} does not mount the shell (and its key line)"
+
+
+def test_scene_two_hides_its_timelines_until_details():
+    lanes = (ROOT / "live_call" / "static" / "lanes.html").read_text(encoding="utf-8")
+    assert 'make("div", { class: "tl", "data-details": ""' in lanes  # timelines live under Details
+    assert 'id="detailsBtn"' in lanes and "Stage.details(" in lanes
+    limits = (ROOT / "live_call" / "static" / "limits.html").read_text(encoding="utf-8")
+    assert limits.count('class="lim"') == 3, "scene 4 shows three limits, the rest under Details"
+    assert '<section class="detail-grid" data-details hidden>' in limits
 
 
 def test_try_it_judges_a_recording_like_a_call(client):

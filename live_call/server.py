@@ -5,7 +5,7 @@ One FastAPI app serves everything the evaluation demo needs:
 | Route | What it is |
 |---|---|
 | ``GET /`` | evaluator home: what the system does, live status, links |
-| ``GET /demo`` | the final review's guided flow; its scenes ``/threat``, ``/lanes``, ``/live``, ``/network``, ``/trust``, ``/limits`` (routes in ``demo_routes.py``) |
+| ``GET /demo`` | the final review's guided flow; its four scenes ``/threat``, ``/lanes``, ``/live``, ``/limits``, and for questions ``/network``, ``/trust``, ``/try`` (routes in ``demo_routes.py``) |
 | ``GET /console`` | one screen: both handsets, the signal path and the live analysis |
 | ``GET /dashboard`` | receiver dashboard: every live call, verdict light, score timeline, alerts |
 | ``GET /call`` | WebRTC call page; a participant can speak or play a clip into the call |
@@ -347,7 +347,7 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/demo")
     async def demo_flow() -> HTMLResponse:
-        """The final review's guided flow: six scenes in order, with the presenter's lines."""
+        """The final review's guided flow: four scenes in order, with the presenter's lines."""
         return page("demo.html")
 
     @api.get("/threat")
@@ -357,8 +357,13 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/limits")
     async def limits_page() -> HTMLResponse:
-        """Scene 6: the limits, what was done about each, and try it."""
+        """Scene 4: the limits, one number each; the rest under Details and More."""
         return page("limits.html")
+
+    @api.get("/try")
+    async def try_page() -> HTMLResponse:
+        """For questions: read a line into the microphone, judged as a live call."""
+        return page("try.html")
 
     @api.get("/console")
     async def console_page() -> HTMLResponse:
@@ -367,7 +372,7 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/lanes")
     async def lanes_page() -> HTMLResponse:
-        """Scene 2: three detectors on one call."""
+        """Scene 2: one call, every detector, a light each."""
         return page("lanes.html")
 
     @api.get("/live")
@@ -377,12 +382,12 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/network")
     async def network_page() -> HTMLResponse:
-        """Scene 4: the real mobile network, scores only."""
+        """For questions: the real mobile network, scores only."""
         return page("network.html")
 
     @api.get("/trust")
     async def trust_page() -> HTMLResponse:
-        """Scene 5: why the verdict can be trusted."""
+        """For questions: why the verdict can be trusted."""
         return page("trust.html")
 
     @api.get("/phone")

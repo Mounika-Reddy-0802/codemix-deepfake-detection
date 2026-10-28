@@ -2,9 +2,9 @@
 
 const STATE_TEXT = {
   listening: "Listening",
-  genuine: "Genuine voice",
-  suspicious: "Suspicious: may be synthetic",
-  likely_fake: "Likely cloned voice",
+  genuine: "Genuine",
+  suspicious: "Caution",
+  likely_fake: "Likely cloned",
 };
 
 function stateText(state) {

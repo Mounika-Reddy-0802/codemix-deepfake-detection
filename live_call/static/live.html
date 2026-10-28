@@ -59,10 +59,8 @@
   <main class="scene">
     <p class="kicker">Scene 3 · A live call</p>
     <div class="head">
-      <h1 class="title">A clone calls. Only the receiver is warned.</h1>
-      <p class="lede">The caller's audio goes through the live detector every two seconds. The verdict goes
-        <b>only to the person being called</b>; the caller's screen never shows it, because a caller who
-        knows they were caught learns to evade.</p>
+      <h1 class="title one">A clone is calling your phone. Only the receiver is warned.</h1>
+      <p class="lede">The caller's screen never shows the verdict: a caller who knows they were caught learns to evade.</p>
     </div>
 
     <div class="stagegrid">
@@ -93,9 +91,8 @@
           <div class="times">
             <div><b id="mclock">–</b><span>into the call</span></div>
             <div><b id="mcaution">–</b><span>first caution</span></div>
-            <div><b id="mlikely">–</b><span>likely-cloned warning</span></div>
+            <div><b id="mlikely">–</b><span>likely cloned</span></div>
           </div>
-          <canvas id="mspark" aria-label="P(genuine) per window"></canvas>
         </div>
 
         <div class="fallback">
@@ -135,8 +132,7 @@
     setInterval(address, 15000);
 
     // ---------------------------------------------------------- the line and its session
-    let session = null, lineState = "idle", points = [], threshold = null, caution = null, likely = null, connectedAt = null;
-    json("/api/health").then((h) => (threshold = h.detector.threshold)).catch(() => {});
+    let session = null, lineState = "idle", points = [], caution = null, likely = null, connectedAt = null;
 
     async function pollLine() {
       try {
@@ -198,25 +194,8 @@
       }
     });
 
-    function draw() {
-      const c = $("mspark"), dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
-      if (!w) return;
-      c.width = w * dpr; c.height = h * dpr;
-      const ctx = c.getContext("2d");
-      ctx.scale(dpr, dpr);
-      const tMax = Math.max(46, ...points.map((p) => p.t));
-      const x = (t) => 6 + (w - 12) * (t / tMax), y = (v) => 6 + (h - 12) * (1 - v);
-      if (threshold !== null) {
-        ctx.setLineDash([6, 5]); ctx.strokeStyle = "rgba(230,238,250,0.6)";
-        ctx.beginPath(); ctx.moveTo(0, y(threshold)); ctx.lineTo(w, y(threshold)); ctx.stroke(); ctx.setLineDash([]);
-      }
-      for (const p of points.filter((q) => q.score !== null)) {
-        ctx.fillStyle = threshold !== null && p.score < threshold ? "#ff6b6b" : "#3ae48c";
-        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 4, 0, 7); ctx.fill();
-      }
-    }
-    window.addEventListener("resize", draw);
-    draw();
+    // the mirror shows the phone's verdict and its times, no per-window scores
+    function draw() {}
   </script>
 </body>
 </html>

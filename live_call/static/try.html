@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Try it</title>
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    .tryit { max-width: 860px; }
+    .tryit .script { font-size: 1.6rem; line-height: 1.45; font-weight: 600; padding: 1.1rem 1.3rem; border-radius: 14px; background: rgba(91, 149, 255, 0.10); border: 1px solid rgba(91, 149, 255, 0.4); margin: 0.9rem 0; }
+    .tryit .verdict { display: flex; align-items: center; gap: 1rem; margin-top: 1.1rem; }
+    .tryit .verdict .light { width: 40px; height: 40px; }
+    .tryit .verdict .vword { font-size: 2.4rem; font-weight: 800; }
+    .tryit canvas { width: 100%; height: 80px; display: block; margin-top: 0.8rem; }
+    .meter { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 0.8rem; }
+    .meter > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--fake), #ff9d9d); transition: width 0.2s linear; }
+    .why { margin-top: 1.2rem; }
+    .tryit [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <a class="backlink" href="/limits">← Back to the limits</a>
+    <p class="kicker">For questions · Try it</p>
+    <h1 class="title one">Read a line: it is judged exactly as a live call.</h1>
+    <section class="card tryit">
+      <p class="muted" style="margin:0">Read this line into the laptop's microphone, twice if it is short. The same
+        windows, threshold and warning ladder as a call.</p>
+      <div class="script" id="script"></div>
+      <div class="row">
+        <button class="btn go big" id="rec">● Record</button>
+        <button class="btn ghost" id="next">Another line</button>
+      </div>
+      <div class="meter"><div id="level"></div></div>
+      <div class="verdict s-listening" id="tryVerdict" hidden><span class="light still"></span><span class="vword" id="tryWord"></span></div>
+      <div class="small muted" id="tryDetail"></div>
+      <canvas id="tryCanvas" hidden></canvas>
+      <div class="note limit why">It was trained on read Hindi-English speech that went through a phone line. A clean
+        laptop microphone, or speaking freely instead of reading, can be warned: that is the spontaneous-speech limit
+        on the previous page.</div>
+    </section>
+  </main>
+
+  <script src="/static/stage.js"></script>
+  <script>
+    const { json } = Stage;
+    Stage.mount("try");
+    const $ = (id) => document.getElementById(id);
+
+    // Read-speech lines in Hindi-English, like the training data (never free talk).
+    const LINES = [
+      "Main aaj office thoda late pahunchunga, kyunki traffic bahut zyada hai aur meeting bhi postpone ho gayi.",
+      "Kal shaam ko hum sab dinner ke liye bahar ja rahe hain, tum bhi aa jao, bahut maza aayega.",
+      "Please apna account number confirm kar dijiye, main details email pe bhej deta hoon.",
+    ];
+    let line = 0;
+    const showLine = () => ($("script").textContent = "“" + LINES[line % LINES.length] + "”");
+    $("next").onclick = () => { line += 1; showLine(); };
+    showLine();
+
+    // long enough for the whole ladder: a caution needs 3 low windows, a warning 5 (2 s apart)
+    const SECONDS = 12;
+    $("rec").textContent = `● Record ${SECONDS} seconds`;
+    $("rec").onclick = async () => {
+      const btn = $("rec");
+      let stream;
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+      catch (e) { Stage.toast("Microphone not available: " + e.message); return; }
+      const ctx = new AudioContext(), src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser();
+      an.fftSize = 512; src.connect(an);
+      const data = new Uint8Array(an.fftSize);
+      let raf = 0;
+      const meter = () => { an.getByteTimeDomainData(data); let sum = 0; for (const v of data) { const q = (v - 128) / 128; sum += q * q; } $("level").style.width = Math.min(100, Math.sqrt(sum / data.length) * 320) + "%"; raf = requestAnimationFrame(meter); };
+      meter();
+      const rec = new MediaRecorder(stream), chunks = [];
+      rec.ondataavailable = (e) => chunks.push(e.data);
+      rec.onstop = async () => {
+        cancelAnimationFrame(raf); $("level").style.width = "0%";
+        stream.getTracks().forEach((t) => t.stop()); ctx.close();
+        btn.textContent = "Scoring…";
+        const form = new FormData();
+        form.append("file", new Blob(chunks, { type: rec.mimeType }), "recording.webm");
+        try {
+          // judged exactly as a live call: the same windows, threshold and warning ladder
+          const r = await json("/api/try", { method: "POST", body: form });
+          const state = r.scored_windows ? r.peak_state : "listening";
+          $("tryVerdict").hidden = false;
+          $("tryVerdict").className = "verdict s-" + state;
+          $("tryWord").textContent = r.scored_windows ? Stage.word(state) : "No speech heard";
+          $("tryDetail").textContent = !r.scored_windows ? "Speak a little louder and try again." :
+            `${r.fake_leaning_windows} of ${r.scored_windows} windows below the threshold` +
+            (r.first_caution_s !== null ? ` · first caution at ${Math.round(r.first_caution_s)} s` : " · no warning");
+          drawTry(r.windows, r.threshold);
+        } catch (e) { Stage.toast("Could not score the recording: " + e.message); }
+        btn.disabled = false; btn.textContent = `● Record ${SECONDS} seconds`;
+      };
+      rec.start(); btn.disabled = true;
+      let left = SECONDS; btn.textContent = `Recording… ${left}`;
+      const tick = setInterval(() => { left -= 1; btn.textContent = `Recording… ${left}`; if (left <= 0) { clearInterval(tick); rec.stop(); } }, 1000);
+    };
+    function drawTry(windows, t) {
+      const c = $("tryCanvas"); c.hidden = false;
+      const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d"); ctx.scale(dpr, dpr);
+      const tMax = Math.max(SECONDS, ...windows.map((p) => p.t));
+      const x = (v) => 6 + (w - 12) * (v / tMax), y = (v) => 6 + (h - 12) * (1 - v);
+      ctx.setLineDash([5, 4]); ctx.strokeStyle = "rgba(230,238,250,0.6)";
+      ctx.beginPath(); ctx.moveTo(0, y(t)); ctx.lineTo(w, y(t)); ctx.stroke(); ctx.setLineDash([]);
+      for (const p of windows.filter((q) => q.score !== null)) {
+        ctx.fillStyle = p.score < t ? "#ff6b6b" : "#3ae48c";
+        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 5, 0, 7); ctx.fill();
+      }
+    }
+  </script>
+</body>
+</html>

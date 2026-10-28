@@ -1,49 +1,56 @@
-// The final-review demo's shared shell: scene stepper, status pills, presenter notes,
-// keyboard navigation and source tooltips. Every scene page calls Stage.mount("<key>").
+// The final-review demo's shared shell: scene stepper, readiness light, presenter notes,
+// the verdict key, keyboard navigation and source tooltips. Every page calls
+// Stage.mount("<key>").
 //
 // No number lives in this file. Where the presenter's line carries one, it is filled
 // from /api/headline or /api/real_calls, which read the committed result files.
 
 const Stage = (() => {
+  // Four scenes, about eight minutes: one message each.
   const SCENES = [
-    { key: "threat", n: 1, title: "The threat", href: "/threat", minutes: "0:30" },
-    { key: "lanes", n: 2, title: "Three detectors", href: "/lanes", minutes: "2:00" },
+    { key: "threat", n: 1, title: "The threat", href: "/threat", minutes: "0:45" },
+    { key: "lanes", n: 2, title: "Four detectors", href: "/lanes", minutes: "2:00" },
     { key: "live", n: 3, title: "Live call", href: "/live", minutes: "3:00" },
-    { key: "network", n: 4, title: "Real network", href: "/network", minutes: "2:00" },
-    { key: "trust", n: 5, title: "Why trust it", href: "/trust", minutes: "1:00" },
-    { key: "limits", n: 6, title: "Limits + try it", href: "/limits", minutes: "1:30" },
+    { key: "limits", n: 4, title: "Limits", href: "/limits", minutes: "2:00" },
   ];
+  // For questions: kept out of the flow, reached from scene 4's "More" menu.
+  const MORE = [
+    { key: "network", title: "Real network", href: "/network", what: "the 30 real mobile calls and what the codec does" },
+    { key: "trust", title: "Why trust it", href: "/trust", what: "shuffle a call into 100 ms pieces: same verdict" },
+    { key: "try", title: "Try it", href: "/try", what: "read a line into the microphone, judged as a call" },
+  ];
+  // The same four names on every page, whatever a lane is called in DFD_LANES.
+  const NAMES = { s1: "English-only", deployed: "Deployed adapter", final: "Final recipe", ssl: "Larger encoder" };
+  const ABOUT = {
+    s1: "Trained on English speech only",
+    deployed: "Our first adapter: Hindi-English clones over a phone line",
+    final: "Far more speakers and a real mobile codec",
+    ssl: "A bigger model on the same data: the next candidate",
+  };
 
-  // What the person at the keyboard says, one breath each (plan section 6).
+  // What the person at the keyboard says, one breath each.
   const SAY = {
     threat: (d) => [
-      `A familiar voice calls in Hindi-English and asks for an OTP. An English-trained detector calls ${d.s1Fake} of real Hindi-English speakers fake, so it cannot protect this call.`,
+      `A familiar voice calls in Hindi-English and asks for an OTP. The usual detector cannot help: it calls ${d.s1Fake} of genuine Hindi-English speech fake.`,
     ],
     lanes: () => [
-      "Same call, three detectors. The English one rejects a real person. Our adapter fixes that.",
-      "The final recipe, trained on far more voices and a real mobile codec, also catches the tool none of them ever saw.",
-      "If a fourth lane is showing: the larger encoder at its own threshold. One checkpoint, our next candidate, not a replacement.",
+      "Same call, four detectors. Play the genuine caller: the English-only detector rejects a real person; ours let them through.",
+      "Now the Tortoise clone, a tool none of them was trained on: the final recipe catches it. The larger encoder is one checkpoint, our next candidate.",
     ],
     live: () => [
       "Please hold this phone. A clone is calling you. [amber] A caution. [red, spoken] Likely cloned.",
       "The caller sees nothing, because a caller who knows they were caught learns to evade.",
     ],
-    network: (d) => [
-      "We called each other over a real mobile network. Hear what the codec does.",
-      `For two of us the old model collapses at the codec; the final recipe holds for all three, and catches ${d.xttsCaught} of ${d.xttsCalls} seen-tool clones. Scores only; we never play our own voices.`,
-    ],
-    trust: () => [
-      "Scramble the words: same verdict. It reads how the voice was produced, not what is said.",
-      "Every number is tested against a cheap-statistics floor.",
-    ],
     limits: () => [
-      "What it cannot do yet, with numbers, and what we did about each overnight.",
-      "The larger encoder already does better on the real calls and on spontaneous speech, but it is one checkpoint: the next candidate, not a replacement.",
-      "Now read this line into the microphone.",
+      "What it cannot do yet, with numbers: spontaneous speech, unseen tools, English over the phone line.",
+      "The larger encoder does better on the first two, but it is one checkpoint: the next candidate, not a replacement.",
     ],
-    hub: () => [
-      "Six scenes, about ten minutes. Arrow keys move between scenes; N opens these notes; F goes full screen.",
+    network: (d) => [
+      `Thirty real mobile calls, scores only: the final recipe holds where the codec breaks the old model, and catches ${d.xttsCaught} of ${d.xttsCalls} seen-tool clones.`,
     ],
+    trust: () => ["Scramble the words: same verdict. It reads how the voice was produced, not what is said."],
+    try: () => ["Read the line on the screen; it is judged exactly as a live call."],
+    hub: () => ["Four scenes, about eight minutes. Keys 1 to 4 jump to a scene; N opens these notes; F goes full screen."],
   };
 
   const ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 4 12 3-9 2 3h5"/></svg>`;
@@ -85,6 +92,21 @@ const Stage = (() => {
     return make("span", { class: ("cite " + cls).trim(), title: "read from " + entry.source, text: format(entry.value) });
   }
   const pct = (digits = 1) => (v) => Number(v).toFixed(digits) + "%";
+  const nameOf = (role, fallback = "") => NAMES[role] || fallback;
+
+  // A "Details" toggle: the button shows or hides every [data-details] block in `root`.
+  function details(button, root = document, onChange = () => {}) {
+    const set = (open) => {
+      root.querySelectorAll("[data-details]").forEach((el) => (el.hidden = !open));
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+      button.textContent = open ? "Hide details" : "Details";
+      document.body.classList.toggle("details-open", open);
+      onChange(open);
+    };
+    button.addEventListener("click", () => set(button.getAttribute("aria-expanded") !== "true"));
+    set(false);
+    return set;
+  }
 
   // One request shared by every caller (the drawer and the overview's cards ask at once).
   function sayData() {
@@ -116,7 +138,7 @@ const Stage = (() => {
     return make("header", { class: "topbar" }, [
       make("a", { class: "brand", href: "/demo", title: "Demo overview" }, [
         make("span", { class: "mark", html: ICON }),
-        make("span", {}, [make("b", { text: "Cloned-voice call detection" }), make("small", { text: "Hindi-English · final review" })]),
+        make("span", {}, [make("b", { text: "Cloned-voice call detection" }), make("small", { text: "Hindi-English phone calls" })]),
       ]),
       steps,
       make("div", { class: "pills", id: "stagePills" }, [make("span", { class: "pill", text: "connecting…" })]),
@@ -125,54 +147,62 @@ const Stage = (() => {
 
   function shortModel(name) {
     if (!name) return "no model";
-    if (name.startsWith("final_")) return "final recipe";
-    if (name.startsWith("lora_norm_rvc")) return "deployed adapter";
-    if (name === "best.pt") return "English-only S1";
-    return name.replace(/\.pt$/, "");
+    if (name.startsWith("final_")) return NAMES.final;
+    if (name.startsWith("lora_norm_rvc")) return NAMES.deployed;
+    if (name.includes("ssl")) return NAMES.ssl;
+    if (name.startsWith("best")) return NAMES.s1; // the baseline folder holds the English-only model
+    return "another model";
   }
 
+  // One light for the room, the details for the presenter's mouse.
   async function pills() {
     const box = $("#stagePills");
     if (!box) return;
     try {
       const h = await json("/api/health");
       const d = h.detector;
-      const items = [
-        make("span", { class: "pill " + (d.model_loaded ? "ok" : d.checkpoint_found ? "warn" : "bad"),
-          title: (d.checkpoint || "no checkpoint") + (d.model_loaded ? " (loaded)" : " (loading)"),
-          text: shortModel(d.checkpoint) + (d.model_loaded ? "" : " · loading") }),
-        make("span", { class: "pill " + (d.threshold !== null ? "ok" : "bad"), title: d.threshold_source || "",
-          text: "threshold " + (d.threshold !== null ? d.threshold.toFixed(3) : "missing") }),
-      ];
-      items.push(make("span", { class: "pill " + (h.demo_clips ? "ok" : "bad"),
-        title: (h.demo_clips_dir || "") + (h.lanes !== undefined ? ` · ${h.lanes} detector lane(s)` : ""),
-        text: h.demo_clips + " calls" }));
-      box.replaceChildren(...items);
+      const ready = d.model_loaded && d.threshold !== null && h.demo_clips;
+      const detail = `${shortModel(d.checkpoint)}${d.model_loaded ? "" : " (loading)"} · threshold from ${d.threshold_source || "missing"} · ${h.demo_clips} prepared calls`;
+      box.replaceChildren(make("span", {
+        class: "pill " + (ready ? "ok" : d.checkpoint_found ? "warn" : "bad"),
+        title: detail,
+        text: ready ? "Ready" : d.checkpoint_found ? "Loading…" : "Model missing",
+      }));
     } catch (e) {
-      box.replaceChildren(make("span", { class: "pill bad", text: "server unreachable" }));
+      box.replaceChildren(make("span", { class: "pill bad", text: "Server unreachable" }));
     }
+  }
+
+  // The same three verdict words and colours on every page, in one line.
+  function keyLine() {
+    return make("div", { class: "vkey", "aria-label": "What the verdicts mean" }, [
+      make("span", { class: "k s-genuine" }, [make("span", { class: "light" }), "Genuine"]),
+      make("span", { class: "k s-suspicious" }, [make("span", { class: "light" }), "Caution"]),
+      make("span", { class: "k s-likely_fake" }, [make("span", { class: "light still" }), "Likely cloned"]),
+      make("span", { class: "means", text: "Caution = a few suspicious seconds in a row. Likely cloned = more of them." }),
+    ]);
   }
 
   async function presenter(key) {
     const scene = SCENES.find((s) => s.key === key);
+    const more = MORE.find((m) => m.key === key);
     const lines = (SAY[key] || (() => []))(await sayData());
-    const prev = scene ? SCENES[scene.n - 2] : null;
-    const next = scene ? SCENES[scene.n] : SCENES[0];
+    const prev = scene ? SCENES[scene.n - 2] : more ? SCENES.at(-1) : null;
+    const next = scene ? SCENES[scene.n] : more ? null : SCENES[0];
     const drawer = make("aside", { class: "presenter", id: "presenter", "aria-label": "Presenter notes" }, [
-      make("div", { class: "handle", onclick: () => toggleNotes() }, [
-        make("b", { text: scene ? `Scene ${scene.n} · ${scene.title}` : "Demo overview" }),
-        make("span", { text: scene ? `${scene.minutes} on the clock` : "about ten minutes" }),
+      make("div", { class: "handle" }, [
+        keyLine(),
         make("span", { class: "spacer" }),
-        make("span", { html: "presenter notes <kbd>N</kbd> · scenes <kbd>←</kbd> <kbd>→</kbd> · full screen <kbd>F</kbd>" }),
+        make("button", { class: "notes-btn", type: "button", onclick: () => toggleNotes(), html: "notes <kbd>N</kbd>" }),
       ]),
       make("div", { class: "body" }, [
-        make("div", { class: "say" }, lines.map((t) => make("p", { text: t }))),
-        make("div", {}, [
-          make("div", { class: "meta", text: "What to say, one breath each" }),
-          make("div", { class: "navs" }, [
-            prev ? make("a", { class: "btn ghost", href: prev.href, text: "← " + prev.title }) : null,
-            next ? make("a", { class: "btn", href: next.href, text: next.title + " →" }) : make("a", { class: "btn ghost", href: "/demo", text: "Overview" }),
-          ]),
+        make("div", { class: "say" }, [
+          make("div", { class: "meta", text: scene ? `Scene ${scene.n} of ${SCENES.length} · ${scene.title} · ${scene.minutes}` : more ? `For questions · ${more.title}` : "Demo overview · about eight minutes" }),
+          ...lines.map((t) => make("p", { text: t })),
+        ]),
+        make("div", { class: "navs" }, [
+          prev ? make("a", { class: "btn ghost", href: prev.href, text: "← " + prev.title }) : null,
+          next ? make("a", { class: "btn", href: next.href, text: next.title + " →" }) : make("a", { class: "btn ghost", href: "/demo", text: "Overview" }),
         ]),
       ]),
     ]);
@@ -194,17 +224,18 @@ const Stage = (() => {
     document.addEventListener("keydown", (ev) => {
       if (ev.target.closest("input, select, textarea, [contenteditable]") || ev.ctrlKey || ev.metaKey || ev.altKey) return;
       const scene = SCENES.find((s) => s.key === key);
+      const more = MORE.some((m) => m.key === key);
       if (ev.key === "ArrowRight") {
-        const next = scene ? SCENES[scene.n] : SCENES[0];
+        const next = scene ? SCENES[scene.n] : more ? null : SCENES[0];
         if (next) location.href = next.href;
       } else if (ev.key === "ArrowLeft") {
-        const prev = scene ? SCENES[scene.n - 2] : null;
+        const prev = scene ? SCENES[scene.n - 2] : more ? SCENES.at(-1) : null;
         location.href = prev ? prev.href : "/demo";
       } else if (ev.key === "n" || ev.key === "N") {
         toggleNotes();
       } else if (ev.key === "f" || ev.key === "F") {
         if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
-      } else if (/^[1-6]$/.test(ev.key)) {
+      } else if (ev.key >= "1" && ev.key <= String(SCENES.length)) {
         location.href = SCENES[Number(ev.key) - 1].href;
       }
     });
@@ -237,7 +268,6 @@ const Stage = (() => {
     await presenter(key);
     let open = false;
     try { open = localStorage.getItem("stage.notes") === "1"; } catch (e) { /* private window */ }
-    if (key === "hub" && window.innerHeight > 900) open = true; // the overview opens them on a tall screen
     toggleNotes(open, false);
   }
 
@@ -263,7 +293,7 @@ const Stage = (() => {
     return (SAY[key] || (() => []))(await sayData());
   }
 
-  // A scene renamed by its page (scene 2 counts the lanes it was given): stepper and notes.
+  // A scene renamed by its page (scene 2 counts the detectors it was given): stepper and notes.
   function retitle(key, title) {
     const s = SCENES.find((x) => x.key === key);
     if (!s) return;
@@ -273,9 +303,9 @@ const Stage = (() => {
       step.querySelector(".t").textContent = title;
       step.title = `Scene ${s.n}: ${title} (${s.minutes})`;
     }
-    const handle = document.querySelector("#presenter .handle b");
-    if (handle && current && current.key === key) handle.textContent = `Scene ${s.n} · ${title}`;
+    const meta = document.querySelector("#presenter .say .meta");
+    if (meta && current && current.key === key) meta.textContent = `Scene ${s.n} of ${SCENES.length} · ${title} · ${s.minutes}`;
   }
 
-  return { SCENES, mount, make, json, cite, pct, toast, socket, word, shortModel, lines, retitle };
+  return { SCENES, MORE, NAMES, ABOUT, mount, make, json, cite, pct, toast, socket, word, shortModel, nameOf, details, lines, retitle };
 })();

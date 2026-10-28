@@ -3,8 +3,10 @@
 The final review needs a demo that shows a complete research system — the gap, the cheap
 fix, the better fix, a real-call pilot and the limits with their numbers — and that cannot
 misfire in front of the mentor and the external reviewer. Track B of the review plan built
-it on the final recipe: six scenes in a guided flow, every number read from a committed
-result file, every call checked against a written-down verdict before it is shown.
+it on the final recipe, every number read from a committed result file, every call checked
+against a written-down verdict before it is shown. On 28 October, after the morning's
+feedback ("confusing, too much information"), Track 2 cut it to four scenes with one message
+each; that part is at the end of the next section.
 
 ## What I did, and why it is built this way
 
@@ -109,6 +111,54 @@ final recipe's three warned genuine live calls, but as recorded it warns one mor
 the first caution on the XTTS-v2 calls, and it silences 83 of the 120 early windows, speech
 included. The card ends with Krishna's conclusion: the gate needs real development calls.
 
+**Track 2: the demo made simple (28 October, Krishna's plan, freeze 15:30).** The detector,
+the live path, the thresholds and the call set did not change; only what a first-time viewer
+reads did.
+
+- *Four scenes, not six, about eight minutes.* The threat, four detectors on one call, the
+  live call on the mentor's phone, the limits. `/network`, `/trust` and the try-it box (now its
+  own page, `/try`) left the flow and sit in a **More** menu at the foot of scene 4, for
+  questions. Try it moved because it warns most real voices speaking freely, which is the first
+  limit; it should not be the last thing the panel sees.
+- *One sentence at the top of every page* (`h1.title.one`), in plain words, and at most three
+  numbers in the default view; the rest opens under **Details** (`Stage.details`), which is a
+  real toggle, not a second page, so the presenter can answer a question without leaving the
+  scene.
+- *The same four names everywhere* (English-only, Deployed adapter, Final recipe, Larger
+  encoder) from `Stage.NAMES`, keyed by each lane's role, so the screen never depends on what a
+  lane is called in `DFD_LANES` and `lanes.py` did not have to change. *The same three verdict
+  words and colours everywhere*, the console's and the phone's included, with one key line at
+  the foot of every page: "Caution = a few suspicious seconds in a row. Likely cloned = more of
+  them." It replaced the presenter bar's scene name and clock, which were for the presenter
+  only and now sit inside the notes.
+- *Scene 2 is four lights.* Each detector is a card with a big light, its verdict word and two
+  times (first caution, likely cloned), and at the end of the call the strongest warning it
+  gave with a one-line outcome. The timelines, thresholds and warning ladders open under
+  Details, where each detector becomes a row with its timeline. The two calls are one click
+  each and are named so the title does not give the answer away ("A genuine caller", "A
+  Tortoise clone"); the other calls stay in a small menu for questions.
+- *Scene 4 is three cards with one headline number each*: genuine callers speaking freely
+  warned by the final recipe (41 of 41, the larger encoder 11 of 41), real-network Chatterbox
+  calls caught (0 of 6, the larger encoder 1 of 6), and the deployed adapter's error on English
+  over a phone line (24.2%, against 2.3% on the same clips without it), plus one sentence for
+  the call chain (the codec alone takes the deployed adapter to its threshold; the values are in
+  its tooltip). Details holds the larger encoder's real-call table, the early-call gate, the
+  30-call table and the trade-off chart.
+- *Nothing moves unless the presenter clicks.* Scene 1's chat bubbles no longer animate in; the
+  live page lost its per-window sparkline (the phone's verdict and its three times say it); the
+  top bar's three status pills (model, threshold, call count) became one light that reads
+  "Ready", with the details on hover.
+- *No new numbers.* Two existing results are now served for these screens, both cited to their
+  files: the clip counts behind scene 1's rate (1,484 of 1,566 genuine clips,
+  `classification_metrics.json`, under Details) and the English-over-the-phone-line pair
+  (`english_channel_v1/summary.json`). `tests/test_demo_routes.py` now checks the four-scene
+  order, the More pages, a one-sentence title and the shared key on every page, the timelines
+  behind Details, three limit cards, and that no page shows a system code or a checkpoint name.
+- *The branch.* Krishna's plan named a new branch, `week14-mounika-demo-simplify`; the team's
+  rule is one branch per member per week (GIT_RULES §11), so this went on
+  `week14-mounika-demo`, fast-forwarded to main after #62 merged: the same starting point,
+  without a third week-14 branch.
+
 **One rule for every page.** No page holds a number. They ask `/api/headline`,
 `/api/real_calls` and `/api/limits`, which answer from `live_call/results_view.py` with each
 value's file and field; `tests/test_results_view.py` resolves every cited field in its file,
@@ -132,7 +182,9 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
 | Cold start of `run_demo.bat` | `/demo` served at 1.2 s, all three models loaded at 8.4 s |
 | CPU cost of three lanes | about 0.6 s per 2 s hop (one 46 s call scored in 13-16 s offline) |
 | CPU cost of four lanes | about 1.3 s per 2 s hop (the 45 s Tortoise call scored in 27 s offline) |
-| Test suite | 1,110 passing, the console's browser tests included (run against the live server) |
+| Test suite | 1,133 passing after Track 2, the console's browser tests included (run against the live server) |
+| Track 2: rehearsal after the simplification (live model + 4 detectors) | 40 of 40 rows PASS, twice in a row (243 s and 285 s): "PASS on every row, 2 rounds in a row." |
+| Track 2: screens checked at 1366x768 and 1920x1080 | each scene's default view reads on one screen at 1366x768, scene 2's Details view included; no page errors on any page |
 
 ## Honest limitations
 
@@ -157,6 +209,14 @@ All measured tonight on this laptop (CPU, final recipe, `C:\dfdata\demo_calls_v2
   identical replays, unlike the other lanes, whose verdicts were stated before the check.
 - **The stage player starts from the speaker's clean MUCS recording**, the source of the demo
   call, not from the exact clips joined into it.
+- **Scene 4's counts are derived.** "41 of 41" and "11 of 41" are the stored share of genuine
+  spontaneous calls warned times the stored number of calls: the calibration files keep the
+  share, not the count. The tooltip shows both.
+- **"At most three numbers" holds for the default view only.** Details and the More pages
+  still carry the full tables; a question can open them, a first look does not.
+- **The simplified screens have been seen by me, not yet by a first-time viewer.** Whether
+  the panel now reads each page in one look is what the next rehearsal with someone outside
+  the team will tell.
 
 ## How to run it
 
@@ -174,6 +234,7 @@ pytest tests -q --deselect tests/test_env_check.py
 ## What's next
 
 The human part of B7: two timed rehearsals with the phone in hand, the backup screen
-recording, then review and merge. Decide before the review whether scene 2 shows three
-lanes or four: four tells the "next candidate" story on the call itself, three keeps the
-scene to the plan and to two minutes.
+recording, then review and merge (Krishna, by the 15:30 freeze). Show the simplified flow once
+to someone outside the team and change any sentence they have to ask about. Four detectors
+need the laptop on mains power; without the larger encoder's weights scene 2 falls back to
+three and says so in its title.
