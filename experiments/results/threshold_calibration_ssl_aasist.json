@@ -1,0 +1,450 @@
+{
+  "checkpoint": "ssl_aasist_final_s1234",
+  "chosen_on": "experiments/calibration_ssl/dev_windows.csv",
+  "rule": "most sensitive candidate with <= 5.0% of genuine 60 s dev calls alerted",
+  "rule_satisfied": true,
+  "threshold": 0.5795788615942001,
+  "dev_window_eer_point": {
+    "threshold": 0.5795788615942001,
+    "dev_window_eer": 0.0,
+    "dev_real_windows": 536,
+    "dev_fake_windows": 617,
+    "dev_clips": 506
+  },
+  "engine": {
+    "threshold": 0.5795788615942001,
+    "margin": 0.5,
+    "min_windows": 2,
+    "suspicious_after": 2,
+    "fake_after": 4,
+    "recover_after": 3
+  },
+  "dev_at_chosen": {
+    "calls_60s": {
+      "real_calls": 18,
+      "fake_calls": 21,
+      "real_calls_alerted_pct": 0.0,
+      "real_calls_likely_fake_pct": 0.0,
+      "fake_calls_alerted_pct": 100.0,
+      "fake_calls_likely_fake_pct": 100.0,
+      "mean_windows_per_call": 29.0
+    },
+    "per_clip": {
+      "real_calls": 186,
+      "fake_calls": 320,
+      "real_calls_alerted_pct": 0.0,
+      "real_calls_likely_fake_pct": 0.0,
+      "fake_calls_alerted_pct": 71.25,
+      "fake_calls_likely_fake_pct": 2.5,
+      "mean_windows_per_call": 2.28
+    }
+  },
+  "candidates": [
+    {
+      "threshold": 0.5795788615942001,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "real_windows_below_pct": 0.0,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 71.25,
+        "fake_calls_likely_fake_pct": 2.5,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.5795788615942001,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "real_windows_below_pct": 0.0,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 19.06,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.6316724322736263,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "real_windows_below_pct": 0.37,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 71.25,
+        "fake_calls_likely_fake_pct": 2.5,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.6316724322736263,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "real_windows_below_pct": 0.37,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 19.06,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.6646845813840627,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "real_windows_below_pct": 0.56,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 71.25,
+        "fake_calls_likely_fake_pct": 2.5,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.6646845813840627,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "real_windows_below_pct": 0.56,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 19.06,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.7944343369454145,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "real_windows_below_pct": 1.12,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 11.11,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.54,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 71.25,
+        "fake_calls_likely_fake_pct": 2.5,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.7944343369454145,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "real_windows_below_pct": 1.12,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 19.06,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.9036542892456055,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "real_windows_below_pct": 2.05,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 22.22,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 2.15,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 71.25,
+        "fake_calls_likely_fake_pct": 2.5,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.9036542892456055,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "real_windows_below_pct": 2.05,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 11.11,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 1.08,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 19.06,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.9896034821867943,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "real_windows_below_pct": 5.04,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 50.0,
+        "real_calls_likely_fake_pct": 33.33,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 3.76,
+        "real_calls_likely_fake_pct": 0.54,
+        "fake_calls_alerted_pct": 71.25,
+        "fake_calls_likely_fake_pct": 2.5,
+        "mean_windows_per_call": 2.28
+      }
+    },
+    {
+      "threshold": 0.9896034821867943,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "real_windows_below_pct": 5.04,
+      "dev_calls_60s": {
+        "real_calls": 18,
+        "fake_calls": 21,
+        "real_calls_alerted_pct": 38.89,
+        "real_calls_likely_fake_pct": 16.67,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      },
+      "dev_per_clip": {
+        "real_calls": 186,
+        "fake_calls": 320,
+        "real_calls_alerted_pct": 2.69,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 19.06,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 2.28
+      }
+    }
+  ],
+  "validation": {
+    "cm04_windows": {
+      "per_clip": {
+        "real_calls": 232,
+        "fake_calls": 68,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 66.18,
+        "fake_calls_likely_fake_pct": 26.47,
+        "mean_windows_per_call": 2.14
+      },
+      "calls_30s": {
+        "real_calls": 32,
+        "fake_calls": 13,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 14.0
+      },
+      "calls_60s": {
+        "real_calls": 15,
+        "fake_calls": 6,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 100.0,
+        "mean_windows_per_call": 29.0
+      }
+    },
+    "cm07_windows": {
+      "per_clip": {
+        "real_calls": 166,
+        "fake_calls": 134,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 9.7,
+        "fake_calls_likely_fake_pct": 0.75,
+        "mean_windows_per_call": 1.46
+      },
+      "calls_30s": {
+        "real_calls": 17,
+        "fake_calls": 13,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 76.92,
+        "fake_calls_likely_fake_pct": 38.46,
+        "mean_windows_per_call": 14.0
+      },
+      "calls_60s": {
+        "real_calls": 8,
+        "fake_calls": 6,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 100.0,
+        "fake_calls_likely_fake_pct": 66.67,
+        "mean_windows_per_call": 29.0
+      }
+    },
+    "cm09_windows": {
+      "per_clip": {
+        "real_calls": 166,
+        "fake_calls": 134,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 6.72,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 1.47
+      },
+      "calls_30s": {
+        "real_calls": 17,
+        "fake_calls": 13,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 61.54,
+        "fake_calls_likely_fake_pct": 0.0,
+        "mean_windows_per_call": 14.0
+      },
+      "calls_60s": {
+        "real_calls": 8,
+        "fake_calls": 6,
+        "real_calls_alerted_pct": 0.0,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": 83.33,
+        "fake_calls_likely_fake_pct": 16.67,
+        "mean_windows_per_call": 29.0
+      }
+    },
+    "hiacc_windows": {
+      "per_clip": {
+        "real_calls": 1000,
+        "fake_calls": 0,
+        "real_calls_alerted_pct": 0.8,
+        "real_calls_likely_fake_pct": 0.0,
+        "fake_calls_alerted_pct": null,
+        "fake_calls_likely_fake_pct": null,
+        "mean_windows_per_call": 1.22
+      },
+      "calls_30s": {
+        "real_calls": 86,
+        "fake_calls": 0,
+        "real_calls_alerted_pct": 16.28,
+        "real_calls_likely_fake_pct": 1.16,
+        "fake_calls_alerted_pct": null,
+        "fake_calls_likely_fake_pct": null,
+        "mean_windows_per_call": 14.0
+      },
+      "calls_60s": {
+        "real_calls": 41,
+        "fake_calls": 0,
+        "real_calls_alerted_pct": 26.83,
+        "real_calls_likely_fake_pct": 2.44,
+        "fake_calls_alerted_pct": null,
+        "fake_calls_likely_fake_pct": null,
+        "mean_windows_per_call": 29.0
+      }
+    }
+  }
+}

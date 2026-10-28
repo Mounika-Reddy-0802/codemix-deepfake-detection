@@ -153,6 +153,24 @@ def make_score_fn(model, device: str):
     return score
 
 
+#: Detector kinds a window scorer can be loaded for: the project's wav2vec 2.0 checkpoints
+#: (S1, S2, S3, the final recipe) and an SSL-AASIST state dict (``src.baselines.aasist``).
+KINDS = ("adapter", "ssl_aasist")
+
+
+def load_score_fn(checkpoint: str, kind: str = "adapter", device: str = "cpu"):
+    """A ``window -> P(bonafide)`` callable for a checkpoint of either kind."""
+    if kind == "ssl_aasist":
+        from src.baselines import aasist
+
+        model = aasist.build(checkpoint, device=device, kind=aasist.SSL)
+        return aasist.window_score_fn(model, device)
+    if kind != "adapter":
+        raise ValueError(f"unknown detector kind {kind!r}; expected one of {KINDS}")
+    model, resolved = load_detector(checkpoint, device=device)
+    return make_score_fn(model, resolved)
+
+
 def predict_file(path: str, score_fn, threshold: Threshold) -> Prediction:
     """Load a file (any rate, resampled to 16 kHz) and predict."""
     from src.utils.audio_utils import load_wav

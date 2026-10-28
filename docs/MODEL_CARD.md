@@ -71,7 +71,10 @@ XTTS, Tortoise and RVC call, half of the IndicF5 calls and one in six Chatterbox
   eleven sets (`docs/results/ssl_vs_adapter_v1.md`) and keeps up with a live call even on two
   CPU threads (1.14 s per 2 s window hop; 69 ms on a T4 GPU). On spontaneous speech one of its
   trainings calls 5.8% of genuine clips fake and another 46.7%, so it is a lead, not a fix
-  (`docs/results/encoder_spontaneous_v1.md`). It is the candidate for the next release.
+  (`docs/results/encoder_spontaneous_v1.md`). On the same 30 real calls one SSL-AASIST
+  checkpoint, at its own operating point chosen on the same dev clips by the same rule, warned
+  one of twelve genuine live calls and took all six XTTS-v2 calls and one of six Chatterbox calls
+  to "likely cloned" (`docs/results/real_calls_v1.md`). It is the candidate for the next release.
 
 ## Training data and licences
 

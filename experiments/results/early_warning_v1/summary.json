@@ -1,0 +1,771 @@
+{
+  "gate_level_dbfs": -29.87,
+  "dev_share": 0.01,
+  "first_seconds": 10.0,
+  "models": {
+    "deployed_recorded": {
+      "early_windows": 120,
+      "early_windows_gated": 83,
+      "without_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 7.0,
+          "median_first_likely_cloned_s": 12.0,
+          "warned_calls": [
+            "C25",
+            "C26",
+            "C27",
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 9.0,
+          "median_first_likely_cloned_s": 13.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 8,
+          "likely_cloned": 8,
+          "median_first_caution_s": 6.0,
+          "median_first_likely_cloned_s": 10.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 9.0,
+          "median_first_likely_cloned_s": 13.0,
+          "warned_calls": [
+            "C13",
+            "C14",
+            "C15",
+            "C16",
+            "C17",
+            "C18"
+          ]
+        }
+      ],
+      "with_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C25",
+            "C26",
+            "C27",
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 8,
+          "likely_cloned": 8,
+          "median_first_caution_s": 8.0,
+          "median_first_likely_cloned_s": 12.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C13",
+            "C14",
+            "C15",
+            "C16",
+            "C17",
+            "C18"
+          ]
+        }
+      ]
+    },
+    "deployed_g711": {
+      "early_windows": 120,
+      "early_windows_gated": 83,
+      "without_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 7.0,
+          "median_first_likely_cloned_s": 12.0,
+          "warned_calls": [
+            "C25",
+            "C26",
+            "C27",
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 9.0,
+          "median_first_likely_cloned_s": 13.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 8,
+          "likely_cloned": 8,
+          "median_first_caution_s": 6.0,
+          "median_first_likely_cloned_s": 10.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 9.0,
+          "median_first_likely_cloned_s": 13.0,
+          "warned_calls": [
+            "C13",
+            "C14",
+            "C15",
+            "C16",
+            "C17",
+            "C18"
+          ]
+        }
+      ],
+      "with_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C25",
+            "C26",
+            "C27",
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 8,
+          "likely_cloned": 8,
+          "median_first_caution_s": 8.0,
+          "median_first_likely_cloned_s": 12.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C09",
+            "C10",
+            "C11",
+            "C12"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C13",
+            "C14",
+            "C15",
+            "C16",
+            "C17",
+            "C18"
+          ]
+        }
+      ]
+    },
+    "final_recorded": {
+      "early_windows": 120,
+      "early_windows_gated": 83,
+      "without_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 2,
+          "likely_cloned": 0,
+          "median_first_caution_s": 36.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C27",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 5,
+          "likely_cloned": 5,
+          "median_first_caution_s": 18.0,
+          "median_first_likely_cloned_s": 28.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 4,
+          "likely_cloned": 2,
+          "median_first_caution_s": 8.0,
+          "median_first_likely_cloned_s": 13.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C08",
+            "C10"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C17"
+          ]
+        }
+      ],
+      "with_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 0,
+          "median_first_caution_s": 64.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 5,
+          "median_first_caution_s": 18.0,
+          "median_first_likely_cloned_s": 28.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 5,
+          "likely_cloned": 1,
+          "median_first_caution_s": 10.0,
+          "median_first_likely_cloned_s": 16.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C07",
+            "C08",
+            "C10"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 18.0,
+          "median_first_likely_cloned_s": 24.0,
+          "warned_calls": [
+            "C17"
+          ]
+        }
+      ]
+    },
+    "final_g711": {
+      "early_windows": 120,
+      "early_windows_gated": 83,
+      "without_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 0,
+          "median_first_caution_s": 8.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C27"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 5,
+          "likely_cloned": 5,
+          "median_first_caution_s": 18.0,
+          "median_first_likely_cloned_s": 30.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 3,
+          "likely_cloned": 1,
+          "median_first_caution_s": 8.0,
+          "median_first_likely_cloned_s": 14.0,
+          "warned_calls": [
+            "C05",
+            "C06",
+            "C08"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 16.0,
+          "median_first_likely_cloned_s": 22.0,
+          "warned_calls": [
+            "C17"
+          ]
+        }
+      ],
+      "with_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 0,
+          "likely_cloned": 0,
+          "median_first_caution_s": null,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": []
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 5,
+          "likely_cloned": 5,
+          "median_first_caution_s": 20.0,
+          "median_first_likely_cloned_s": 30.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 1,
+          "likely_cloned": 0,
+          "median_first_caution_s": 16.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C05"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 0,
+          "median_first_caution_s": 18.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C17"
+          ]
+        }
+      ]
+    },
+    "ssl_aasist_recorded": {
+      "early_windows": 120,
+      "early_windows_gated": 83,
+      "without_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 3,
+          "likely_cloned": 2,
+          "median_first_caution_s": 12.0,
+          "median_first_likely_cloned_s": 23.0,
+          "warned_calls": [
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 10.0,
+          "median_first_likely_cloned_s": 14.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 0,
+          "likely_cloned": 0,
+          "median_first_caution_s": null,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": []
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 40.0,
+          "median_first_likely_cloned_s": 44.0,
+          "warned_calls": [
+            "C18"
+          ]
+        }
+      ],
+      "with_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 4,
+          "likely_cloned": 1,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C27",
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 0,
+          "likely_cloned": 0,
+          "median_first_caution_s": null,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": []
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 40.0,
+          "median_first_likely_cloned_s": 44.0,
+          "warned_calls": [
+            "C18"
+          ]
+        }
+      ]
+    },
+    "ssl_aasist_g711": {
+      "early_windows": 120,
+      "early_windows_gated": 83,
+      "without_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 3,
+          "likely_cloned": 1,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 16.0,
+          "warned_calls": [
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 10.0,
+          "median_first_likely_cloned_s": 14.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 1,
+          "likely_cloned": 0,
+          "median_first_caution_s": 48.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C08"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 40.0,
+          "median_first_likely_cloned_s": 44.0,
+          "warned_calls": [
+            "C18"
+          ]
+        }
+      ],
+      "with_gate": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "warned": 4,
+          "likely_cloned": 1,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C27",
+            "C28",
+            "C29",
+            "C30"
+          ]
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "warned": 6,
+          "likely_cloned": 6,
+          "median_first_caution_s": 14.0,
+          "median_first_likely_cloned_s": 18.0,
+          "warned_calls": [
+            "C19",
+            "C20",
+            "C21",
+            "C22",
+            "C23",
+            "C24"
+          ]
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "warned": 1,
+          "likely_cloned": 0,
+          "median_first_caution_s": 48.0,
+          "median_first_likely_cloned_s": null,
+          "warned_calls": [
+            "C08"
+          ]
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "warned": 1,
+          "likely_cloned": 1,
+          "median_first_caution_s": 40.0,
+          "median_first_likely_cloned_s": 44.0,
+          "warned_calls": [
+            "C18"
+          ]
+        }
+      ]
+    }
+  },
+  "chosen_on": "experiments/calibration_final/dev_windows.csv"
+}

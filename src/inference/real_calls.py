@@ -46,8 +46,15 @@ from src.inference.streaming import EMA_ALPHA, SAMPLE_RATE
 from src.utils.paths import DATA_ROOT_TOKEN
 
 CONDITIONS = ("recorded", "g711")
-#: Model name -> its frozen live operating point.
-MODELS = {"deployed": "configs/threshold.yaml", "final": "configs/threshold_final.yaml"}
+#: Model name -> its frozen live operating point. SSL-AASIST's is chosen on the final
+#: recipe's dev windows by the same rule (``src.inference.calibrate``), never on these calls.
+MODELS = {
+    "deployed": "configs/threshold.yaml",
+    "final": "configs/threshold_final.yaml",
+    "ssl_aasist": "configs/threshold_ssl_aasist.yaml",
+}
+#: Model name -> detector kind for ``src.inference.predict.load_score_fn``.
+MODEL_KINDS = {"deployed": "adapter", "final": "adapter", "ssl_aasist": "ssl_aasist"}
 SOURCE = "realcall"
 NARROWBAND_SR = 8_000
 
@@ -372,8 +379,13 @@ def without_first_window(windows: pd.DataFrame, alpha: float = EMA_ALPHA) -> pd.
     how much of each verdict rests on the window that spans the quiet before the first
     word. It is not an operating rule, and nothing is chosen with it.
     """
+    return as_silence(windows, windows["window"] == 0, alpha)
+
+
+def as_silence(windows: pd.DataFrame, mask: pd.Series, alpha: float = EMA_ALPHA) -> pd.DataFrame:
+    """The same calls with the masked windows treated as silence, re-smoothed as live."""
     out = windows.copy()
-    out.loc[out["window"] == 0, ["score", "smoothed"]] = np.nan
+    out.loc[mask, ["score", "smoothed"]] = np.nan
     smoothed = pd.Series(np.nan, index=out.index)
     for _, call in out.sort_values(["filepath", "window"]).groupby("filepath", sort=False):
         ema = None
@@ -389,12 +401,11 @@ def without_first_window(windows: pd.DataFrame, alpha: float = EMA_ALPHA) -> pd.
 def score_all(audio: Path, checkpoints: dict[str, str], out: Path, device: str = "cpu") -> None:
     """Window scores for every model and condition, resumable, via the calibration path."""
     from src.inference.calibrate import score_manifest
-    from src.inference.predict import load_detector, make_score_fn
+    from src.inference.predict import load_score_fn
 
     out.mkdir(parents=True, exist_ok=True)
     for name, checkpoint in checkpoints.items():
-        model, dev = load_detector(checkpoint, device=device)
-        score_fn = make_score_fn(model, dev)
+        score_fn = load_score_fn(checkpoint, kind=MODEL_KINDS.get(name, "adapter"), device=device)
         for condition in CONDITIONS:
             score_manifest(
                 str(audio / f"manifest_{condition}.csv"),
@@ -415,6 +426,8 @@ def report(audio: Path, windows_dir: Path, plan: pd.DataFrame = CALL_PLAN) -> di
             seconds.update(dict(zip(manifest["call_id"], manifest["seconds"], strict=True)))
     result["calls_recorded"] = len(seconds)
     for name, threshold_file in MODELS.items():
+        if not any((windows_dir / f"windows_{name}_{c}.csv").is_file() for c in CONDITIONS):
+            continue  # a model that was not scored has no operating point to read either
         config = load_config(threshold_file)
         for condition in CONDITIONS:
             path = windows_dir / f"windows_{name}_{condition}.csv"
@@ -545,8 +558,9 @@ def main() -> None:
     ck.add_argument("--out", required=True, help="CSV, one row per replay call")
     sc = sub.add_parser("score")
     sc.add_argument("--audio", required=True, help="the prepare output folder")
-    sc.add_argument("--deployed", required=True, help="deployed adapter checkpoint")
-    sc.add_argument("--final", required=True, help="final-recipe checkpoint")
+    sc.add_argument("--deployed", help="deployed adapter checkpoint")
+    sc.add_argument("--final", help="final-recipe checkpoint")
+    sc.add_argument("--ssl", help="SSL-AASIST state dict (final-recipe data)")
     sc.add_argument("--out", required=True)
     sc.add_argument("--device", default="cpu")
     rp = sub.add_parser("report")
@@ -571,7 +585,10 @@ def main() -> None:
         if not table["ok"].all():
             raise SystemExit("a replay recording does not match its planned file")
     elif args.cmd == "score":
-        checkpoints = {"deployed": args.deployed, "final": args.final}
+        given = {"deployed": args.deployed, "final": args.final, "ssl_aasist": args.ssl}
+        checkpoints = {name: path for name, path in given.items() if path}
+        if not checkpoints:
+            parser.error("score needs at least one of --deployed, --final, --ssl")
         score_all(Path(args.audio), checkpoints, Path(args.out), args.device)
     else:
         result = report(Path(args.audio), Path(args.windows))

@@ -288,6 +288,7 @@ def main() -> None:
     sc.add_argument("--out", required=True)
     sc.add_argument("--limit", type=int, default=None, help="label-stratified clip subset")
     sc.add_argument("--device", default="cpu")
+    sc.add_argument("--kind", default="adapter", help="adapter, or ssl_aasist for SSL-AASIST")
     ch = sub.add_parser("choose")
     ch.add_argument("--dev", required=True)
     ch.add_argument("--validate", nargs="*", default=[])
@@ -297,12 +298,10 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.cmd == "score":
-        from src.inference.predict import load_detector, make_score_fn
+        from src.inference.predict import load_score_fn
 
-        model, device = load_detector(args.checkpoint, device=args.device)
-        score_manifest(
-            args.manifest, args.data_root, args.out, make_score_fn(model, device), args.limit
-        )
+        score_fn = load_score_fn(args.checkpoint, kind=args.kind, device=args.device)
+        score_manifest(args.manifest, args.data_root, args.out, score_fn, args.limit)
         return
 
     dev = pd.read_csv(args.dev)

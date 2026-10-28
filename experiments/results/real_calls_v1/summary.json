@@ -1220,6 +1220,616 @@
           "median_first_caution_s": 16.0
         }
       ]
+    },
+    "ssl_aasist_recorded": {
+      "threshold": 0.5795788615942001,
+      "ladder": [
+        2,
+        4
+      ],
+      "summary": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "caution_pct": 50.0,
+          "caution_ci": [
+            18.8,
+            81.2
+          ],
+          "likely_cloned_pct": 33.3,
+          "likely_cloned_ci": [
+            9.7,
+            70.0
+          ],
+          "median_first_caution_s": 12.0
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "caution_pct": 100.0,
+          "caution_ci": [
+            61.0,
+            100.0
+          ],
+          "likely_cloned_pct": 100.0,
+          "likely_cloned_ci": [
+            61.0,
+            100.0
+          ],
+          "median_first_caution_s": 10.0
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "caution_pct": 0.0,
+          "caution_ci": [
+            0.0,
+            24.3
+          ],
+          "likely_cloned_pct": 0.0,
+          "likely_cloned_ci": [
+            0.0,
+            24.3
+          ],
+          "median_first_caution_s": null
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "caution_pct": 16.7,
+          "caution_ci": [
+            3.0,
+            56.4
+          ],
+          "likely_cloned_pct": 16.7,
+          "likely_cloned_ci": [
+            3.0,
+            56.4
+          ],
+          "median_first_caution_s": 40.0
+        }
+      ],
+      "by_speaker": [
+        {
+          "speaker": "P1",
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 2,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P1",
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 2
+        },
+        {
+          "speaker": "P1",
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 4,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P1",
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 2,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P2",
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 2,
+          "caution": 1,
+          "likely_cloned": 1
+        },
+        {
+          "speaker": "P2",
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 2
+        },
+        {
+          "speaker": "P2",
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 4,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P2",
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 2,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P3",
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 1
+        },
+        {
+          "speaker": "P3",
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 2
+        },
+        {
+          "speaker": "P3",
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 4,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P3",
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 2,
+          "caution": 1,
+          "likely_cloned": 1
+        }
+      ],
+      "window_eer": [
+        {
+          "genuine": "genuine_replay",
+          "tool": "xtts_v2",
+          "eer_pct": 4.41,
+          "windows": [
+            158,
+            205
+          ]
+        },
+        {
+          "genuine": "genuine_replay",
+          "tool": "chatterbox",
+          "eer_pct": 36.56,
+          "windows": [
+            158,
+            162
+          ]
+        },
+        {
+          "genuine": "genuine_live",
+          "tool": "xtts_v2",
+          "eer_pct": 3.41,
+          "windows": [
+            352,
+            205
+          ]
+        },
+        {
+          "genuine": "genuine_live",
+          "tool": "chatterbox",
+          "eer_pct": 32.69,
+          "windows": [
+            352,
+            162
+          ]
+        }
+      ],
+      "by_phase": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "0-10 s": 0.834,
+          "10-20 s": 0.771,
+          "after 20 s": 0.872
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "0-10 s": 0.158,
+          "10-20 s": 0.073,
+          "after 20 s": 0.054
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "0-10 s": 0.986,
+          "10-20 s": 0.989,
+          "after 20 s": 0.974
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "0-10 s": 0.993,
+          "10-20 s": 0.957,
+          "after 20 s": 0.934
+        }
+      ],
+      "first_window_skipped": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "caution_pct": 66.7,
+          "caution_ci": [
+            30.0,
+            90.3
+          ],
+          "likely_cloned_pct": 33.3,
+          "likely_cloned_ci": [
+            9.7,
+            70.0
+          ],
+          "median_first_caution_s": 10.0
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "caution_pct": 100.0,
+          "caution_ci": [
+            61.0,
+            100.0
+          ],
+          "likely_cloned_pct": 100.0,
+          "likely_cloned_ci": [
+            61.0,
+            100.0
+          ],
+          "median_first_caution_s": 10.0
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "caution_pct": 0.0,
+          "caution_ci": [
+            0.0,
+            24.3
+          ],
+          "likely_cloned_pct": 0.0,
+          "likely_cloned_ci": [
+            0.0,
+            24.3
+          ],
+          "median_first_caution_s": null
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "caution_pct": 16.7,
+          "caution_ci": [
+            3.0,
+            56.4
+          ],
+          "likely_cloned_pct": 16.7,
+          "likely_cloned_ci": [
+            3.0,
+            56.4
+          ],
+          "median_first_caution_s": 40.0
+        }
+      ]
+    },
+    "ssl_aasist_g711": {
+      "threshold": 0.5795788615942001,
+      "ladder": [
+        2,
+        4
+      ],
+      "summary": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "caution_pct": 50.0,
+          "caution_ci": [
+            18.8,
+            81.2
+          ],
+          "likely_cloned_pct": 16.7,
+          "likely_cloned_ci": [
+            3.0,
+            56.4
+          ],
+          "median_first_caution_s": 14.0
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "caution_pct": 100.0,
+          "caution_ci": [
+            61.0,
+            100.0
+          ],
+          "likely_cloned_pct": 100.0,
+          "likely_cloned_ci": [
+            61.0,
+            100.0
+          ],
+          "median_first_caution_s": 10.0
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "caution_pct": 8.3,
+          "caution_ci": [
+            1.5,
+            35.4
+          ],
+          "likely_cloned_pct": 0.0,
+          "likely_cloned_ci": [
+            0.0,
+            24.3
+          ],
+          "median_first_caution_s": 48.0
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "caution_pct": 16.7,
+          "caution_ci": [
+            3.0,
+            56.4
+          ],
+          "likely_cloned_pct": 16.7,
+          "likely_cloned_ci": [
+            3.0,
+            56.4
+          ],
+          "median_first_caution_s": 40.0
+        }
+      ],
+      "by_speaker": [
+        {
+          "speaker": "P1",
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 2,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P1",
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 2
+        },
+        {
+          "speaker": "P1",
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 4,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P1",
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 2,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P2",
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 2,
+          "caution": 1,
+          "likely_cloned": 1
+        },
+        {
+          "speaker": "P2",
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 2
+        },
+        {
+          "speaker": "P2",
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 4,
+          "caution": 1,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P2",
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 2,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P3",
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P3",
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 2,
+          "caution": 2,
+          "likely_cloned": 2
+        },
+        {
+          "speaker": "P3",
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 4,
+          "caution": 0,
+          "likely_cloned": 0
+        },
+        {
+          "speaker": "P3",
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 2,
+          "caution": 1,
+          "likely_cloned": 1
+        }
+      ],
+      "window_eer": [
+        {
+          "genuine": "genuine_replay",
+          "tool": "xtts_v2",
+          "eer_pct": 4.41,
+          "windows": [
+            158,
+            205
+          ]
+        },
+        {
+          "genuine": "genuine_replay",
+          "tool": "chatterbox",
+          "eer_pct": 36.56,
+          "windows": [
+            158,
+            162
+          ]
+        },
+        {
+          "genuine": "genuine_live",
+          "tool": "xtts_v2",
+          "eer_pct": 3.41,
+          "windows": [
+            352,
+            205
+          ]
+        },
+        {
+          "genuine": "genuine_live",
+          "tool": "chatterbox",
+          "eer_pct": 32.69,
+          "windows": [
+            352,
+            162
+          ]
+        }
+      ],
+      "by_phase": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "0-10 s": 0.832,
+          "10-20 s": 0.76,
+          "after 20 s": 0.866
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "0-10 s": 0.104,
+          "10-20 s": 0.083,
+          "after 20 s": 0.051
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "0-10 s": 0.977,
+          "10-20 s": 0.987,
+          "after 20 s": 0.969
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "0-10 s": 0.99,
+          "10-20 s": 0.965,
+          "after 20 s": 0.927
+        }
+      ],
+      "first_window_skipped": [
+        {
+          "kind": "clone_replay",
+          "tool": "chatterbox",
+          "calls": 6,
+          "caution_pct": 66.7,
+          "caution_ci": [
+            30.0,
+            90.3
+          ],
+          "likely_cloned_pct": 16.7,
+          "likely_cloned_ci": [
+            3.0,
+            56.4
+          ],
+          "median_first_caution_s": 13.0
+        },
+        {
+          "kind": "clone_replay",
+          "tool": "xtts_v2",
+          "calls": 6,
+          "caution_pct": 100.0,
+          "caution_ci": [
+            61.0,
+            100.0
+          ],
+          "likely_cloned_pct": 100.0,
+          "likely_cloned_ci": [
+            61.0,
+            100.0
+          ],
+          "median_first_caution_s": 10.0
+        },
+        {
+          "kind": "genuine_live",
+          "tool": "none",
+          "calls": 12,
+          "caution_pct": 8.3,
+          "caution_ci": [
+            1.5,
+            35.4
+          ],
+          "likely_cloned_pct": 0.0,
+          "likely_cloned_ci": [
+            0.0,
+            24.3
+          ],
+          "median_first_caution_s": 48.0
+        },
+        {
+          "kind": "genuine_replay",
+          "tool": "none",
+          "calls": 6,
+          "caution_pct": 16.7,
+          "caution_ci": [
+            3.0,
+            56.4
+          ],
+          "likely_cloned_pct": 16.7,
+          "likely_cloned_ci": [
+            3.0,
+            56.4
+          ],
+          "median_first_caution_s": 40.0
+        }
+      ]
     }
   }
 }

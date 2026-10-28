@@ -15,24 +15,24 @@ Audio Deepfake Detection on Hindi--English Telephone Speech}
 \maketitle
 
 \begin{abstract}
-Deepfake detectors report errors below one percent on English benchmarks.
-We ask what that means for Hindi--English speech over a telephone line. A
+Deepfake detectors report errors below one percent on English benchmarks; we
+test Hindi--English speech over a telephone line. A
 wav2vec~2.0 detector trained on ASVspoof 2019 LA reaches 0.85\% equal error rate on
 English but 58.42\% on code-mixed speech over a simulated narrowband channel, and calls
 94.8\% of clean genuine Hindi--English speech fake. A
 language-controlled test on 183 unseen speakers shows the gap follows the recording
 domain, not code-mixing. Low-rank adaptation of 1.13\% of the parameters lowers
-channel-matched error to 2.75\%, but this deployed model never beats an informative shortcut
-floor of cheap signal statistics on unseen Tortoise clones over the channel. More training speakers
+channel-matched error to 2.75\%, but this deployed model never beats a shortcut
+floor of cheap signal statistics on unseen Tortoise clones over the channel. More speakers
 and real codec audio help most: trained on 248 speakers over simulated G.711 and real AMR-NB,
 error on new speakers' unseen Tortoise clones falls from 30.8\% to 8.8\% over the line,
-beating an informative floor, and from 36.3\% to 6.0\% over AMR-NB, in all five seeds, with
-no unseen-tool audio in training. A larger encoder (SSL-AASIST) fine-tuned on the same data
+beating an informative floor, and from 36.3\% to 6.0\% over AMR-NB, in all five seeds, without
+unseen-tool audio in training. A larger encoder (SSL-AASIST) fine-tuned on the same data
 reaches 0.5\% over AMR-NB and 12.9\% on Chatterbox, a third unseen generator, while the
-second, IndicF5, stays at 15.8--21.8\%. Spontaneous speech stays mostly rejected. The
-detector warns only the callee on live calls. On 30 real mobile calls the deployed model,
-failing mostly at the mobile codec, warns most genuine live calls, the final recipe one in
-four, and flags five of six seen-tool clone calls as likely cloned but no unseen-tool call.
+second, IndicF5, stays at 15.8--21.8\%. Spontaneous speech stays mostly rejected. On 30
+real mobile calls the deployed model, failing mostly at the mobile codec, warns most genuine
+live calls, the final recipe one in four and the larger encoder one in twelve; these two catch
+five and six of six seen-tool clone calls and none and one of six unseen-tool calls.
 \end{abstract}
 
 % Section owners follow docs plan, Week 9. Uncomment each line once its file exists.
