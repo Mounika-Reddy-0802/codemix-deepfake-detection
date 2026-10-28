@@ -1,0 +1,100 @@
+{
+  "about": "One held-out corpus speaker (genuine, never trained on) through each stage of a phone call, scored on the live path. Not a team member's voice.",
+  "speaker": "596505",
+  "recording": "mSiZUO1cgwb8nNpA",
+  "segments": [
+    "mSiZUO1cgwb8nNpA_seg000.wav",
+    "mSiZUO1cgwb8nNpA_seg001.wav",
+    "mSiZUO1cgwb8nNpA_seg002.wav",
+    "mSiZUO1cgwb8nNpA_seg003.wav",
+    "mSiZUO1cgwb8nNpA_seg004.wav"
+  ],
+  "seconds": 52.0,
+  "thresholds": {
+    "deployed": {
+      "value": 0.49997557675233106,
+      "file": "configs/threshold.yaml"
+    },
+    "final": {
+      "value": 0.6868554928153753,
+      "file": "configs/threshold_final.yaml"
+    }
+  },
+  "stages": [
+    {
+      "key": "direct",
+      "label": "Direct recording",
+      "file": "direct.wav",
+      "deployed": {
+        "mean_p_genuine": 0.7624,
+        "fake_leaning_pct": 12.0,
+        "windows": 25
+      },
+      "final": {
+        "mean_p_genuine": 1.0,
+        "fake_leaning_pct": 0.0,
+        "windows": 25
+      }
+    },
+    {
+      "key": "g711",
+      "label": "Simulated G.711 line",
+      "file": "g711.wav",
+      "deployed": {
+        "mean_p_genuine": 0.7332,
+        "fake_leaning_pct": 16.0,
+        "windows": 25
+      },
+      "final": {
+        "mean_p_genuine": 1.0,
+        "fake_leaning_pct": 0.0,
+        "windows": 25
+      }
+    },
+    {
+      "key": "amr_nb",
+      "label": "Real AMR-NB codec, 12.2 kbit/s",
+      "file": "amr_nb.wav",
+      "deployed": {
+        "mean_p_genuine": 0.0002,
+        "fake_leaning_pct": 100.0,
+        "windows": 25
+      },
+      "final": {
+        "mean_p_genuine": 0.9999,
+        "fake_leaning_pct": 0.0,
+        "windows": 25
+      }
+    },
+    {
+      "key": "amr_nb_rec",
+      "label": "AMR-NB, then the call recorder",
+      "file": "amr_nb_rec.wav",
+      "deployed": {
+        "mean_p_genuine": 0.0002,
+        "fake_leaning_pct": 100.0,
+        "windows": 25
+      },
+      "final": {
+        "mean_p_genuine": 0.9999,
+        "fake_leaning_pct": 0.0,
+        "windows": 25
+      }
+    },
+    {
+      "key": "amr_wb_rec",
+      "label": "AMR-WB (4G), then the recorder",
+      "file": "amr_wb_rec.wav",
+      "deployed": {
+        "mean_p_genuine": 0.2286,
+        "fake_leaning_pct": 87.5,
+        "windows": 24
+      },
+      "final": {
+        "mean_p_genuine": 1.0,
+        "fake_leaning_pct": 0.0,
+        "windows": 24
+      }
+    }
+  ]
+}

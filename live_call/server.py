@@ -5,11 +5,13 @@ One FastAPI app serves everything the evaluation demo needs:
 | Route | What it is |
 |---|---|
 | ``GET /`` | evaluator home: what the system does, live status, links |
+| ``GET /demo`` | the final review's guided flow; its scenes ``/threat``, ``/lanes``, ``/live``, ``/network``, ``/trust``, ``/limits`` (routes in ``demo_routes.py``) |
+| ``GET /console`` | one screen: both handsets, the signal path and the live analysis |
 | ``GET /dashboard`` | receiver dashboard: every live call, verdict light, score timeline, alerts |
 | ``GET /call`` | WebRTC call page; a participant can speak or play a clip into the call |
 | ``POST /offer`` | WebRTC signalling; every participant's audio becomes a monitored session |
 | ``POST /api/predict`` | upload or record a clip, get a verdict and its window timeline |
-| ``GET /api/demo-clips``, ``POST /api/replay/{id}`` | play a prepared real or cloned clip as a live call |
+| ``GET /api/demo-clips``, ``POST /api/replay/{id}`` | play a prepared real or cloned clip as a live call (``?realtime=false&wait=true``: as fast as it scores, verdict returned) |
 | ``GET /api/results`` | the measured S1/S2/S3 tables and the calibration, from committed JSONs |
 | ``WS /ws/dashboard`` | push channel for the dashboard |
 | ``POST /twilio/voice`` | Twilio webhook for an incoming call: stream it, bridge the receiver |
@@ -54,12 +56,15 @@ from fastapi import (
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from live_call import demo_routes
 from live_call.alerts import AlertDispatcher, announcement_twiml
 from live_call.detector import DetectorService, DetectorSettings
+from live_call.lanes import LaneSet
 from live_call.media_handler import TwilioStreamSource
 from live_call.phone import CALLER, RECEIVER, CallState, Exchange
 from live_call.replay import FileSource
 from live_call.session import CallSession, Hub, SessionInfo, SessionRegistry, new_session_id
+from live_call.verdict_engine import State
 
 log = logging.getLogger("live_call")
 
@@ -91,11 +96,18 @@ class App:
     """Everything the routes share, created once per process."""
 
     def __init__(
-        self, detector: DetectorService | None = None, dispatcher: AlertDispatcher | None = None
+        self,
+        detector: DetectorService | None = None,
+        dispatcher: AlertDispatcher | None = None,
+        lanes: LaneSet | None = None,
     ):
         _load_env_file(ROOT / ".env")
         self.detector = detector or DetectorService(DetectorSettings.from_env())
         self.dispatcher = dispatcher or AlertDispatcher()
+        #: the detectors of the three-lane view (``DFD_LANES``), read on first use
+        self._lanes = lanes
+        self.lanes_task: asyncio.Task | None = None
+        self.lanes_run: str | None = None
         self.hub = Hub()
         self.sessions = SessionRegistry()
         self.exchange = Exchange()
@@ -119,9 +131,15 @@ class App:
         )
         self.sessions.add(session)
         task = asyncio.create_task(session.run(source))
+        session.task = task  # so a caller that needs the verdict can wait for the call to end
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
         return session
+
+    def lane_set(self) -> LaneSet:
+        if self._lanes is None:
+            self._lanes = LaneSet.from_env(self.detector)
+        return self._lanes
 
     def start_pending(self, room: str) -> None:
         """Begin monitoring the caller audio held for ``room``; called on answer."""
@@ -229,6 +247,19 @@ def list_demo_clips(directory: Path | None = None) -> list[dict]:
     return [c for c in clips if (directory / c["file"]).is_file()]
 
 
+def find_clip(clip_id: str) -> dict:
+    """The prepared demo call with this id, or a 404."""
+    clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
+    if clip is None:
+        raise HTTPException(404, "unknown clip")
+    return clip
+
+
+def clip_audio(clip: dict) -> np.ndarray:
+    """A prepared call's audio at 16 kHz mono."""
+    return decode_audio((demo_clips_dir() / clip["file"]).read_bytes(), clip["file"])
+
+
 def create_app(state: App | None = None) -> FastAPI:
     shared: App = state or App()
 
@@ -243,12 +274,19 @@ def create_app(state: App | None = None) -> FastAPI:
             ``/offer``, which blocked the event loop and timed the caller out. It
             runs on the detector's own thread, so the server serves pages meanwhile.
             """
+            loop = asyncio.get_running_loop()
             try:
-                loop = asyncio.get_running_loop()
                 await loop.run_in_executor(shared.detector.executor, shared.detector.score_fn)
                 log.info("detector ready")
             except Exception as exc:  # no checkpoint on this machine: pages still work
                 log.warning("detector not loaded: %s", exc)
+            # the lanes view's other models too, so the first lanes call does not wait
+            for lane in shared.lane_set().lanes:
+                try:
+                    await loop.run_in_executor(shared.detector.executor, lane.detector.score_fn)
+                    log.info("lane %r ready", lane.name)
+                except Exception as exc:
+                    log.warning("lane %r not loaded: %s", lane.name, exc)
 
         warming = asyncio.create_task(warm())
         queue = shared.hub.subscribe()
@@ -290,6 +328,15 @@ def create_app(state: App | None = None) -> FastAPI:
     async def home() -> HTMLResponse:
         return page("index.html")
 
+    @api.get("/favicon.ico", include_in_schema=False)
+    async def favicon() -> Response:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" '
+            'rx="8" fill="#2a63e8"/><path d="M5 16h3l3-8 5 16 4-12 2 4h5" fill="none" stroke="#fff" '
+            'stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        )
+        return Response(svg, media_type="image/svg+xml")
+
     @api.get("/dashboard")
     async def dashboard() -> HTMLResponse:
         return page("dashboard.html")
@@ -299,9 +346,44 @@ def create_app(state: App | None = None) -> FastAPI:
         return page("call.html")
 
     @api.get("/demo")
-    async def demo_console() -> HTMLResponse:
-        """One-screen console for a live evaluation: both handsets and the analysis."""
+    async def demo_flow() -> HTMLResponse:
+        """The final review's guided flow: six scenes in order, with the presenter's lines."""
+        return page("demo.html")
+
+    @api.get("/threat")
+    async def threat_page() -> HTMLResponse:
+        """Scene 1: the threat."""
+        return page("threat.html")
+
+    @api.get("/limits")
+    async def limits_page() -> HTMLResponse:
+        """Scene 6: the limits, what was done about each, and try it."""
+        return page("limits.html")
+
+    @api.get("/console")
+    async def console_page() -> HTMLResponse:
+        """The one-screen console under its own name (the phone scene's fallback)."""
         return page("console.html")
+
+    @api.get("/lanes")
+    async def lanes_page() -> HTMLResponse:
+        """Scene 2: three detectors on one call."""
+        return page("lanes.html")
+
+    @api.get("/live")
+    async def live_page() -> HTMLResponse:
+        """Scene 3: the caller on this laptop, the receiver on the mentor's phone."""
+        return page("live.html")
+
+    @api.get("/network")
+    async def network_page() -> HTMLResponse:
+        """Scene 4: the real mobile network, scores only."""
+        return page("network.html")
+
+    @api.get("/trust")
+    async def trust_page() -> HTMLResponse:
+        """Scene 5: why the verdict can be trusted."""
+        return page("trust.html")
 
     @api.get("/phone")
     async def phone_home() -> HTMLResponse:
@@ -331,6 +413,8 @@ def create_app(state: App | None = None) -> FastAPI:
                 "live_sessions": sum(not s.ended for s in shared.sessions.all()),
                 "dashboards": shared.hub.subscribers,
                 "demo_clips": len(list_demo_clips()),
+                "demo_clips_dir": demo_clips_dir().name,
+                "lanes": len(shared.lane_set().lanes),
             }
         )
 
@@ -401,25 +485,64 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/api/demo-clips/{clip_id}/audio")
     async def demo_clip_audio(clip_id: str) -> FileResponse:
-        clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
-        if clip is None:
-            raise HTTPException(404, "unknown clip")
-        return FileResponse(demo_clips_dir() / clip["file"])
+        return FileResponse(demo_clips_dir() / find_clip(clip_id)["file"])
 
     @api.post("/api/replay/{clip_id}")
-    async def replay_clip(clip_id: str) -> JSONResponse:
-        clip = next((c for c in list_demo_clips() if c["id"] == clip_id), None)
-        if clip is None:
-            raise HTTPException(404, "unknown clip")
-        audio = decode_audio((demo_clips_dir() / clip["file"]).read_bytes(), clip["file"])
+    async def replay_clip(clip_id: str, realtime: bool = True, wait: bool = False) -> JSONResponse:
+        """Play a prepared clip as a live call through the live path.
+
+        ``wait=true`` returns the verdict once the call ends; with ``realtime=false`` the
+        clip is played as fast as it can be scored. That is how the rehearsal check runs
+        every demo call through the exact live path in seconds, not minutes.
+        """
+        clip = find_clip(clip_id)
+        audio = clip_audio(clip)
         info = SessionInfo(
             new_session_id("replay"),
             "replay",
             clip["title"],
             meta={"clip": clip_id, "truth": clip["label"], "tool": clip.get("tool")},
         )
-        session = shared.start_session(info, FileSource(audio, realtime=True))
-        return JSONResponse({"session": session.info.session_id})
+        session = shared.start_session(info, FileSource(audio, realtime=realtime))
+        if not wait:
+            return JSONResponse({"session": session.info.session_id})
+        await session.task
+        summary = session.engine.summary
+        caution = next(
+            (at for at, s in summary.timeline if s in (State.SUSPICIOUS, State.LIKELY_FAKE)), None
+        )
+        likely = next((at for at, s in summary.timeline if s is State.LIKELY_FAKE), None)
+        return JSONResponse(
+            {
+                "session": session.info.session_id,
+                "clip": clip_id,
+                "peak_state": summary.peak_state.value,
+                "first_caution_s": caution,
+                "first_likely_s": likely,
+                "scored_windows": summary.scored_windows,
+                "fake_leaning_windows": summary.fake_leaning_windows,
+                "duration": summary.duration_seconds,
+                "threshold": session.engine.config.threshold,
+                "checkpoint": shared.detector.status()["checkpoint"],
+            }
+        )
+
+    # ----------------------------------------------------------------- demo scenes
+    demo_routes.add_lane_routes(api, shared, find_clip, clip_audio)
+    demo_routes.add_live_routes(
+        api,
+        lambda: Path(
+            os.environ.get("TUNNEL_URL_FILE", str(demo_clips_dir().parent / "tunnel_url.txt"))
+        ),
+    )
+    demo_routes.add_results_routes(
+        api,
+        lambda: Path(
+            os.environ.get("STAGE_PLAYER_DIR", str(demo_clips_dir().parent / "stage_player"))
+        ),
+    )
+    demo_routes.add_shuffle_routes(api, shared, find_clip, clip_audio)
+    demo_routes.add_try_routes(api, shared, decode_audio)
 
     # ----------------------------------------------------------------- dashboard push
     @api.websocket("/ws/dashboard")

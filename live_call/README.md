@@ -23,7 +23,11 @@ caller audio ──▶ 16 kHz PCM frames ──▶ 4 s windows every 2 s ──�
 | `media_handler.py` | Twilio Media Streams: G.711 μ-law decode, 8 → 16 kHz |
 | `webrtc_harness/rtc_server.py` | aiortc signalling; one audio source per participant |
 | `replay.py` | a file played as a call through the same path |
-| `static/` | overview + results, receiver dashboard, WebRTC call page |
+| `lanes.py` | several detectors on one call, each the live path with its own model and threshold (`DFD_LANES`) |
+| `demo_routes.py` | the final-review scenes' routes: lanes, the phone's address and QR code, results, shuffle proof, try it |
+| `results_view.py` | every number the scene pages show, read from a committed result file with its source |
+| `rehearsal.py` | compares every demo call's observed verdict with `configs/demo_rehearsal.json` |
+| `static/` | the six scene pages and their shared look (`stage.css`, `stage.js`), overview, dashboard, handsets, console |
 
 ---
 
@@ -80,8 +84,11 @@ window scores in under a second, faster than the 2 s hop.
 
 | Page | What it shows |
 |---|---|
-| `/` | overview, **try a clip** (upload or 10 s recording), **play a prepared call**, the measured S1/S2/S3 tables |
+| `/` | overview, the measured results of every system (final recipe first), **try a clip** judged as a call, **play a prepared call** |
+| `/demo` | the final review's guided flow: six scenes in order with the presenter's lines (section 5) |
+| `/console` | both handsets, the signal path and the live analysis on one screen |
 | `/dashboard` | every live call: verdict light, P(genuine) timeline against the threshold, warning tone and banner, alert log |
+| `/phone/caller`, `/phone/receiver` | the two handsets on two devices; only the receiver sees a verdict |
 | `/call` | a WebRTC call. Open it in two tabs, join the same room. A participant can speak, or choose **An audio file** to play a cloned clip into the call |
 
 Microphone access works on `localhost` or `https` only. To join from a phone or a
@@ -195,3 +202,45 @@ python -m live_call.replay <data>/demo_clips/xtts_clone.wav --checkpoint <checkp
 `test_live_server.py` drives the real app: upload, Twilio webhooks and signature
 check, and a simulated Twilio Media Stream becoming a monitored call. It uses a
 stand-in detector, so it needs no checkpoint.
+
+---
+
+## 5. The final-review demo
+
+`scripts\run_demo.bat` starts everything below on the final recipe and opens `/demo`; set
+`DFD_NO_BROWSER=1` to start the server alone. It expects, under `DFD_DATA` (default
+`C:\dfdata`): `checkpoints\final_s1234_best.pt`, `checkpoints\lora_norm_rvc_channel_best.pt`,
+`demo_calls_v2\` (or `demo_clips_final\`) and `stage_player\`; the English-only checkpoint
+comes from Git LFS (`checkpoints/baseline/best.pt`).
+
+| Scene | Page | Routes behind it |
+|---|---|---|
+| 1 The threat | `/threat` | `GET /api/headline` |
+| 2 Three detectors | `/lanes` | `GET /api/lanes`, `POST /api/replay_lanes/{id}` (real time, streamed to `/ws/dashboard` tagged by lane and run; `?realtime=false` returns every lane's series), `POST /api/replay_lanes_stop` |
+| 3 Live call | `/live`, `/phone/receiver` | `GET /api/tunnel` (the https tunnel, else this laptop's Wi-Fi address), `GET /api/qr?text=` |
+| 4 Real network | `/network` | `GET /api/real_calls`, `GET /api/stage_player`, `GET /api/stage_player/{stage}/audio` |
+| 5 Why trust it | `/trust` | `POST /api/shuffle/{id}`, `GET /api/shuffle/{id}/audio`, `GET /api/headline` |
+| 6 Limits + try it | `/limits` | `GET /api/limits`, `POST /api/try` |
+
+| Variable | What it sets |
+|---|---|
+| `DFD_LANES` | the scene-2 detectors, `name=checkpoint=threshold_file` separated by commas; a checkpoint with `ssl` in its name loads as SSL-AASIST (`predict.load_score_fn(kind="ssl_aasist")`); `run_demo.bat` adds it as a fourth lane when its weights are present |
+| `STAGE_PLAYER_DIR` | the stage player's audio (`scripts/prepare_stage_player.py`); its scores are committed in `experiments/results/stage_player_v1.json` |
+| `TUNNEL_URL_FILE` | where `scripts/start_tunnel.py` writes the tunnel's https address |
+
+**Before showing it**, every call must replay to the verdict written in
+`configs/demo_rehearsal.json`, in the live model and every lane, twice in a row:
+
+```bash
+python scripts/rehearse_demo.py --server http://localhost:8000
+```
+
+**The phone.** Open the address `/live` shows (as a QR code) on the receiver's phone. Over
+`python scripts/start_tunnel.py` (cloudflared, no account; or `--ngrok`) the phone gets https,
+its microphone and two-way audio; over the room's Wi-Fi on plain http it joins listen-only,
+still hears the caller and still gets every verdict. If the phone misbehaves, the same call
+runs on one screen at `/console`.
+
+**`POST /api/replay/{id}?realtime=false&wait=true`** plays a prepared call through the live
+path as fast as it scores and returns its peak verdict and warning times: the rehearsal's
+building block, and a quick way to check one call.

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Three detectors on one call</title>
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    main.scene { padding-top: 1.1rem; }
+    .head { display: flex; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+    .head h1.title { margin: 0; }
+    .head p.lede { margin: 0; font-size: 0.98rem; max-width: 46rem; }
+
+    .deck { padding: 0.8rem 1rem; margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.7rem; }
+    .chips { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .chip {
+      font: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ink); cursor: pointer;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.8rem; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .chip:hover { background: rgba(255, 255, 255, 0.09); border-color: var(--line-2); }
+    .chip.on { background: rgba(91, 149, 255, 0.16); border-color: var(--accent); }
+    .chip .sw { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+    .chip .sw.real { background: var(--genuine); }
+    .chip .sw.cloned { background: var(--fake); }
+    .chips select {
+      font: inherit; font-size: 0.85rem; color: var(--ink); background: #0e1626;
+      border: 1px solid var(--line); border-radius: 999px; padding: 0.42rem 0.75rem; max-width: 22rem;
+    }
+    .playrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 1rem; align-items: center; }
+    .now { min-width: 0; }
+    .now .nt { font-size: 1.15rem; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 0.6rem; }
+    .now .nd { color: var(--dim); font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress { height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 0.45rem; }
+    .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), #8fb6ff); }
+    .clock { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; min-width: 7.5ch; text-align: right; }
+
+    .lanes { display: flex; flex-direction: column; gap: 0.65rem; }
+    .lane {
+      display: grid; grid-template-columns: 16rem 1fr 14rem; gap: 1rem; align-items: stretch;
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 0.85rem 1rem; position: relative; overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .lane::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--lane); }
+    .lane.s-suspicious { border-color: rgba(255, 176, 46, 0.55); }
+    .lane.s-likely_fake { border-color: rgba(255, 79, 79, 0.7); box-shadow: 0 0 34px rgba(255, 79, 79, 0.18); }
+    .lane .who { display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding-left: 0.35rem; }
+    .lane .ln { font-size: 1.12rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .lane .ln .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--lane); flex: none; }
+    .lane .lm { color: var(--dim); font-size: 0.78rem; line-height: 1.4; }
+    .lane canvas { width: 100%; height: 118px; display: block; border-radius: 10px; background: rgba(0, 0, 0, 0.22); }
+    .lane .lrole { color: #c4d2e8; font-size: 0.8rem; line-height: 1.35; }
+    .lane .verdict { display: flex; flex-direction: column; justify-content: center; gap: 0.35rem; }
+    .lane .verdict .vrow { display: flex; align-items: center; gap: 0.7rem; }
+    .lane .verdict .vword { font-size: 1.32rem; font-weight: 750; line-height: 1.1; }
+    .lane .verdict .vtimes { color: var(--dim); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+    .lane .outcome { font-size: 0.82rem; font-weight: 650; padding: 0.3rem 0.6rem; border-radius: 9px; display: none; }
+    .lane .outcome.show { display: inline-block; }
+    .outcome.good { background: rgba(34, 201, 122, 0.15); color: #92f0c4; }
+    .outcome.bad { background: rgba(255, 79, 79, 0.16); color: #ffb3b3; }
+    .outcome.warn { background: rgba(255, 176, 46, 0.15); color: #ffd18a; }
+    /* short screens (a 768- or 720-line projector): all three lanes still fit */
+    @media (max-height: 900px) and (min-width: 1101px) {
+      main.scene { padding-top: 0.7rem; }
+      .kicker { margin-bottom: 0.2rem; }
+      .head { margin-bottom: 0.6rem; }
+      .head h1.title { font-size: 1.7rem; }
+      .head p.lede { font-size: 0.86rem; }
+      .deck { padding: 0.6rem 0.85rem; gap: 0.5rem; margin-bottom: 0.6rem; }
+      .btn.big { padding: 0.62rem 1.1rem; font-size: 1rem; }
+      .lanes { gap: 0.5rem; }
+      .lane { padding: 0.55rem 0.85rem; }
+      .lane canvas { height: clamp(64px, calc((100vh - 470px) / 3), 118px); }
+      .lane .lm { display: none; }
+      .lane .verdict .vword { font-size: 1.15rem; }
+      .legend { margin-top: 0.5rem; }
+    }
+    @media (max-height: 720px) and (min-width: 1101px) { .head p.lede, .lane .lrole { display: none; } }
+    /* a fourth lane (the larger encoder): four rows on one screen */
+    @media (min-width: 1101px) {
+      .lanes[data-count="4"] { gap: 0.45rem; }
+      .lanes[data-count="4"] .lane { padding: 0.45rem 0.85rem; }
+      .lanes[data-count="4"] .lane canvas { height: clamp(52px, calc((100vh - 500px) / 4), 100px); }
+      .lanes[data-count="4"] .lane .lm { display: none; }
+    }
+    @media (max-height: 900px) and (min-width: 1101px) {
+      .lanes[data-count="4"] .lane .lrole { display: none; }
+      .lanes[data-count="4"] .lane .verdict .vword { font-size: 1.05rem; }
+      .lanes[data-count="4"] .lane .ln { font-size: 1rem; }
+    }
+    @media (max-width: 1100px) {
+      .lane { grid-template-columns: 1fr; }
+      .deck { grid-template-columns: 1fr; }
+      .clock { text-align: left; }
+    }
+    .legend { display: flex; gap: 1.2rem; flex-wrap: wrap; color: var(--dim); font-size: 0.8rem; margin-top: 0.9rem; }
+    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: #cfd9ea; }
+    .legend i.dash { background: repeating-linear-gradient(90deg, #cfd9ea 0 5px, transparent 5px 9px); }
+    .legend i.band { height: 10px; background: rgba(255, 79, 79, 0.28); }
+    .legend i.band.c { background: rgba(255, 176, 46, 0.26); }
+    .empty { padding: 2rem; text-align: center; color: var(--dim); }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <p class="kicker">Scene 2 · Three detectors on one call</p>
+    <div class="head">
+      <h1 class="title">Same call. Three detectors.</h1>
+      <p class="lede">Every two seconds the last four seconds of the caller's voice are scored by each
+        detector against <b>its own frozen threshold</b>. The light is the warning that detector would give
+        the person being called.</p>
+    </div>
+
+    <section class="card glow deck">
+      <div class="chips" id="picker" aria-label="Choose a call"></div>
+      <div class="playrow">
+        <div class="row">
+          <button class="btn go big" id="play" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play the call
+          </button>
+          <button class="btn ghost" id="stop" disabled>Stop</button>
+        </div>
+        <div class="now">
+          <div class="nt"><span id="nowTag"></span><span id="nowTitle">Choose a call</span></div>
+          <div class="nd" id="nowDesc">Real and cloned calls from held-out corpus speakers, already through a phone line.</div>
+          <div class="progress"><div id="bar"></div></div>
+        </div>
+        <div class="clock" id="clock">0:00</div>
+      </div>
+    </section>
+
+    <section class="lanes" id="lanes"><div class="empty card">Loading the detectors…</div></section>
+    <div class="legend">
+      <span><i></i> P(genuine), smoothed, one point per 4 s window</span>
+      <span><i class="dash"></i> that detector's frozen threshold</span>
+      <span><i class="band c"></i> caution</span>
+      <span><i class="band"></i> likely cloned</span>
+      <span>Hover a lane's threshold to see the file it is read from.</span>
+    </div>
+    <audio id="audio" preload="auto"></audio>
+  </main>
+
+  <script src="/static/stage.js"></script>
+  <script>
+    const { make, json, word } = Stage;
+    Stage.mount("lanes");
+
+    // Scene 2 plays these two first: a genuine new speaker, then the unseen-tool call
+    // only the final recipe catches (configs/demo_rehearsal.json checks both).
+    const FEATURED = ["genuine_new_speaker", "tortoise_caught"];
+    // What each detector is, in one line the audience can read.
+    const ROLE_TEXT = {
+      s1: "Trained on English only (ASVspoof 2019 LA)",
+      deployed: "Adapted on Hindi-English XTTS + RVC clones over a phone line",
+      final: "Final recipe: more speakers, plus a real mobile codec (AMR-NB)",
+      ssl: "Larger encoder (SSL-AASIST) on the final-recipe data",
+    };
+    const audio = document.getElementById("audio");
+    let clips = [], chosen = null, lanes = [], run = null, seconds = 45, playing = false;
+
+    // ------------------------------------------------------------------ calls
+    const isFake = (c) => c.label === "spoof";
+    function chip(c) {
+      const node = make("button", { class: "chip", type: "button", onclick: () => choose(c.id),
+        title: (isFake(c) ? "cloned voice" : "real person") + (c.description ? " · " + c.description : "") }, [
+        make("span", { class: "sw " + (isFake(c) ? "cloned" : "real") }), c.title,
+      ]);
+      node.dataset.id = c.id;
+      return node;
+    }
+
+    async function loadCalls() {
+      try {
+        clips = await json("/api/demo-clips");
+      } catch (e) { Stage.toast("Could not load the prepared calls: " + e.message); return; }
+      const featured = FEATURED.map((id) => clips.find((c) => c.id === id)).filter(Boolean);
+      const rest = clips.filter((c) => !featured.includes(c));
+      const box = document.getElementById("picker");
+      box.replaceChildren(...featured.map(chip));
+      if (rest.length) {
+        const select = make("select", { "aria-label": "Other prepared calls", onchange: (ev) => ev.target.value && choose(ev.target.value) }, [
+          make("option", { value: "", text: featured.length ? "Other calls…" : "Choose a call…" }),
+          ...rest.map((c) => make("option", { value: c.id, text: `${c.title} (${isFake(c) ? "cloned" : "real"})` })),
+        ]);
+        select.id = "otherCalls";
+        box.append(select);
+      }
+      // /lanes?clip=<id> opens on that call (scene 6 links its known-limit calls here)
+      const wanted = new URLSearchParams(location.search).get("clip");
+      if (clips.length) choose(clips.some((c) => c.id === wanted) ? wanted : (featured[0] || clips[0]).id);
+    }
+
+    function choose(id) {
+      if (playing) stop();
+      chosen = clips.find((c) => c.id === id);
+      document.querySelectorAll(".chip").forEach((el) => el.classList.toggle("on", el.dataset.id === id));
+      const other = document.getElementById("otherCalls");
+      if (other) other.value = FEATURED.includes(id) ? "" : id;
+      document.getElementById("nowTag").replaceChildren(
+        make("span", { class: "tag " + (isFake(chosen) ? "cloned" : "real"), text: isFake(chosen) ? "cloned voice" : "real person" }));
+      document.getElementById("nowTitle").textContent = chosen.title;
+      document.getElementById("nowDesc").textContent = chosen.description || "";
+      document.getElementById("play").disabled = !lanes.length;
+      seconds = chosen.seconds || 45;
+      audio.src = `/api/demo-clips/${id}/audio`;
+      resetLanes();
+    }
+
+    // ------------------------------------------------------------------ lanes
+    async function loadLanes() {
+      try {
+        const info = await json("/api/lanes");
+        if (info.problems && info.problems.length) Stage.toast(info.problems.join(" · "), 12000);
+        lanes = info.lanes.map((l) => ({ ...l, points: [], bands: [], state: "listening", firstCaution: null, firstLikely: null }));
+      } catch (e) {
+        Stage.toast("Could not read the lanes: " + e.message);
+        lanes = [];
+      }
+      renderLanes();
+      if (chosen) document.getElementById("play").disabled = !lanes.length;
+    }
+
+    function renderLanes() {
+      const box = document.getElementById("lanes");
+      if (!lanes.length) { box.replaceChildren(make("div", { class: "empty card", text: "No detectors configured (DFD_LANES)." })); return; }
+      box.dataset.count = lanes.length;
+      const word = { 2: "Two", 3: "Three", 4: "Four", 5: "Five" }[lanes.length];
+      if (word) {
+        document.querySelector(".kicker").textContent = `Scene 2 · ${word} detectors on one call`;
+        document.querySelector("h1.title").textContent = `Same call. ${word} detectors.`;
+        document.title = `${word} detectors on one call`;
+        Stage.retitle("lanes", `${word} detectors`);
+      }
+      box.replaceChildren(...lanes.map((l, i) => {
+        const ladder = l.ladder ? ` · caution ${l.ladder.caution_after}, warning ${l.ladder.likely_after} low windows` : "";
+        const row = make("section", { class: "lane s-listening", id: "lane" + i, style: `--lane:${l.colour}` }, [
+          make("div", { class: "who" }, [
+            make("div", { class: "ln" }, [make("span", { class: "dot" }), l.name]),
+            make("div", { class: "lrole", text: ROLE_TEXT[l.role] || "" }),
+            make("div", { class: "lm", title: l.checkpoint || "" }, [
+              "threshold ",
+              make("span", { class: "cite", title: "read from " + (l.threshold_source || "the threshold file"), text: l.threshold !== null ? l.threshold.toFixed(3) : "missing" }),
+              ladder,
+            ]),
+          ]),
+          make("canvas", { id: "cv" + i, "aria-label": `${l.name}: P(genuine) per window` }),
+          make("div", { class: "verdict" }, [
+            make("div", { class: "vrow" }, [make("span", { class: "light" }), make("span", { class: "vword", id: "vw" + i, text: "Listening" })]),
+            make("div", { class: "vtimes", id: "vt" + i, text: "waiting for speech" }),
+            make("span", { class: "outcome", id: "oc" + i }),
+          ]),
+        ]);
+        return row;
+      }));
+      drawAll();
+    }
+
+    function resetLanes() {
+      for (const l of lanes) Object.assign(l, { points: [], bands: [], state: "listening", firstCaution: null, firstLikely: null });
+      lanes.forEach((l, i) => {
+        const row = document.getElementById("lane" + i);
+        if (!row) return;
+        row.className = "lane s-listening";
+        document.getElementById("vw" + i).textContent = "Listening";
+        document.getElementById("vt" + i).textContent = "waiting for speech";
+        document.getElementById("oc" + i).className = "outcome";
+      });
+      updateClock(0);
+      drawAll();
+    }
+
+    function setState(i, state, t) {
+      const l = lanes[i];
+      if (state === l.state) return;
+      l.state = state;
+      if (state === "suspicious" || state === "likely_fake") {
+        if (l.firstCaution === null) l.firstCaution = t;
+        if (state === "likely_fake" && l.firstLikely === null) l.firstLikely = t;
+      }
+      l.bands.push({ t, state });
+      document.getElementById("lane" + i).className = "lane s-" + state;
+      document.getElementById("vw" + i).textContent = word(state);
+      const parts = [];
+      if (l.firstCaution !== null) parts.push(`first caution ${Math.round(l.firstCaution)} s`);
+      if (l.firstLikely !== null) parts.push(`likely cloned ${Math.round(l.firstLikely)} s`);
+      document.getElementById("vt" + i).textContent = parts.length ? parts.join(" · ") : "no warning so far";
+    }
+
+    // At the end of the call each lane shows the strongest warning it gave, not where its
+    // light happened to settle: a receiver who was told "likely cloned" was told so.
+    function outcome(i, summary) {
+      const truth = chosen && chosen.label;
+      const l = lanes[i], peak = summary.peak_state;
+      document.getElementById("lane" + i).className = "lane s-" + peak;
+      document.getElementById("vw" + i).textContent = word(peak);
+      const times = [];
+      if (summary.first_caution_s !== null) times.push(`first caution ${Math.round(summary.first_caution_s)} s`);
+      if (summary.first_likely_s !== null) times.push(`likely cloned ${Math.round(summary.first_likely_s)} s`);
+      document.getElementById("vt" + i).textContent =
+        "strongest warning in the call" + (times.length ? " · " + times.join(" · ") : ": none");
+      let cls, text;
+      if (truth === "bonafide") {
+        [cls, text] = peak === "genuine" ? ["good", "✓ let the real caller through"]
+          : peak === "suspicious" ? ["warn", "cautioned a real caller"]
+          : ["bad", "✗ warned a real caller as cloned"];
+      } else if (l.role === "s1" && peak !== "genuine") {
+        // the English-only detector warns on every Hindi-English call, real or cloned
+        [cls, text] = ["warn", "warned, but it warns real Hindi-English callers too"];
+      } else {
+        [cls, text] = peak === "likely_fake" ? ["good", `✓ caught the clone at ${Math.round(summary.first_likely_s ?? 0)} s`]
+          : peak === "suspicious" ? ["warn", "only a caution, never a warning"]
+          : ["bad", "✗ missed the clone"];
+      }
+      const el = document.getElementById("oc" + i);
+      el.className = "outcome show " + cls;
+      el.textContent = text;
+    }
+
+    // ------------------------------------------------------------------ drawing
+    const STATE_FILL = { suspicious: "rgba(255,176,46,0.22)", likely_fake: "rgba(255,79,79,0.26)" };
+    function draw(i) {
+      const l = lanes[i], c = document.getElementById("cv" + i);
+      if (!c) return;
+      const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+      if (!w || !h) return;
+      c.width = w * dpr; c.height = h * dpr;
+      const ctx = c.getContext("2d");
+      ctx.scale(dpr, dpr);
+      const padL = 36, padR = 10, padT = 10, padB = 20;
+      const x = (t) => padL + (w - padL - padR) * Math.min(1, t / seconds);
+      const y = (v) => padT + (h - padT - padB) * (1 - v);
+      // state bands, from each change to the next
+      l.bands.forEach((b, k) => {
+        const end = k + 1 < l.bands.length ? l.bands[k + 1].t : (playing ? audio.currentTime : (l.points.at(-1)?.t ?? b.t));
+        if (!STATE_FILL[b.state]) return;
+        ctx.fillStyle = STATE_FILL[b.state];
+        ctx.fillRect(x(b.t), padT, Math.max(2, x(end) - x(b.t)), h - padT - padB);
+      });
+      // grid
+      ctx.font = "11px Segoe UI, sans-serif";
+      ctx.strokeStyle = "rgba(255,255,255,0.07)"; ctx.fillStyle = "rgba(200,214,236,0.55)";
+      for (const v of [0, 0.5, 1]) {
+        ctx.beginPath(); ctx.moveTo(padL, y(v)); ctx.lineTo(w - padR, y(v)); ctx.stroke();
+        ctx.fillText(v.toFixed(1), 6, y(v) + 4);
+      }
+      for (let t = 0; t <= seconds; t += 10) ctx.fillText(t + " s", x(t) - 8, h - 5);
+      // threshold
+      if (l.threshold !== null) {
+        ctx.setLineDash([6, 5]); ctx.strokeStyle = "rgba(230,238,250,0.75)"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(padL, y(l.threshold)); ctx.lineTo(w - padR, y(l.threshold)); ctx.stroke();
+        ctx.setLineDash([]); ctx.lineWidth = 1;
+        ctx.fillStyle = "rgba(230,238,250,0.8)";
+        const label = "threshold " + l.threshold.toFixed(3);
+        ctx.fillText(label, w - padR - ctx.measureText(label).width - 4, y(l.threshold) - 5);
+      }
+      // windows: raw score dots, smoothed line
+      const scored = l.points.filter((p) => p.score !== null);
+      ctx.fillStyle = l.colour + "88";
+      for (const p of scored) { ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 3, 0, 7); ctx.fill(); }
+      const smooth = l.points.filter((p) => p.smoothed !== null && p.smoothed !== undefined);
+      if (smooth.length) {
+        ctx.strokeStyle = l.colour; ctx.lineWidth = 3; ctx.lineJoin = "round";
+        ctx.beginPath();
+        smooth.forEach((p, k) => (k ? ctx.lineTo(x(p.t), y(p.smoothed)) : ctx.moveTo(x(p.t), y(p.smoothed))));
+        ctx.stroke(); ctx.lineWidth = 1;
+        const last = smooth.at(-1);
+        ctx.fillStyle = l.colour; ctx.beginPath(); ctx.arc(x(last.t), y(last.smoothed), 5, 0, 7); ctx.fill();
+      }
+      // playhead
+      if (playing || audio.currentTime > 0) {
+        ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x(audio.currentTime), padT - 4); ctx.lineTo(x(audio.currentTime), h - padB); ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+    }
+    function drawAll() { lanes.forEach((_, i) => draw(i)); }
+    function updateClock(t) {
+      const m = (s) => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+      document.getElementById("clock").textContent = m(t) + " / " + m(seconds);
+      document.getElementById("bar").style.width = Math.min(100, (100 * t) / seconds) + "%";
+    }
+    function tick() {
+      updateClock(audio.currentTime || 0);
+      drawAll();
+      if (playing) requestAnimationFrame(tick);
+    }
+    window.addEventListener("resize", drawAll);
+
+    // ------------------------------------------------------------------ playing
+    async function play() {
+      if (!chosen || !lanes.length) return;
+      resetLanes();
+      document.getElementById("play").disabled = true;
+      try {
+        const started = await json(`/api/replay_lanes/${chosen.id}`, { method: "POST" });
+        run = started.run;
+        seconds = started.seconds || seconds;
+        audio.currentTime = 0;
+        await audio.play().catch(() => {});
+        playing = true;
+        document.getElementById("stop").disabled = false;
+        requestAnimationFrame(tick);
+      } catch (e) {
+        Stage.toast("Could not start the call: " + e.message, 12000);
+        document.getElementById("play").disabled = false;
+      }
+    }
+    async function stop() {
+      playing = false;
+      audio.pause();
+      try { await json("/api/replay_lanes_stop", { method: "POST" }); } catch (e) { /* already ended */ }
+      finish();
+    }
+    function finish() {
+      playing = false;
+      document.getElementById("play").disabled = !chosen;
+      document.getElementById("stop").disabled = true;
+      drawAll();
+    }
+
+    Stage.socket((m) => {
+      if (!run || m.run !== run) return;
+      if (m.type === "lane_window") {
+        const i = m.lane_index;
+        if (!lanes[i]) return;
+        lanes[i].points.push({ t: m.t, score: m.score, smoothed: m.smoothed });
+        if (m.score !== null) setState(i, m.state, m.t);
+        draw(i);
+      } else if (m.type === "lanes_end") {
+        m.lanes.forEach((s, i) => { if (lanes[i]) outcome(i, s); });
+        if (audio.ended || audio.paused) finish();
+      } else if (m.type === "lanes_error") {
+        Stage.toast("Scoring failed: " + m.error, 12000);
+        finish();
+      }
+    });
+    audio.addEventListener("ended", () => { if (playing) finish(); });
+
+    document.getElementById("play").onclick = play;
+    document.getElementById("stop").onclick = stop;
+    document.addEventListener("keydown", (ev) => {
+      if (ev.code === "Space" && !ev.target.closest("input, select, textarea, button")) {
+        ev.preventDefault();
+        playing ? stop() : play();
+      }
+    });
+
+    loadLanes().then(loadCalls);
+  </script>
+</body>
+</html>

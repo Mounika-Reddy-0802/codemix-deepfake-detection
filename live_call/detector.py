@@ -8,7 +8,9 @@ one thread keeps windows from different calls in arrival order.
 Configuration comes from the environment, so the same code runs on the laptop and
 on a server:
 
-- ``DFD_CHECKPOINT``: detector checkpoint (S1, S2 LoRA or S3), required;
+- ``DFD_CHECKPOINT``: detector checkpoint (S1, S2 LoRA or S3; an SSL-AASIST checkpoint,
+  ``ssl`` in its file name, loads as ``kind="ssl_aasist"`` through
+  ``src.inference.predict.load_score_fn``), required;
 - ``DFD_THRESHOLD_FILE``: frozen operating point, default ``configs/threshold.yaml``;
 - ``DFD_DEVICE``: ``cpu`` (default) or ``cuda``.
 """
@@ -22,6 +24,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from live_call.verdict_engine import EngineConfig, load_config
+
+
+def is_ssl_aasist(checkpoint: str) -> bool:
+    """SSL-AASIST checkpoints carry ``ssl`` in their file name and need their own loader."""
+    return "ssl" in Path(checkpoint).name.lower()
 
 
 @dataclass
@@ -68,19 +75,26 @@ class DetectorService:
                         raise FileNotFoundError(
                             f"DFD_CHECKPOINT not found: {self.settings.checkpoint!r}"
                         )
-                    from src.inference.predict import load_detector, make_score_fn
+                    from src.inference import predict
 
-                    model, device = load_detector(
-                        self.settings.checkpoint, device=self.settings.device
+                    kind = "ssl_aasist" if is_ssl_aasist(self.settings.checkpoint) else "adapter"
+                    self._score_fn = predict.load_score_fn(
+                        self.settings.checkpoint, kind=kind, device=self.settings.device
                     )
-                    self._score_fn = make_score_fn(model, device)
         return self._score_fn
 
     def status(self) -> dict:
+        ladder = None
         try:
-            threshold = self.config().threshold
-            threshold_error = None
-        except FileNotFoundError as exc:
+            config = self.config()
+            threshold, threshold_error = config.threshold, None
+            ladder = {
+                "caution_after": config.suspicious_after,
+                "likely_after": config.fake_after,
+                "recover_after": config.recover_after,
+                "min_windows": config.min_windows,
+            }
+        except (FileNotFoundError, ValueError) as exc:
             threshold, threshold_error = None, str(exc)
         return {
             "checkpoint": Path(self.settings.checkpoint).name if self.settings.checkpoint else None,
@@ -89,5 +103,10 @@ class DetectorService:
             "model_loaded": self.loaded,
             "device": self.settings.device,
             "threshold": threshold,
+            # forward slashes, so the same file reads the same on every machine
+            "threshold_source": Path(self.settings.threshold_file).as_posix()
+            if self.settings.threshold_file
+            else None,
             "threshold_error": threshold_error,
+            "ladder": ladder,
         }

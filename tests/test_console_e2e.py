@@ -70,7 +70,7 @@ def _place_call(browser, clip: str, room: str, hold_ms: int):
     errors: list[str] = []
     page.on("pageerror", lambda err: errors.append(str(err)))
 
-    page.goto(f"{BASE}/demo?room={room}", wait_until="networkidle")
+    page.goto(f"{BASE}/console?room={room}", wait_until="networkidle")
     for _ in range(40):  # both handsets must register before dialling
         with urllib.request.urlopen(f"{BASE}/api/lines", timeout=5) as response:
             lines = json.load(response)

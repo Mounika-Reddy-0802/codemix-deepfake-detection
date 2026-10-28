@@ -2,196 +2,188 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Caller handset</title>
-  <link rel="stylesheet" href="/static/app.css" />
-  <link rel="stylesheet" href="/static/phone.css" />
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    .cxhead { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1.1rem; border-bottom: 1px solid var(--line); }
+    .cxhead b { display: block; }
+    .cxhead small { color: var(--dim); font-size: 0.76rem; }
+    .cxhead nav { margin-left: auto; display: flex; gap: 0.8rem; font-size: 0.85rem; }
+    body.embed .cxhead, body.embed .ident { display: none; }
+    body.embed { background: transparent; }
+    .cx { max-width: 520px; margin: 0 auto; padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+    body.embed .cx { padding: 0.4rem; max-width: none; }
+    /* inside scene 3 on a short screen: a compact handset, so the call key stays in view */
+    @media (max-height: 700px) {
+      body.embed .device { padding: 0.9rem 1rem; }
+      body.embed .who { padding: 0.3rem 0 0.2rem; }
+      body.embed .avatar { width: 60px; height: 60px; font-size: 1.35rem; margin-bottom: 0.4rem; }
+      body.embed .who .nm { font-size: 1.15rem; }
+      body.embed .who .tm { font-size: 1.3rem; }
+      body.embed .field { margin-top: 0.5rem; }
+      body.embed .keys { padding-top: 0.7rem; }
+      body.embed .key button { width: 58px; height: 58px; font-size: 1.4rem; }
+      body.embed .never { display: none; }
+    }
+    .device { border-radius: 26px; padding: 1.2rem; background: linear-gradient(180deg, #121c2c, #0b1220); border: 1px solid var(--line-2); box-shadow: var(--shadow); }
+    .tagline { display: flex; justify-content: space-between; color: var(--dim); font-size: 0.76rem; }
+    .who { text-align: center; padding: 0.8rem 0 0.4rem; }
+    .avatar { width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 0.7rem; display: grid; place-items: center; font-size: 1.9rem; font-weight: 650; background: linear-gradient(145deg, #283b57, #18263a); border: 1px solid var(--line-2); }
+    .avatar.ringing { animation: ring 1.1s ease-out infinite; }
+    @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(91, 149, 255, 0.55); } 70% { box-shadow: 0 0 0 22px rgba(91, 149, 255, 0); } 100% { box-shadow: none; } }
+    .who .nm { font-size: 1.35rem; font-weight: 700; }
+    .who .no { color: var(--dim); font-variant-numeric: tabular-nums; }
+    .who .st { margin-top: 0.4rem; color: #b6c8e4; min-height: 1.3em; }
+    .who .tm { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 1px; min-height: 1.2em; }
+    .field { margin-top: 0.75rem; }
+    .field label { display: block; color: var(--dim); font-size: 0.74rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 650; margin-bottom: 0.3rem; }
+    .field select, .field input[type="file"] { width: 100%; font: inherit; font-size: 0.92rem; padding: 0.55rem 0.6rem; border-radius: 10px; border: 1px solid var(--line-2); background: #0e1626; color: var(--ink); }
+    .meter { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden; margin-top: 1rem; }
+    .meter > div { height: 100%; width: 0; background: #57b0ff; transition: width 0.08s linear; }
+    .hint { color: var(--dim); font-size: 0.82rem; text-align: center; margin-top: 0.55rem; }
+    .keys { display: flex; justify-content: center; gap: 2.4rem; padding-top: 1.1rem; }
+    .key { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; color: var(--dim); font-size: 0.8rem; }
+    .key button { width: 70px; height: 70px; border-radius: 50%; border: 0; color: #fff; font-size: 1.7rem; cursor: pointer; display: grid; place-items: center; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4); }
+    .key button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .key .answer { background: linear-gradient(145deg, #1fbf72, #14955a); }
+    .key .end { background: linear-gradient(145deg, #ef5050, #c43535); }
+    .never { text-align: center; color: var(--faint); font-size: 0.8rem; }
+    details.ident { color: var(--dim); font-size: 0.85rem; }
+    details.ident summary { cursor: pointer; }
+    details.ident input { font: inherit; width: 100%; margin-top: 0.3rem; padding: 0.45rem 0.6rem; border-radius: 9px; border: 1px solid var(--line-2); background: #0e1626; color: var(--ink); }
+    details.ident label { display: block; margin-top: 0.6rem; }
+  </style>
 </head>
-<body>
-  <header class="top">
-    <div class="brand">Caller handset<small>device A &mdash; the person placing the call</small></div>
-    <nav>
-      <a href="/">Overview</a>
-      <a href="/demo">Live console</a>
-      <a href="/phone">Phone demo</a>
-      <a href="/phone/caller" class="active">Caller</a>
-      <a href="/phone/receiver" target="_blank">Receiver</a>
-      <a href="/dashboard" target="_blank">Dashboard</a>
-    </nav>
+<body class="stage">
+  <header class="cxhead">
+    <div><b>Caller handset</b><small>device A · the person placing the call</small></div>
+    <nav><a href="/live">Scene 3</a><a href="/phone/receiver" target="_blank">Receiver</a></nav>
   </header>
 
-  <main>
-    <div class="stage">
-      <section class="device caller">
-        <div class="notch"></div>
-        <div class="statusbar"><span id="net">connecting…</span><span>line <b id="roomTag">demo</b></span></div>
-        <div class="screen">
-          <span class="role-tag">Caller</span>
-
-          <div class="who">
-            <div class="avatar" id="avatar">R</div>
-            <div class="name" id="peerName">Receiver</div>
-            <div class="number" id="peerNumber">…</div>
-            <div class="callstate" id="callstate">Ready to call</div>
-            <div class="timer" id="timer"></div>
-          </div>
-
-          <div id="setup">
-            <div class="field">
-              <label for="src">What this caller sends</label>
-              <select id="src">
-                <option value="mic">My microphone (a real person speaking)</option>
-                <option value="clip">A prepared clip (real or cloned voice)</option>
-                <option value="file">An audio file from this device</option>
-              </select>
-            </div>
-            <div class="field" id="clipField" hidden>
-              <label for="clip">Clip</label>
-              <select id="clip"></select>
-            </div>
-            <div class="field" id="fileField" hidden>
-              <label for="file">File</label>
-              <input type="file" id="file" accept="audio/*" />
-            </div>
-          </div>
-
-          <div class="meter"><div id="meterBar"></div></div>
-          <div class="hint" id="hint">Your voice is carried to the receiver.</div>
-
-          <div class="keys">
-            <div class="keywrap">
-              <button class="key answer" id="callBtn" title="Call">&#9742;</button>
-              <span class="label">Call</span>
-            </div>
-            <div class="keywrap">
-              <button class="key end" id="endBtn" title="End call" disabled>&#10006;</button>
-              <span class="label">End</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div class="link">
-        <div class="state" id="linkState">Idle</div>
-        <div class="wire"></div>
-        <div class="hops">
-          <span class="hop" id="hop1">caller handset</span>
-          <span class="hop" id="hop2">detector</span>
-          <span class="hop" id="hop3">receiver handset</span>
-        </div>
-        <p class="small" style="margin-top:1rem">The caller is never told the verdict, exactly as in a real
-          fraud warning. Watch the receiver's screen.</p>
+  <main class="cx">
+    <section class="device">
+      <div class="tagline"><span id="net">connecting…</span><span>line <b id="roomTag">demo</b></span></div>
+      <div class="who">
+        <div class="avatar" id="avatar">?</div>
+        <div class="nm" id="peerName">Receiver</div>
+        <div class="no" id="peerNumber">…</div>
+        <div class="st" id="callstate">Ready to call</div>
+        <div class="tm" id="timer"></div>
       </div>
-    </div>
 
-    <div class="card" style="max-width:760px;margin:1.5rem auto 0">
-      <h2>Identity on this handset</h2>
-      <div class="grid two">
-        <label>Your name<br /><input type="text" id="myName" /></label>
-        <label>Your number<br /><input type="text" id="myNumber" /></label>
+      <div id="setup">
+        <div class="field">
+          <label for="src">What this caller sends</label>
+          <select id="src">
+            <option value="clip">A prepared call (real or cloned voice)</option>
+            <option value="mic">My microphone (a real person speaking)</option>
+            <option value="file">An audio file from this device</option>
+          </select>
+        </div>
+        <div class="field" id="clipField">
+          <label for="clip">Prepared call</label>
+          <select id="clip"></select>
+        </div>
+        <div class="field" id="fileField" hidden>
+          <label for="file">Audio file</label>
+          <input type="file" id="file" accept="audio/*" />
+        </div>
       </div>
-      <p class="small muted">Set these before calling; they appear on the receiver's screen. Change the line with
-        <code>?room=demo2</code> if two pairs demo at once.</p>
-    </div>
+
+      <div class="meter"><div id="meterBar"></div></div>
+      <div class="hint" id="hint">The voice is carried to the receiver.</div>
+
+      <div class="keys">
+        <div class="key"><button class="answer" id="callBtn" title="Call">&#9742;</button><span>Call</span></div>
+        <div class="key"><button class="end" id="endBtn" title="End call" disabled>&#10006;</button><span>End</span></div>
+      </div>
+    </section>
+    <p class="never">The caller is never told the verdict, exactly as with a real fraud warning.</p>
+
+    <details class="ident">
+      <summary>This handset (name and number shown to the receiver)</summary>
+      <label>Name<input type="text" id="myName" /></label>
+      <label>Number<input type="text" id="myNumber" /></label>
+      <p class="tiny">Set these before calling. Use <code>?room=demo2</code> if two pairs demo at once.</p>
+    </details>
   </main>
 
   <script src="/static/common.js"></script>
   <script src="/static/phone.js"></script>
   <script>
+    const $ = (id) => document.getElementById(id);
+    if (qs("embed", "") === "1") document.body.classList.add("embed");
     const room = qs("room", "demo");
-    document.getElementById("roomTag").textContent = room;
-    const nameEl = document.getElementById("myName");
-    const numberEl = document.getElementById("myNumber");
-    nameEl.value = qs("name", "Ravi Kumar");
-    numberEl.value = qs("number", "+91 98200 11234");
-
-    const ui = {
-      state: document.getElementById("callstate"),
-      timer: document.getElementById("timer"),
-      peerName: document.getElementById("peerName"),
-      peerNumber: document.getElementById("peerNumber"),
-      avatar: document.getElementById("avatar"),
-      call: document.getElementById("callBtn"),
-      end: document.getElementById("endBtn"),
-      net: document.getElementById("net"),
-      hint: document.getElementById("hint"),
-      setup: document.getElementById("setup"),
-      linkState: document.getElementById("linkState"),
-    };
+    $("roomTag").textContent = room;
+    $("myName").value = qs("name", "Ravi Kumar");
+    $("myNumber").value = qs("number", "+91 98200 11234");
 
     const media = new Media();
     const remote = new Audio();
     remote.autoplay = true;
     let line = null, timerId = null;
 
-    function setHops(on) {
-      ["hop1", "hop2", "hop3"].forEach((id, i) =>
-        document.getElementById(id).classList.toggle("on", i < on));
-    }
-
-    function showState(text) { ui.state.textContent = text; }
+    function showState(text) { $("callstate").textContent = text; }
 
     function reset() {
       clearInterval(timerId);
       stopRing();
       media.close();
-      ui.timer.textContent = "";
-      ui.avatar.classList.remove("ringing");
-      ui.call.disabled = false;
-      ui.end.disabled = true;
-      ui.setup.style.display = "";
-      setHops(0);
-      ui.linkState.textContent = "Idle";
+      $("timer").textContent = "";
+      $("avatar").classList.remove("ringing");
+      $("callBtn").disabled = false;
+      $("endBtn").disabled = true;
+      $("setup").style.display = "";
+      $("hint").textContent = "The voice is carried to the receiver.";
     }
 
     async function loadClips() {
       try {
         const clips = await getJSON("/api/demo-clips");
-        const select = document.getElementById("clip");
-        select.replaceChildren(...clips.map((c) =>
+        const wanted = qs("clip", "");
+        $("clip").replaceChildren(...clips.map((c) =>
           el("option", { value: c.id, text: c.title + (c.label === "spoof" ? " (cloned)" : " (real)") })));
-      } catch (e) { /* no prepared clips on this machine */ }
+        if (wanted && clips.some((c) => c.id === wanted)) $("clip").value = wanted;
+      } catch (e) { /* no prepared calls on this machine */ }
     }
     loadClips();
 
-    document.getElementById("src").addEventListener("change", (ev) => {
-      document.getElementById("clipField").hidden = ev.target.value !== "clip";
-      document.getElementById("fileField").hidden = ev.target.value !== "file";
+    $("src").addEventListener("change", (ev) => {
+      $("clipField").hidden = ev.target.value !== "clip";
+      $("fileField").hidden = ev.target.value !== "file";
     });
 
     async function openLine() {
-      line = new Line({ room, role: "caller", name: nameEl.value, number: numberEl.value });
+      line = new Line({ room, role: "caller", name: $("myName").value, number: $("myNumber").value });
       line
         .on("joined", onLine)
         .on("line", onLine)
-        .on("ringing", (m) => { onLine(m); showState("Ringing…"); startRing("ringback");
-                                ui.avatar.classList.add("ringing"); ui.linkState.textContent = "Ringing"; setHops(1); })
+        .on("ringing", (m) => { onLine(m); showState("Ringing…"); startRing("ringback"); $("avatar").classList.add("ringing"); })
         .on("connected", onConnected)
         .on("ended", onEnded)
         .on("unavailable", (m) => { showState(m.message); reset(); })
-        .on("renegotiate", () => media.negotiate({ room, role: "caller", name: nameEl.value }))
-        .on("closed", () => { ui.net.textContent = "disconnected"; });
+        .on("renegotiate", () => media.negotiate({ room, role: "caller", name: $("myName").value }))
+        .on("closed", () => { $("net").textContent = "disconnected: reload the page"; });
       await line.connect();
-      ui.net.textContent = "on the network";
+      $("net").textContent = "on the line";
     }
 
     function onLine(msg) {
       const peer = (msg.parties || {}).receiver;
-      ui.peerName.textContent = peer ? peer.name : "No receiver handset";
-      ui.peerNumber.textContent = peer ? peer.number : "open /phone/receiver on the other device";
-      ui.avatar.textContent = initials(peer ? peer.name : "?");
-      ui.call.disabled = !peer || ["ringing", "connected"].includes(msg.state);
+      $("peerName").textContent = peer ? peer.name : "No receiver yet";
+      $("peerNumber").textContent = peer ? peer.number : "open /phone/receiver on the other phone";
+      $("avatar").textContent = initials(peer ? peer.name : "?");
+      $("callBtn").disabled = !peer || ["ringing", "connected"].includes(msg.state);
     }
 
-    async function onConnected(msg) {
+    function onConnected(msg) {
       stopRing();
-      ui.avatar.classList.remove("ringing");
+      $("avatar").classList.remove("ringing");
       showState("Connected");
-      timerId = startTimer(ui.timer, msg.connected);
-      ui.linkState.textContent = "In call";
-      setHops(3);
+      timerId = startTimer($("timer"), msg.connected);
       media.playClip();
-      ui.hint.textContent = "Connected. The detector is scoring this side of the call.";
+      $("hint").textContent = "Connected. Only the receiver sees what the detector says.";
     }
 
     function onEnded(msg) {
@@ -199,34 +191,34 @@
       reset();
     }
 
-    ui.call.onclick = async () => {
+    $("callBtn").onclick = async () => {
       unlockAudio();
-      ui.call.disabled = true;
-      const mode = document.getElementById("src").value;
-      const clipId = document.getElementById("clip").value;
+      $("callBtn").disabled = true;
+      const mode = $("src").value;
+      const clipId = $("clip").value;
       try {
         await media.open(mode, {
           clipUrl: clipId ? `/api/demo-clips/${clipId}/audio` : null,
-          file: document.getElementById("file").files[0],
-          meterBar: document.getElementById("meterBar"),
+          file: $("file").files[0],
+          meterBar: $("meterBar"),
         });
       } catch (err) {
         showState("Cannot start audio: " + err.message);
-        ui.call.disabled = false;
+        $("callBtn").disabled = false;
         return;
       }
-      await media.connect({ room, role: "caller", name: nameEl.value, monitor: true },
+      await media.connect({ room, role: "caller", name: $("myName").value, monitor: true },
                           (stream) => (remote.srcObject = stream));
       line.send("pc", { pc_id: media.pcId });
       line.send("dial");
-      ui.end.disabled = false;
-      ui.setup.style.display = "none";
+      $("endBtn").disabled = false;
+      $("setup").style.display = "none";
       showState("Calling…");
     };
 
-    ui.end.onclick = () => { line.send("hangup"); reset(); showState("Call ended"); };
+    $("endBtn").onclick = () => { line.send("hangup"); reset(); showState("Call ended"); };
 
-    openLine().catch(() => (ui.net.textContent = "server unreachable"));
+    openLine().catch(() => ($("net").textContent = "server unreachable"));
     window.addEventListener("beforeunload", () => media.close());
   </script>
 </body>
