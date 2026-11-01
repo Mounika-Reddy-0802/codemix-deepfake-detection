@@ -8,7 +8,8 @@ each ``configs/train_*.yaml``, opens the manifests it names, and applies the rul
 to the rows it would really train on:
 
 1. no held-out tool (Tortoise), no evaluation-only corpus (IndicSynth,
-   IndicTTS-Deepfake, IndicVoices, HiACC), no child audio;
+   IndicTTS-Deepfake, IndicVoices, HiACC, the real calls and the voice check's field
+   recordings), no child audio;
 2. no eval-pool speaker in training -- measured on the frozen pools, not on the
    config's own split column, which a mistake could set either way. The extension
    pools' evaluation-only speakers (``eval_ext``, ``control`` in
@@ -34,7 +35,8 @@ from src.data import build_manifests as bm
 POOLS = "data/manifests/speaker_pools.csv"
 POOLS_EXT = "data/manifests/speaker_pools_ext.csv"
 RVC_TEST = "data/manifests/rvc_holdout_test.csv"
-EVAL_ONLY = bm.EVAL_ONLY_SOURCES | {"hiacc"}
+# the field recordings are the team's own voices, consented for evaluation only
+EVAL_ONLY = bm.EVAL_ONLY_SOURCES | {"hiacc", "field_validation"}
 S3_NATIVE = "s3_native"
 
 
