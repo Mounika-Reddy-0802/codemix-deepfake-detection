@@ -40,6 +40,8 @@ PREFIX = "iv_"
 EVAL_ONLY = ("iv_test",)
 #: allowed in a dev manifest, never in a training manifest
 DEV_ONLY = ("iv_dev",)
+#: allowed in a training manifest, never in a dev manifest (decision D1, P-038)
+TRAIN_ONLY = ("iv_train",)
 N_GROUPS = 40
 MIN_CLIPS = 20
 MIN_SECONDS, MAX_SECONDS = 2.0, 15.0
@@ -147,6 +149,11 @@ def evaluation_only_speakers(path: str = POOLS_PATH) -> set[str]:
 def dev_only_speakers(path: str = POOLS_PATH) -> set[str]:
     """Speakers of the development pool (``iv_dev``); empty if the file is absent."""
     return _speakers_of(DEV_ONLY, path)
+
+
+def training_speakers(path: str = POOLS_PATH) -> set[str]:
+    """Speakers of the training pool (``iv_train``); empty if the file is absent."""
+    return _speakers_of(TRAIN_ONLY, path)
 
 
 def load_clips(cache: str) -> pd.DataFrame:
