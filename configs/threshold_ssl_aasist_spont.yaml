@@ -1,0 +1,12 @@
+# Decision D1 part (a), P-038/P-039: the same rule on the old dev windows plus the 20 iv_dev
+# speakers (dev_spont_windows.csv); the point on read-speech dev alone is configs/threshold_ssl_aasist.yaml.
+# Live-demo operating point (W8-T5, P-029). Chosen by src.inference.calibrate on
+# streaming-path smoothed window scores of the dev manifest only, for a low false-alarm
+# rate on genuine 60 s calls; validated on held-out sets in experiments/results/threshold_calibration_ssl_spont.json.
+threshold: 0.08170506833586838
+checkpoint: ssl_aasist_final_s1234
+margin: 0.5
+min_windows: 2
+suspicious_after: 2
+fake_after: 4
+recover_after: 3
