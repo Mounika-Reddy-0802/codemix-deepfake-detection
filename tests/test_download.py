@@ -22,7 +22,7 @@ def test_all_sources_are_eval_only() -> None:
 def test_repo_ids_match_dataset_matrix() -> None:
     assert download.INDICSYNTH.repo_id == "vdivyasharma/IndicSynth"
     assert download.INDICTTS_DEEPFAKE.repo_id == "SherryT997/IndicTTS-Deepfake-Challenge-Data"
-    assert download.INDICVOICES.repo_id == "ai4bharat/indicvoices"
+    assert download.INDICVOICES.repo_id == "ai4bharat/IndicVoices"
 
 
 def test_indicsynth_licence_is_noncommercial() -> None:

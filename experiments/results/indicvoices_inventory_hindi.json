@@ -1,0 +1,111 @@
+{
+  "repo_id": "ai4bharat/IndicVoices",
+  "licence": "CC BY 4.0",
+  "columns_used": {
+    "speaker": "speaker_id",
+    "duration": "duration",
+    "style": "scenario"
+  },
+  "speakers": 2356,
+  "clips": 450690,
+  "hours": 828.21,
+  "hours_by_style": {
+    "conversation": 181.09,
+    "extempore": 574.52,
+    "read": 72.6
+  },
+  "speakers_by_style": {
+    "conversation": 2086,
+    "extempore": 1781,
+    "read": 1795
+  },
+  "speakers_with_extempore_minutes": {
+    ">=2": 1776,
+    ">=5": 1757,
+    ">=10": 1701,
+    ">=20": 781
+  },
+  "category_counts": {
+    "lang": {
+      "hi": 2356
+    },
+    "gender": {
+      "Female": 1186,
+      "Male": 1167,
+      "Other": 3
+    },
+    "age_group": {
+      "18-30": 808,
+      "30-45": 677,
+      "45-60": 473,
+      "60+": 398
+    },
+    "job_type": {
+      "Blue Collar": 689,
+      "White Collar": 629,
+      "Unemployed": 530,
+      "Student": 508
+    },
+    "qualification": {
+      "Undergrad and Grad.": 680,
+      "Upto 12th": 575,
+      "Post Grad + PhD": 553,
+      "No Schooling": 548
+    },
+    "area": {
+      "Rural": 1426,
+      "Urban": 930
+    },
+    "district": {
+      "Jodhpur": 101,
+      "Jaipur": 97,
+      "Bhopal": 96,
+      "Samastipur": 86,
+      "Begusarai": 84,
+      "Azamgarh": 81,
+      "Ghazipur": 80,
+      "Chandauli": 79,
+      "Jaunpur": 79,
+      "Prayagraj": 76,
+      "Sonbhadra": 75,
+      "Hoshangabad": 75,
+      "Jabalpur": 73,
+      "Gwalior": 73,
+      "Betul": 73,
+      "Harda": 70,
+      "Sitapur": 67,
+      "Mau": 66,
+      "Vaishali": 62,
+      "Ujjain": 62,
+      "Muzaffarpur": 61,
+      "Madhepura": 59,
+      "Ayodhya": 54,
+      "Varanasi": 53,
+      "Mirzapur": 52,
+      "Hardoi": 52,
+      "Karauli": 52,
+      "Lucknow": 50,
+      "Bhadohi": 48,
+      "Pratapgarh": 45,
+      "Narsinghpur": 44,
+      "Seoni": 44,
+      "Balaghat": 41,
+      "Chhindwara": 41,
+      "Darbhanga": 30,
+      "Bharatpur": 25,
+      "Nagaur": 16,
+      "Katni": 11,
+      "Sehore": 10,
+      "Indore": 5
+    },
+    "state": {
+      "Uttar Pradesh": 957,
+      "Madhya Pradesh": 720,
+      "Bihar": 384,
+      "Rajasthan": 293,
+      "Delhi": 2
+    }
+  },
+  "subset": "hindi",
+  "shards_read": 83
+}
