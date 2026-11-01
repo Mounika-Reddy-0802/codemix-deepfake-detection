@@ -1,0 +1,27 @@
+{
+  "checkpoint": "/kaggle/temp/codemix-deepfake-detection/checkpoints/w13/spont_s7/best.pt",
+  "manifest": "data/manifests/score_iv_test_amr.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.00627416910535117,
+    "eer_ci_low": 0.0026482806020957234,
+    "eer_ci_high": 0.010220657501715899,
+    "auc": 0.9996668582775919,
+    "auc_ci_low": 0.9987714225128228,
+    "auc_ci_high": 0.999972428474051,
+    "f1": 0.9951124144672531,
+    "threshold": 0.13315251469612122,
+    "clips": 1622,
+    "bonafide": 1024,
+    "spoof": 598,
+    "score_std": 0.481629
+  },
+  "per_attack": [
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 598,
+      "eer": 0.006274
+    }
+  ]
+}
