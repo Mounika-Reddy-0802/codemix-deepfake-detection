@@ -1,0 +1,64 @@
+{
+  "reference": "ssl_s1234_spont",
+  "measures": {
+    "ssl_s1234_spont": {
+      "hiacc": 99.3,
+      "read_new_speakers": 99.91666666666667,
+      "read_control": 99.92248062015504,
+      "xtts": 99.37853107344633,
+      "tortoise_new": 81.08108108108108,
+      "tortoise_cm04": 76.85589519650655,
+      "indicf5": 12.547528517110266,
+      "chatterbox": 4.380952380952381,
+      "rvc": 45.42586750788644,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_spontrain_s1234": {
+      "hiacc": 99.5,
+      "read_new_speakers": 99.83333333333333,
+      "read_control": 99.84496124031008,
+      "xtts": 100.0,
+      "tortoise_new": 93.69369369369369,
+      "tortoise_cm04": 84.49781659388647,
+      "indicf5": 35.551330798479086,
+      "chatterbox": 51.61904761904762,
+      "rvc": 85.8044164037855,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_spontrain_s2025": {
+      "hiacc": 99.1,
+      "read_new_speakers": 97.625,
+      "read_control": 98.68217054263566,
+      "xtts": 100.0,
+      "tortoise_new": 96.3963963963964,
+      "tortoise_cm04": 90.39301310043668,
+      "indicf5": 45.43726235741445,
+      "chatterbox": 51.61904761904762,
+      "rvc": 88.95899053627761,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    }
+  },
+  "unseen_mean": {
+    "ssl_s1234_spont": 44.058264936707346,
+    "ssl_spontrain_s1234": 70.23326102177847,
+    "ssl_spontrain_s2025": 74.56094200191455
+  },
+  "conditions": {
+    "ssl_spontrain_s1234": {
+      "1_spontaneous": true,
+      "2_read": true,
+      "3_unseen": true,
+      "4_xtts": true
+    },
+    "ssl_spontrain_s2025": {
+      "1_spontaneous": true,
+      "2_read": false,
+      "3_unseen": true,
+      "4_xtts": true
+    }
+  },
+  "decision": "the current detector stays"
+}
