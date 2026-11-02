@@ -64,6 +64,38 @@ family it was trained on (XTTS-v2). **Weak:** every other generator. The move fr
 unseen tool; no single threshold serves both, because the newest generators' clones score
 as high as genuine unscripted speech (`docs/results/operating_points_spont_v1.md`).
 
+## The retrained detector, measured here (decision D1 part b)
+
+SSL-AASIST retrained with 150 spontaneous IndicVoices speakers was measured in this voice check
+under a rule written before any of its voice-check numbers existed
+(`docs/results/spontaneous_training_v1.md`, "Voice check"; commit `98d145c`): both seeds, each
+at its own operating point chosen on dev only, had to keep genuine speech (spontaneous at least
+97.3%, read at least 99.0%, at least 11 of 12 live calls and 5 of 6 replays), raise the mean over
+the five unseen-tool rows by 10 points with none falling more than 10, and keep XTTS-v2 at 98%.
+`python -m src.reporting.voice_check_adoption` applies it
+(`experiments/results/voice_check_adoption_v1.json`).
+
+| Audio, telephone line | Current: seed 1234 at 0.082 | Retrained seed 1234 at 0.035 | Retrained seed 2025 at 0.515 |
+|---|---|---|---|
+| Genuine spontaneous (HiACC) | 99.3 % | 99.5 % | 99.1 % |
+| Genuine read: new speakers / language control | 99.9 % / 99.9 % | 99.8 % / 99.8 % | **97.6 % / 98.7 %** |
+| Genuine live calls / replays | 12 of 12 / 6 of 6 | 12 of 12 / 6 of 6 | 12 of 12 / 6 of 6 |
+| XTTS-v2 clones | 99.4 % | 100.0 % | 100.0 % |
+| Tortoise (new speakers / CM04) | 81.1 % / 76.9 % | 93.7 % / 84.5 % | 96.4 % / 90.4 % |
+| IndicF5 | 12.5 % | 35.6 % | 45.4 % |
+| Chatterbox | 4.4 % | 51.6 % | 51.6 % |
+| RVC | 45.4 % | 85.8 % | 89.0 % |
+| Mean of the five unseen-tool rows | 44.1 % | 70.2 % | 74.6 % |
+
+**Decision: the current detector stays.** Seed 1234 meets every condition; seed 2025 calls
+2.4 % of read genuine speech cloned, above the 1 % the rule allows, so the rule is not met and
+neither seed is adopted. Both trainings catch far more clones of every unseen tool than the
+current detector (IndicF5 over AMR-NB too: 38.6-39.0 % against 2.3 %), at no cost on
+spontaneous speech, so this is where the next version of the voice check comes from. Adopting it
+needs a recipe whose every training meets the rule, or a rule for the average of the two
+checkpoints written before that average is measured; picking the seed that passed would be
+choosing on test results.
+
 ## Not measured yet, and how to measure it
 
 | Gap | Command |
@@ -86,10 +118,9 @@ ticked.
    would then no longer be unseen tools in the paper's sense, so the paper's numbers stay as
    they are and this becomes a separate demo model.
 3. **Add spontaneous genuine speech to training** (decision D1 part b, done): retrained with
-   150 spontaneous speakers, SSL-AASIST separates unscripted genuine speech from IndicF5 and
-   Chatterbox clones far better (8-20% EER instead of 39-57%), at a cost on the read-speech
-   benchmarks. Whether it replaces this detector is decided by a rule written before it was
-   measured here (`docs/results/spontaneous_training_v1.md`).
+   150 spontaneous speakers, SSL-AASIST catches 36-52 % of IndicF5 and Chatterbox clones here
+   instead of 4-13 %, with spontaneous speech still judged real 99 % of the time; one of its two
+   trainings lets read genuine speech fall below the bar set for adoption (section above).
 4. **Say "uncertain" between the two development-chosen points** (0.082 and 0.580) instead of
    forcing real or cloned; the files that land there are where unscripted speech and the
    newest generators overlap.

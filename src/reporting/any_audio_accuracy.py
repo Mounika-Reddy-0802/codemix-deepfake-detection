@@ -39,9 +39,33 @@ THRESHOLDS = {  # frozen operating points (configs/threshold*.yaml), chosen on d
     # part a, configs/threshold_ssl_aasist_spont.yaml): the voice check's operating point
     "ssl_s1234_spont": 0.08170506833586838,
     "ssl_s2025": 0.3340942859649658,
+    # SSL-AASIST retrained with spontaneous speech (decision D1 part b), each seed at the point
+    # the unchanged rule chose on the same dev set (configs/threshold_ssl_aasist_spontrain_s*.yaml)
+    "ssl_spontrain_s1234": 0.03506464880984274,
+    "ssl_spontrain_s2025": 0.5148912489253562,
 }
 #: columns that reuse another column's stored scores at their own threshold
 SCORES_OF = {"ssl_s1234_spont": "ssl_s1234"}
+#: the 1,000 HiACC clips the live-path columns were measured on
+HIACC_CALIBRATION = Path("D:/kaggle_realcall/ssl_manifests/hiacc.csv")
+#: this checkout: the spontaneous recipe's columns read only committed files
+REPO = Path(__file__).resolve().parents[2]
+#: the spontaneous recipe's SSL-AASIST (decision D1 part b): its per-clip score files
+SPONTRAIN = {
+    f"ssl_spontrain_s{seed}": REPO / f"experiments/results/spontaneous_training_v1/ssl_s{seed}"
+    for seed in (1234, 2025)
+}
+#: each column's 30 real calls, as scored by ``src.inference.real_calls score``
+CALLS = {
+    "deployed": RC / "calls_deployed_recorded.csv",
+    "final": RC / "calls_final_recorded.csv",
+    "ssl_s1234": RC / "calls_ssl_aasist_recorded.csv",
+    "ssl_s1234_spont": RC / "calls_ssl_aasist_recorded.csv",
+    **{
+        m: REPO / f"experiments/results/real_calls_v1/{m}/calls_ssl_aasist_recorded.csv"
+        for m in SPONTRAIN
+    },
+}
 
 
 def sigmoid(x):
@@ -66,6 +90,24 @@ def window0(path: Path) -> pd.DataFrame:
     d = d[d["window"] == 0].copy()
     d["p"] = d["score"]
     return d
+
+
+def calibration_hiacc(d: pd.DataFrame) -> pd.DataFrame:
+    """The rows of the 1,000 HiACC clips the reference columns were measured on."""
+    names = {Path(p).name for p in pd.read_csv(HIACC_CALIBRATION)["filepath"]}
+    return d[d["filepath"].map(lambda p: Path(p).name in names)].copy()
+
+
+def spontrain_scores(folder: Path, model: str) -> dict[str, pd.DataFrame]:
+    """A spontaneous-recipe checkpoint's head-crop scores, HiACC on the reference's clips."""
+    run = "spont_s" + model.rsplit("_s", 1)[1]
+    out = {}
+    for path in sorted(folder.glob(f"{run}__*_scores.csv")):
+        d = pd.read_csv(path)
+        d["p"] = sigmoid(d["score"])  # SSL-AASIST scores are log-odds
+        out[path.name[len(run) + 2 : -len("_scores.csv")]] = d
+    out["hiacc"] = calibration_hiacc(out["hiacc"])
+    return out
 
 
 @functools.cache
@@ -100,6 +142,7 @@ def sources() -> dict:
                 True,
             )
         },
+        **{m: {"zip": spontrain_scores(z, m)} for m, z in SPONTRAIN.items()},
     }
 
 
@@ -135,45 +178,59 @@ CONDITIONS = [
 ]
 
 
-def rate(model: str, key: str, rows, expected: str) -> str:
+def accuracy(model: str, key: str, rows, expected: str) -> tuple[float, int] | None:
+    """Percent of items judged correctly and their number; None if the set is missing."""
     d = get(model, key)
     if d is None:
-        return "-"
+        return None
     lab, tool = rows
     d = d[d["label"].str.lower() == lab]
     if tool:
         d = d[d["tool"] == tool]
     if d.empty:
-        return "-"
+        return None
     thr = THRESHOLDS[model]
     correct = (d["p"] >= thr) if expected == "bonafide" else (d["p"] < thr)
-    return f"{100 * correct.mean():.1f} (n={len(d)})"
+    return 100 * float(correct.mean()), len(d)
+
+
+def rate(model: str, key: str, rows, expected: str) -> str:
+    r = accuracy(model, key, rows, expected)
+    return "-" if r is None else f"{r[0]:.1f} (n={r[1]})"
+
+
+CALL_KINDS = (
+    ("genuine_live", "none", "Genuine live call (12 calls)"),
+    ("genuine_replay", "none", "Genuine recording replayed into the phone (6)"),
+    ("clone_replay", "xtts_v2", "XTTS-v2 clone replayed into the phone (6)"),
+    ("clone_replay", "chatterbox", "Chatterbox clone replayed into the phone (6)"),
+)
+
+
+def call_counts(model: str) -> dict[tuple[str, str], tuple[int, int]] | None:
+    """(kind, tool) -> (judged correctly, calls) for one column; None without call scores."""
+    path = CALLS.get(model)
+    if path is None or not path.exists():
+        return None
+    c = pd.read_csv(path)
+    thr = THRESHOLDS[model]
+    out = {}
+    for kind, tool, _ in CALL_KINDS:
+        d = c[(c["kind"] == kind) & (c["tool"] == tool)]
+        ok = (
+            (d["mean_score"] >= thr)
+            if d["label"].iloc[0] == "bonafide"
+            else (d["mean_score"] < thr)
+        )
+        out[(kind, tool)] = (int(ok.sum()), len(d))
+    return out
 
 
 def real_calls() -> list[tuple[str, dict]]:
+    counts = {m: call_counts(m) for m in THRESHOLDS}
     rows = []
-    for kind, tool, text in (
-        ("genuine_live", "none", "Genuine live call (12 calls)"),
-        ("genuine_replay", "none", "Genuine recording replayed into the phone (6)"),
-        ("clone_replay", "xtts_v2", "XTTS-v2 clone replayed into the phone (6)"),
-        ("clone_replay", "chatterbox", "Chatterbox clone replayed into the phone (6)"),
-    ):
-        res = {}
-        for model, fname in (
-            ("deployed", "deployed"),
-            ("final", "final"),
-            ("ssl_s1234", "ssl_aasist"),
-            ("ssl_s1234_spont", "ssl_aasist"),
-        ):
-            c = pd.read_csv(RC / f"calls_{fname}_recorded.csv")
-            c = c[(c["kind"] == kind) & (c["tool"] == tool)]
-            thr = THRESHOLDS[model]
-            ok = (
-                (c["mean_score"] >= thr)
-                if c["label"].iloc[0] == "bonafide"
-                else (c["mean_score"] < thr)
-            )
-            res[model] = f"{int(ok.sum())}/{len(c)}"
+    for kind, tool, text in CALL_KINDS:
+        res = {m: "{}/{}".format(*c[(kind, tool)]) for m, c in counts.items() if c}
         rows.append((text, res))
     return rows
 
@@ -209,7 +266,8 @@ def table() -> str:
         "Thresholds: "
         + ", ".join(f"{k} {v:.3f}" for k, v in THRESHOLDS.items())
         + " (each chosen on dev only; ssl_s1234_spont: the dev set includes the 20 iv_dev"
-        " spontaneous speakers, decision D1 part a)."
+        " spontaneous speakers, decision D1 part a; ssl_spontrain_s*: SSL-AASIST retrained with"
+        " spontaneous speech, decision D1 part b, its point chosen on the same dev set)."
     )
     return "\n".join(lines) + "\n"
 

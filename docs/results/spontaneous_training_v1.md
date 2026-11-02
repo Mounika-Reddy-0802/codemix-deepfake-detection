@@ -247,6 +247,17 @@ Otherwise the current detector stays. AMR-NB rows and replayed clones are report
 Seed 1234 because it is the seed the voice check and every deployed model use; requiring both
 seeds to pass keeps the choice from resting on the better seed.
 
+**Result (2 November, measured after this rule was committed): the current detector stays.**
+Operating points chosen on dev only: 0.035 for seed 1234, 0.515 for seed 2025 (ladder two and
+four for both). Seed 1234 meets all four conditions. Seed 2025 meets three and misses the second:
+it judges 97.6% of the new speakers' and 98.7% of the language-control speakers' read genuine
+speech real, against 99.0% required. Both catch far more clones of every unseen tool than the
+current detector (mean over the five rows 70.2% and 74.6% against 44.1%; IndicF5 35.6% and 45.4%
+against 12.5%, Chatterbox 51.6% against 4.4%), keep spontaneous genuine speech at 99.1-99.5% and
+all 12 genuine live calls. `src/reporting/voice_check_adoption.py` applies the rule
+(`experiments/results/voice_check_adoption_v1.json`); the full table is
+`experiments/results/any_audio_accuracy.md` and the reading is in `docs/voice_check.md`.
+
 ### How to reproduce the adapter numbers
 
 The two sessions' outputs are in `experiments/results/spontaneous_training_v1/` (`adapter_s1234/`,
