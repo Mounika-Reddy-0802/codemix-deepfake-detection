@@ -1,174 +1,109 @@
-"""The robustness sweep's report: each transform against no transform, by the rules fixed first.
+"""The robustness and evasion sweep, scored (plan task A4).
 
-``docs/results/robustness_v1.md`` fixed the measures and the reading rules on 1 November 2026,
-before any clip was transformed or scored; this module is those rules as code, written before
-the scores exist. For every model, set and transform it compares the transformed clips with
-the same clips under ``none`` (the channel bundle's clip):
+``src.data.robustness`` renders 1,122 clips (genuine new speakers, XTTS-v2, Tortoise and
+IndicF5 clones) under 15 post-processing transforms before the phone line. This module
+reads one per-clip score file per transform and reports, for each transform:
 
-- the EER and its change, by a paired bootstrap over whole speakers
-  (``floor_compare.speaker_bootstrap``);
-- at the operating rule, the share of genuine clips called fake (false alarms) and of clones
-  passed as genuine, and their changes, paired the same way.
+- the EER of each clone tool against the genuine clips (the same clips under the same
+  transform), with :func:`src.training.metrics.eer`;
+- false alarms (genuine called fake) and misses per tool at the fixed clip rule, fake when
+  P(genuine) < 0.5 (``src.reporting.det_curves.clip_metrics``);
+- the change from the untransformed reference (``none``).
 
-A transform **helps an attacker** when the clones-passed change has its whole 95% interval
-above zero, and **hurts a genuine caller** when the false-alarm change does; otherwise it is
-reported as no measurable effect, with its interval.
+A transform helps an attacker when misses or EER rise on the clones; it hurts a genuine
+caller when false alarms rise. Nothing is chosen here. Score files are named
+``<scores-dir>/sweep_<transform>_scores.csv``::
 
-Run, once the sweep is scored::
-
-    python -m src.reporting.robustness --scores adapter=SCORES.csv --scores ssl=SCORES.csv \\
-        --out experiments/results/robustness_v1/summary.json
+    python -m src.reporting.robustness --scores-dir experiments/robustness_v1/final_s1234 \\
+        --model "Final adapter" --out experiments/results/robustness_v1_final.json
 """
 
 from __future__ import annotations
 
-import argparse
 import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from src.training.floor_compare import binary_labels, speaker_bootstrap
+from src.data.robustness import TRANSFORMS
+from src.reporting.det_curves import clip_metrics
+from src.training.metrics import eer
 
-#: The operating rule, a clip is called fake below this score: P(genuine) 0.5 for the adapter,
-#: log-odds 0 for SSL-AASIST, whose scorer writes log-odds. The same rule on both scales.
-CALLED_FAKE_BELOW = {"adapter": 0.5, "ssl": 0.0}
-N_BOOT = 1000
-SEED = 1234
+FAKE_GROUPS = ("xtts_v2", "tortoise", "indicf5")
 
 
-def clip_key(filepath: str) -> str:
-    """The clip's name: the same under every transform folder."""
-    return Path(str(filepath).replace("\\", "/")).name
+def measure(scores: pd.DataFrame) -> dict:
+    """EER per clone tool against the genuine clips, and the rule's error rates."""
+    genuine = scores[scores["group"] == "genuine"]
+    g_scores = genuine["score"].to_numpy(dtype=float)
+    out = {"false_alarm": clip_metrics(g_scores, np.ones(len(g_scores), dtype=int))["false_alarm"]}
+    for tool in FAKE_GROUPS:
+        fake = scores.loc[scores["group"] == tool, "score"].to_numpy(dtype=float)
+        if len(fake) == 0:
+            continue
+        both = np.concatenate([g_scores, fake])
+        labels = np.concatenate([np.ones(len(g_scores)), np.zeros(len(fake))]).astype(int)
+        out[f"eer_{tool}"] = float(eer(both, labels)) * 100
+        out[f"miss_{tool}"] = clip_metrics(fake, np.zeros(len(fake), dtype=int))["miss"]
+    return out
 
 
-def paired_rate_change(
-    speakers: np.ndarray,
-    flags_t: np.ndarray,
-    flags_none: np.ndarray,
-    n_boot: int = N_BOOT,
-    seed: int = SEED,
-) -> dict:
-    """Share of flagged clips with a transform minus without, resampling whole speakers."""
-    speakers = np.asarray(speakers).astype(str)
-    t = np.asarray(flags_t, dtype=np.float64)
-    n = np.asarray(flags_none, dtype=np.float64)
-    if not (len(speakers) == len(t) == len(n)) or not len(t):
-        raise ValueError("speakers and both flag arrays must be the same, non-zero length")
-    unique = np.unique(speakers)
-    members = [np.flatnonzero(speakers == s) for s in unique]
-    rng = np.random.default_rng(seed)
-    diffs = []
-    for _ in range(n_boot):
-        idx = np.concatenate([members[i] for i in rng.integers(0, len(unique), len(unique))])
-        diffs.append(t[idx].mean() - n[idx].mean())
-    return {
-        "with": float(t.mean()),
-        "without": float(n.mean()),
-        "change": float(t.mean() - n.mean()),
-        "change_ci": [float(v) for v in np.percentile(diffs, [2.5, 97.5])],
-        "clips": int(len(t)),
-        "speakers": int(len(unique)),
-    }
-
-
-def reading(passed: dict, alarms: dict) -> str:
-    """The pre-registered reading of one transform on one set."""
-    said = []
-    if passed["change"] > 0 and passed["change_ci"][0] > 0:
-        said.append("helps an attacker")
-    if alarms["change"] > 0 and alarms["change_ci"][0] > 0:
-        said.append("hurts a genuine caller")
-    return " and ".join(said) or "no measurable effect"
-
-
-def compare(scored: pd.DataFrame, model: str, n_boot: int = N_BOOT) -> list[dict]:
-    """Every transform of every set against ``none`` on the same clips, for one model."""
-    cut = CALLED_FAKE_BELOW[model]
-    df = scored.assign(key=scored["filepath"].map(clip_key))
+def table(scores_dir: str | Path) -> pd.DataFrame:
+    """One row per transform found, with the change from ``none`` for every measure."""
     rows = []
-    for set_name, part in df.groupby("set", sort=True):
-        base = part[part["transform"] == "none"].set_index("key")
-        if base.empty:
-            raise ValueError(f"{model}/{set_name}: no untransformed clips to compare with")
-        for transform, tpart in part[part["transform"] != "none"].groupby("transform", sort=True):
-            t = tpart.set_index("key")
-            missing = base.index.difference(t.index)
-            if len(missing):
-                raise ValueError(f"{model}/{set_name}/{transform}: {len(missing)} clips not scored")
-            t = t.loc[base.index]
-            labels = binary_labels(base["label"])
-            speakers = base["speaker"].astype(str).to_numpy()
-            eer = speaker_bootstrap(
-                labels, speakers, t["score"].to_numpy(), base["score"].to_numpy(), n_boot, SEED
-            )
-            genuine, spoof = labels == 1, labels == 0
-            alarms = paired_rate_change(
-                speakers[genuine],
-                t["score"].to_numpy()[genuine] < cut,
-                base["score"].to_numpy()[genuine] < cut,
-                n_boot,
-            )
-            passed = paired_rate_change(
-                speakers[spoof],
-                t["score"].to_numpy()[spoof] >= cut,
-                base["score"].to_numpy()[spoof] >= cut,
-                n_boot,
-            )
-            rows.append(
-                {
-                    "model": model,
-                    "set": set_name,
-                    "transform": transform,
-                    "eer": eer["eer_a"],
-                    "eer_none": eer["eer_b"],
-                    "eer_change": eer["diff"],
-                    "eer_change_ci": eer["diff_ci"],
-                    "false_alarms": alarms,
-                    "clones_passed": passed,
-                    "reading": reading(passed, alarms),
-                }
-            )
-    return rows
+    for name in TRANSFORMS:
+        path = Path(scores_dir) / f"sweep_{name}_scores.csv"
+        if path.is_file():
+            rows.append({"transform": name, **measure(pd.read_csv(path))})
+    frame = pd.DataFrame(rows).set_index("transform")
+    if "none" not in frame.index:
+        raise ValueError(f"no reference (sweep_none_scores.csv) in {scores_dir}")
+    deltas = (frame - frame.loc["none"]).add_prefix("delta_")
+    return frame.join(deltas).reset_index()
 
 
-def markdown(rows: list[dict]) -> str:
-    """The results table for ``robustness_v1.md``: one row per model, set and transform."""
-    pct = lambda v: f"{100 * v:.1f}"  # noqa: E731
-    ci = lambda c: f"[{100 * c[0]:+.1f}, {100 * c[1]:+.1f}]"  # noqa: E731
+def markdown(frame: pd.DataFrame, model: str) -> str:
+    """The table for a results document: values with their change from ``none``."""
+    cols = ["false_alarm"] + [c for c in frame.columns if c.startswith(("eer_", "miss_"))]
+    names = {"false_alarm": "False alarm"} | {
+        c: c.replace("eer_", "EER ").replace("miss_", "Miss ") for c in cols[1:]
+    }
     lines = [
-        "| Model | Set | Transform | EER (%) | Change | Clones passed (%) | Change | "
-        "False alarms (%) | Change | Reading |",
-        "|---|---|---|---:|---|---:|---|---:|---|---|",
+        f"**{model}** (%; change from no transform in brackets)",
+        "",
+        "| Transform | " + " | ".join(names[c] for c in cols) + " |",
+        "|---|" + "---:|" * len(cols),
     ]
-    for r in rows:
-        p, a = r["clones_passed"], r["false_alarms"]
-        lines.append(
-            f"| {r['model']} | {r['set']} | `{r['transform']}` | {pct(r['eer'])} | "
-            f"{100 * r['eer_change']:+.1f} {ci(r['eer_change_ci'])} | {pct(p['with'])} | "
-            f"{100 * p['change']:+.1f} {ci(p['change_ci'])} | {pct(a['with'])} | "
-            f"{100 * a['change']:+.1f} {ci(a['change_ci'])} | {r['reading']} |"
-        )
-    return "\n".join(lines) + "\n"
+    for _, row in frame.iterrows():
+        cells = []
+        for c in cols:
+            value, delta = row[c], row[f"delta_{c}"]
+            cells.append(
+                f"{value:.1f}" if row["transform"] == "none" else f"{value:.1f} ({delta:+.1f})"
+            )
+        lines.append(f"| {row['transform']} | " + " | ".join(cells) + " |")
+    return "\n".join(lines)
 
 
 def main() -> None:
-    """CLI: every scored model -> the summary JSON and the markdown table beside it."""
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--scores", action="append", required=True, help="MODEL=scores.csv")
-    parser.add_argument("--out", default="experiments/results/robustness_v1/summary.json")
-    parser.add_argument("--n-boot", type=int, default=N_BOOT)
+    """CLI: score files of one model -> JSON and a markdown table."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Robustness sweep report")
+    parser.add_argument("--scores-dir", required=True)
+    parser.add_argument("--model", required=True)
+    parser.add_argument("--out", required=True)
     args = parser.parse_args()
-    rows = []
-    for spec in args.scores:
-        model, path = spec.split("=", 1)
-        rows += compare(pd.read_csv(path, dtype={"speaker": str}), model, args.n_boot)
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"n_boot": args.n_boot, "rows": rows}, indent=2), encoding="utf-8")
-    out.with_suffix(".md").write_text(markdown(rows), encoding="utf-8")
-    print(f"{len(rows)} rows -> {out} and {out.with_suffix('.md')}")
+    frame = table(args.scores_dir)
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(
+        json.dumps(
+            {"model": args.model, "rows": json.loads(frame.to_json(orient="records"))}, indent=1
+        ),
+        encoding="utf-8",
+    )
+    print(markdown(frame, args.model))
 
 
 if __name__ == "__main__":

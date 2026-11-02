@@ -421,6 +421,15 @@ whatever its source column says. It runs as a test before every training launch.
 transcripts come only from the speaker's own pool. HiACC, the other spontaneous test set, was
 never trained on, which is why its numbers are the ones we judge on.
 
+**Q51. What if the attacker re-encodes the clone or adds noise?**
+The usual sharing formats do not help an attacker: MP3, Opus, AAC and a second phone hop change
+no EER by more than 2 points, for the final adapter or either SSL-AASIST checkpoint. The weak
+points are elsewhere. A reverberant room makes genuine speech look cloned (genuine clips called
+fake: adapter 0.3% to 25.7%, SSL-AASIST 0.7% to 35.7%), loud background talk lets more clones
+through, and a one-semitone pitch shift makes SSL-AASIST call 90-99% of genuine clips fake. The
+transforms, clips and reading rule were fixed before any clip was scored
+(`docs/results/robustness_v1.md`).
+
 ## 10. Numbers to remember
 
 | What | Number |
