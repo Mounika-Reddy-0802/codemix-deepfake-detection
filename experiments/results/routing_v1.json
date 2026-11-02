@@ -1,0 +1,373 @@
+{
+  "rule": "english_over_hindi",
+  "sets": {
+    "eval_pool": {
+      "s1": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 60.4,
+        "brier": 0.43582485042724717,
+        "ece": 0.4036689905255335,
+        "accuracy": 39.4,
+        "false_alarm": 46.6,
+        "miss": 74.6
+      },
+      "other": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 1.2,
+        "brier": 0.011642687714324468,
+        "ece": 0.017496943301113767,
+        "accuracy": 98.5,
+        "false_alarm": 0.8,
+        "miss": 2.1999999999999997
+      },
+      "routed": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 1.6,
+        "brier": 0.02071039635299554,
+        "ece": 0.02808212644557348,
+        "accuracy": 97.2,
+        "false_alarm": 0.2,
+        "miss": 5.4
+      },
+      "gate": {
+        "clips": 1000,
+        "to_s1_percent": 2.2,
+        "top_languages": {
+          "hi": 409,
+          "ur": 154,
+          "eo": 102,
+          "bn": 75,
+          "te": 37
+        }
+      }
+    },
+    "new_speakers": {
+      "s1": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 46.6,
+        "brier": 0.33836992873302835,
+        "ece": 0.2673365715165273,
+        "accuracy": 52.900000000000006,
+        "false_alarm": 43.4,
+        "miss": 50.8
+      },
+      "other": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 2.1999999999999997,
+        "brier": 0.04812941921901212,
+        "ece": 0.061674466709417196,
+        "accuracy": 94.69999999999999,
+        "false_alarm": 0.2,
+        "miss": 10.4
+      },
+      "routed": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 1.4000000000000001,
+        "brier": 0.042645051038254465,
+        "ece": 0.06083353813296706,
+        "accuracy": 94.69999999999999,
+        "false_alarm": 0.0,
+        "miss": 10.6
+      },
+      "gate": {
+        "clips": 1000,
+        "to_s1_percent": 4.6,
+        "top_languages": {
+          "hi": 508,
+          "bn": 58,
+          "te": 55,
+          "as": 52,
+          "eo": 46
+        }
+      }
+    },
+    "cm04": {
+      "s1": {
+        "clips": 958,
+        "genuine": 500,
+        "fake": 458,
+        "eer": 44.36157205240174,
+        "brier": 0.3486235664989014,
+        "ece": 0.29326345368757767,
+        "accuracy": 54.90605427974948,
+        "false_alarm": 46.6,
+        "miss": 43.44978165938865
+      },
+      "other": {
+        "clips": 958,
+        "genuine": 500,
+        "fake": 458,
+        "eer": 17.642794759825325,
+        "brier": 0.30036413685348373,
+        "ece": 0.3261094505563322,
+        "accuracy": 67.95407098121086,
+        "false_alarm": 0.8,
+        "miss": 66.15720524017468
+      },
+      "routed": {
+        "clips": 958,
+        "genuine": 500,
+        "fake": 458,
+        "eer": 10.231004366812227,
+        "brier": 0.20110858375837848,
+        "ece": 0.24540204346372688,
+        "accuracy": 75.26096033402922,
+        "false_alarm": 0.2,
+        "miss": 51.52838427947598
+      },
+      "gate": {
+        "clips": 958,
+        "to_s1_percent": 27.87,
+        "top_languages": {
+          "hi": 329,
+          "ur": 128,
+          "eo": 94,
+          "en": 61,
+          "ha": 48
+        }
+      }
+    },
+    "cm07": {
+      "s1": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 50.4,
+        "brier": 0.3721877735102051,
+        "ece": 0.31970781196129977,
+        "accuracy": 49.6,
+        "false_alarm": 48.8,
+        "miss": 52.0
+      },
+      "other": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 25.8,
+        "brier": 0.40848410036080335,
+        "ece": 0.4201815293059335,
+        "accuracy": 57.599999999999994,
+        "false_alarm": 0.4,
+        "miss": 84.39999999999999
+      },
+      "routed": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 25.8,
+        "brier": 0.40848410036080335,
+        "ece": 0.4201815293059335,
+        "accuracy": 57.599999999999994,
+        "false_alarm": 0.4,
+        "miss": 84.39999999999999
+      },
+      "gate": {
+        "clips": 1000,
+        "to_s1_percent": 0.0,
+        "top_languages": {
+          "hi": 805,
+          "ur": 132,
+          "mr": 9,
+          "kn": 6,
+          "bn": 6
+        }
+      }
+    },
+    "rvc_test": {
+      "s1": {
+        "clips": 619,
+        "genuine": 302,
+        "fake": 317,
+        "eer": 55.89811352288633,
+        "brier": 0.39349009612003927,
+        "ece": 0.34647794037965923,
+        "accuracy": 44.74959612277868,
+        "false_alarm": 43.377483443708606,
+        "miss": 66.5615141955836
+      },
+      "other": {
+        "clips": 619,
+        "genuine": 302,
+        "fake": 317,
+        "eer": 10.337497649737815,
+        "brier": 0.16662920881800158,
+        "ece": 0.19089957179302486,
+        "accuracy": 80.45234248788368,
+        "false_alarm": 1.3245033112582782,
+        "miss": 36.90851735015773
+      },
+      "routed": {
+        "clips": 619,
+        "genuine": 302,
+        "fake": 317,
+        "eer": 10.337497649737815,
+        "brier": 0.1670397877080217,
+        "ece": 0.19281655220904081,
+        "accuracy": 80.45234248788368,
+        "false_alarm": 0.9933774834437087,
+        "miss": 37.22397476340694
+      },
+      "gate": {
+        "clips": 619,
+        "to_s1_percent": 0.32,
+        "top_languages": {
+          "hi": 417,
+          "ur": 166,
+          "te": 6,
+          "as": 6,
+          "ha": 3
+        }
+      }
+    },
+    "control": {
+      "s1": {
+        "clips": 1000,
+        "genuine": 1000,
+        "fake": 0,
+        "eer": null,
+        "brier": 0.37973952679820466,
+        "ece": 0.5135662797635304,
+        "accuracy": 55.400000000000006,
+        "false_alarm": 44.6,
+        "miss": null
+      },
+      "other": {
+        "clips": 1000,
+        "genuine": 1000,
+        "fake": 0,
+        "eer": null,
+        "brier": 0.0013332091125369313,
+        "ece": 0.0030189393311739325,
+        "accuracy": 99.8,
+        "false_alarm": 0.2,
+        "miss": null
+      },
+      "routed": {
+        "clips": 1000,
+        "genuine": 1000,
+        "fake": 0,
+        "eer": null,
+        "brier": 0.001631498798263164,
+        "ece": 0.0038741419762373325,
+        "accuracy": 99.7,
+        "false_alarm": 0.3,
+        "miss": null
+      },
+      "gate": {
+        "clips": 1000,
+        "to_s1_percent": 0.4,
+        "top_languages": {
+          "hi": 682,
+          "te": 71,
+          "as": 56,
+          "ur": 32,
+          "bn": 28
+        }
+      }
+    },
+    "english_clean": {
+      "s1": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 0.6,
+        "brier": 0.025553733875303238,
+        "ece": 0.02796790098858762,
+        "accuracy": 97.0,
+        "false_alarm": 0.2,
+        "miss": 5.800000000000001
+      },
+      "other": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 13.5,
+        "brier": 0.3311685645279872,
+        "ece": 0.3535834793478135,
+        "accuracy": 64.0,
+        "false_alarm": 0.2,
+        "miss": 71.8
+      },
+      "routed": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 0.6,
+        "brier": 0.0265009551365209,
+        "ece": 0.02894681760214734,
+        "accuracy": 96.89999999999999,
+        "false_alarm": 0.2,
+        "miss": 6.0
+      },
+      "gate": {
+        "clips": 1000,
+        "to_s1_percent": 99.4,
+        "top_languages": {
+          "en": 676,
+          "cy": 152,
+          "nn": 18,
+          "gv": 13,
+          "no": 10
+        }
+      }
+    },
+    "english_channel": {
+      "s1": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 6.800000000000001,
+        "brier": 0.0826605067936695,
+        "ece": 0.08193866447091566,
+        "accuracy": 88.0,
+        "false_alarm": 0.6,
+        "miss": 23.400000000000002
+      },
+      "other": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 25.0,
+        "brier": 0.35733371073359704,
+        "ece": 0.3759462041189836,
+        "accuracy": 62.0,
+        "false_alarm": 0.4,
+        "miss": 75.6
+      },
+      "routed": {
+        "clips": 1000,
+        "genuine": 500,
+        "fake": 500,
+        "eer": 9.8,
+        "brier": 0.10295528661517374,
+        "ece": 0.1053226678290521,
+        "accuracy": 85.8,
+        "false_alarm": 0.4,
+        "miss": 28.000000000000004
+      },
+      "gate": {
+        "clips": 1000,
+        "to_s1_percent": 90.4,
+        "top_languages": {
+          "en": 474,
+          "cy": 106,
+          "fo": 54,
+          "ha": 27,
+          "da": 22
+        }
+      }
+    }
+  }
+}

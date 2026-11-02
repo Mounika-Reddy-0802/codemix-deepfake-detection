@@ -78,7 +78,7 @@ fact anywhere until it is.
 
 ## Consequences
 
-1. `paper/sections/system.tex` said the codec explained the drop. Corrected.
+1. `Paper_Journal/sections/system.tex` said the codec explained the drop. Corrected.
 2. `docs/W11_krishna_phone_demo.md` said the same. Corrected, with a pointer here.
 3. The high-bitrate, DTX-off negotiation added in week 11 stays — it is sensible for
    a demo regardless — but it must no longer be described as the fix for this, since

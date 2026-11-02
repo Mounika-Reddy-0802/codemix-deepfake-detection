@@ -125,17 +125,29 @@ def table(root: str | Path = R) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def figure(out_dir: str = FIGURES_DIR, root: str | Path = R) -> str:
-    """Write ``final_overview.png`` and ``.pdf``; returns the PNG path."""
+#: Shorter tick labels for the one-column version, where the groups are narrow.
+SHORT_TOOLS = {"XTTS-v2\n(seen tool)": "XTTS-v2\n(seen)", "Chatterbox": "Chatter-\nbox"}
+
+
+def figure(out_dir: str = FIGURES_DIR, root: str | Path = R, column: bool = False) -> str:
+    """Write ``final_overview.png`` and ``.pdf``; returns the PNG path.
+
+    ``column=True`` draws the same bars one IEEE column wide (3.5 in) as
+    ``final_overview_column``, for the six-page paper; the numbers are identical.
+    """
     data = table(root)
+    if column:
+        data = data.assign(tool=data["tool"].replace(SHORT_TOOLS))
     plt = _style()
     panels = list(dict.fromkeys(data["panel"]))
     widths = [data[data["panel"] == p]["tool"].nunique() for p in panels]
+    size = (3.5, 2.35) if column else (7.2, 2.9)
+    tick, title, legend_size = (5.6, 6.6, 5.6) if column else (7.5, 8.5, 7)
     fig, axes = plt.subplots(
-        1, len(panels), figsize=(7.2, 2.9), sharey=True, gridspec_kw={"width_ratios": widths}
+        1, len(panels), figsize=size, sharey=True, gridspec_kw={"width_ratios": widths}
     )
     bar = 0.19
-    for ax, panel in zip(axes, panels, strict=True):
+    for k, (ax, panel) in enumerate(zip(axes, panels, strict=True)):
         part = data[data["panel"] == panel]
         tools = list(dict.fromkeys(part["tool"]))
         for j, system in enumerate(SYSTEMS):
@@ -170,23 +182,30 @@ def figure(out_dir: str = FIGURES_DIR, root: str | Path = R) -> str:
                 label="Shortcut floor, final data" if i == 0 else None,
             )
         ax.axhline(50, ls="--", lw=0.8, color="grey", zorder=1)
-        ax.set_xticks(range(len(tools)), tools, fontsize=7.5)
-        ax.set_title(panel, fontsize=8.5)
+        ax.set_xticks(range(len(tools)), tools, fontsize=tick)
+        # (a), (b): the captions and the text refer to the panels by letter
+        ax.set_title(f"({chr(ord('a') + k)}) {panel}", fontsize=title)
         ax.set_ylim(0, 75)
         ax.grid(axis="x", visible=False)
-    axes[0].set_ylabel("EER (%)")
-    axes[0].text(-0.45, 51.5, "chance", fontsize=7, color="grey")
+        if column:
+            ax.tick_params(axis="y", labelsize=tick)
+    axes[0].set_ylabel("EER (%)", fontsize=title if column else None)
+    axes[0].text(-0.45, 51.5, "chance", fontsize=legend_size, color="grey")
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
         handles,
         labels,
         loc="upper center",
-        ncol=5,
-        fontsize=7,
+        ncol=3 if column else 5,
+        fontsize=legend_size,
         frameon=False,
-        bbox_to_anchor=(0.5, 1.06),
+        bbox_to_anchor=(0.5, 1.07 if column else 1.06),
+        columnspacing=0.9 if column else 2.0,
+        handlelength=1.6 if column else 2.0,
     )
-    out = Path(out_dir) / "final_overview.png"
+    if column:
+        fig.subplots_adjust(left=0.11, right=0.995, bottom=0.17, top=0.84, wspace=0.06)
+    out = Path(out_dir) / ("final_overview_column.png" if column else "final_overview.png")
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=DPI)
     fig.savefig(out.with_suffix(".pdf"))

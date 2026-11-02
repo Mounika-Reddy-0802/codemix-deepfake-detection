@@ -15,7 +15,7 @@ epoch) is made on the **dev set**; CM04 (Tortoise) and the RVC test set are scor
 |---|---|---|---|---|
 | 1 | Several seeds and confidence intervals | Five training seeds for every system that carries a claim; a paired bootstrap over speakers, not clips; Wilson intervals on the real calls | Deployed adapter 3.27 ± 1.17% over the phone line. On Tortoise 35.59 ± 3.35%, so the published 30.99% was a favourable draw | - |
 | 2 | Better generalisation to unseen tools, especially Tortoise | More genuine voices (21 to 248 speakers) and the real AMR-NB codec in training; three unseen tools (Tortoise, IndicF5, Chatterbox); AASIST and SSL-AASIST as outside baselines; augmentation reported as exploratory | Final recipe: new-speaker Tortoise from 30.8% to 8.8% over the line and from 36.3% to 6.0% over AMR-NB, every seed, every set beating its floor (three floors above chance, so weak bars); SSL-AASIST 0.5% | IndicF5 (16-22%) and Chatterbox (32.0% for the adapter, 12.9% for SSL-AASIST) |
-| 3 | More speakers and speaking styles | 248 training speakers; 60 new test speakers; 183 language-control speakers; 24 spontaneous HiACC speakers; per-speaker results; real mobile calls in our own voices | False alarms 3.40% to 0.47%; seen tool on new speakers 10.75% to 0.91%; the gap is the recording domain, not code-mixing | Spontaneous speech: 43.9% of genuine clips called fake by the final recipe |
+| 3 | More speakers and speaking styles | 248 training speakers; 60 new test speakers; 183 language-control speakers; 24 spontaneous HiACC speakers; per-speaker results; real mobile calls in our own voices | False alarms 3.40% to 0.47%; seen tool on new speakers 10.75% to 0.91%; the gap is the recording domain, not code-mixing | Spontaneous speech: 43.9% of genuine clips called fake by the final recipe; a spontaneous dev set trades it for missed clones of the newest tools (week 15); training on spontaneous speech is running |
 | 4 | The Hinglish-versus-English trade-off | English scored clean for S1, the adapters, S3 and the final recipe, and over the phone line for S1, the deployed adapter and the final recipe | Deployed: 2.42% clean, 24.20% over the line; S3 at chance (50.9-56.4%); final recipe 13.44% clean, missing English clones; deployment needs routing or English phone audio | English telephone training |
 | 5 | How to read the shortcut floor | A floor matched to each detector's own training data, a paired speaker-level test against it, and weak floors flagged | The old floor fitted on Tortoise itself (25.79%) understated the deployed model; matched, it is 37.79%, and three floors above chance are marked as weak bars | - |
 | 6 | Full references and positioning | Bibliography rebuilt and checked against publishers (now 45 entries); related work rewritten with a "how this work differs" part | Each ingredient has precedent; the contribution is stated as the combination | - |
@@ -192,6 +192,25 @@ recipe already span 38.5-54.4%, so with one seed this is not evidence that the r
 helps. More read voices and a real codec do not teach the detector spontaneous speech;
 that needs spontaneous training data (`docs/results/hiacc_final_v1.md`).
 
+**Week 15 (decision D1, P-038/P-039): a second spontaneous corpus, and spontaneous speech as
+data.** 200 IndicVoices Hindi speakers in frozen pools (150 train, 20 dev, 30 test), chosen
+from metadata before any audio was read, with XTTS-v2 clones of each. Every model calls far
+more of the 30 test speakers' genuine extempore speech fake than read speech (final adapter
+37.5%), so the failure is not a property of HiACC (`docs/results/indicvoices_data_v1.md`).
+(a) Operating points chosen again with the 20 dev speakers' spontaneous speech in dev: false
+alarms on spontaneous speech fall 3-23 times, but the newest generators' clones then pass,
+because no threshold separates them from people speaking freely
+(`docs/results/operating_points_spont_v1.md`). (b) Training with the 150 train speakers'
+spontaneous speech, hypotheses fixed before launch. Both families are a trade-off. Adapter,
+three seeds: HiACC's genuine clips called fake fall from 43.9% to 1.2%, but G.711 EER rises 8.2
+points on Tortoise and 10.7 on IndicF5 (2.0 allowed). SSL-AASIST, two seeds: 26.2% to 1.5%, and
+spontaneous genuine speech against IndicF5 and Chatterbox clones from 39-57% to 8-20% EER, but
+Tortoise and Chatterbox EER rise 3.7 and 3.4 points. The frozen models stay the reported ones
+(`docs/results/spontaneous_training_v1.md`). In the voice check, under a rule committed before
+measuring, both retrained trainings catch far more unseen clones (mean 70-75% against 44%), but
+one judges 97.6% of read genuine speech real against 99% required, so the voice check keeps its
+detector (P-040, `docs/voice_check.md`).
+
 ## 4. Hinglish phone-line vs clean-English trade-off
 
 > Quantify the trade-off between improved Hinglish phone-line detection and degraded
@@ -275,14 +294,14 @@ new speakers, so beating it there is a weak bar (`floor_new_sets_v1.md`).
 > Provide complete bibliographic details and clarify how the channel-matched approach
 > differs from existing multilingual and audio deepfake detection methods.
 
-**Checked.** Correct. `refs.bib` had 10 entries and no DOIs; AdamW, G.711, Opus, the
+**Checked.** Correct. `references.bib` (then `refs.bib`) had 10 entries and no DOIs; AdamW, G.711, Opus, the
 bootstrap and a layer-wise claim were named without citations; related work excluded
 multilingual detection and cited no channel/codec-robustness or adapter-based
 anti-spoofing work.
 
-**Done.** `paper/refs.bib` rebuilt: now 45 entries (the 10 cited ones completed, 35
+**Done.** `Paper_Journal/references.bib` (then `refs.bib`) rebuilt: now 45 entries (the 10 cited ones completed, 35
 added), every field checked against the publisher, Crossref or the ISCA Archive;
-sources per entry in `docs/references_verification.md`. One error corrected in an
+the source of every entry is recorded with the paper, outside this repository. One error corrected in an
 existing entry (wav2vec 2.0 second author). New references cover ASVspoof 2021,
 AASIST, RawNet2, RawBoost, In-the-Wild, ADD 2022, MLAAD, XLSR-53, XLS-R, WavLM,
 layer-wise SSL analysis, AdamW, G.711, Opus, the bootstrap, codec/channel

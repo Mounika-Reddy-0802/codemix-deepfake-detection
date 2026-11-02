@@ -4,14 +4,14 @@ Kept as code rather than a drawing tool so the figure can be regenerated when th
 system changes, and so what it claims can be checked against the modules it names.
 ``tests/test_architecture.py`` asserts every module referenced here exists.
 
-    python -m src.reporting.architecture --out paper/figures
+    python -m src.reporting.architecture --out Paper_Journal/figures
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-OUT_DIR = "paper/figures"
+OUT_DIR = "Paper_Journal/figures"
 
 #: (label, module) for every box, grouped by layer. The module path is checked by a
 #: test, so the diagram cannot claim a component the repository does not have.

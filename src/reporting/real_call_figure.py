@@ -67,13 +67,14 @@ def table(root: str | Path = R, plan: pd.DataFrame | None = None) -> pd.DataFram
     )
 
 
-def _placement(y: float, thresholds) -> tuple[tuple[int, int], str]:
+def _placement(y: float, thresholds, first: bool = False) -> tuple[tuple[int, int], str]:
     """Where a point's label goes: above it, or below and to the left of it (clear of a falling
-    line) unless that would sit on a threshold line or the axis."""
+    line) unless that would sit on a threshold line or the axis. The first stage's label goes
+    to the right instead, so it does not run into the y-axis tick labels."""
     below = y - 0.075
     if below < 0.05 or y > 0.85 or any(abs(below - t) < 0.05 for t in thresholds):
         return (0, 6), "center"
-    return (-3, -10), "right"
+    return ((3, -10), "left") if first else ((-3, -10), "right")
 
 
 def figure(out_dir: str = FIGURES_DIR, root: str | Path = R) -> str:
@@ -92,7 +93,7 @@ def figure(out_dir: str = FIGURES_DIR, root: str | Path = R) -> str:
         ys = list(part["mean_p_genuine"])
         ax.plot(xs, ys, color=colour, marker=marker, markersize=4.5, lw=1.6, label=name, zorder=3)
         for x, y in zip(xs, ys, strict=True):
-            xytext, ha = _placement(y, thresholds.values())
+            xytext, ha = _placement(y, thresholds.values(), first=x == 0)
             ax.annotate(
                 f"{y:.2f}",
                 (x, y),
