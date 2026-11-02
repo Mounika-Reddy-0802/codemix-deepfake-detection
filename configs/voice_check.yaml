@@ -1,0 +1,15 @@
+# The detector behind the voice check (src/inference/any_audio.py, voice_check/app.py).
+#
+# SSL-AASIST, final-recipe data, seed 1234: the most accurate checkpoint measured on every
+# condition we have scores for (direct microphone, real phone calls, replayed recordings,
+# G.711, AMR-NB, spontaneous speech); see experiments/results/any_audio_accuracy.md.
+# The weights are 632 MB and stay outside git.
+kind: ssl_aasist
+checkpoint: D:/kaggle_realcall/ssl_out/ssl_aasist_final_s1234_fp16.pt
+# Frozen operating point, chosen on development calls only (never on a test set). Since
+# decision D1 part a (P-038) the dev set includes 20 spontaneous IndicVoices speakers; the
+# point chosen on read-speech dev calls alone was configs/threshold_ssl_aasist.yaml (0.580).
+threshold_file: configs/threshold_ssl_aasist_spont.yaml
+# g711: every input passes an 8 kHz G.711 round trip first (the training domain).
+# none: score the audio as it is. any_audio_eval measures both on the clean test sets.
+front_end: g711

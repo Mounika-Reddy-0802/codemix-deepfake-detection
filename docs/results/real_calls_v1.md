@@ -100,7 +100,18 @@ read-speech call, catches every CM04 Tortoise call, and warns 11 of 41 genuine s
 HiACC calls (one "likely cloned"), where the final recipe warns all 41 (40 "likely cloned").
 Two earlier trainings of this encoder disagreed on spontaneous speech (5.8% and 46.7% of
 clips called fake; this one scores 6.4% of its 1,000 HiACC clips below 0.5, the final recipe
-44.5%), so a second checkpoint has to show the same before it replaces the final recipe.
+44.5%), so a second checkpoint had to show the same before it could replace the final recipe.
+
+**The second checkpoint (week 15) does not show the same** (`docs/results/ensemble_v1.md`).
+Seed 2025, at its own dev-chosen operating point (threshold 0.334, ladder two and four),
+agrees with seed 1234 where it matters most on these calls: all six XTTS-v2 calls are taken
+to "likely cloned" and no genuine live call is, in both conditions. It differs elsewhere: it
+warns none of the six Chatterbox calls, and on the held-out spontaneous calls it warns 31 of
+41 (seed 1234: 11), calling 30.9% of the 1,000 HiACC clips fake (seed 1234: 6.4%). The
+average of the two (threshold 0.540, chosen on dev) warns none of the 18 genuine calls over
+G.711, takes all six XTTS-v2 calls to "likely cloned", cautions three Chatterbox calls (none
+"likely cloned") and warns 23 of 41 spontaneous calls. Results:
+`experiments/results/real_calls_v1/ssl_s2025/` and `.../ssl_avg/`.
 
 **The final recipe's false alarms come early in a call.** Mean window score of the final recipe by time in the call:
 
@@ -182,8 +193,10 @@ figure is `experiments/figures/real_call_chain.pdf` (also `Paper_Journal/figures
   carrier was not exercised.
 - References and recordings came from different phones (each speaker's references on their own
   phone, in three formats), which a fixed protocol would avoid.
-- SSL-AASIST is one checkpoint at one operating point. The call chain (next section) was rebuilt
-  for the deployed model and the final recipe only.
+- SSL-AASIST: two checkpoints and their average, each at its own dev-chosen operating point
+  (`ensemble_v1.md`); they agree on the genuine live and XTTS-v2 calls and disagree on Chatterbox
+  and on spontaneous speech. The call chain (next section) was rebuilt for the deployed model and
+  the final recipe only.
 
 ## Reproduce
 
