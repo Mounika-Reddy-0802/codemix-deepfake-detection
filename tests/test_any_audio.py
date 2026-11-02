@@ -73,6 +73,7 @@ def test_silent_ends_are_trimmed_before_windowing():
 
 
 def test_g711_front_end_keeps_length_and_removes_the_upper_band():
+    pytest.importorskip("librosa")  # resampling wheel, not installed in CI
     t = np.arange(4 * SR) / SR
     wide = (0.1 * np.sin(2 * np.pi * 300 * t) + 0.1 * np.sin(2 * np.pi * 6000 * t)).astype(
         np.float32

@@ -69,6 +69,7 @@ def test_babble_needs_its_voices_and_lands_at_its_snr() -> None:
 
 
 def test_reverb_is_seeded_keeps_length_and_level() -> None:
+    pytest.importorskip("scipy")  # convolution wheel, not installed in CI
     clean = _voice()
     a = rb.reverb(clean, rb.clip_rng("x.wav", "reverb"), None)
     b = rb.reverb(clean, rb.clip_rng("x.wav", "reverb"), None)
