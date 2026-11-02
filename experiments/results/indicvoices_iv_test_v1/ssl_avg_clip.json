@@ -1,0 +1,226 @@
+{
+  "checkpoint": "D:/kaggle_realcall/w15_scoring/ssl_avg_iv_test_scores.csv",
+  "manifest": "data/manifests/indicvoices_genuine_channel20_iv_test.csv",
+  "summary": {
+    "threshold": 0.5,
+    "clips": 1024,
+    "speakers": 30,
+    "false_alarm_rate": 0.173828125,
+    "false_alarm_ci": [
+      0.09038276105362182,
+      0.26620232893119156
+    ],
+    "median_score": 0.8525794431235916,
+    "per_speaker_min": 0.0,
+    "per_speaker_median": 0.08347826086956522,
+    "per_speaker_max": 0.95,
+    "speakers_above_10pct": 11
+  },
+  "reference": {
+    "scores": "D:/kaggle_realcall/ssl_ref/avg__eval_pool_scores.csv",
+    "summary": {
+      "threshold": 0.5,
+      "clips": 1566,
+      "speakers": 15,
+      "false_alarm_rate": 0.0031928480204342275,
+      "false_alarm_ci": [
+        0.001150715103529914,
+        0.005835286984353279
+      ],
+      "median_score": 0.9986407204345327,
+      "per_speaker_min": 0.0,
+      "per_speaker_median": 0.0,
+      "per_speaker_max": 0.013333333333333334,
+      "speakers_above_10pct": 0
+    }
+  },
+  "difference": {
+    "difference": 0.17063527697956576,
+    "difference_ci": [
+      0.0876759535116516,
+      0.2631607691242759
+    ]
+  },
+  "per_speaker": [
+    {
+      "speaker": "iv_S4258890200391392",
+      "clips": 20,
+      "false_alarms": 19,
+      "false_alarm_rate": 0.95
+    },
+    {
+      "speaker": "iv_S4259370500388406",
+      "clips": 39,
+      "false_alarms": 36,
+      "false_alarm_rate": 0.9230769230769231
+    },
+    {
+      "speaker": "iv_S4256066400337654",
+      "clips": 20,
+      "false_alarms": 12,
+      "false_alarm_rate": 0.6
+    },
+    {
+      "speaker": "iv_S4258704000330090",
+      "clips": 44,
+      "false_alarms": 24,
+      "false_alarm_rate": 0.5454545454545454
+    },
+    {
+      "speaker": "iv_S4259710100356313",
+      "clips": 26,
+      "false_alarms": 13,
+      "false_alarm_rate": 0.5
+    },
+    {
+      "speaker": "iv_S4259308200354057",
+      "clips": 48,
+      "false_alarms": 20,
+      "false_alarm_rate": 0.4166666666666667
+    },
+    {
+      "speaker": "iv_S4259520800311167",
+      "clips": 31,
+      "false_alarms": 10,
+      "false_alarm_rate": 0.3225806451612903
+    },
+    {
+      "speaker": "iv_S4259701900332070",
+      "clips": 33,
+      "false_alarms": 8,
+      "false_alarm_rate": 0.24242424242424243
+    },
+    {
+      "speaker": "iv_S4256049300326084",
+      "clips": 28,
+      "false_alarms": 5,
+      "false_alarm_rate": 0.17857142857142858
+    },
+    {
+      "speaker": "iv_S4259317900335757",
+      "clips": 29,
+      "false_alarms": 4,
+      "false_alarm_rate": 0.13793103448275862
+    },
+    {
+      "speaker": "iv_S4257820300349694",
+      "clips": 33,
+      "false_alarms": 4,
+      "false_alarm_rate": 0.12121212121212122
+    },
+    {
+      "speaker": "iv_S4259767300355437",
+      "clips": 21,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.09523809523809523
+    },
+    {
+      "speaker": "iv_S4259251700344460",
+      "clips": 21,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.09523809523809523
+    },
+    {
+      "speaker": "iv_S4258203800376610",
+      "clips": 57,
+      "false_alarms": 5,
+      "false_alarm_rate": 0.08771929824561403
+    },
+    {
+      "speaker": "iv_S4258068500364578",
+      "clips": 23,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.08695652173913043
+    },
+    {
+      "speaker": "iv_S4258036800318829",
+      "clips": 25,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.08
+    },
+    {
+      "speaker": "iv_S4258280600326717",
+      "clips": 26,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.07692307692307693
+    },
+    {
+      "speaker": "iv_S4258360300325147",
+      "clips": 33,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.06060606060606061
+    },
+    {
+      "speaker": "iv_S4258244200343565",
+      "clips": 55,
+      "false_alarms": 2,
+      "false_alarm_rate": 0.03636363636363636
+    },
+    {
+      "speaker": "iv_S4259363600395929",
+      "clips": 29,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.034482758620689655
+    },
+    {
+      "speaker": "iv_S4259646700312629",
+      "clips": 29,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.034482758620689655
+    },
+    {
+      "speaker": "iv_S4258472800314837",
+      "clips": 35,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.02857142857142857
+    },
+    {
+      "speaker": "iv_S4259053500335823",
+      "clips": 57,
+      "false_alarms": 1,
+      "false_alarm_rate": 0.017543859649122806
+    },
+    {
+      "speaker": "iv_S4259265000315134",
+      "clips": 35,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "iv_S4258699100390157",
+      "clips": 64,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "iv_S4259512900372261",
+      "clips": 21,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "iv_S4258647200399309",
+      "clips": 39,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "iv_S4257249600388848",
+      "clips": 22,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "iv_S4259764400310760",
+      "clips": 41,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "speaker": "iv_S4258136900385620",
+      "clips": 40,
+      "false_alarms": 0,
+      "false_alarm_rate": 0.0
+    }
+  ]
+}

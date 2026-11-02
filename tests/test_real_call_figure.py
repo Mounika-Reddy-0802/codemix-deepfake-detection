@@ -73,6 +73,8 @@ def test_labels_avoid_threshold_lines_and_the_axis():
     assert rf._placement(0.08, [0.5, 0.687])[0] == above  # would fall below the axis
     assert rf._placement(0.77, [0.5, 0.687])[0] == above  # would sit on the 0.69 line
     assert rf._placement(0.29, [0.5, 0.687])[0] != above
+    # the first stage's label goes right, clear of the y-axis tick labels
+    assert rf._placement(0.83, [0.5, 0.687], first=True)[1] == "left"
 
 
 def test_figure_is_written(tmp_path):

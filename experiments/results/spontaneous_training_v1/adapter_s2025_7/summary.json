@@ -1,0 +1,66 @@
+{
+  "mode": "full",
+  "commit": "c13e7a8de8423043cdba12160b2b3ed57418d888",
+  "branch": "week15-lahari-spontaneous-data",
+  "seeds": [
+    1234,
+    2025,
+    7
+  ],
+  "run_seeds": [
+    2025,
+    7
+  ],
+  "systems": {
+    "spont": "configs/train_lora_spont.yaml"
+  },
+  "runs": [
+    {
+      "name": "spont_s2025",
+      "system": "spont",
+      "seed": 2025,
+      "dev_eer": 0.0044,
+      "status": "ok",
+      "eval_pool": 0.013371647509578545,
+      "cm04": 0.27516633483355357,
+      "rvc_test": 0.19870683351787244,
+      "cm07": 0.37715301992255257,
+      "cm07_amr": 0.3389403841997979,
+      "cm04_amr": 0.2489752212685506,
+      "iv_test": 0.014849302362040134,
+      "iv_test_amr": 0.004949767454013378,
+      "new_xtts": 0.008612,
+      "new_tortoise": 0.139611,
+      "new_xtts_amr": 0.001681,
+      "new_tortoise_amr": 0.104093,
+      "control_fa": 0.011627906976744186,
+      "hiacc_fa": 0.008740204942736588,
+      "iv_test_fa": 0.0224609375,
+      "minutes": 99.0
+    },
+    {
+      "name": "spont_s7",
+      "system": "spont",
+      "seed": 7,
+      "dev_eer": 0.0056,
+      "status": "ok",
+      "eval_pool": 0.007581417624521072,
+      "cm04": 0.27452776522946676,
+      "rvc_test": 0.08886602460985649,
+      "cm07": 0.31524475361099913,
+      "cm07_amr": 0.2879293628404385,
+      "cm04_amr": 0.2537129057984351,
+      "iv_test": 0.014849302362040134,
+      "iv_test_amr": 0.00627416910535117,
+      "new_xtts": 0.002871,
+      "new_tortoise": 0.148491,
+      "new_xtts_amr": 0.002172,
+      "new_tortoise_amr": 0.11214,
+      "control_fa": 0.0015503875968992248,
+      "hiacc_fa": 0.017179023508137433,
+      "iv_test_fa": 0.01953125,
+      "minutes": 83.9
+    }
+  ],
+  "failures": []
+}

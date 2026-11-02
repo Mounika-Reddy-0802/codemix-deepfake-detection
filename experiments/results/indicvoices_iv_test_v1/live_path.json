@@ -1,0 +1,154 @@
+{
+  "final": {
+    "threshold": 0.6868554928153753,
+    "engine": {
+      "threshold": 0.6868554928153753,
+      "margin": 0.5,
+      "min_windows": 2,
+      "suspicious_after": 3,
+      "fake_after": 5,
+      "recover_after": 3
+    },
+    "per_clip": {
+      "real_calls": 1024,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 22.95,
+      "real_calls_likely_fake_pct": 5.08,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 2.67
+    },
+    "calls_30s": {
+      "real_calls": 195,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 91.79,
+      "real_calls_likely_fake_pct": 64.62,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 14.0
+    },
+    "calls_60s": {
+      "real_calls": 94,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 98.94,
+      "real_calls_likely_fake_pct": 93.62,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 29.0
+    }
+  },
+  "ssl": {
+    "threshold": 0.5795788615942001,
+    "engine": {
+      "threshold": 0.5795788615942001,
+      "margin": 0.5,
+      "min_windows": 2,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "recover_after": 3
+    },
+    "per_clip": {
+      "real_calls": 1024,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 12.79,
+      "real_calls_likely_fake_pct": 2.73,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 2.67
+    },
+    "calls_30s": {
+      "real_calls": 195,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 49.74,
+      "real_calls_likely_fake_pct": 22.05,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 14.0
+    },
+    "calls_60s": {
+      "real_calls": 94,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 84.04,
+      "real_calls_likely_fake_pct": 44.68,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 29.0
+    }
+  },
+  "ssl_s2025": {
+    "threshold": 0.3340942859649658,
+    "engine": {
+      "threshold": 0.3340942859649658,
+      "margin": 0.5,
+      "min_windows": 2,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "recover_after": 3
+    },
+    "per_clip": {
+      "real_calls": 1024,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 24.32,
+      "real_calls_likely_fake_pct": 6.64,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 2.67
+    },
+    "calls_30s": {
+      "real_calls": 195,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 73.85,
+      "real_calls_likely_fake_pct": 37.95,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 14.0
+    },
+    "calls_60s": {
+      "real_calls": 94,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 95.74,
+      "real_calls_likely_fake_pct": 73.4,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 29.0
+    }
+  },
+  "ssl_avg": {
+    "threshold": 0.5396859410684556,
+    "engine": {
+      "threshold": 0.5396859410684556,
+      "margin": 0.5,
+      "min_windows": 2,
+      "suspicious_after": 2,
+      "fake_after": 4,
+      "recover_after": 3
+    },
+    "per_clip": {
+      "real_calls": 1024,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 18.75,
+      "real_calls_likely_fake_pct": 5.08,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 2.67
+    },
+    "calls_30s": {
+      "real_calls": 195,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 65.64,
+      "real_calls_likely_fake_pct": 34.36,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 14.0
+    },
+    "calls_60s": {
+      "real_calls": 94,
+      "fake_calls": 0,
+      "real_calls_alerted_pct": 92.55,
+      "real_calls_likely_fake_pct": 67.02,
+      "fake_calls_alerted_pct": null,
+      "fake_calls_likely_fake_pct": null,
+      "mean_windows_per_call": 29.0
+    }
+  }
+}

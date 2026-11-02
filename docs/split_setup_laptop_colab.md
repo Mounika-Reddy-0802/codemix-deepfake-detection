@@ -39,7 +39,7 @@ differs is which entry point you *invoke*.
 | `src/data/build_manifests.py`, `checksums.py`, `quarantine.py`, `ethics_gate.py` | pure logic and hashing |
 | `src/inference/predict.py` | one clip at a time — CPU latency is the number the paper reports |
 | `live_call/`, `demo/` | FastAPI + WebRTC + Gradio; CPU inference by design |
-| `tests/`, `docs/`, `paper/`, `report/` | everything else |
+| `tests/`, `docs/`, `Paper_Journal/`, `report/` | everything else |
 
 **Never syncs, in either direction:** `data/**` (audio), `checkpoints/**`,
 `.env`, `.env.git`, `docs/ethics/*.pdf`, `wandb/`. All are already in

@@ -162,7 +162,7 @@ direction is the one the offline AMR-NB results predicted. The final recipe also
 voices, so these calls cannot say which of its two changes keeps it up; offline, adding AMR-NB
 alone to the deployed recipe's training recovers most of the codec loss (new-speaker XTTS over
 AMR-NB 7.59% against 22.37%, three seeds; `experiments/results/mixcodec_v1/`). The call-chain
-figure is `experiments/figures/real_call_chain.pdf` (also `paper/figures/`).
+figure is `experiments/figures/real_call_chain.pdf` (also `Paper_Journal/figures/`).
 
 ## Limitations
 
@@ -197,7 +197,7 @@ python -m src.inference.calibrate choose --dev experiments/calibration_ssl/dev_w
 python -m src.inference.real_calls score --audio data/real_calls/scored --ssl <ssl_aasist_final_s1234_fp16.pt> --out experiments/results/real_calls_v1
 python -m src.inference.real_calls report --audio data/real_calls/scored --windows experiments/results/real_calls_v1 --md experiments/results/real_calls_v1/report.md
 python -m src.inference.real_call_codecs --references data/real_calls/references --speakers P1,P2,P3 --deployed <deployed ckpt> --final <final_s1234 ckpt> --out experiments/results/real_calls_v1/codec_chain.csv
-python -m src.reporting.real_call_figure   # the call-chain figure, then copy the .pdf to paper/figures/
+python -m src.reporting.real_call_figure   # the call-chain figure, then copy the .pdf to Paper_Journal/figures/
 ```
 
 The recordings and clones are never committed (`data/` is ignored) and are deleted after the

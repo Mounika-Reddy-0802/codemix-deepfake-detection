@@ -38,8 +38,9 @@ from src.data.pilot_jobs import (
 #: each generated at the same rate the train pool was.
 CLIPS_PER_SPEAKER = 160
 
-#: ``eval_ext`` / ``adapt_ext`` live in ``speaker_pools_ext.csv`` (pass it as ``--pools``).
-ALLOWED_POOLS = ("adaptation", "eval", "eval_ext", "adapt_ext")
+#: ``eval_ext`` / ``adapt_ext`` live in ``speaker_pools_ext.csv`` (pass it as ``--pools``);
+#: the ``iv_*`` pools in ``indicvoices_pools.csv`` (``src.data.indicvoices_jobs``).
+ALLOWED_POOLS = ("adaptation", "eval", "eval_ext", "adapt_ext", "iv_train", "iv_dev", "iv_test")
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,6 @@
 # Viva preparation: questions and answers
 
-Every number here is from the long paper (`paper/main.tex`) or the results file it names.
+Every number here is from the long paper (`Paper_Journal/main.tex`) or the results file it names.
 Each of us should be able to answer every question in our own words, not read these
 answers out. Answer the question asked, give the one number that matters, and say what we
 did not show when that is the honest answer: examiners trust a team that knows its limits.
@@ -157,7 +157,10 @@ Chatterbox, against 31.98% for our adapter.
 It is the candidate for the next release: it keeps up with a live call even on two CPU threads
 (1.14 s per window, inside the 2 s hop), and on our 30 real calls it did better than the final
 recipe (Q33a). But on spontaneous speech two trainings with equal development scores call 5.8%
-and 46.7% of genuine clips fake, so it is not yet reliable.
+and 46.7% of genuine clips fake, so it is not yet reliable. Retrained with spontaneous speech,
+both trainings call only 1-2% of HiACC fake, which removes that instability, and in the voice
+check they catch far more clones; one of them misses the read-speech bar we set before measuring,
+so it is the next version, not this one (Q37).
 
 **Q25. Which attack is hardest?**
 It depends on the detector. For our adapters, Chatterbox (32.0%, one seed). For the larger
@@ -237,12 +240,13 @@ any call (threshold 0.580, caution after two windows, "likely cloned" after four
 the 30 calls. Over G.711 it warned one of twelve genuine live calls (a caution 48 s in, none
 "likely cloned"), took all six XTTS-v2 calls to "likely cloned" (four of them 10-14 s in),
 caught one Chatterbox call and cautioned two, and, like the final recipe, took one of six
-genuine replays to "likely cloned". If asked how sure: it is one checkpoint, and offline it is
-the weakest of six trainings on Chatterbox (21.2% against 8.2-18.3%), so this is a reason to
-test it next, not proof it is better. On held-out 60 s calls at the same operating
-point it also warned only 11 of 41 genuine spontaneous calls (the final recipe warns all 41),
-but two earlier trainings of this encoder disagreed on spontaneous speech, so a second
-checkpoint has to agree before it replaces the final recipe.
+genuine replays to "likely cloned". If asked how sure: we scored a second checkpoint (seed
+2025) the same way in week 15. It agrees on what matters most here (all six XTTS-v2 calls
+"likely cloned", no genuine live call warned) but catches none of the six Chatterbox calls,
+and on held-out 60 s calls it warns 31 of 41 genuine spontaneous calls where seed 1234 warns 11.
+Their average warns none of the 18 genuine calls and 23 of 41 spontaneous calls. So the larger
+encoder does not replace the final recipe yet: which training generalises to spontaneous
+speech is luck until spontaneous speech is in training (`docs/results/ensemble_v1.md`).
 
 **Q34. Why does the deployed model fail on real calls?**
 We rebuilt the call chain on each speaker's direct recordings, one stage at a time. Over the six
@@ -297,8 +301,36 @@ calls 54.37% of genuine clips fake (0.89% for read lectures) and the final recip
 seed inside the 38.5-54.4% spread of single trainings, so not evidence of a gain. A different
 threshold does not fix it either: sweeping the final recipe's threshold over 60 s calls,
 choosing nothing, every threshold that catches all Tortoise calls warns at least 38 of the 41
-genuine spontaneous calls (`docs/results/spontaneous_tradeoff_v1.md`). The first future step is
-spontaneous genuine speech in training.
+genuine spontaneous calls (`docs/results/spontaneous_tradeoff_v1.md`). In week 15 we added a
+second spontaneous test set, 30 IndicVoices speakers (extempore Hindi): the final recipe calls
+37.5% of their clips fake, so the failure is not a property of HiACC. The larger encoder's seed
+1234, the one that did well on HiACC (11 of 41 calls warned), warns 79 of 94 IndicVoices calls,
+so no model we have handles spontaneous speech (`docs/results/indicvoices_data_v1.md`). The
+failure is on the genuine side: XTTS-v2 clones of the same 30 spontaneous speakers are still
+caught (96.3% by the adapter, all of them by SSL-AASIST), but a third of their genuine clips
+score like clones for the adapter. SSL-AASIST ranks the genuine clips above those clones (2-3% EER).
+So with decision D1 (part a) we chose every operating point again by the unchanged rule, with 20
+spontaneous IndicVoices speakers in the dev set and no retraining. For SSL-AASIST seed 1234 the
+voice check then calls 0.7% of HiACC's and 5.0% of IndicVoices' genuine spontaneous files cloned
+(7.6% and 15.3% before), but lets through 32% of Tortoise and 96% of IndicF5 and Chatterbox
+clones (4%, 71%, 78% before). Threshold-free, its file score separates spontaneous genuine
+speech from XTTS-v2 clones (1.5% EER) but not from IndicF5 or Chatterbox clones (40-44%): the
+newest clones sound as genuine to the model as people speaking freely, so no threshold serves
+both (`docs/results/operating_points_spont_v1.md`). We adopted the new point for the voice check,
+as agreed before the results, because a false alarm on a real person is the costlier error, and
+we say plainly what it lets through. The fix has to be in the model, so part (b) retrained with
+150 spontaneous IndicVoices speakers, hypotheses written before launch. Both families are a
+trade-off. HiACC, a corpus never trained on, falls to 1-2% of genuine clips called fake for every
+seed (from 43.9% for the adapter, 26.2% for SSL-AASIST), and spontaneous genuine speech moves away
+from every tool's clones: for SSL-AASIST, IndicF5 and Chatterbox go from 39-57% to 8-20% EER,
+which no threshold could do. But the read-speech benchmarks pay more than the 2 points we
+allowed: 8-11 for the adapter, 3.4-3.7 for SSL-AASIST on Tortoise and Chatterbox (IndicF5
++1.2), on the seed mean. The verdicts stand as
+written and the frozen models stay the reported ones (`docs/results/spontaneous_training_v1.md`).
+In the voice check the retrained SSL-AASIST catches far more unseen clones (Chatterbox 52% against
+4%, the five unseen-tool rows 70-75% against 44%), but we had committed the adoption rule first,
+and one of the two trainings judges only 97.6% of read genuine speech real against the 99% we
+required. So the voice check keeps its detector (P-040, `docs/voice_check.md`).
 
 **Q38. Are your fakes realistic?**
 They are our own, made with open tools, and most are not hard: the seen tool sits half a MOS point
@@ -340,7 +372,10 @@ comparisons) are marked as one seed wherever they appear.
 No. Thresholds, checkpoints and recipe choices are made on development data by rules fixed in
 advance. One variant chosen after a test score was seen is reported as exploratory. Be ready
 for the follow-up: the final recipe joins two changes whose gains were first seen on test sets,
-so we report it with five seeds and shortcut floors, not as a blind selection.
+so we report it with five seeds and shortcut floors, not as a blind selection. This week's two
+decisions on spontaneous speech followed rules committed before the measurement; when the
+better-looking retrained model missed one condition on one seed, we kept the old detector rather
+than pick the seed that passed.
 
 **Q45. Did you use any tools to help write the code or the paper?**
 Answer honestly and the same way the paper's acknowledgments do: which tools, what they were used
@@ -361,6 +396,31 @@ S1, the deployed adapter and the final recipe; matched every
 shortcut floor to its detector's own training data; and rebuilt the references (45, each
 checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say so.
 
+**Q48. Can the system handle an English caller?**
+Not with one detector: the final recipe misses English clones (25.00% EER over the phone line).
+With a language gate in front (a spoken-language identifier; English goes to S1, everything else
+to the Hindi-English detector), English EER is 0.60% clean and 9.80% over G.711, and Hindi-English
+loses at most 0.4 points. The rule was chosen on development audio before any test output existed.
+English spoken by our Hindi-English speakers stays with the right detector (0.4% routed to S1).
+One catch, said plainly: the gate also seems to catch Tortoise, but only because Tortoise's Hindi
+sounds English-accented; that is a confound, not detection (`docs/results/routing_v1.md`).
+
+**Q49. Can P(genuine) be read as a probability?**
+On the seen tool, nearly: calibration error 0.004-0.046, and SSL-AASIST stays close on Tortoise
+(0.02-0.03). On the newest generators, no: the models are confidently wrong, and almost every
+error at the fixed rule is a missed clone, not a false alarm (IndicF5: 73.7% of clones missed by
+the final adapter, 61.7% by SSL-AASIST; calibration error 0.27-0.35 on IndicF5 and Chatterbox). The one system that raises many false alarms is the deployed adapter over the real
+AMR-NB codec (30.5-66.0%) (`docs/results/calibration_v1.md`).
+
+**Q50. How do you know IndicVoices did not leak from training into testing?**
+The 200 speakers were split into pools (150 train, 20 dev, 30 test) from metadata alone, before
+any audio was downloaded, and the pool file is frozen with its hash. `config_guard` reads every
+training config's real manifests and refuses an `iv_test` speaker anywhere, an `iv_dev` speaker
+in training, an `iv_train` speaker in dev, and any other IndicVoices speaker or a clone of one,
+whatever its source column says. It runs as a test before every training launch. Clone
+transcripts come only from the speaker's own pool. HiACC, the other spontaneous test set, was
+never trained on, which is why its numbers are the ones we judge on.
+
 ## 10. Numbers to remember
 
 | What | Number |
@@ -376,3 +436,7 @@ checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say 
 | Real calls, SSL-AASIST: genuine live warned / XTTS-v2 / Chatterbox "likely cloned" | 1 of 12 / 6 of 6 / 1 of 6 |
 | First caution / warning on a live call | about 6 s / 10 s (deployed); 8 s / 12 s (final recipe) |
 | Speakers in the language-controlled test | 183 |
+| HiACC genuine called fake, frozen vs retrained with spontaneous speech (adapter / SSL-AASIST) | 43.9% vs 1.2% / 26.2% vs 1.5% |
+| Spontaneous genuine against IndicF5 clones, threshold-free, SSL-AASIST frozen vs retrained | 49% vs 15-20% EER |
+| Cost of that retraining on read-speech benchmarks (adapter / SSL-AASIST, seed mean) | +8-11 / +1-4 EER points |
+| English over the phone line: final adapter alone vs behind the language gate | 25.00% vs 9.80% EER |

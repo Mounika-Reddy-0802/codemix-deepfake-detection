@@ -26,6 +26,9 @@ peft==0.13.2
 librosa==0.11.0
 soundfile==0.12.1
 silero-vad==5.1.2
+# English routing gate (src/inference/routing.py): spoken-language identification with
+# the VoxLingua107 ECAPA model on CPU. 1.1.2 installs beside torch 2.8 without changing it.
+speechbrain==1.1.2
 
 # --- Voice cloning (spoof generation only; not needed to train or serve) ---
 # The original `TTS` package stops at Python 3.11. `coqui-tts` is the maintained

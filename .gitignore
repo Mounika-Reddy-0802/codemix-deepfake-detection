@@ -2,9 +2,14 @@
 # ^^^ LINE 1 IS MANDATORY: never commit git identities / GitHub PATs. ^^^
 
 # --- Other secrets ---
+# .env.example documents every variable with placeholders and is the only env file tracked.
 .env
-.env.local
+.env.*
+!.env.example
 *.pem
+*.key
+*.p12
+kaggle.json
 
 # --- Signed ethics artefacts: CONFIDENTIAL, never committed ---
 # The signed mentor note carries real handwritten signatures of the team and the
@@ -18,21 +23,102 @@ docs/ethics/*.jpg
 docs/ethics/*.jpeg
 
 # The transfer bundle carries a COPY of that signed PDF, plus reference and
-# generated audio, so it is exactly what must never be committed -- and unlike
+# synthesised audio, so it is exactly what must never be committed -- and unlike
 # docs/ethics/ it is not covered by any rule above. It sits in the repo root
 # while a machine is being set up, one `git add -A` away from putting real
 # signatures into git history.
 gpu-laptop-bundle/
-gpu-laptop-bundle.zip
 
-# Kaggle result zips and Overleaf exports are downloaded into the repo root. Some carry
-# clones of the team's own voices from the real-call test, which the consent form keeps out
-# of git, and all of them are one `git add -A` away from history. Results that matter are
-# committed unzipped under experiments/results/.
-/*.zip
+# --- Papers: never in git ---
+# The journal and conference manuscripts, their LaTeX, bibliographies, compiled PDFs,
+# Overleaf exports and review copies stay on team machines and in Overleaf. A public copy
+# would be indexed by similarity checkers and could break double-blind review. The code
+# that draws the figures lives in src/reporting/ and is tracked; figures made only for a
+# paper's layout are paper work and stay out.
+paper/
+Paper_Journal/
+paper_conference/
+*overleaf*/
+*Overleaf*/
+*.tex
+*.bib
+*.bst
+*.cls
+*.sty
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+experiments/figures/*_column.*
+experiments/figures/detector_architecture.*
+experiments/figures/system_architecture_detailed.*
+experiments/figures/algorithm_flowchart.*
+# Reference-checking and related-work notes for the papers.
+docs/references_verification.md
+docs/related_work_notes.md
+
+# --- Root documents: only these are tracked ---
+# Every other document in the repo root is a local working file: plans, rule books, review
+# decks, compiled papers, printed reports and editor instruction files. They are shared
+# privately, never through git. Add a root document to git only by adding an exception here.
+/*.md
+!/README.md
+!/REPRODUCE.md
+!/TECH_STACK_AND_FOLDER_STRUCTURE.md
+!/Works updates.md
+/*.docx
+!/Tech_Stack_And_Structure.docx
+/*.pptx
+/*.xlsx
+/*.pdf
+
+# --- Archives, anywhere ---
+# Kaggle result zips and Overleaf exports are downloaded into the repo. Some carry clones of
+# the team's own voices from the real-call test, which the consent form keeps out of git.
+# Results that matter are committed unzipped under experiments/results/.
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# --- Audio, anywhere: corpora, clones, real calls, field recordings ---
+# Cloned speech is of identifiable people and real recordings are covered by consent forms;
+# none of it is ever committed (docs/datasheet.md, docs/release.md).
+*.wav
+*.flac
+*.mp3
+*.m4a
+*.aac
+*.amr
+*.ogg
+*.opus
+*.webm
+*.3gp
+
+# --- Model weights, anywhere ---
+# Released through the model package (docs/release.md), never through git. The Stage-1 and
+# early adapter checkpoints under checkpoints/ and third_party/aasist/AASIST.pth were added
+# on purpose through Git LFS before this rule; ignore rules do not untrack them.
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+*.h5
 
 # --- Large corpora & model artifacts: local / Kaggle only ---
-# Track the directory skeleton (.gitkeep) but ignore all real data files.
+# Track the directory skeleton (.gitkeep) but ignore all real data files. Real-call
+# recordings (data/real_calls/) and voice-check field recordings (data/field_validation/)
+# live here and never enter git.
 data/**
 !data/**/
 !data/**/.gitkeep
@@ -71,53 +157,62 @@ data/manifests/mucs_language_control_source.csv
 data/manifests/eval_ext_genuine_source.csv
 data/manifests/adapt_ext_genuine_source.csv
 data/manifests/indicf5_genuine_source.csv
+# IndicVoices clip manifests carry transcripts and per-speaker demographics from a gated
+# corpus; they rebuild exactly from the tracked row groups and pools with
+# `python data/indicvoices_run.py src.data.indicvoices_download --out <bundle>/clean`.
+data/manifests/indicvoices_genuine*.csv
+# The clone job tables hold the same transcripts; `python -m src.data.indicvoices_jobs` rebuilds them.
+data/manifests/indicvoices_*_xtts_jobs.csv
 
 checkpoints/**
 !checkpoints/**/
 !checkpoints/**/.gitkeep
 
+# --- Experiment tracking and run output ---
 wandb/
+mlruns/
+lightning_logs/
+flagged/
+# Run logs: machine-local stdout from training/eval, rewritten every run.
+logs/
+*.log
+# Partial and smoke-test score dumps written while a run is in progress.
+experiments/_partial_*
+experiments/_smoke_*
+# duration cache for the dataset inventory: regenerate with
+#   python -m src.reporting.datasets
+experiments/results/_duration_cache.csv
 
-# --- Generated audio (never committed, from any generated dir) ---
-**/generated/**/*.wav
+# --- Notebooks ---
+# Notebooks live in notebooks/; copies downloaded into the root are local.
+/*.ipynb
+.ipynb_checkpoints/
 
 # --- Python ---
 __pycache__/
 *.py[cod]
 *.egg-info/
+build/
+dist/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage
+htmlcov/
 .venv/
 venv/
 env/
+node_modules/
 
-# --- Notebooks ---
-.ipynb_checkpoints/
-
-# --- OS / editor cruft ---
-.DS_Store
-Thumbs.db
-~$*
-*.swp
+# --- OS, editor and local tool settings ---
+# Every hidden folder is a machine-local settings or cache folder (editors, local tools,
+# virtual environments, app caches); only the CI workflows are tracked.
+.*/
+!.github/
 .idea/
 .vscode/
-.claude/
-
-# --- Planning documents and review decks: shared privately, not through git ---
-# These are working documents for the team and the mentor (task IDs, owners,
-# review slides, the standing workflow contract). They live on team machines and
-# in the shared drive; the repo carries the code and the results, not the plan.
-Project_Plan_12_Weeks.docx
-PROJECT_PLAN_12_WEEKS.md
-PROJECT_PLAN_V2_AFFECTDF.md
-Updated_Project_Plan_v2_AffectDF.docx
-Review1_Presentation_v3.pptx
-GIT_RULES.md
-
-# Run logs: machine-local stdout from training/eval, regenerated every run.
-logs/
-
-# duration cache for the dataset inventory: regenerate with
-#   python -m src.reporting.datasets
-experiments/results/_duration_cache.csv
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+*.swp

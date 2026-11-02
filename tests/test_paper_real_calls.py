@@ -9,6 +9,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SUMMARY = ROOT / "experiments/results/real_calls_v1/summary.json"
+#: The journal paper is kept out of git (.gitignore), so CI checkouts do not have it.
+PAPER = ROOT / "Paper_Journal/sections/system.tex"
 #: Row label in Table tab:realcalls -> (kind, tool) in the report.
 ROWS = {
     "Genuine, live": ("genuine_live", "none"),
@@ -42,11 +44,12 @@ def _table_rows(tex: str) -> list[list[str]]:
 
 
 @pytest.mark.skipif(not SUMMARY.is_file(), reason="real-call results not present")
+@pytest.mark.skipif(not PAPER.is_file(), reason="journal paper not present (kept out of git)")
 def test_paper_real_call_table_matches_the_scored_calls() -> None:
     result = json.loads(SUMMARY.read_text(encoding="utf-8"))
     deployed = _counts(result["models"]["deployed_g711"])
     final = _counts(result["models"]["final_g711"])
-    rows = _table_rows((ROOT / "paper/sections/system.tex").read_text(encoding="utf-8"))
+    rows = _table_rows(PAPER.read_text(encoding="utf-8"))
     assert len(rows) == len(ROWS)
     total = 0
     for cells in rows:
