@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -89,3 +91,38 @@ def test_paired_comparison_refuses_different_clips():
     a["filepath"] = [f"clip{i}" for i in range(len(a))]
     with pytest.raises(ValueError, match="different clips"):
         fa.compare_paired(a, a.iloc[:-1])
+
+
+def test_cli_reports_scores_made_elsewhere_without_scoring(tmp_path, monkeypatch, capsys):
+    clips = pd.DataFrame(
+        {
+            "utt_id": [f"u{i}" for i in range(6)],
+            "speaker": ["s1", "s1", "s2", "s2", "s3", "s3"],
+            "label": "bonafide",
+            "score": [-1.0, 2.0, 3.0, 4.0, -2.0, 5.0],
+        }
+    )
+    manifest, scores = tmp_path / "m.csv", tmp_path / "in.csv"
+    clips.drop(columns="score").to_csv(manifest, index=False)
+    clips.to_csv(scores, index=False)
+    out = tmp_path / "out.json"
+    argv = ["fa", "--scores-in", str(scores), "--manifest", str(manifest), "--threshold", "0"]
+    argv += ["--scores-out", str(tmp_path / "copy.csv"), "--out", str(out), "--n-boot", "50"]
+    monkeypatch.setattr("sys.argv", argv)
+    fa.main()
+    result = json.loads(out.read_text(encoding="utf-8"))
+    assert result["summary"]["false_alarm_rate"] == pytest.approx(2 / 6)
+    assert result["checkpoint"] == str(scores)
+    assert "33.33%" in capsys.readouterr().out
+
+
+def test_cli_refuses_scores_that_miss_manifest_clips(tmp_path, monkeypatch):
+    rows = pd.DataFrame({"utt_id": ["a", "b"], "speaker": "s", "label": "bonafide", "score": 1.0})
+    manifest, scores = tmp_path / "m.csv", tmp_path / "in.csv"
+    rows.to_csv(manifest, index=False)
+    rows.iloc[:1].to_csv(scores, index=False)
+    argv = ["fa", "--scores-in", str(scores), "--manifest", str(manifest)]
+    argv += ["--scores-out", str(tmp_path / "c.csv"), "--out", str(tmp_path / "o.json")]
+    monkeypatch.setattr("sys.argv", argv)
+    with pytest.raises(ValueError, match="exactly"):
+        fa.main()

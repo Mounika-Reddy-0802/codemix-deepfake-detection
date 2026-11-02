@@ -72,13 +72,15 @@ INDICTTS_DEEPFAKE = StreamingSource(
 )
 
 INDICVOICES = StreamingSource(
-    repo_id="ai4bharat/indicvoices",
-    licence="Research (AI4Bharat)",
-    configs={"tamil": "tamil", "code_switched": ""},
+    repo_id="ai4bharat/IndicVoices",
+    licence="CC-BY-4.0",
+    configs={"tamil": "tamil", "hindi": "hindi", "code_switched": ""},
     notes=(
-        "Tamil bonafide column + supplementary code-mixed bonafide. GATED: accept "
-        "terms on the HF page and use a token. Stream filtered subsets only, never "
-        "the full 7,348 hrs."
+        "Read (8%), extempore (76%) and conversational (15%) speech, 23.7K hours from "
+        "51K speakers in 22 languages (dataset page, checked 31 Oct 2026); one parquet "
+        "folder per language (Hindi: 82 shards, about 50 GB). GATED: accept the terms "
+        "on the HF page and use a token. Stream or read metadata columns only, never "
+        "the whole corpus (src/data/indicvoices_inventory.py)."
     ),
 )
 

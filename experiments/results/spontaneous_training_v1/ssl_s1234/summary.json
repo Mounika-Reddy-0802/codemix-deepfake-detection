@@ -1,0 +1,43 @@
+{
+  "mode": "full",
+  "commit": "2dc1cdae85487f32433e4618d997730a28936c79",
+  "branch": "week15-lahari-spontaneous-data",
+  "seeds": [
+    1234
+  ],
+  "epochs": 3,
+  "train_sets": {
+    "spont": [
+      "data/manifests/codemix_adapt_train_spont.csv",
+      "data/manifests/codemix_adapt_dev_spont_channel20.csv"
+    ]
+  },
+  "runs": [
+    {
+      "name": "spont_s1234",
+      "data": "spont",
+      "seed": 1234,
+      "dev_eer": 0.0,
+      "status": "ok",
+      "eval_pool": 0.001999521072796935,
+      "cm04": 0.030928798094887536,
+      "rvc_test": 0.056536862556667435,
+      "new_xtts": 0.000491,
+      "new_tortoise": 0.013007,
+      "cm07": 0.19545098795068133,
+      "control_fa": 0.010077519379844961,
+      "new_xtts_amr": 0.000491,
+      "new_tortoise_amr": 0.013007,
+      "cm07_amr": 0.20137489559788102,
+      "cm04_amr": 0.03944631274852627,
+      "cm09": 0.11474654377880183,
+      "iv_test": 0.004949767454013378,
+      "iv_test_fa": 0.056640625,
+      "iv_test_amr": 0.003137084552675585,
+      "hiacc_fa": 0.017480409885473176,
+      "minutes": 352.9
+    }
+  ],
+  "timing": {},
+  "failures": []
+}

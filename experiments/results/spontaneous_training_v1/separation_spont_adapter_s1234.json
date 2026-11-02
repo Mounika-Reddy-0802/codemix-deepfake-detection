@@ -1,0 +1,25 @@
+{
+  "genuine_clips": 4342,
+  "tools": {
+    "xtts_v2": {
+      "clones": 598,
+      "eer_pct": 1.84
+    },
+    "tortoise_cm04": {
+      "clones": 458,
+      "eer_pct": 42.9
+    },
+    "tortoise_new": {
+      "clones": 222,
+      "eer_pct": 28.39
+    },
+    "indicf5": {
+      "clones": 526,
+      "eer_pct": 51.98
+    },
+    "rvc": {
+      "clones": 317,
+      "eer_pct": 20.23
+    }
+  }
+}

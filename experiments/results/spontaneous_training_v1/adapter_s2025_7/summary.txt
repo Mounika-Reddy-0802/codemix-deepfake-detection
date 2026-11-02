@@ -1,0 +1,25 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: c13e7a8de8423043cdba12160b2b3ed57418d888
+
+EER (%) per run; *_amr = AMR-NB, otherwise G.711; *_fa = genuine clips called fake (%) (hiacc, iv_test: spontaneous)
+run                  status    dev        eval_pool             cm04         rvc_test         new_xtts     new_tortoise             cm07       control_fa     new_xtts_amr new_tortoise_amr         cm07_amr         cm04_amr         hiacc_fa          iv_test      iv_test_amr       iv_test_fa
+spont_s2025              ok   0.44             1.34            27.52            19.87             0.86            13.96            37.72             1.16             0.17            10.41            33.89            24.90             0.87             1.48             0.49             2.25
+spont_s7                 ok   0.56             0.76            27.45             8.89             0.29            14.85            31.52             0.16             0.22            11.21            28.79            25.37             1.72             1.48             0.63             1.95
+
+MEAN +/- SD over seeds
+  eval_pool     spont   1.05 +/-  0.41 (n=2)   
+  cm04          spont  27.48 +/-  0.05 (n=2)   
+  rvc_test      spont  14.38 +/-  7.77 (n=2)   
+  new_xtts      spont   0.57 +/-  0.41 (n=2)   
+  new_tortoise  spont  14.41 +/-  0.63 (n=2)   
+  cm07          spont  34.62 +/-  4.38 (n=2)   
+  control_fa    spont   0.66 +/-  0.71 (n=2)   
+  new_xtts_amr  spont   0.19 +/-  0.03 (n=2)   
+  new_tortoise_amr spont  10.81 +/-  0.57 (n=2)   
+  cm07_amr      spont  31.34 +/-  3.61 (n=2)   
+  cm04_amr      spont  25.13 +/-  0.34 (n=2)   
+  hiacc_fa      spont   1.30 +/-  0.60 (n=2)   
+  iv_test       spont   1.48 +/-  0.00 (n=2)   
+  iv_test_amr   spont   0.56 +/-  0.09 (n=2)   
+  iv_test_fa    spont   2.10 +/-  0.21 (n=2)   

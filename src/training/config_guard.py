@@ -8,14 +8,18 @@ each ``configs/train_*.yaml``, opens the manifests it names, and applies the rul
 to the rows it would really train on:
 
 1. no held-out tool (Tortoise), no evaluation-only corpus (IndicSynth,
-   IndicTTS-Deepfake, IndicVoices, HiACC, the real calls and the voice check's field
-   recordings), no child audio;
+   IndicTTS-Deepfake, HiACC, the real calls and the voice check's field recordings),
+   no child audio;
 2. no eval-pool speaker in training -- measured on the frozen pools, not on the
    config's own split column, which a mistake could set either way. The extension
    pools' evaluation-only speakers (``eval_ext``, ``control`` in
-   ``speaker_pools_ext.csv``) count as eval speakers too;
-3. code-mixed rows only in a Stage-3 run: either LoRA adaptation or a config that
-   declares ``system: s3_native``;
+   ``speaker_pools_ext.csv``) and the IndicVoices test pool (``iv_test`` in
+   ``indicvoices_pools.csv``) count as eval speakers too. IndicVoices speakers (ids
+   prefixed ``iv_``, clones of them included) are allowed by team decision D1 (P-038) from
+   two frozen pools only: ``iv_train`` in the training manifest and ``iv_dev`` in the dev
+   manifest, never the other way round;
+3. code-mixed and Hindi rows (MUCS, IndicVoices) only in a Stage-3 run: either LoRA
+   adaptation or a config that declares ``system: s3_native``;
 4. an S3 native run starts from the pretrained encoder (no ``init_from``), because
    the point of S3 is that it has never seen English spoofing data;
 5. RVC conversions only from speakers absent from the RVC test half (P-025).
@@ -34,9 +38,13 @@ from src.data import build_manifests as bm
 
 POOLS = "data/manifests/speaker_pools.csv"
 POOLS_EXT = "data/manifests/speaker_pools_ext.csv"
+POOLS_IV = "data/manifests/indicvoices_pools.csv"
 RVC_TEST = "data/manifests/rvc_holdout_test.csv"
-# the field recordings are the team's own voices, consented for evaluation only
-EVAL_ONLY = bm.EVAL_ONLY_SOURCES | {"hiacc", "field_validation"}
+#: IndicVoices is checked by pool below, not refused as a whole corpus (decision D1); the
+#: field recordings are the team's own voices, consented for evaluation only
+EVAL_ONLY = (bm.EVAL_ONLY_SOURCES - {"indicvoices"}) | {"hiacc", "field_validation"}
+#: rows only a Stage-3 run may train on: code-mixed MUCS and IndicVoices Hindi
+STAGE3_LANGUAGES = {"hi-en", "hi"}
 S3_NATIVE = "s3_native"
 
 
@@ -64,7 +72,7 @@ def _training_rows(cfg: dict, root: Path, report: ConfigReport) -> pd.DataFrame 
         if not (root / path).is_file():
             report.unverifiable.append(f"{key} not in the repository: {path}")
             continue
-        frames.append(pd.read_csv(root / path))
+        frames.append(pd.read_csv(root / path).assign(manifest=key))
     return pd.concat(frames, ignore_index=True) if frames else None
 
 
@@ -73,8 +81,13 @@ def check_rows(
     cfg: dict,
     eval_speakers: set[str],
     rvc_test_speakers: set[str],
+    indicvoices_allowed: set[str] | None = None,
 ) -> list[str]:
-    """Every rule the rows of one config break. Empty means clean."""
+    """Every rule the rows of one config break. Empty means clean.
+
+    ``indicvoices_allowed`` holds the IndicVoices speakers decision D1 admits (the
+    ``iv_train`` and ``iv_dev`` pools); every other IndicVoices speaker is refused.
+    """
     problems = []
     tool = rows["tool"].astype(str).str.lower()
     source = rows["source"].astype(str).str.lower()
@@ -86,6 +99,15 @@ def check_rows(
     bad_sources = sorted(set(source) & EVAL_ONLY)
     if bad_sources:
         problems.append(f"evaluation-only corpus in training: {bad_sources}")
+    # IndicVoices speakers (ids prefixed iv_) are IndicVoices data whatever the row's source
+    # says, so clones made from their references are caught too.
+    indicvoices = speaker.str.startswith("iv_") | source.eq("indicvoices")
+    outside = sorted(set(speaker[indicvoices]) - (indicvoices_allowed or set()))
+    if outside:
+        problems.append(
+            f"{len(outside)} IndicVoices speakers outside the iv_train and iv_dev pools, "
+            f"e.g. {outside[:3]}"
+        )
     if (source.str.contains("child") | speaker.str.lower().str.contains("child")).any():
         problems.append("child audio in training")
 
@@ -93,13 +115,14 @@ def check_rows(
     if leaked:
         problems.append(f"{len(leaked)} eval-pool speakers in training, e.g. {leaked[:3]}")
 
-    codemix = rows["language"].astype(str).str.lower().eq("hi-en")
-    if codemix.any():
+    stage3 = rows["language"].astype(str).str.lower().isin(STAGE3_LANGUAGES)
+    if stage3.any():
         is_lora = bool(cfg.get("lora"))
         is_s3 = cfg.get("system") == S3_NATIVE
         if not (is_lora or is_s3):
             problems.append(
-                "code-mixed rows in a run that is neither LoRA adaptation nor system: s3_native"
+                "code-mixed or Hindi rows in a run that is neither LoRA adaptation nor "
+                "system: s3_native"
             )
         if is_s3 and cfg.get("init_from"):
             problems.append("s3_native must start from the pretrained encoder, not init_from")
@@ -122,17 +145,31 @@ def check_config(path: str, root: str = ".") -> ConfigReport:
     if rows is None:
         return report
 
+    from src.data import indicvoices_pools as ivp
     from src.data.speaker_pools_ext import evaluation_only_speakers
 
     pools = pd.read_csv(base / POOLS)
     eval_speakers = set(pools.loc[pools["pool"] == "eval", "speaker"].astype(str))
     eval_speakers |= evaluation_only_speakers(str(base / POOLS_EXT))
+    eval_speakers |= ivp.evaluation_only_speakers(str(base / POOLS_IV))
     rvc_test = pd.read_csv(base / RVC_TEST) if (base / RVC_TEST).is_file() else None
     rvc_test_speakers = set(rvc_test["speaker"].astype(str)) if rvc_test is not None else set()
 
+    iv_train = ivp.training_speakers(str(base / POOLS_IV))
+    iv_dev = ivp.dev_only_speakers(str(base / POOLS_IV))
+
     report.rows = len(rows)
     report.codemix_rows = int(rows["language"].astype(str).str.lower().eq("hi-en").sum())
-    report.problems = check_rows(rows, cfg, eval_speakers, rvc_test_speakers)
+    report.problems = check_rows(rows, cfg, eval_speakers, rvc_test_speakers, iv_train | iv_dev)
+    speakers = rows["speaker"].astype(str)
+    in_train = set(speakers[rows["manifest"] == "train_manifest"])
+    in_dev = set(speakers[rows["manifest"] == "dev_manifest"])
+    for wrong, what in (
+        (in_train & iv_dev, "dev-pool speakers in training"),
+        (in_dev & iv_train, "training-pool speakers in the dev set"),
+    ):
+        if wrong:
+            report.problems.append(f"{len(wrong)} IndicVoices {what}, e.g. {sorted(wrong)[:3]}")
     return report
 
 

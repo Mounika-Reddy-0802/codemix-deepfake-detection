@@ -173,7 +173,11 @@ def main() -> None:
     from src.training.evaluate import score_manifest
 
     parser = argparse.ArgumentParser(description="False alarms on genuine speech")
-    parser.add_argument("--checkpoint", required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--checkpoint")
+    source.add_argument(
+        "--scores-in", help="per-clip scores already made (e.g. on Kaggle): nothing is scored"
+    )
     parser.add_argument("--manifest", required=True, help="genuine-only manifest to score")
     parser.add_argument("--data-root", default=None)
     parser.add_argument(
@@ -192,22 +196,28 @@ def main() -> None:
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
-    scored = score_manifest(
-        args.checkpoint,
-        args.manifest,
-        encoder=args.encoder,
-        batch_size=args.batch_size,
-        max_seconds=args.max_seconds,
-        device=args.device,
-        data_root=args.data_root,
-        num_workers=args.num_workers,
-        partial_path=str(Path(args.scores_out).with_suffix(".partial.csv")),
-    )
+    if args.scores_in:
+        scored = pd.read_csv(args.scores_in)
+        expected = set(pd.read_csv(args.manifest, usecols=["utt_id"])["utt_id"])
+        if set(scored["utt_id"]) != expected or len(scored) != len(expected):
+            raise ValueError(f"{args.scores_in} does not cover exactly the manifest's clips")
+    else:
+        scored = score_manifest(
+            args.checkpoint,
+            args.manifest,
+            encoder=args.encoder,
+            batch_size=args.batch_size,
+            max_seconds=args.max_seconds,
+            device=args.device,
+            data_root=args.data_root,
+            num_workers=args.num_workers,
+            partial_path=str(Path(args.scores_out).with_suffix(".partial.csv")),
+        )
     Path(args.scores_out).parent.mkdir(parents=True, exist_ok=True)
     scored.to_csv(args.scores_out, index=False)
 
     result = {
-        "checkpoint": args.checkpoint,
+        "checkpoint": args.checkpoint or args.scores_in,
         "manifest": args.manifest,
         "summary": summarise(scored, args.threshold, args.n_boot),
     }
