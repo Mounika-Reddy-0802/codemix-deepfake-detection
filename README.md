@@ -35,7 +35,7 @@ Recorded real mobile calls were scored offline through the same path.
 > (SSL-AASIST, one checkpoint at its own dev-chosen operating point) warns 1 of 12 genuine live
 > calls and takes all 6 XTTS-v2 calls and 1 of 6 Chatterbox calls to "likely cloned"
 > ([real_calls_v1](docs/results/real_calls_v1.md); the call chain, stage by stage:
-> [`paper/figures/real_call_chain.pdf`](paper/figures/real_call_chain.pdf)).
+> [`experiments/figures/real_call_chain.pdf`](experiments/figures/real_call_chain.pdf)).
 
 ---
 
@@ -130,7 +130,7 @@ into 60 s calls, with the final recipe's operating point chosen on the dev set o
   a GPU), and one of its trainings calls only 5.8% of spontaneous speech fake, another 46.7%:
   a lead, not a fix ([encoder_spontaneous_v1](docs/results/encoder_spontaneous_v1.md)).
 - **One overview figure** of every main system against every attack tool, both channels:
-  `paper/figures/final_overview.pdf`. **Model card** (draft, not published):
+  `experiments/figures/final_overview.pdf`. **Model card** (draft, not published):
   [MODEL_CARD](docs/MODEL_CARD.md).
 
   ![EER of every main system on every attack tool, over the simulated G.711 line and the real AMR-NB codec, with the shortcut floor](experiments/figures/final_overview.png)
@@ -160,7 +160,7 @@ into 60 s calls, with the final recipe's operating point chosen on the dev set o
 
   ![Mean P(genuine) of our own recordings through each stage of a phone call, and of the genuine live calls: on average the deployed adapter falls to its threshold at the mobile codec, the final recipe stays above its own](experiments/figures/real_call_chain.png)
 
-- **Conference paper** (`paper/short/main.tex`) in the IEEE two-column format; its page
+- **Conference paper** (`Paper_Journal/short/main.tex`) in the IEEE two-column format; its page
   count is checked in Overleaf, since the laptop has no LaTeX.
 - **Weights package** for the release decision: safetensors, config, model card, checksums,
   verified identical to the checkpoint ([release](docs/release.md)).
@@ -617,7 +617,8 @@ codemix-deepfake-detection/
 ├── data/manifests/      # clip index, FROZEN speaker pools, pilot job tables
 ├── docs/results/        # one write-up per measurement, each naming its result files
 ├── docs/real_calls/     # the real-call protocol, scripts and 30-call plan
-├── paper/               # the long paper (sections/) and the conference version (short/)
+├── Paper_Journal/       # the journal paper and the conference source (short/); local only, ignored by git
+├── paper_conference/    # compile-ready conference upload (Overleaf); local only, ignored by git
 ├── experiments/         # eval JSONs + per-clip score CSVs behind every table
 ├── checkpoints/         # Stage-1 and LoRA adapters (Git LFS)
 ├── live_call/           # live detection server: web demo, dashboard, WebRTC, Twilio
@@ -899,7 +900,6 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | **Model card** for the final recipe (draft, not published) |
 | [`docs/release.md`](docs/release.md) | **What is published and what is not**, and the weights package ready for the release decision |
 | [`docs/viva/VIVA_QA.md`](docs/viva/VIVA_QA.md) | **Viva questions and answers**, with the numbers to remember |
-| [`docs/references_verification.md`](docs/references_verification.md) | Where every reference was checked |
 | `docs/W<week>_<member>_<work>.md` | **Per-member weekly records** — what each of us did that week, the numbers we got, and the limitations we know about. One per person per week, e.g. [`docs/W9_krishna_cm02_gate_cm01_recovery.md`](docs/W9_krishna_cm02_gate_cm01_recovery.md) |
 
 ---
