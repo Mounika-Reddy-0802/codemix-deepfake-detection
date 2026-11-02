@@ -217,7 +217,7 @@ comes from Git LFS (`checkpoints/baseline/best.pt`).
 |---|---|---|
 | Overview | `/demo` | `GET /api/health`, `GET /api/lanes`, `GET /api/tunnel`, `GET /api/sessions`, `GET /api/headline`, `GET /api/real_calls` |
 | Live call | `/live`, `/phone/receiver` | `GET /api/tunnel` (the https tunnel, else this laptop's Wi-Fi address), `GET /api/qr?text=` |
-| Check audio | `/try` | `POST /api/try` (a file, a recording or a prepared sample, judged by the live model's windows and ladder), `GET /api/demo-clips` |
+| Check audio | `/try` | `POST /api/try` (a file, a recording or a prepared sample, judged by the live model's windows and ladder; the page says why in the ladder's terms and lists the live model's measured weak spots), `GET /api/demo-clips`, `GET /api/health` (the ladder), `GET /api/limits`, `GET /api/headline` |
 | Call log | `/history` | `GET /api/sessions` (each call's `peak_state`, `first_warning_s`, `duration`), `POST /api/replay/{id}?realtime=false&wait=true` (run a test call), `/ws/dashboard` |
 | Compare | `/lanes` | `GET /api/lanes`, `POST /api/replay_lanes/{id}` (real time, streamed to `/ws/dashboard` tagged by lane and run; `?realtime=false` returns every lane's series), `POST /api/replay_lanes_stop` |
 | Performance | `/limits` | `GET /api/limits`, `GET /api/headline`, `GET /api/real_calls` |

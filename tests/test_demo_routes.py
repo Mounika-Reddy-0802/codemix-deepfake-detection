@@ -278,6 +278,9 @@ def test_try_it_judges_a_recording_like_a_call(client):
     assert too_short.status_code == 400 and "6 seconds" in too_short.json()["detail"]
     page = (ROOT / "live_call" / "static" / "try.html").read_text(encoding="utf-8")
     assert "Too short to judge" in page and "at least 6 seconds" in page
+    # every verdict says why in the ladder's terms, and the weak rows come from the results
+    assert "function why(r, ladder)" in page and "What it cannot do yet" in page
+    assert "english_line_final" in page and "p.smoothed ?? p.score" in page
 
 
 def test_qr_codes_are_standalone_svg(client):

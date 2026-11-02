@@ -196,6 +196,8 @@ def headline() -> dict:
             **_s1_false_alarm_counts(),
         },
         "english_line_deployed": _english_line(),
+        # the model Check audio judges with: the same English clips through the line
+        "english_line_final": _english_line("final_s1234"),
         "deployed": {
             "line_eer_mean": cite(
                 round(dep["eval_pool"]["eer"]["mean"], 2), seeds, "deployed.sets.eval_pool.eer.mean"

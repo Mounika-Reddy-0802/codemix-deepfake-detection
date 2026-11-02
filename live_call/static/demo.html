@@ -20,6 +20,7 @@
     .srow { display: grid; grid-template-columns: 7.2rem 1fr; gap: 0.6rem; font-size: 0.9rem; align-items: baseline; }
     .srow .k { color: var(--dim); }
     .srow .v small { display: block; color: var(--faint); font-size: 0.76rem; }
+    .srow.warn .v { color: var(--caution); font-weight: 650; }
 
     .why { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
     @media (max-width: 1000px) { .why { grid-template-columns: 1fr; } }
@@ -189,6 +190,9 @@
         if (t) out.push(srow("Phone pairing", t.url ? "Secure link open" : t.lan.length ? "Same Wi-Fi" : "No network", t.url ? "any network, https" : "scan the code on Live call"));
         const calls = await json("/api/sessions").catch(() => []);
         out.push(srow("Calls judged", String(calls.length), "since it started"));
+        // four detectors fall behind a call on battery: say it before the panel sees the lag
+        if (h.power && !h.power.plugged) out.push(make("div", { class: "srow warn" }, [make("span", { class: "k", text: "Power" }),
+          make("span", { class: "v" }, [`On battery, ${h.power.percent}%`, make("small", { text: "plug in: the detectors fall behind on battery" })])]));
         recent(calls);
       } catch (e) {
         out.push(make("div", { class: "on s-likely_fake" }, [make("span", { class: "light still" }), "Off: server not answering"]));

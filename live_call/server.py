@@ -233,6 +233,19 @@ def warning_beep_wav(rate: int = 8000) -> bytes:
     return buffer.getvalue()
 
 
+def power_status() -> dict | None:
+    """Mains or battery: four detectors fall behind a call on battery, so the demo says so."""
+    try:
+        import psutil
+
+        battery = psutil.sensors_battery()
+    except Exception:  # noqa: BLE001 - no battery, or no psutil: nothing to report
+        return None
+    if battery is None:
+        return None
+    return {"plugged": bool(battery.power_plugged), "percent": round(battery.percent)}
+
+
 def demo_clips_dir() -> Path:
     """Read when used, so a value from ``.env`` (loaded when the app starts) applies."""
     return Path(os.environ.get("DEMO_CLIPS_DIR", "demo_assets"))
@@ -425,6 +438,7 @@ def create_app(state: App | None = None) -> FastAPI:
                 "demo_clips": len(list_demo_clips()),
                 "demo_clips_dir": demo_clips_dir().name,
                 "lanes": len(shared.lane_set().lanes),
+                "power": power_status(),
             }
         )
 

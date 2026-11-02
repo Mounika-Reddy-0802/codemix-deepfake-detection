@@ -650,7 +650,7 @@ hover. The review's eight-minute walkthrough is Overview, Compare, Live call, Pe
 |---|---|---|
 | Overview | `/demo` | protection status, three measured results, the features, the latest calls, how it works |
 | Live call | `/live` + `/phone/receiver` | a test caller on the laptop calls the protected phone; only the phone is warned (fallback: `/console`) |
-| Check audio | `/try` | upload a file, record a line or pick a prepared sample; judged exactly like a call, with the window timeline |
+| Check audio | `/try` | upload a file, record a line or pick a prepared sample; judged exactly like a call, with the window timeline, why the verdict came out as it did, and the live model's measured weak spots |
 | Call log | `/history` | every call judged since the server started, with its strongest warning; prepared calls marked "clone caught" or "false alarm"; run a test call |
 | Compare | `/lanes` | one call through the four detectors: a big light and two times each; the timelines open under Details |
 | Performance | `/limits`, `/threat`, `/network`, `/trust` | what it catches and what it cannot do yet; tabs for why it is needed (94.8% of genuine Hindi-English speech called fake by the English-only detector), the 30 real calls with the call chain and stage player, and the 100 ms shuffle check |

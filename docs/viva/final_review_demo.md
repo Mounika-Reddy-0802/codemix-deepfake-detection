@@ -12,7 +12,7 @@ of them."
 |---|---|---|
 | 1 | Overview (`/demo`) | protection status, three measured results, the features, recent calls, how it works |
 | 2 | Live call (`/live`) | the test caller on this laptop calls the protected phone; only the phone is warned |
-| 3 | Check audio (`/try`) | upload a file, record a line, or pick a prepared sample: judged like a call |
+| 3 | Check audio (`/try`) | upload a file, record a line, or pick a prepared sample: judged like a call, with why (how many windows sounded cloned, and how many in a row) and what it cannot do yet |
 | 4 | Call log (`/history`) | every call judged since the server started, its strongest warning, and "clone caught" / "false alarm" for prepared calls; "Run a test call" adds one |
 | 5 | Compare (`/lanes`) | one call through the four detectors, a light each |
 | 6 | Performance (`/limits`) | what it catches and what it cannot do yet; tabs for why it is needed, the real phone network and the trust check |
@@ -29,7 +29,8 @@ of them."
    anywhere so it may play sound. The page must read **Phone connected**.
 4. Press `F` for full screen. `N` opens these lines on screen; `→` and `←` move along the
    walkthrough below; `1`-`6` open a rail page.
-5. Laptop on mains power (four detectors use most of the CPU), phone charged, hotspot tested,
+5. Laptop on mains power (four detectors use most of the CPU; the Overview's Protection card
+   shows a Power warning while it runs on battery), phone charged, hotspot tested,
    `backup_demo.mp4` on the desktop.
 
 ## The walkthrough (8 minutes)

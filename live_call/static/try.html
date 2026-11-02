@@ -44,6 +44,14 @@
     .facts span { color: var(--dim); font-size: 0.8rem; }
     .result canvas { width: 100%; height: 110px; display: block; }
     .result audio { width: 100%; }
+    .why { padding: 0.75rem 0.9rem; border-radius: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); line-height: 1.45; }
+    .why b { margin-right: 0.35rem; }
+    .cannot { border-top: 1px solid var(--line); padding-top: 0.75rem; }
+    .cannot h3 { margin: 0 0 0.45rem; font-size: 0.78rem; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim); }
+    .cannot ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.35rem; }
+    .cannot li { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr); gap: 0.6rem; font-size: 0.9rem; }
+    .cannot li b { color: var(--ink); font-weight: 650; }
+    .cannot li span { color: var(--dim); }
     .busy { display: flex; align-items: center; gap: 0.7rem; color: var(--dim); }
     .spin { width: 1.2rem; height: 1.2rem; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.15); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -117,10 +125,54 @@
       suspicious: "A few suspicious seconds in a row. Be careful: verify who is speaking before acting on it.",
       likely_fake: "Likely cloned. Do not share codes or money; call the person back on a number you know.",
     };
+    // what the checker is and where it is weak: the ladder from the live model, the weak rows
+    // from the committed results (never typed here)
+    const context = Promise.all([json("/api/health"), json("/api/limits"), json("/api/headline")])
+      .then(([health, limits, headline]) => ({ ladder: health.detector && health.detector.ladder, limits, headline }))
+      .catch(() => ({}));
+
+    // why the verdict came out as it did, in the ladder's own terms
+    function why(r, ladder) {
+      const n = r.scored_windows, k = r.fake_leaning_windows;
+      const caution = ladder ? ladder.caution_after : null, likely = ladder ? ladder.likely_after : null;
+      const of = `${k} of ${n} windows`;
+      if (r.peak_state === "genuine") {
+        if (!k) return ["Sounds clearly genuine.", `None of the ${n} windows sounded cloned.`];
+        return ["Borderline.", `${of} sounded cloned, but never ${caution || "enough"} in a row, which a caution needs.`];
+      }
+      if (r.peak_state === "suspicious") {
+        return ["Borderline.", `${of} sounded cloned; ${caution || "a few"} in a row by ${Stage.secs(r.first_caution_s)} gave a caution, and likely cloned needs ${likely || "more"}.`];
+      }
+      const sure = k * 2 >= n ? "Sounds clearly cloned." : "Sounds cloned on one stretch.";
+      return [sure, `${of} sounded cloned; ${likely || "enough"} in a row by ${Stage.secs(r.first_likely_s)} made it likely cloned.`];
+    }
+
+    // the measured weak rows for the model this page judges with
+    function cannot(ctx) {
+      if (!ctx.limits || !ctx.headline) return null;
+      const by = Object.fromEntries(ctx.limits.limits.map((l) => [l.key, l]));
+      const sp = by.spontaneous && by.spontaneous.numbers, cb = by.chatterbox && by.chatterbox.numbers;
+      const en = ctx.headline.english_line_final;
+      const rows = [];
+      if (sp) {
+        const n = sp.final_calls.value, warned = Math.round((sp.final_genuine_warned_pct.value * n) / 100);
+        rows.push(["Free conversation", [make("span", { class: "cite", title: `read from ${sp.final_genuine_warned_pct.source}`, text: String(warned) }),
+          ` of `, Stage.cite(sp.final_calls), " genuine spontaneous calls were warned: it learned from read speech"]]);
+      }
+      if (cb) rows.push(["Some tools it never saw", [Stage.cite(cb.real_calls_likely), " of ", Stage.cite(cb.real_calls), " Chatterbox clone calls caught on a real network"]]);
+      if (en) rows.push(["English over a phone line", [Stage.cite(en.line_eer, Stage.pct(2)), " error: English calls need the English model"]]);
+      if (!rows.length) return null;
+      return make("div", { class: "cannot" }, [
+        make("h3", { text: "What it cannot do yet" }),
+        make("ul", {}, rows.map(([head, body]) => make("li", {}, [make("b", { text: head }), make("span", {}, body)]))),
+      ]);
+    }
+
     function busy(what) {
       $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", { class: "busy" }, [make("span", { class: "spin" }), "Checking " + what + "…"])]));
     }
-    function show(r, blob, what) {
+    async function show(r, blob, what) {
+      const ctx = await context;
       if (!r.scored_windows) {
         $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: "No speech heard" }), "Try a louder or longer recording."])]));
         return;
@@ -131,12 +183,14 @@
       }
       const state = r.peak_state;
       const canvas = make("canvas", { id: "tl" });
+      const [sure, because] = why(r, ctx.ladder);
       $("result").replaceChildren(
         make("div", { class: "verdict s-" + state }, [
           make("span", { class: "light" + (state === "likely_fake" ? " still" : "") }),
           make("div", {}, [make("div", { class: "vword", text: Stage.word(state) }), make("div", { class: "what", text: what })]),
         ]),
         make("div", { class: "small", text: ADVICE[state] || "" }),
+        make("div", { class: "why", id: "why" }, [make("b", { text: sure }), " " + because]),
         make("div", { class: "facts" }, [
           make("div", {}, [make("b", { text: `${r.fake_leaning_windows} of ${r.scored_windows}` }), make("span", { text: "windows sounded cloned" })]),
           make("div", {}, [make("b", { text: Stage.secs(r.first_caution_s) }), make("span", { text: "first warning" })]),
@@ -144,7 +198,7 @@
         ]),
         canvas,
         blob ? make("audio", { controls: true, src: URL.createObjectURL(blob) }) : null,
-        make("div", { class: "note limit small", text: "It learned from read Hindi-English speech over a phone line. Free conversation, or a clean studio microphone, can be warned: that is a known limit on the Performance page." }),
+        cannot(ctx) || make("div", { class: "note limit small", text: "It learned from read Hindi-English speech over a phone line. Free conversation, or a clean studio microphone, can be warned: that is a known limit on the Performance page." }),
       );
       drawTimeline(canvas, r.windows, r.threshold, r.seconds);
     }
@@ -158,9 +212,11 @@
       ctx.fillText("sounds genuine", 8, 14); ctx.fillText("sounds cloned", 8, h - 20);
       ctx.setLineDash([5, 4]); ctx.strokeStyle = "rgba(230,238,250,0.5)";
       ctx.beginPath(); ctx.moveTo(0, y(t)); ctx.lineTo(w, y(t)); ctx.stroke(); ctx.setLineDash([]);
+      // the smoothed score is what the ladder counts, so the dots agree with "k of n windows"
       for (const p of windows.filter((q) => q.score !== null)) {
-        ctx.fillStyle = p.score < t ? "#ff6b6b" : "#3ae48c";
-        ctx.beginPath(); ctx.arc(x(p.t), y(p.score), 5, 0, 7); ctx.fill();
+        const v = p.smoothed ?? p.score;
+        ctx.fillStyle = v < t ? "#ff6b6b" : "#3ae48c";
+        ctx.beginPath(); ctx.arc(x(p.t), y(v), 5, 0, 7); ctx.fill();
       }
       ctx.fillStyle = "rgba(147,166,195,0.8)";
       ctx.fillText("0:00", 8, h - 4); const end = Stage.secs(tMax); ctx.fillText(end, w - 8 - ctx.measureText(end).width, h - 4);
@@ -170,7 +226,7 @@
       const form = new FormData();
       form.append("file", blob, filename);
       try {
-        show(await json("/api/try", { method: "POST", body: form }), blob, what);
+        await show(await json("/api/try", { method: "POST", body: form }), blob, what);
       } catch (e) {
         const short = e.message.startsWith("record at least");
         $("result").replaceChildren(make("div", { class: "waiting" }, [make("div", {}, [make("b", { text: short ? "Too short to judge" : "Could not check it" }), short ? e.message[0].toUpperCase() + e.message.slice(1) + "." : e.message])]));

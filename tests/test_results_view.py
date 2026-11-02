@@ -129,6 +129,9 @@ def test_the_headline_numbers_are_the_reviewed_ones():
     assert h["final"]["new_tortoise"]["eer"]["value"] == 8.8
     assert h["final"]["new_tortoise"]["floor"]["value"] == 36.5
     assert h["ladders"]["final"]["caution_after"]["value"] == 3
+    # Check audio judges with the final recipe, so its English weak row is the final recipe's
+    assert h["english_line_final"]["line_eer"]["value"] == 25.95
+    assert h["english_line_deployed"]["line_eer"]["value"] == 24.2
 
 
 def test_limits_cite_their_numbers_and_say_what_landed():
