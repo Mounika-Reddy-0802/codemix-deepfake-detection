@@ -1,23 +1,34 @@
-// The final-review demo's shared shell: scene stepper, readiness light, presenter notes,
-// the verdict key, keyboard navigation and source tooltips. Every page calls
-// Stage.mount("<key>").
+// The product's shared shell: the navigation rail, the status light, the verdict key, the
+// presenter's notes and keyboard, and source tooltips. Every page calls Stage.mount("<key>").
 //
 // No number lives in this file. Where the presenter's line carries one, it is filled
 // from /api/headline or /api/real_calls, which read the committed result files.
 
 const Stage = (() => {
-  // Four scenes, about eight minutes: one message each.
-  const SCENES = [
-    { key: "threat", n: 1, title: "The threat", href: "/threat", minutes: "0:45" },
-    { key: "lanes", n: 2, title: "Four detectors", href: "/lanes", minutes: "2:00" },
-    { key: "live", n: 3, title: "Live call", href: "/live", minutes: "3:00" },
-    { key: "limits", n: 4, title: "Limits", href: "/limits", minutes: "2:00" },
+  const BRAND = { name: "Asli", tagline: "Cloned-voice call protection" };
+
+  // What the product does, in the order a user meets it. Keys 1-6 jump here.
+  const NAV = [
+    { key: "home", title: "Overview", href: "/demo", icon: "home", what: "status, recent calls and what it protects" },
+    { key: "live", title: "Live call", href: "/live", icon: "phone", what: "call a protected phone; only the receiver is warned" },
+    { key: "try", title: "Check audio", href: "/try", icon: "wave", what: "upload, record or pick a recording to check" },
+    { key: "history", title: "Call log", href: "/history", icon: "list", what: "every call it has judged, with its verdict" },
+    { key: "lanes", title: "Compare", href: "/lanes", icon: "columns", what: "one call through four detectors side by side" },
+    { key: "limits", title: "Performance", href: "/limits", icon: "chart", what: "measured results and known limits" },
   ];
-  // For questions: kept out of the flow, reached from scene 4's "More" menu.
-  const MORE = [
-    { key: "network", title: "Real network", href: "/network", what: "the 30 real mobile calls and what the codec does" },
-    { key: "trust", title: "Why trust it", href: "/trust", what: "shuffle a call into 100 ms pieces: same verdict" },
-    { key: "try", title: "Try it", href: "/try", what: "read a line into the microphone, judged as a call" },
+  // The evidence pages sit inside Performance, reached from its tabs.
+  const EVIDENCE = [
+    { key: "limits", title: "Results and limits", href: "/limits" },
+    { key: "threat", title: "Why it is needed", href: "/threat" },
+    { key: "network", title: "Real phone network", href: "/network" },
+    { key: "trust", title: "Trust check", href: "/trust" },
+  ];
+  // The review's eight-minute walkthrough: the arrow keys follow it.
+  const FLOW = [
+    { key: "home", title: "Overview", minutes: "0:45" },
+    { key: "lanes", title: "Compare detectors", minutes: "2:00" },
+    { key: "live", title: "Live call", minutes: "3:00" },
+    { key: "limits", title: "Performance", minutes: "2:00" },
   ];
   // The same four names on every page, whatever a lane is called in DFD_LANES.
   const NAMES = { s1: "English-only", deployed: "Deployed adapter", final: "Final recipe", ssl: "Larger encoder" };
@@ -30,11 +41,12 @@ const Stage = (() => {
 
   // What the person at the keyboard says, one breath each.
   const SAY = {
-    threat: (d) => [
-      `A familiar voice calls in Hindi-English and asks for an OTP. The usual detector cannot help: it calls ${d.s1Fake} of genuine Hindi-English speech fake.`,
+    home: (d) => [
+      `A familiar voice calls in Hindi-English and asks for an OTP. The usual detector, trained on English, calls ${d.s1Fake} of genuine Hindi-English speech fake: it cannot protect this call.`,
+      "Asli listens to the call as it happens and warns only the person being called.",
     ],
     lanes: () => [
-      "Same call, four detectors. Play the genuine caller: the English-only detector rejects a real person; ours let them through.",
+      "One call, four detectors. Play the genuine caller: the English-only detector rejects a real person; ours let them through.",
       "Now the Tortoise clone, a tool none of them was trained on: the final recipe catches it. The larger encoder is one checkpoint, our next candidate.",
     ],
     live: () => [
@@ -42,19 +54,30 @@ const Stage = (() => {
       "The caller sees nothing, because a caller who knows they were caught learns to evade.",
     ],
     limits: () => [
-      "What it cannot do yet, with numbers: spontaneous speech, unseen tools, English over the phone line.",
-      "The larger encoder does better on the first two, but it is one checkpoint: the next candidate, not a replacement.",
+      "Where it stands, with numbers: what it catches on real calls, and what it cannot do yet.",
+      "The larger encoder does better on spontaneous speech and Chatterbox, but it is one checkpoint: the next candidate, not a replacement.",
     ],
+    try: () => ["Any recording, judged exactly like a live call: upload a file, record a line, or pick a prepared sample."],
+    history: () => ["Every call it has judged since it started, with the strongest warning each one got."],
+    threat: (d) => [`The usual detector calls ${d.s1Fake} of genuine Hindi-English speech fake.`],
     network: (d) => [
       `Thirty real mobile calls, scores only: the final recipe holds where the codec breaks the old model, and catches ${d.xttsCaught} of ${d.xttsCalls} seen-tool clones.`,
     ],
     trust: () => ["Scramble the words: same verdict. It reads how the voice was produced, not what is said."],
-    try: () => ["Read the line on the screen; it is judged exactly as a live call."],
-    hub: () => ["Four scenes, about eight minutes. Keys 1 to 4 jump to a scene; N opens these notes; F goes full screen."],
   };
 
-  const ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 4 12 3-9 2 3h5"/></svg>`;
-  let current = null;
+  const ICONS = {
+    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
+    phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+    wave: '<path d="M3 12h1M7 8v8M11 4v16M15 8v8M19 10v4M21 12h0"/>',
+    list: '<path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+    columns: '<rect x="3" y="4" width="7.5" height="16" rx="2"/><rect x="13.5" y="4" width="7.5" height="16" rx="2"/>',
+    chart: '<path d="M3 21h18"/><path d="M6 17v-6M11 17V6M16 17v-9M20 17v-4"/>',
+  };
+  const svg = (paths, cls = "") =>
+    `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  const MARK = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 19.5 6v5.6c0 4.6-3.2 8.3-7.5 9.6-4.3-1.3-7.5-5-7.5-9.6V6z"/><path d="M8 12h1.6l1.3-2.6 2.2 5.2 1.3-2.6H16"/></svg>`;
+
   let data = null;
 
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -108,7 +131,7 @@ const Stage = (() => {
     return set;
   }
 
-  // One request shared by every caller (the drawer and the overview's cards ask at once).
+  // One request shared by every caller (the notes and a page's cards ask at once).
   function sayData() {
     if (data) return data;
     data = (async () => {
@@ -128,21 +151,31 @@ const Stage = (() => {
     return data;
   }
 
-  function topbar(key) {
-    const steps = make("nav", { class: "steps", "aria-label": "Demo scenes" },
-      SCENES.map((s) => make("a", {
-        href: s.href,
-        class: s.key === key ? "on" : (current && s.n < current.n ? "done" : ""),
-        title: `Scene ${s.n}: ${s.title} (${s.minutes})`,
-      }, [make("span", { class: "n", text: s.n }), make("span", { class: "t", text: s.title })])));
-    return make("header", { class: "topbar" }, [
-      make("a", { class: "brand", href: "/demo", title: "Demo overview" }, [
-        make("span", { class: "mark", html: ICON }),
-        make("span", {}, [make("b", { text: "Cloned-voice call detection" }), make("small", { text: "Hindi-English phone calls" })]),
+  const sectionOf = (key) => (EVIDENCE.some((e) => e.key === key) ? "limits" : key);
+
+  function rail(key) {
+    const section = sectionOf(key);
+    return make("nav", { class: "rail", "aria-label": BRAND.name }, [
+      make("a", { class: "brand", href: "/demo", title: `${BRAND.name}: ${BRAND.tagline}` }, [
+        make("span", { class: "mark", html: MARK }),
+        make("b", { text: BRAND.name }),
       ]),
-      steps,
-      make("div", { class: "pills", id: "stagePills" }, [make("span", { class: "pill", text: "connecting…" })]),
+      make("div", { class: "nav" }, NAV.map((n, i) => make("a", {
+        href: n.href,
+        class: n.key === section ? "on" : "",
+        "aria-current": n.key === section ? "page" : null,
+        title: `${n.title}: ${n.what} (${i + 1})`,
+      }, [make("span", { class: "ic", html: svg(ICONS[n.icon]) }), make("span", { class: "t", text: n.title })]))),
+      make("div", { class: "status", id: "stagePills" }, [make("span", { class: "pill", text: "connecting…" })]),
     ]);
+  }
+
+  // The evidence pages share one tab strip under Performance.
+  function tabs(key) {
+    if (!EVIDENCE.some((e) => e.key === key)) return null;
+    return make("nav", { class: "tabs", "aria-label": "Performance" }, EVIDENCE.map((e) => make("a", {
+      href: e.href, class: e.key === key ? "on" : "", "aria-current": e.key === key ? "page" : null, text: e.title,
+    })));
   }
 
   function shortModel(name) {
@@ -154,7 +187,7 @@ const Stage = (() => {
     return "another model";
   }
 
-  // One light for the room, the details for the presenter's mouse.
+  // One light: is protection on? The details for the mouse.
   async function pills() {
     const box = $("#stagePills");
     if (!box) return;
@@ -169,7 +202,7 @@ const Stage = (() => {
         text: ready ? "Ready" : d.checkpoint_found ? "Loading…" : "Model missing",
       }));
     } catch (e) {
-      box.replaceChildren(make("span", { class: "pill bad", text: "Server unreachable" }));
+      box.replaceChildren(make("span", { class: "pill bad", text: "Offline" }));
     }
   }
 
@@ -183,12 +216,16 @@ const Stage = (() => {
     ]);
   }
 
+  function flowStep(key) {
+    const i = FLOW.findIndex((f) => f.key === key);
+    return { i, prev: i > 0 ? FLOW[i - 1] : null, next: i >= 0 ? FLOW[i + 1] || null : FLOW[0] };
+  }
+  const hrefOf = (key) => (NAV.find((n) => n.key === key) || EVIDENCE.find((e) => e.key === key) || NAV[0]).href;
+
   async function presenter(key) {
-    const scene = SCENES.find((s) => s.key === key);
-    const more = MORE.find((m) => m.key === key);
+    const { i, prev, next } = flowStep(key);
     const lines = (SAY[key] || (() => []))(await sayData());
-    const prev = scene ? SCENES[scene.n - 2] : more ? SCENES.at(-1) : null;
-    const next = scene ? SCENES[scene.n] : more ? null : SCENES[0];
+    const step = i >= 0 ? FLOW[i] : null;
     const drawer = make("aside", { class: "presenter", id: "presenter", "aria-label": "Presenter notes" }, [
       make("div", { class: "handle" }, [
         keyLine(),
@@ -197,20 +234,19 @@ const Stage = (() => {
       ]),
       make("div", { class: "body" }, [
         make("div", { class: "say" }, [
-          make("div", { class: "meta", text: scene ? `Scene ${scene.n} of ${SCENES.length} · ${scene.title} · ${scene.minutes}` : more ? `For questions · ${more.title}` : "Demo overview · about eight minutes" }),
+          make("div", { class: "meta", text: step ? `Walkthrough ${i + 1} of ${FLOW.length} · ${step.title} · ${step.minutes}` : "For questions" }),
           ...lines.map((t) => make("p", { text: t })),
         ]),
         make("div", { class: "navs" }, [
-          prev ? make("a", { class: "btn ghost", href: prev.href, text: "← " + prev.title }) : null,
-          next ? make("a", { class: "btn", href: next.href, text: next.title + " →" }) : make("a", { class: "btn ghost", href: "/demo", text: "Overview" }),
+          prev ? make("a", { class: "btn ghost", href: hrefOf(prev.key), text: "← " + prev.title }) : null,
+          next ? make("a", { class: "btn", href: hrefOf(next.key), text: next.title + " →" }) : null,
         ]),
       ]),
     ]);
     document.body.append(drawer);
   }
 
-  // Only the presenter's own toggle is remembered: the overview opening its notes by
-  // default must not leave them open over every scene on the projector.
+  // Only the presenter's own toggle is remembered, so notes never open by themselves.
   function toggleNotes(force, remember = true) {
     const p = $("#presenter");
     if (!p) return;
@@ -223,20 +259,18 @@ const Stage = (() => {
   function keys(key) {
     document.addEventListener("keydown", (ev) => {
       if (ev.target.closest("input, select, textarea, [contenteditable]") || ev.ctrlKey || ev.metaKey || ev.altKey) return;
-      const scene = SCENES.find((s) => s.key === key);
-      const more = MORE.some((m) => m.key === key);
+      const { prev, next } = flowStep(key);
       if (ev.key === "ArrowRight") {
-        const next = scene ? SCENES[scene.n] : more ? null : SCENES[0];
-        if (next) location.href = next.href;
+        if (next) location.href = hrefOf(next.key);
       } else if (ev.key === "ArrowLeft") {
-        const prev = scene ? SCENES[scene.n - 2] : more ? SCENES.at(-1) : null;
-        location.href = prev ? prev.href : "/demo";
+        if (prev) location.href = hrefOf(prev.key);
+        else if (key !== "home") location.href = NAV[0].href;
       } else if (ev.key === "n" || ev.key === "N") {
         toggleNotes();
       } else if (ev.key === "f" || ev.key === "F") {
         if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
-      } else if (ev.key >= "1" && ev.key <= String(SCENES.length)) {
-        location.href = SCENES[Number(ev.key) - 1].href;
+      } else if (ev.key >= "1" && ev.key <= String(NAV.length)) {
+        location.href = NAV[Number(ev.key) - 1].href;
       }
     });
   }
@@ -252,19 +286,22 @@ const Stage = (() => {
 
   function favicon() {
     if (document.querySelector("link[rel=icon]")) return;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2a63e8"/><path d="M5 16h3l3-8 5 16 4-12 2 4h5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    document.head.append(make("link", { rel: "icon", href: "data:image/svg+xml," + encodeURIComponent(svg) }));
+    const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2a63e8"/><path d="M16 5l9 4v6.5c0 5.4-3.8 9.7-9 11.2-5.2-1.5-9-5.8-9-11.2V9z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg>`;
+    document.head.append(make("link", { rel: "icon", href: "data:image/svg+xml," + encodeURIComponent(icon) }));
   }
 
   async function mount(key) {
-    current = SCENES.find((s) => s.key === key) || null;
     favicon();
+    const page = NAV.find((n) => n.key === key) || EVIDENCE.find((e) => e.key === key);
+    if (page) document.title = `${page.title} · ${BRAND.name}`;
     document.body.classList.add("stage");
-    document.body.prepend(topbar(key));
+    document.body.prepend(rail(key));
+    const strip = tabs(key);
+    const main = $("main");
+    if (strip && main) main.prepend(strip);
     keys(key);
     pills();
     setInterval(pills, 10000);
-    if (key === "home") return; // the project overview is not a scene: no presenter notes
     await presenter(key);
     let open = false;
     try { open = localStorage.getItem("stage.notes") === "1"; } catch (e) { /* private window */ }
@@ -288,24 +325,39 @@ const Stage = (() => {
   const WORDS = { listening: "Listening", genuine: "Genuine", suspicious: "Caution", likely_fake: "Likely cloned" };
   const word = (state) => WORDS[state] || state || "Listening";
 
-  // The presenter's lines for one scene, numbers filled from the results API.
+  // The presenter's lines for one page, numbers filled from the results API.
   async function lines(key) {
     return (SAY[key] || (() => []))(await sayData());
   }
 
-  // A scene renamed by its page (scene 2 counts the detectors it was given): stepper and notes.
-  function retitle(key, title) {
-    const s = SCENES.find((x) => x.key === key);
-    if (!s) return;
-    s.title = title;
-    const step = document.querySelector(`.steps a[href="${s.href}"]`);
-    if (step) {
-      step.querySelector(".t").textContent = title;
-      step.title = `Scene ${s.n}: ${title} (${s.minutes})`;
-    }
-    const meta = document.querySelector("#presenter .say .meta");
-    if (meta && current && current.key === key) meta.textContent = `Scene ${s.n} of ${SCENES.length} · ${title} · ${s.minutes}`;
+  // A small verdict chip: light and word, in the verdict's colour.
+  function chip(state, text) {
+    return make("span", { class: "vchip s-" + (state || "listening") }, [make("span", { class: "light still" }), text || word(state)]);
   }
 
-  return { SCENES, MORE, NAMES, ABOUT, mount, make, json, cite, pct, toast, socket, word, shortModel, nameOf, details, lines, retitle };
+  // Prepared calls are named for what they are, never for how they turned out.
+  const CALL_NAMES = {
+    tortoise_caught: "Tortoise cloned voice, call 1 (unseen tool)",
+    tortoise_clone: "Tortoise cloned voice, call 2 (unseen tool)",
+    hiacc_spontaneous: "Genuine caller speaking freely",
+  };
+  const callName = (id, title) => CALL_NAMES[id] || title || String(id).replace(/_/g, " ");
+
+  // A judged call, described for people: what it was and where it came from.
+  function callInfo(s) {
+    const meta = s.meta || {};
+    const truth = meta.truth === "spoof" ? "known clone" : meta.truth === "bonafide" ? "known genuine" : null;
+    if (s.kind === "replay") return { title: callName(meta.clip, s.label), source: "Prepared call", truth };
+    if (s.kind === "webrtc") return { title: "Call to the protected phone", source: "Browser phone", truth };
+    if (s.kind === "twilio") return { title: s.label, source: "Phone network", truth };
+    return { title: s.label, source: s.kind, truth };
+  }
+  const clock = (unix) => new Date(unix * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const secs = (s) => {
+    if (s === null || s === undefined) return "–";
+    const r = Math.round(s);
+    return `${Math.floor(r / 60)}:${String(r % 60).padStart(2, "0")}`;
+  };
+
+  return { BRAND, NAV, EVIDENCE, FLOW, NAMES, ABOUT, ICONS, svg, mount, make, json, cite, pct, toast, socket, word, chip, callName, callInfo, clock, secs, shortModel, nameOf, details, lines };
 })();

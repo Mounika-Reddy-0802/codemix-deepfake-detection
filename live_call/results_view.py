@@ -196,6 +196,8 @@ def headline() -> dict:
             **_s1_false_alarm_counts(),
         },
         "english_line_deployed": _english_line(),
+        # the model Check audio judges with: the same English clips through the line
+        "english_line_final": _english_line("final_s1234"),
         "deployed": {
             "line_eer_mean": cite(
                 round(dep["eval_pool"]["eer"]["mean"], 2), seeds, "deployed.sets.eval_pool.eer.mean"
@@ -398,7 +400,7 @@ def _live_call_mean(model: str) -> tuple[float | None, int, str]:
 
 
 def real_calls() -> dict:
-    """Everything the real-network scene shows."""
+    """Everything the real-network page shows."""
     summary = _json(REAL_CALLS / "summary.json")
     src = _rel(REAL_CALLS / "summary.json")
     final = summary["models"]["final_g711"]
@@ -416,10 +418,10 @@ def real_calls() -> dict:
 
 
 # --------------------------------------------------------------------------- #
-# Scene 6: what it cannot do yet, and what was done about each limit
+# Performance: what it cannot do yet, and what was done about each limit
 # --------------------------------------------------------------------------- #
 #: Track A's overnight results: (doc, data files it may ship with), looked up at request
-#: time so the limits scene picks them up the moment they are committed.
+#: time so the Performance page picks them up the moment they are committed.
 TONIGHT = {
     "spontaneous": ("docs/results/spontaneous_tradeoff_v1.md", "spontaneous_tradeoff_v1"),
     "late": ("docs/results/early_warning_v1.md", "early_warning_v1"),

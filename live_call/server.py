@@ -5,7 +5,7 @@ One FastAPI app serves everything the evaluation demo needs:
 | Route | What it is |
 |---|---|
 | ``GET /`` | evaluator home: what the system does, live status, links |
-| ``GET /demo`` | the final review's guided flow; its four scenes ``/threat``, ``/lanes``, ``/live``, ``/limits``, and for questions ``/network``, ``/trust``, ``/try`` (routes in ``demo_routes.py``) |
+| ``GET /demo`` | the product's overview; its pages ``/live`` (live call), ``/try`` (check a recording), ``/history`` (call log), ``/lanes`` (compare detectors), ``/limits`` with ``/threat``, ``/network``, ``/trust`` (performance) (APIs in ``demo_routes.py``) |
 | ``GET /console`` | one screen: both handsets, the signal path and the live analysis |
 | ``GET /dashboard`` | receiver dashboard: every live call, verdict light, score timeline, alerts |
 | ``GET /call`` | WebRTC call page; a participant can speak or play a clip into the call |
@@ -233,6 +233,19 @@ def warning_beep_wav(rate: int = 8000) -> bytes:
     return buffer.getvalue()
 
 
+def power_status() -> dict | None:
+    """Mains or battery: four detectors fall behind a call on battery, so the demo says so."""
+    try:
+        import psutil
+
+        battery = psutil.sensors_battery()
+    except Exception:  # noqa: BLE001 - no battery, or no psutil: nothing to report
+        return None
+    if battery is None:
+        return None
+    return {"plugged": bool(battery.power_plugged), "percent": round(battery.percent)}
+
+
 def demo_clips_dir() -> Path:
     """Read when used, so a value from ``.env`` (loaded when the app starts) applies."""
     return Path(os.environ.get("DEMO_CLIPS_DIR", "demo_assets"))
@@ -347,47 +360,52 @@ def create_app(state: App | None = None) -> FastAPI:
 
     @api.get("/demo")
     async def demo_flow() -> HTMLResponse:
-        """The final review's guided flow: four scenes in order, with the presenter's lines."""
+        """The product's overview: protection status, what it measured, recent calls."""
         return page("demo.html")
 
     @api.get("/threat")
     async def threat_page() -> HTMLResponse:
-        """Scene 1: the threat."""
+        """Performance: why it is needed (the English-only detector on Hindi-English speech)."""
         return page("threat.html")
 
     @api.get("/limits")
     async def limits_page() -> HTMLResponse:
-        """Scene 4: the limits, one number each; the rest under Details and More."""
+        """Performance: what it catches on real calls and what it cannot do yet."""
         return page("limits.html")
 
     @api.get("/try")
     async def try_page() -> HTMLResponse:
-        """For questions: read a line into the microphone, judged as a live call."""
+        """Check a recording: upload, record or pick a sample, judged as a live call."""
         return page("try.html")
+
+    @api.get("/history")
+    async def history_page() -> HTMLResponse:
+        """The call log: every call judged since the server started, with its verdict."""
+        return page("history.html")
 
     @api.get("/console")
     async def console_page() -> HTMLResponse:
-        """The one-screen console under its own name (the phone scene's fallback)."""
+        """The one-screen console under its own name (the live call's fallback)."""
         return page("console.html")
 
     @api.get("/lanes")
     async def lanes_page() -> HTMLResponse:
-        """Scene 2: one call, every detector, a light each."""
+        """Compare detectors: one call, every detector, a light each."""
         return page("lanes.html")
 
     @api.get("/live")
     async def live_page() -> HTMLResponse:
-        """Scene 3: the caller on this laptop, the receiver on the mentor's phone."""
+        """Live call protection: the caller on this laptop, the receiver on a phone."""
         return page("live.html")
 
     @api.get("/network")
     async def network_page() -> HTMLResponse:
-        """For questions: the real mobile network, scores only."""
+        """Performance: the real mobile network, scores only."""
         return page("network.html")
 
     @api.get("/trust")
     async def trust_page() -> HTMLResponse:
-        """For questions: why the verdict can be trusted."""
+        """Performance: why the verdict can be trusted (the shuffle check)."""
         return page("trust.html")
 
     @api.get("/phone")
@@ -420,6 +438,7 @@ def create_app(state: App | None = None) -> FastAPI:
                 "demo_clips": len(list_demo_clips()),
                 "demo_clips_dir": demo_clips_dir().name,
                 "lanes": len(shared.lane_set().lanes),
+                "power": power_status(),
             }
         )
 
@@ -532,7 +551,7 @@ def create_app(state: App | None = None) -> FastAPI:
             }
         )
 
-    # ----------------------------------------------------------------- demo scenes
+    # ------------------------------------------------------------------ demo pages
     demo_routes.add_lane_routes(api, shared, find_clip, clip_audio)
     demo_routes.add_live_routes(
         api,

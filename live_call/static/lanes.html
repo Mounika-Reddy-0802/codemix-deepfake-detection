@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Same call, four detectors</title>
+  <title>Compare detectors</title>
   <link rel="stylesheet" href="/static/stage.css" />
   <style>
     main.scene { padding-top: 1.1rem; }
@@ -11,7 +11,7 @@
     .head h1.title { margin: 0; }
     .head p.lede { margin: 0.35rem 0 0; font-size: 1.02rem; }
 
-    /* the two calls the presenter plays, one click each */
+    /* the two featured calls, one click each */
     .calls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.25fr); gap: 0.8rem; margin-bottom: 1rem; align-items: stretch; }
     @media (max-width: 1100px) { .calls { grid-template-columns: 1fr; } }
     .callbtn {
@@ -91,9 +91,8 @@
     .empty { padding: 2rem; text-align: center; color: var(--dim); grid-column: 1 / -1; }
     @media (max-height: 820px) and (min-width: 1101px) {
       main.scene { padding-top: 0.7rem; }
-      .kicker { margin-bottom: 0.2rem; }
       .head { margin-bottom: 0.6rem; }
-      .head p.lede { display: none; }
+      .head p.lede { font-size: 0.9rem; margin-top: 0.15rem; }
       .calls { margin-bottom: 0.7rem; }
       .callbtn { padding: 0.6rem 0.85rem; }
       .det { padding: 0.85rem 0.95rem 0.8rem; gap: 0.65rem; }
@@ -107,11 +106,11 @@
 </head>
 <body>
   <main class="scene">
-    <p class="kicker" id="kicker">Scene 2 · One call, every detector</p>
     <div class="head">
       <div>
-        <h1 class="title one" id="sentence">Same call, four detectors.</h1>
-        <p class="lede muted">Each light is the warning that detector would give the person being called.</p>
+        <h1 class="title one">Compare detectors</h1>
+        <p class="lede muted"><span id="sentence">Same call, four detectors.</span> Each light is the warning that detector
+          would give the person receiving the call.</p>
       </div>
       <button class="btn details-btn" id="detailsBtn" type="button">Details</button>
     </div>
@@ -146,7 +145,7 @@
     const { make, json, word, nameOf, ABOUT } = Stage;
     Stage.mount("lanes");
 
-    // Scene 2 plays these two, named so the title does not give the answer away
+    // The two featured calls, named so the title does not give the answer away
     // (configs/demo_rehearsal.json checks both).
     const FEATURED = [
       { id: "genuine_new_speaker", title: "A genuine caller", sub: "a real person none of them has heard" },
@@ -161,7 +160,7 @@
     // ------------------------------------------------------------------ calls
     const isFake = (c) => c.label === "spoof";
     const featuredOf = (id) => FEATURED.find((f) => f.id === id);
-    const titleOf = (c) => (featuredOf(c.id) || {}).title || c.title;
+    const titleOf = (c) => (featuredOf(c.id) || {}).title || Stage.callName(c.id, c.title);
 
     async function loadCalls() {
       try {
@@ -174,10 +173,10 @@
       }, [make("span", { class: "ic", html: PLAY }), make("b", { text: f.title }), make("small", { text: f.sub })])).filter(Boolean);
       box.prepend(...buttons);
       const others = clips.filter((c) => !featuredOf(c.id));
-      $("otherCalls").replaceChildren(make("option", { value: "", text: "Other calls, for questions…" }),
-        ...others.map((c) => make("option", { value: c.id, text: `${c.title} (${isFake(c) ? "cloned" : "real"})` })));
+      $("otherCalls").replaceChildren(make("option", { value: "", text: "More prepared calls…" }),
+        ...others.map((c) => make("option", { value: c.id, text: `${Stage.callName(c.id, c.title)} (${isFake(c) ? "cloned" : "real"})` })));
       $("otherCalls").onchange = (ev) => ev.target.value && choose(ev.target.value);
-      // /lanes?clip=<id> opens on that call (scene 4's known-limit links)
+      // /lanes?clip=<id> opens on that call (the known-limit links on Performance)
       const wanted = new URLSearchParams(location.search).get("clip");
       if (clips.length) choose(clips.some((c) => c.id === wanted) ? wanted : (featuredOf(clips[0].id) ? FEATURED[0].id : clips[0].id));
     }
@@ -218,8 +217,6 @@
       document.body.style.setProperty("--n", lanes.length);
       const count = { 2: "two", 3: "three", 4: "four", 5: "five" }[lanes.length] || String(lanes.length);
       $("sentence").textContent = `Same call, ${count} detectors.`;
-      document.title = `Same call, ${count} detectors`;
-      Stage.retitle("lanes", count[0].toUpperCase() + count.slice(1) + " detectors");
       const l0 = lanes.find((l) => l.ladder);
       if (l0) $("ladder").textContent = "Each detector warns on its own ladder: caution after a few low windows in a row, likely cloned after more (hover a threshold for its file).";
       box.replaceChildren(...lanes.map((l, i) => {

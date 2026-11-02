@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Call log</title>
+  <link rel="stylesheet" href="/static/stage.css" />
+  <style>
+    .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    @media (max-width: 800px) { .summary { grid-template-columns: 1fr; } }
+    .summary .stat .v { font-size: 2rem; }
+    .filters { display: inline-flex; padding: 0.2rem; border-radius: 999px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); }
+    .filters button { font: inherit; font-size: 0.84rem; font-weight: 600; color: var(--dim); background: none; border: 0; padding: 0.38rem 0.85rem; border-radius: 999px; cursor: pointer; }
+    .filters button[aria-pressed="true"] { background: rgba(91, 149, 255, 0.2); color: var(--ink); }
+    .testcall { display: flex; gap: 0.5rem; align-items: center; }
+    .testcall select { font: inherit; font-size: 0.88rem; color: var(--ink); background: #0f1828; border: 1px solid var(--line-2); border-radius: 10px; padding: 0.5rem 0.6rem; max-width: 17rem; }
+    .testcall .btn { padding: 0.55rem 1rem; font-size: 0.88rem; }
+    table.log { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+    table.log th, table.log td { padding: 0.7rem 0.7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    table.log th { color: var(--dim); font-weight: 650; font-size: 0.72rem; letter-spacing: 0.8px; text-transform: uppercase; }
+    table.log td.num, table.log th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.log td .sub { display: block; color: var(--faint); font-size: 0.78rem; margin-top: 0.1rem; }
+    table.log tr.live td { background: rgba(91, 149, 255, 0.06); }
+    .when { color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .mark { font-size: 0.8rem; font-weight: 650; white-space: nowrap; }
+    .mark.ok { color: #7fe9b6; } .mark.no { color: #ff9a9a; } .mark.meh { color: #ffcd7a; }
+    .empty { text-align: center; padding: 2.6rem 1rem; color: var(--dim); }
+    .empty b { display: block; color: var(--ink); font-size: 1.15rem; margin-bottom: 0.3rem; }
+    .empty .row { justify-content: center; margin-top: 1rem; }
+    .livebadge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--dim); }
+    .livebadge .light { width: 8px; height: 8px; }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <header class="page-head">
+      <div>
+        <h1 class="title one">Call log</h1>
+        <p class="lede">Every call Asli has judged since it started, newest first, with the strongest warning each one got.</p>
+      </div>
+      <div class="actions">
+        <div class="testcall" title="Plays a prepared call through the live path, as fast as it can be scored">
+          <select id="clip" aria-label="Prepared call"></select>
+          <button class="btn ghost" id="run" type="button">Run a test call</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="card stat"><span class="v" id="nAll">–</span><span class="l">calls judged</span></div>
+      <div class="card stat bad"><span class="v" id="nWarned">–</span><span class="l">warned: a caution or "likely cloned"</span></div>
+      <div class="card stat good"><span class="v" id="nGenuine">–</span><span class="l">let through as genuine</span></div>
+    </section>
+
+    <section class="card">
+      <div class="row" style="margin-bottom:0.6rem">
+        <div class="filters" role="group" aria-label="Show">
+          <button type="button" data-f="all" aria-pressed="true">All</button>
+          <button type="button" data-f="warned" aria-pressed="false">Warned</button>
+          <button type="button" data-f="genuine" aria-pressed="false">Genuine</button>
+        </div>
+        <span class="spacer"></span>
+        <span class="livebadge s-genuine" id="livebadge"><span class="light still"></span>updates as calls arrive</span>
+      </div>
+      <div id="log"></div>
+    </section>
+  </main>
+
+  <script src="/static/stage.js"></script>
+  <script>
+    const { make, json } = Stage;
+    Stage.mount("history");
+    const $ = (id) => document.getElementById(id);
+    let calls = [];
+    let filter = "all";
+
+    // a prepared call knows what it really is, so the log can say whether the verdict was right
+    function mark(s) {
+      const truth = (s.meta || {}).truth;
+      if (!s.ended || !truth) return null;
+      const warned = s.peak_state === "suspicious" || s.peak_state === "likely_fake";
+      if (truth === "spoof") return warned ? make("span", { class: "mark ok", text: "✓ clone caught" }) : make("span", { class: "mark no", text: "✗ clone missed" });
+      if (!warned) return make("span", { class: "mark ok", text: "✓ let through" });
+      return s.peak_state === "suspicious" ? make("span", { class: "mark meh", text: "cautioned a real caller" }) : make("span", { class: "mark no", text: "✗ false alarm" });
+    }
+
+    function render() {
+      const done = calls.filter((s) => s.ended);
+      const warned = (s) => s.peak_state === "suspicious" || s.peak_state === "likely_fake";
+      $("nAll").textContent = calls.length;
+      $("nWarned").textContent = done.filter(warned).length;
+      $("nGenuine").textContent = done.filter((s) => s.peak_state === "genuine").length;
+      const rows = calls
+        .filter((s) => filter === "all" || (filter === "warned" ? warned(s) : s.ended && s.peak_state === "genuine"))
+        .sort((a, b) => b.started - a.started);
+      if (!rows.length) {
+        $("log").replaceChildren(make("div", { class: "empty" }, [
+          make("b", { text: calls.length ? "No calls match this filter" : "No calls yet" }),
+          calls.length ? "Choose All to see every call." : "Calls to the protected phone and test calls appear here as they happen.",
+          calls.length ? null : make("div", { class: "row" }, [
+            make("a", { class: "btn go", href: "/live", text: "Start a protected call" }),
+            make("button", { class: "btn ghost", type: "button", text: "Run a test call", onclick: run }),
+          ]),
+        ]));
+        return;
+      }
+      const head = make("tr", {}, ["Time", "Call", "Verdict", "First warning", "Suspicious windows", "Length"].map((h, i) =>
+        make("th", { class: i >= 3 ? "num" : "", text: h })));
+      const body = rows.map((s) => {
+        const info = Stage.callInfo(s);
+        const state = s.ended ? s.peak_state : s.state;
+        return make("tr", { class: s.ended ? "" : "live" }, [
+          make("td", { class: "when", text: Stage.clock(s.started) }),
+          make("td", {}, [info.title, make("span", { class: "sub", text: [info.source, info.truth].filter(Boolean).join(" · ") })]),
+          make("td", {}, [Stage.chip(state, s.ended ? null : "Live · " + Stage.word(state)), mark(s) ? make("span", { class: "sub" }, [mark(s)]) : null]),
+          make("td", { class: "num", text: s.first_warning_s === null || s.first_warning_s === undefined ? "–" : Stage.secs(s.first_warning_s) }),
+          make("td", { class: "num", text: s.scored_windows ? `${s.fake_leaning_windows} of ${s.scored_windows}` : "–" }),
+          make("td", { class: "num", text: s.duration ? Stage.secs(s.duration) : "–" }),
+        ]);
+      });
+      $("log").replaceChildren(make("table", { class: "log" }, [make("thead", {}, [head]), make("tbody", {}, body)]));
+    }
+
+    async function refresh() {
+      try {
+        calls = await json("/api/sessions");
+        $("livebadge").className = "livebadge s-genuine";
+        render();
+      } catch (e) {
+        $("livebadge").className = "livebadge s-likely_fake";
+      }
+    }
+
+    document.querySelectorAll(".filters button").forEach((b) => b.addEventListener("click", () => {
+      filter = b.dataset.f;
+      document.querySelectorAll(".filters button").forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      render();
+    }));
+
+    async function run() {
+      const id = $("clip").value;
+      if (!id) return;
+      $("run").disabled = true;
+      $("run").textContent = "Running…";
+      try {
+        await json(`/api/replay/${encodeURIComponent(id)}?realtime=false&wait=true`, { method: "POST" });
+      } catch (e) { Stage.toast("Could not run the test call: " + e.message); }
+      $("run").disabled = false;
+      $("run").textContent = "Run a test call";
+      refresh();
+    }
+    $("run").onclick = run;
+
+    (async () => {
+      try {
+        const clips = await json("/api/demo-clips");
+        $("clip").replaceChildren(...clips.map((c) => make("option", { value: c.id, text: Stage.callName(c.id, c.title) })));
+      } catch (e) { $("run").disabled = true; }
+    })();
+
+    // a call starting or ending anywhere refreshes the log at once; the poll is the safety net
+    Stage.socket((m) => { if (m.type === "session_start" || m.type === "session_end") refresh(); });
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

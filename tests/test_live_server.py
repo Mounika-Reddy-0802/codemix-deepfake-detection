@@ -54,6 +54,22 @@ def test_pages_and_health(client):
     health = client.get("/api/health").json()
     assert health["detector"]["threshold"] == 0.5
     assert health["twilio"]["configured"] is False
+    # mains or battery, or nothing on a machine without a battery
+    power = health["power"]
+    assert power is None or (isinstance(power["plugged"], bool) and 0 <= power["percent"] <= 100)
+
+
+def test_power_status_reports_battery_and_survives_no_battery(monkeypatch):
+    import types
+
+    from live_call import server
+
+    battery = types.SimpleNamespace(power_plugged=False, percent=23.6)
+    fake = types.SimpleNamespace(sensors_battery=lambda: battery)
+    monkeypatch.setitem(__import__("sys").modules, "psutil", fake)
+    assert server.power_status() == {"plugged": False, "percent": 24}
+    fake.sensors_battery = lambda: None
+    assert server.power_status() is None
 
 
 def test_upload_returns_verdict_and_window_timeline(client):
