@@ -85,6 +85,12 @@ def test_hiacc_is_evaluation_only():
     assert any("evaluation-only" in p for p in problems)
 
 
+def test_field_recordings_are_evaluation_only():
+    # the consent form promises the team's field recordings never train a model
+    problems = cg.check_rows(_rows(source="field_validation", tool="none"), S3, set(), set())
+    assert any("evaluation-only" in p for p in problems)
+
+
 def test_eval_pool_speaker_is_rejected():
     problems = cg.check_rows(_rows(speaker="e1"), S3, eval_speakers={"e1"}, rvc_test_speakers=set())
     assert any("eval-pool" in p for p in problems)
