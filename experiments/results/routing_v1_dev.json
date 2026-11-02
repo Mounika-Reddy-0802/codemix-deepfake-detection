@@ -1,0 +1,25 @@
+{
+  "chosen": "english_over_hindi",
+  "percent_routed_correctly": {
+    "english_clean": {
+      "top_english": 64.25,
+      "english_over_hindi": 98.25,
+      "not_indian": 98.5
+    },
+    "english_g711": {
+      "top_english": 39.75,
+      "english_over_hindi": 90.75,
+      "not_indian": 93.75
+    },
+    "hinglish_g711": {
+      "top_english": 100.0,
+      "english_over_hindi": 96.64,
+      "not_indian": 90.71
+    },
+    "worst": {
+      "top_english": 39.75,
+      "english_over_hindi": 90.75,
+      "not_indian": 90.71
+    }
+  }
+}
