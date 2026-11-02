@@ -13,7 +13,7 @@ voice raises a warning on the receiver's dashboard, and the telephone carrier, b
 beep in the receiver's ear and send an SMS, is implemented but not yet run on live numbers.
 Recorded real mobile calls were scored offline through the same path.
 
-> **Status: Week 14 — the final recipe, a larger encoder, and a first test on real phone calls.**
+> **Status: Week 15 — spontaneous speech as data, a voice check for any recording, and English calls.**
 >
 > An English-trained detector (0.85% EER on English) reaches **58.42%** on Hindi–English
 > speech over a phone line; it rejects real speakers, calling **94.8%** of clean genuine
@@ -32,10 +32,21 @@ Recorded real mobile calls were scored offline through the same path.
 > (for the speakers it fails on, the real mobile codec is the largest step); the final recipe
 > warns 3 of 12 genuine live calls (all one speaker's) and takes 5 of 6 XTTS-v2 clone calls
 > to "likely cloned", but none of 6 Chatterbox calls (it cautions one); the larger encoder
-> (SSL-AASIST, one checkpoint at its own dev-chosen operating point) warns 1 of 12 genuine live
-> calls and takes all 6 XTTS-v2 calls and 1 of 6 Chatterbox calls to "likely cloned"
+> (SSL-AASIST, two checkpoints, each at its own dev-chosen operating point) warns at most 1 of 12
+> genuine live calls and takes all 6 XTTS-v2 calls to "likely cloned" in both checkpoints, but the
+> two disagree on Chatterbox and on spontaneous speech ([ensemble_v1](docs/results/ensemble_v1.md))
 > ([real_calls_v1](docs/results/real_calls_v1.md); the call chain, stage by stage:
 > [`experiments/figures/real_call_chain.pdf`](experiments/figures/real_call_chain.pdf)).
+>
+> **Week 15:** every model rejected people speaking freely. Retraining with 150 spontaneous
+> IndicVoices speakers, hypotheses written before launch, brings genuine spontaneous clips called
+> fake to 1-2% for every seed and separates them from clones far better, at a cost of 1-11 EER
+> points on the read-speech benchmarks: a trade-off, as the rule fixed beforehand says. The
+> **voice check** (any recording in, real or cloned out) judges 99% of genuine speech real but lets
+> most IndicF5 and Chatterbox clones through; the retrained detector catches far more of them, and
+> it is not adopted because one of its two trainings misses the read-speech bar set before
+> measuring ([voice_check](docs/voice_check.md)). A language gate fixes English calls: 9.80% EER over
+> the phone line instead of 25.00% ([routing_v1](docs/results/routing_v1.md)).
 
 ---
 
@@ -107,6 +118,43 @@ Every number below comes from a real run on real data and is reproducible from
 notebooks). **The newest results come first**; sections 1–5
 are the pre-normalisation numbers, kept as the record of how we got here.
 
+### Week 15 — spontaneous speech as data, and the voice check
+
+**Spontaneous speech in training** (decision D1, hypotheses written before launch;
+[spontaneous_training_v1](docs/results/spontaneous_training_v1.md)). 200 IndicVoices Hindi speakers
+were split into pools from metadata before any audio was read
+([indicvoices_data_v1](docs/results/indicvoices_data_v1.md)); the final recipe and SSL-AASIST were
+retrained with the 150 training speakers:
+
+| | Adapter, 3 seeds | SSL-AASIST, 2 seeds |
+|---|---|---|
+| HiACC genuine called fake (never trained on) | 43.9% -> **1.2%** | 26.2% -> **1.5%** |
+| Read-speech EER change: Tortoise / IndicF5 / Chatterbox (2.0 allowed) | +8.2 / +10.7 / - | +3.7 / +1.2 / +3.4 |
+| Spontaneous genuine against IndicF5 clones, threshold-free EER | 72.8 -> 37-52 | 49 -> 15-20 |
+| Verdict by the rule fixed before launch | trade-off | trade-off |
+
+Choosing the operating point again with spontaneous dev speakers, without retraining, only trades
+errors: no threshold separates people speaking freely from the newest generators
+([operating_points_spont_v1](docs/results/operating_points_spont_v1.md)).
+
+**The voice check** ([voice_check](docs/voice_check.md)): any file or microphone take, judged by the
+mean window score through the same path the accuracy is measured on.
+
+| Judged correctly | Voice check today (SSL-AASIST seed 1234 at 0.082) | Retrained, seed 1234 / seed 2025 |
+|---|---|---|
+| Genuine spontaneous / read speech | 99.3% / 99.9% | 99.5% / 99.8% and 99.1% / **97.6%** |
+| Genuine live calls | 12 of 12 | 12 of 12, both |
+| IndicF5 / Chatterbox / RVC clones | 12.5% / 4.4% / 45.4% | 35.6-45.4% / 51.6% / 85.8-89.0% |
+
+The retrained detector was measured under a rule committed first: both trainings had to keep read
+genuine speech at 99%, and seed 2025 does not, so the voice check keeps its detector (P-040).
+
+**English calls** ([routing_v1](docs/results/routing_v1.md)): a language gate, its rule chosen on dev
+audio, sends English to S1: English EER 0.60% clean and 9.80% over the phone line (final adapter
+alone 13.50% and 25.00%), at most 0.4 points lost on Hindi-English. **Calibration**
+([calibration_v1](docs/results/calibration_v1.md)): at the fixed rule the final systems almost never
+call genuine speech fake, but miss most clones of the newest tools and are confident when wrong.
+
 ### Week 14 — what a caller meets
 
 **Whole calls, not clips.** Test clips replayed through the live scoring path and stitched
@@ -146,11 +194,14 @@ into 60 s calls, with the final recipe's operating point chosen on the dev set o
   SSL-AASIST, retrained on Kaggle so its weights could be kept and given its own operating point
   on the same dev clips by the same rule, warns 1 of 12 genuine live calls (none "likely
   cloned"), takes all 6 XTTS-v2 calls to "likely cloned" (four of them 10-14 s in) and catches 1
-  Chatterbox call and cautions 2. It is one checkpoint, the weakest of six trainings on
+  Chatterbox call and cautions 2. That checkpoint is the weakest of six trainings on
   Chatterbox offline (21.2% EER against 8.2-18.3%). On held-out 60 s calls at the
   same operating point it warns 11 of 41 genuine spontaneous (HiACC) calls, where the final recipe
-  warns all 41, but trainings of this encoder differ on spontaneous speech, so a second checkpoint
-  has to agree first.
+  warns all 41. **A second checkpoint (seed 2025, week 15) does not agree**: it also takes all six
+  XTTS-v2 calls and no genuine live call to "likely cloned", but it catches none of the six
+  Chatterbox calls and warns 31 of 41 spontaneous calls; their average warns none of the 18 genuine
+  calls and 23 of 41 spontaneous ones ([ensemble_v1](docs/results/ensemble_v1.md)). Which training
+  of this encoder generalises to spontaneous speech is luck without spontaneous training data.
   Rebuilding the call chain on our direct recordings
   shows where the deployed model breaks: over six readings its mean P(genuine) falls from 0.75
   through the simulated line to **0.50 through the real AMR-NB codec**, its threshold, the
@@ -784,7 +835,7 @@ bonafide, never a cloning reference, never in any manifest. Enforced by
 
 ---
 
-## Progress — Weeks 1–14
+## Progress — Weeks 1–15
 
 Only completed work is listed. The full 12-week plan lives in the team drive,
 outside this repo.
@@ -803,23 +854,17 @@ outside this repo.
 | **12** | ✅ **Dataset inventory** and datasheet corrected ([W12](docs/W12_lahari_dataset_inventory.md)); ✅ **data chapter**, stating who each model hears (21 speakers, not 10) and who it is tested on; ✅ **false-alarm test on 24 new spontaneous speakers** — 54.37% of genuine speech called fake (review 3); ✅ **English over the phone line** — deployed 2.30 → 24.20%, S1 6.50% (review 4) | ✅ **Classification metrics** — precision, recall, confusion matrices ([W12](docs/W12_mounika_classification_metrics.md)); ✅ **five-seed stability** — deployed Tortoise 35.59 ± 3.35, S3 XTTS-only under its floor in every seed (review 1); ✅ **phone-line trade-off** — every adapter scored in the condition it was not trained in (review 4) | ✅ **System design chapter**, backup demo, Streamlit stand-in ([W12](docs/W12_krishna_system_design_and_demo.md)); ✅ **introduction, related work, conclusion**; ✅ **matched shortcut floors** with a paired speaker-level test (review 5); ✅ **38 verified references** (review 6); ✅ **training variants** chosen by a rule fixed in advance, and an exploratory augmentation lead (review 2) |
 | **13** | ✅ **Three new speaker pools** and a **language-controlled set**: the gap follows the recording, not the code-mixing; ✅ **real AMR-NB codec** and two-codec training; ✅ **Chatterbox** as a third unseen tool; ✅ **shortcut floors for the final systems**, beaten in every seed ([W13](docs/W13_lahari_speakers_codemixing_and_codec.md)) | ✅ **248 training speakers** beat 21 in every seed on six of seven sets; ✅ **the final recipe** (248 speakers, both codecs); ✅ **AASIST and SSL-AASIST baselines**, the larger encoder better in every seed on eight of eleven sets ([W13](docs/W13_mounika_overfit_fix_and_aasist.md)) | ✅ **Four clone sets** generated on Kaggle (CM05-CM08) and every model scored on them; ✅ **paper retitled** around the recording-domain finding, four-page version ([W13](docs/W13_krishna_generation_and_scoring.md)) |
 | **14** | ✅ **English with the final recipe** (it misses English fakes rather than rejecting English callers); ✅ **overview figure**; ✅ **model card** drafted; ✅ **conference paper at six pages** ([W14](docs/W14_lahari_english_figure_release.md)) | ✅ **Larger encoder on spontaneous speech** (5.8% and 46.7% across two trainings) and **its speed** (keeps up with a live call on two CPU threads); ✅ **viva preparation** and the demo script brought to week 14 ([W14](docs/W14_mounika_encoder_spontaneous.md)); ✅ **live demo for the final review**: four scenes in eight minutes, one sentence and at most three numbers per screen, four detectors on one call, the receiver's phone, the limits with their numbers, the rest under Details; every demo call checked against a written-down verdict through the live path, every number on screen read from its committed file ([W14](docs/W14_mounika_live_demo.md)) | ✅ **Live system on the final recipe**: threshold chosen on dev, 60 s calls replayed through the live path; ✅ **real-call pilot**: consent, protocol, cloning packs, real calls scored, and the call chain that shows the mobile codec takes the deployed model to its threshold on average; ✅ **weights package** verified for the release decision; ✅ **the larger encoder on the real calls**, at its own dev-chosen operating point (better than the final recipe there and on spontaneous calls, one checkpoint) ([W14](docs/W14_krishna_live_final_recipe.md)) |
+| **15** | ✅ **IndicVoices Hindi** in speaker pools frozen before any audio; ✅ **decision D1**: operating points chosen with spontaneous dev speech, and retraining with spontaneous speech, both a trade-off by rules fixed beforehand; ✅ **English routing** with a language gate; ✅ **DET curves and calibration** ([W15](docs/W15_lahari_spontaneous_data.md)) | ✅ **Voice check page** with a consent-gated field log; ✅ **field-recording protocol**; ✅ **robustness sweep design**; ✅ the retrained detector **measured in the voice check** and not adopted, by the rule written first (P-040) | ✅ **Voice-check scoring path** (one `judge` for the page and the numbers); ✅ **second SSL-AASIST checkpoint** and the two-checkpoint average on the real calls; ✅ Kaggle runs launched from the laptop ([W15](docs/W15_krishna_real_calls_and_training.md)) |
 
-**Open:** run the final recipe as the live system's default everywhere (the demo already runs it,
-`scripts/run_demo.bat`; the real calls support it), and score a second SSL-AASIST checkpoint on the
-real and spontaneous calls, to see whether the larger encoder should replace it (one checkpoint did
-better on both); fund the Twilio account and run the carrier on real numbers for the first time (trial
-credit exhausted; the carrier leg has never run on them); spontaneous speech is still rejected
-(every genuine 60 s spontaneous call is warned by both live models, and no threshold avoids it;
-[hiacc_final_v1](docs/results/hiacc_final_v1.md),
-[spontaneous_tradeoff_v1](docs/results/spontaneous_tradeoff_v1.md)), and fixing it needs spontaneous genuine
-speech in training; real development calls, to set a stricter speech gate for the first
-seconds of a call together with the operating point (the quiet before the first word is
-scored as speech, and some early speech windows score as fake too; a gate set on the dev
-clips alone helps over G.711, not as recorded, and delays every model:
-[early_warning_v1](docs/results/early_warning_v1.md));
-decide on publishing the weights (the package is ready, [release](docs/release.md)); settle
-the title, authors and venue, tag `paper-v1` (both papers point readers to it), then submit
-the paper.
+**Open:** the newest generators (IndicF5, Chatterbox) still pass the voice check at its current
+point; the SSL-AASIST retrained with spontaneous speech catches far more of them, and adopting it
+needs a recipe whose every training meets the rule, or a rule for the two-checkpoint average
+written before it is measured ([voice_check](docs/voice_check.md)); measure the voice check on clean
+wideband files and on field recordings; run the final recipe as the live system's default
+everywhere (the demo already runs it, `scripts/run_demo.bat`); fund the Twilio account and run the
+carrier on real numbers for the first time; real development calls, to set a stricter speech gate
+for the first seconds of a call ([early_warning_v1](docs/results/early_warning_v1.md)); decide on
+publishing the weights (the package is ready, [release](docs/release.md)).
 
 ---
 
@@ -892,10 +937,16 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/dataset_inventory_v1.md`](docs/results/dataset_inventory_v1.md) | Clips and hours for every corpus and attack |
 | [`docs/results/encoder_ablation_v1.md`](docs/results/encoder_ablation_v1.md) | **XLSR-53 against wav2vec2-base** — XLSR-53's frozen-feature advantage does not survive training in our LoRA/S3 recipes (separate from SSL-AASIST) |
 | [`docs/results/live_final_recipe_v1.md`](docs/results/live_final_recipe_v1.md) | **What a caller meets** — 60 s calls through the live path, deployed model against the final recipe |
-| [`docs/results/real_calls_v1.md`](docs/results/real_calls_v1.md) | **Real phone calls** — the pilot over a mobile network, and the call chain, in which the mobile codec is the largest single step in the deployed model's failure; the larger encoder (one checkpoint) on the same calls |
+| [`docs/results/real_calls_v1.md`](docs/results/real_calls_v1.md) | **Real phone calls** — the pilot over a mobile network, and the call chain, in which the mobile codec is the largest single step in the deployed model's failure; the larger encoder on the same calls (two checkpoints and their average: [`ensemble_v1.md`](docs/results/ensemble_v1.md)) |
 | [`docs/results/early_warning_v1.md`](docs/results/early_warning_v1.md) | **A stricter speech gate for the first seconds of a call**, set on dev and replayed on the real calls: it clears two of the final recipe's three warned genuine live calls over G.711 but not as recorded, delays every model, and shows the gate needs real development calls |
 | [`docs/real_calls/PROTOCOL.md`](docs/real_calls/PROTOCOL.md) | **How the real-call test is run** — consent, scripts, the 30-call plan, what is kept where |
 | [`docs/results/english_final_v1.md`](docs/results/english_final_v1.md) | **English with the final recipe** — it misses English fakes rather than rejecting English callers |
+| [`docs/voice_check.md`](docs/voice_check.md) | **The voice check** — any recording judged real or cloned: how, how accurate today, and the retrained detector measured against it |
+| [`docs/results/indicvoices_data_v1.md`](docs/results/indicvoices_data_v1.md) | **IndicVoices Hindi** — inventory, speaker pools frozen before any audio, clones, the second spontaneous test set |
+| [`docs/results/operating_points_spont_v1.md`](docs/results/operating_points_spont_v1.md) | **Operating points with spontaneous dev speech** (decision D1 part a) — fewer false alarms, more clones passing |
+| [`docs/results/spontaneous_training_v1.md`](docs/results/spontaneous_training_v1.md) | **Training with spontaneous speech** (decision D1 part b) — hypotheses before launch, both families a trade-off, the voice-check rule and its result |
+| [`docs/results/routing_v1.md`](docs/results/routing_v1.md) | **English routing** — a language gate in front of the detectors |
+| [`docs/results/calibration_v1.md`](docs/results/calibration_v1.md) | **DET curves and calibration** — every trade-off point, Brier score, calibration error |
 | [`docs/results/encoder_spontaneous_v1.md`](docs/results/encoder_spontaneous_v1.md) | **The larger encoder** on spontaneous speech, and its speed on a live call |
 | [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | **Model card** for the final recipe (draft, not published) |
 | [`docs/release.md`](docs/release.md) | **What is published and what is not**, and the weights package ready for the release decision |
