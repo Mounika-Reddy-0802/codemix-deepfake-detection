@@ -175,7 +175,7 @@ codemix-deepfake-detection/
 │
 ├── checkpoints/                  # GITIGNORED — store on Kaggle Datasets / Drive
 │
-├── paper/                        # Overleaf-synced LaTeX (IEEE template)
+├── Paper_Journal/                        # Overleaf-synced LaTeX (IEEE template)
 │   ├── main.tex
 │   ├── sections/
 │   └── figures/
