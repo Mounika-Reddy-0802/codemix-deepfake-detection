@@ -198,7 +198,6 @@ def build_inventory(
 ) -> pd.DataFrame:
     """Read (or reuse the cached) metadata of every shard and concatenate it."""
     import pandas as pd
-    import pyarrow.parquet as pq
 
     token = token or hf_token()
     if not token:
@@ -206,6 +205,8 @@ def build_inventory(
             "HF_TOKEN is not set: accept the IndicVoices terms on its Hugging Face page, "
             "create a read token and put it in .env as HF_TOKEN."
         )
+    import pyarrow.parquet as pq  # only once there is something to read
+
     cache.mkdir(parents=True, exist_ok=True)
     shards = list_shards(subset, token)[:max_shards]
     frames = []

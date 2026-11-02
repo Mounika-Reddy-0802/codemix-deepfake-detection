@@ -4,6 +4,7 @@ import io
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from src.data import indicvoices_download as dl
 
@@ -52,7 +53,7 @@ def test_manifest_rows_have_the_project_columns_and_offsets() -> None:
 
 
 def test_decode_resamples_to_16k_mono() -> None:
-    import soundfile as sf
+    sf = pytest.importorskip("soundfile")  # audio wheel, not installed in CI
 
     buf = io.BytesIO()
     stereo = np.zeros((8000, 2), dtype=np.float32)
