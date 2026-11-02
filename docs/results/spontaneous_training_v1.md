@@ -2,8 +2,9 @@
 
 **Status: hypotheses written on 1 November 2026, before any run was launched.** Results are
 added below them when the runs finish; nothing above the results section changes after launch
-except the session log in the compute table. **Adapter: all three seeds in, verdict
-*trade-off*** (2 November). SSL-AASIST: running.
+except the session log in the compute table. **Verdict for both families: *trade-off***
+(2 November): spontaneous genuine speech is no longer called fake and is separated from every
+tool's clones far better, at a cost above the allowed 2 points on the read-speech benchmarks.
 
 ## Why
 
@@ -80,14 +81,16 @@ records its `run_seeds`. Launched from the laptop (`kaggle kernels push`, T4):
 | Session | Seeds | Started | Finished | Commit |
 |---|---|---|---|---|
 | `w15-spont-adapter` | 1234 | 1 Nov 23:07 | 2 Nov 01:20 | `2dc1cda` |
-| `w15-spont-ssl-s1234` | SSL-AASIST 1234 | 1 Nov 23:12 | | |
+| `w15-spont-ssl-s1234` | SSL-AASIST 1234 | 1 Nov 23:12 | 2 Nov 05:03 | `2dc1cda` |
 | `w15-spont-adapter-b` | 2025, 7 | 2 Nov 01:22 | 2 Nov 04:28 | `c13e7a8` |
-| `w15-spont-ssl-s2025` | SSL-AASIST 2025 | when a slot frees | | |
+| `w15-spont-ssl-s2025` | SSL-AASIST 2025 | 2 Nov 05:05 | 2 Nov 10:20 | `2bae234` |
 
 Between `2dc1cda` and `c13e7a8` the branch gained result files and a `--scores-in` option in
 `false_alarm` that the notebook does not use; training and scoring code is identical, so the
-three adapter seeds are one experiment. At 04:28 the laptop's queue script started
-`w15-spont-adapter-b` a second time (it still listed the session after being restarted). That
+three adapter seeds are one experiment; between `2dc1cda` and `2bae234` only reporting code,
+result files and the adapter notebook's defaults changed, so the same holds for SSL-AASIST. At 04:28 the laptop's queue script started
+`w15-spont-adapter-b` a second time (two copies of the script were running, each with its own
+queue). That
 duplicate run is not part of the plan and does not enter any verdict.
 
 ## Results
@@ -164,6 +167,86 @@ P(genuine) ≥ 0.5: Tortoise CM04 66.2% frozen (seed 1234) against 84.5 / 73.8 /
    model; this run is reported beside it. A recipe that keeps both results is future work: more
    generator variety in the added clones, and clones made from spontaneous speech.
 
+### SSL-AASIST, both seeds: verdict **trade-off**
+
+RUN HEALTH clean in both sessions. Frozen values are week 14's SSL-AASIST on the same sets and
+seeds (`encoder_spontaneous_v1`). The fixed rule is log-odds < 0
+(`experiments/results/spontaneous_training_v1/verdict_ssl.json`).
+
+| Measure | Frozen, seeds 1234 / 2025 | Spontaneous recipe, seeds 1234 / 2025 | Paired mean change |
+|---|---|---|---:|
+| **H1** HiACC genuine called fake | 5.76 / 46.68 | 1.75 / 1.15, mean **1.45** | −24.77 |
+| **H2** CM04 Tortoise EER, G.711 | 1.74 / 0.68 | 3.09 / 6.80 | **+3.74** |
+| **H2** CM07 IndicF5 EER, G.711 | 25.83 / 14.86 | 19.55 / 23.62 | +1.23 |
+| **H2** CM09 Chatterbox EER, G.711 | 12.58 / 12.41 | 11.47 / 20.41 | **+3.44** |
+| CM04 / CM07 EER over AMR-NB | 0.88 / 0.27 and 31.77 / 21.84 | 3.94 / 3.94 and 20.14 / 23.19 | +3.37 / −5.14 |
+| New speakers' Tortoise EER, G.711 | 0.91 / 0.37 | 1.30 / 2.71 | +1.36 |
+| RVC test half EER | 6.30 / 5.01 | 5.65 / 10.98 | +2.67 |
+| Evaluation pool EER (XTTS-v2) | 0.13 / 0.13 | 0.20 / 1.74 | +0.84 |
+| Language control, read genuine called fake | 0.00 / 0.16 | 1.01 / 1.32 | +1.09 |
+| `iv_test` genuine called fake / EER (same corpus as training) | | 5.66 / 3.52 and 0.49 / 0.49 | |
+
+H1 holds: mean 1.45% (allowed at most 16.2%), and neither seed is above its frozen seed. H2
+fails on CM04 (+3.74) and CM09 (+3.44) and holds on CM07 (+1.23): by the rule fixed before
+launch, **trade-off**. The seeds disagree: seed 1234 holds or improves on every clone set
+(IndicF5 −6.3, Chatterbox −1.1, Tortoise +1.4), seed 2025 loses 6–9 points on each.
+
+*Threshold-free separation of spontaneous genuine speech* (diagnostic; the 4,342 genuine
+spontaneous clips against each tool's clones, as for the adapter; every file of one row is
+log-odds from one checkpoint):
+
+| Clones | Frozen, seeds 1234 / 2025 | Spontaneous recipe, seeds 1234 / 2025 |
+|---|---|---|
+| XTTS-v2 of the `iv_test` speakers (598) | 1.68 / 1.34 | 0.16 / 0.29 |
+| RVC test half (317) | 18.93 / 25.92 | 3.53 / 4.74 |
+| Tortoise, new speakers (222) | 12.62 / 16.73 | 2.25 / 1.90 |
+| Tortoise, CM04 (458) | 14.19 / 20.52 | 2.43 / 2.79 |
+| IndicF5, CM07 (526) | 49.81 / 48.67 | 14.83 / 20.34 |
+| Chatterbox, CM09 (525) | 39.41 / 57.18 | 8.19 / 17.14 |
+
+### Reading, both families
+
+1. **The purpose is met for both, and more strongly for the larger encoder.** HiACC false alarms
+   fall to 1-2% for every seed of both families, and spontaneous genuine speech moves away from
+   every tool's clones. For SSL-AASIST the newest generators, which no operating point could
+   separate from people speaking freely (`operating_points_spont_v1.md`, 38-55%), fall to
+   8-20% EER.
+2. **The cost is on read-speech benchmarks, and it depends on the encoder.** The adapter loses
+   8-11 points on Tortoise and IndicF5 on every seed. SSL-AASIST's mean loss is 1-4 points:
+   seed 1234 stays within the allowed 2 points on all three sets, seed 2025 loses 6-9; two
+   seeds cannot say which is typical.
+3. **The verdicts stand as written.** Both are trade-offs; the frozen models remain the
+   project's reported models.
+
+### Voice check: the spontaneous-recipe SSL-AASIST against the current detector
+
+*Decided on 2 November, after both verdicts above and before any voice-check number of the new
+checkpoints was computed.* The voice check judges any audio, most of it people speaking freely,
+which is where the spontaneous recipe is strongest; the verdicts above judge read-speech
+benchmarks. So the new checkpoints are measured in the voice check under a rule fixed here:
+
+- **Candidates:** the spontaneous recipe's SSL-AASIST seeds 1234 and 2025, each at its own
+  operating point chosen by the unchanged rule (P-031) on the dev windows of part (a): the 506
+  dev clips plus the 20 `iv_dev` speakers.
+- **Reference:** the current voice check, frozen seed 1234 at 0.082.
+- **Measured** with `src/reporting/any_audio_accuracy.py` exactly as the reference column: one
+  4 s head crop per clip on the G.711 sets, HiACC on the same 1,000 clips, the real calls by
+  their mean window P(genuine).
+
+Seed 1234 replaces the current detector only if **both** seeds meet all four:
+
+1. spontaneous genuine (HiACC) judged real at least 97.3% (the reference's 99.3% less 2 points);
+2. read genuine judged real at least 99.0% on the new speakers and on the language control, and
+   at least 11 of 12 genuine live calls and 5 of 6 genuine replays;
+3. unseen clones: mean accuracy over Tortoise (new speakers), Tortoise (CM04), IndicF5,
+   Chatterbox and RVC at least 54.1% (10 points above the reference's 44.1%), with none of the
+   five more than 10 points below the reference;
+4. XTTS-v2 clones caught at least 98.0%.
+
+Otherwise the current detector stays. AMR-NB rows and replayed clones are reported, not judged.
+Seed 1234 because it is the seed the voice check and every deployed model use; requiring both
+seeds to pass keeps the choice from resting on the better seed.
+
 ### How to reproduce the adapter numbers
 
 The two sessions' outputs are in `experiments/results/spontaneous_training_v1/` (`adapter_s1234/`,
@@ -186,3 +269,8 @@ python -m src.reporting.spontaneous_separation \
 The frozen row uses `hiacc_false_alarm_v1/final_s1234_channel_scores.csv` and
 `indicvoices_iv_test_v1/final_s1234_clones_g711_scores.csv` as genuine and as XTTS-v2 clones, and
 `frozen_s1234/final_s1234__*_scores.csv` for the other tools.
+
+SSL-AASIST: the same two commands with `--ssl-runs $O/ssl_s1234/runs.json $O/ssl_s2025/runs.json
+--out $O/verdict_ssl.json`, `D=$O/ssl_s1234` (or `ssl_s2025`) and an extra
+`chatterbox=$D/spont_s${S}__cm09_scores.csv`; the frozen rows read `frozen_ssl/` and
+`indicvoices_iv_test_v1/ssl_s${S}_clones_g711_scores.csv` (genuine and XTTS-v2 clones).
