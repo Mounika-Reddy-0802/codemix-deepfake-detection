@@ -40,13 +40,13 @@ Recorded real mobile calls were scored offline through the same path.
 >
 > **Week 15:** every model rejected people speaking freely. Retraining with 150 spontaneous
 > IndicVoices speakers, hypotheses written before launch, brings genuine spontaneous clips called
-> fake to 1-2% for every seed and separates them from clones far better, at a cost of 1-11 EER
+> fake below 2% for every seed and separates them from clones far better, at a cost of 1-11 EER
 > points on the read-speech benchmarks: a trade-off, as the rule fixed beforehand says. The
 > **voice check** (any recording in, real or cloned out) judges 99% of genuine speech real but lets
 > most IndicF5 and Chatterbox clones through; the retrained detector catches far more of them, and
 > it is not adopted because one of its two trainings misses the read-speech bar set before
 > measuring ([voice_check](docs/voice_check.md)). A language gate fixes English calls: 9.80% EER over
-> the phone line instead of 25.00% ([routing_v1](docs/results/routing_v1.md)).
+> the phone line instead of 25.00% on the routing test sample ([routing_v1](docs/results/routing_v1.md)).
 
 ---
 
@@ -151,7 +151,7 @@ genuine speech at 99%, and seed 2025 does not, so the voice check keeps its dete
 
 **English calls** ([routing_v1](docs/results/routing_v1.md)): a language gate, its rule chosen on dev
 audio, sends English to S1: English EER 0.60% clean and 9.80% over the phone line (final adapter
-alone 13.50% and 25.00%), at most 0.4 points lost on Hindi-English. **Calibration**
+alone 13.50% and 25.00% on the same 1,000-clip sample), at most 0.4 points lost on Hindi-English. **Calibration**
 ([calibration_v1](docs/results/calibration_v1.md)): at the fixed rule the final systems almost never
 call genuine speech fake, but miss most clones of the newest tools and are confident when wrong.
 
