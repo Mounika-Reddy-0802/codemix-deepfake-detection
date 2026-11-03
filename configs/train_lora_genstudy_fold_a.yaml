@@ -1,0 +1,29 @@
+# Week 15, owner SK. Generator study (P-041), system fold_a: the final recipe
+# (train_lora_final.yaml) plus gen_train genuine clips + IndicF5 clones (Chatterbox unseen).
+# Built by src/data/generator_study; scored only on speakers outside gen_train.
+system: generator_study
+encoder: wav2vec2-base
+init_from: checkpoints/baseline/best.pt
+
+lora: true
+lora_r: 8
+lora_alpha: 16.0
+lora_dropout: 0.05
+
+train_manifest: data/manifests/genstudy_train_fold_a.csv
+dev_manifest: data/manifests/codemix_adapt_dev_channel20.csv
+out_dir: checkpoints/genstudy_fold_a
+
+lr: 1.0e-4
+weight_decay: 1.0e-5
+batch_size: 8
+max_seconds: 4.0
+epochs: 5
+num_workers: 4
+seed: 1234
+
+device: cuda
+amp: true
+class_weighted: true
+log_every: 25
+wandb_mode: offline
