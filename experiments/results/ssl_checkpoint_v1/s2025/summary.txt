@@ -1,0 +1,22 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: 23fe2742b56b8ec4edc92f895e0d0c7b488826be
+
+SSL-AASIST on the final-recipe data, EER (%): G.711 line, *_amr = real AMR-NB codec; control_fa = genuine clips called fake (%)
+run                    status    dev        eval_pool             cm04         rvc_test         new_xtts     new_tortoise             cm07       control_fa     new_xtts_amr new_tortoise_amr         cm07_amr         cm04_amr             cm09
+final_s2025                ok   0.00             0.45             1.09             5.98             0.00             0.45            19.03             0.23             0.05             0.45            30.07             1.77             9.94
+
+MEAN +/- SD over seeds
+  fine-tuned on final:
+    eval_pool           0.45 (n=1)
+    cm04                1.09 (n=1)
+    rvc_test            5.98 (n=1)
+    new_xtts            0.00 (n=1)
+    new_tortoise        0.45 (n=1)
+    cm07               19.03 (n=1)
+    control_fa          0.23 (n=1)
+    new_xtts_amr        0.05 (n=1)
+    new_tortoise_amr    0.45 (n=1)
+    cm07_amr           30.07 (n=1)
+    cm04_amr            1.77 (n=1)
+    cm09                9.94 (n=1)
