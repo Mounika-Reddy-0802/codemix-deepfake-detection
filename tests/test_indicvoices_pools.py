@@ -1,5 +1,7 @@
 """Tests for src/data/indicvoices_pools.py on synthetic metadata (no network)."""
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
@@ -85,3 +87,8 @@ def test_only_usable_clips_inside_chosen_groups_count() -> None:
     chosen = pd.DataFrame({"shard": ["a.parquet"], "group": [0]})
     # x: one usable clip (one is too long, one is read); y: one clip in the chosen group
     assert ivp.eligible_counts(clips, chosen).to_dict() == {"x": 1, "y": 1}
+
+
+def test_the_committed_pools_are_still_the_frozen_ones():
+    root = Path(__file__).resolve().parents[1]
+    sp.verify_frozen(str(root / ivp.POOLS_PATH), ivp.FROZEN_SHA256)
