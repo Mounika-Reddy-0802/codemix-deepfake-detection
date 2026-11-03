@@ -34,6 +34,8 @@ import pandas as pd
 from src.data import speaker_pools as sp
 
 POOLS_PATH = "data/manifests/indicvoices_pools.csv"
+#: canonical hash of the frozen pools (`speaker_pools.frame_hash`), checked by the tests
+FROZEN_SHA256 = "f8ba8c36ce87111ae38e5d5ef5d5ed6c6825626562556a6d8cd170fbca355a5b"
 GROUPS_PATH = "data/manifests/indicvoices_row_groups.csv"
 PREFIX = "iv_"
 #: never in a training or dev manifest

@@ -8,6 +8,8 @@ moving after generation has started.
 Pure pandas, no audio.
 """
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
@@ -151,3 +153,12 @@ def test_freeze_record_describes_itself(tmp_path) -> None:
     record = sp.freeze(sp.pools_to_frame(sp.carve_pools(_speakers(40))), str(tmp_path / "p.csv"))
     described = record.describe()
     assert "train=" in described and "eval=" in described
+
+
+def test_the_committed_pools_match_the_hash_recorded_in_the_datasheet():
+    # recorded on Windows; the canonical form fixes the line ending, so this holds on Linux too
+    root = Path(__file__).resolve().parents[1]
+    sp.verify_frozen(
+        str(root / "data/manifests/speaker_pools.csv"),
+        "f57e0d85dbd3c8f5b96ad6af59edae7218104b0167807eae6433314947063e7b",
+    )

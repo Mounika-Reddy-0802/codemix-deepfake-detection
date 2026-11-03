@@ -52,8 +52,9 @@ Results: `experiments/results/real_calls_v1/` (seed 1234), `.../ssl_s2025/` and
   to "likely cloned", and neither takes any genuine live call there. The single-checkpoint
   caveat on these rows is removed.
 - **They disagree on Chatterbox.** Seed 1234 warns on 3 of 6 Chatterbox calls (1 or 2
-  likely cloned); seed 2025 warns on none, although its offline Chatterbox EER is about
-  10%. On real calls an unseen generator's result can hinge on the training run.
+  likely cloned); seed 2025 warns on none, although its offline Chatterbox EER is 9.94%
+  (`experiments/results/ssl_checkpoint_v1/s2025/`). On real calls an unseen generator's result
+  can hinge on the training run.
 - **The average warns on no genuine call** (0 of 18 in both conditions) and keeps the
   caution on half the Chatterbox calls, but takes none of them to "likely cloned".
 - With 6 calls per clone kind the intervals are wide (3 of 6 is 19-81% at 95%), so the

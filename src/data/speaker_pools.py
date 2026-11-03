@@ -116,8 +116,13 @@ def pools_to_frame(pools: dict[str, list[str]], source: str = "mucs2021") -> pd.
 
 
 def frame_hash(frame: pd.DataFrame) -> str:
-    """SHA-256 of the canonical CSV form, so the freeze is verifiable."""
-    canonical = frame[POOL_COLUMNS].sort_values(["pool", "speaker"]).to_csv(index=False)
+    """SHA-256 of the canonical CSV form, so the freeze is verifiable.
+
+    The line ending is fixed: pandas otherwise writes the platform's own, and the recorded
+    hashes were made on Windows (CRLF), so a Linux check of an unchanged file would fail.
+    """
+    ordered = frame[POOL_COLUMNS].sort_values(["pool", "speaker"])
+    canonical = ordered.to_csv(index=False, lineterminator="\r\n")
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
