@@ -46,6 +46,7 @@ def test_room_response_has_unit_energy_and_keeps_length() -> None:
 
 
 def test_speed_changes_length_and_pitch_does_not() -> None:
+    pytest.importorskip("librosa")  # resampling wheel, not installed in CI
     clean = _tone(2.0)
     rng = np.random.default_rng(0)
     assert len(rb.transform("speed_1.05", clean, rng)) == pytest.approx(len(clean) / 1.05, rel=0.01)
