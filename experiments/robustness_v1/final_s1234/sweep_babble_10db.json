@@ -1,0 +1,37 @@
+{
+  "checkpoint": "C:/dfdata/checkpoints/final_s1234_best.pt",
+  "manifest": "D:/dfdata/robustness_v1/sweep_babble_10db.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.20324817518248176,
+    "eer_ci_low": 0.17914630701282183,
+    "eer_ci_high": 0.2280935651132014,
+    "auc": 0.8811820762368208,
+    "auc_ci_low": 0.8600258343588781,
+    "auc_ci_high": 0.9017714215729561,
+    "f1": 0.6770538243626063,
+    "threshold": 0.9964473843574524,
+    "clips": 1122,
+    "bonafide": 300,
+    "spoof": 822,
+    "score_std": 0.403182
+  },
+  "per_attack": [
+    {
+      "attack": "indicf5",
+      "spoof_clips": 300,
+      "eer": 0.32
+    },
+    {
+      "attack": "tortoise",
+      "spoof_clips": 222,
+      "eer": 0.189595
+    },
+    {
+      "attack": "xtts_v2",
+      "spoof_clips": 300,
+      "eer": 0.063333
+    }
+  ]
+}

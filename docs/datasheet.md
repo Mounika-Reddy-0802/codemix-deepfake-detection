@@ -29,7 +29,8 @@ It has three parts:
    and nothing else, which is what makes the gap a measurement of generalisation
    rather than an artefact of mixed training data.
 2. **Code-mixed bonafide speech** — MUCS 2021 Hindi-English (NPTEL lecture audio) and
-   HiACC adult (spontaneous), indexed to real speaker identities.
+   HiACC adult (spontaneous), indexed to real speaker identities; since week 15 also
+   IndicVoices Hindi (spontaneous, extempore), in three frozen pools (section 1.3).
 3. **Code-mixed spoofs we made** — XTTS-v2 zero-shot clones, RVC per-speaker voice
    conversions, and three tools no model is trained on (Tortoise-TTS, IndicF5, Chatterbox),
    each built from a committed job table and only from the speakers of its own pool
@@ -79,6 +80,46 @@ clones**, so if a speaker moved pool after generation, a fake of an evaluation v
 would be sitting in training data and every generalisation number in the project
 would be void. `speaker_pools.verify_frozen()` re-checks the hash before use, and
 `test_verify_fails_when_a_speaker_moved_pool` is exactly that scenario.
+
+### 1.3 IndicVoices Hindi — a second spontaneous corpus (week 15)
+
+Every code-mixed training clip above is read lecture speech, and every model calls genuine
+spontaneous speech fake far more often than read speech. IndicVoices (AI4Bharat) holds
+unscripted Hindi from thousands of speakers. Its speakers were chosen from metadata alone,
+before any audio was read (`docs/results/indicvoices_data_v1.md`):
+
+- **Inventory:** the metadata columns of all 83 Hindi shards (never the audio): 2,356
+  speakers, 828 hours (574.5 extempore, 181.1 conversation, 72.6 read).
+- **Download bound:** 40 row groups drawn first (seed 1234; `indicvoices_row_groups.csv`);
+  395 speakers have at least 20 extempore clips of 2-15 s inside them.
+- **Pools:** a seeded draw, test pool first, frozen in `data/manifests/indicvoices_pools.csv`
+  (canonical SHA-256 `f8ba8c36ce87111ae38e5d5ef5d5ed6c6825626562556a6d8cd170fbca355a5b`,
+  checked by `tests/test_indicvoices_pools.py`). Speaker ids carry the prefix `iv_`.
+
+| Pool | Speakers | Female | Rural | Genuine clips kept | XTTS-v2 clones passing QA | Role |
+|---|---:|---:|---:|---:|---:|---|
+| `iv_train` | 150 | 64 | 102 | 4,952 | 2,951 of 3,000 | Stage-3 training (decision D1, P-038) |
+| `iv_dev` | 20 | 12 | 14 | 694 | 398 of 400 | development set only |
+| `iv_test` | 30 | 17 | 16 | 1,024 | 598 of 600 | evaluation only, never in any training or dev manifest |
+| **All** | **200** | **93** | **132** | **6,670 (14.9 h)** | **3,947** | |
+
+Each pool spans four states and all four age groups. Clone transcripts come only from the
+speaker's own pool, so no test text reaches training. `src/training/config_guard.py`
+enforces the roles on every training config's real manifests and refuses any other
+IndicVoices speaker, or a clone of one, whatever its source column says.
+
+### 1.4 Field recordings for the voice check (planned)
+
+The voice check judges audio as a user would bring it: speech recorded on the laptop
+microphone, a phone recording played into it, a call heard on speaker. Its accuracy table
+has rows for corpora and for 30 real calls, none for such recordings. The protocol
+(`docs/field_validation/PROTOCOL.md`) plans 105 takes by the three team members (their own
+voices, their own phone recordings, and the clones of their voices made for the real-call
+test, played back). Each member signs the consent form
+(`docs/ethics/field_recording_consent_form.md`) before the first take. The recordings are
+evaluation-only (`config_guard` refuses the `field_validation` source in any training
+config) and are never committed: they stay in `data/field_validation/`, and signed forms in
+`docs/ethics/`, both ignored by git. Not recorded yet.
 
 ---
 
@@ -263,7 +304,12 @@ quarantine that is not running.
 - **Tortoise clones from any training manifest** — permanently, by rule. Enforced by
   `tests/test_splits.py`, which fails the build rather than warning.
 - **Eval-only corpora from any training manifest** — IndicSynth, IndicTTS-Deepfake,
-  IndicVoices, AffectDF.
+  AffectDF, HiACC, and IndicVoices except its `iv_train` pool (decision D1; `iv_dev` only in
+  a dev manifest, `iv_test` never).
+- **The team's field recordings** from every training manifest, and from the repository.
+- **IndicVoices clip manifests and clone job tables** from the repository: they carry
+  transcripts and per-speaker demographics of a gated corpus. They rebuild from the committed
+  row groups and pools.
 
 ---
 
@@ -278,7 +324,7 @@ constrain what this project may release:
 | HiACC | CC BY 4.0 | Attribution. Adult subset only. |
 | IndicSynth | **CC BY-NC 4.0** | **Non-commercial only** — the restriction must be stated explicitly in the paper. |
 | ASVspoof 2019 LA | ASVspoof research licence | Research use, cite the dataset paper. LA partition only. |
-| IndicVoices | AI4Bharat research | Gated: accept terms, use a token. |
+| IndicVoices | CC BY 4.0 (gated) | Attribution; accept the terms on Hugging Face and use a token. Transcripts and demographics are not redistributed. |
 
 **The generated audio is not in this repository and will not be.** It is cloned
 speech of identifiable people; the repo is public. CM01, CM02 and CM04 audio live in
@@ -345,8 +391,11 @@ different romanisation. 0 unmapped characters across all 56,143 rows.
 4. **Spoof quality is uneven.** CM01 rated 1.5/5 "sounds human" and 1/5
    "code-switch natural" by the team. These are easy fakes, and detector numbers
    against them are optimistic.
-5. **HiACC is small** — 3,318 adult clips, 24 speakers, 3.2 hours. It is the only
-   spontaneous-speech source, so the read/spontaneous contrast rests on a narrow base.
+5. **Spontaneous speech rests on two corpora** — HiACC (3,318 adult clips, 24 speakers,
+   3.2 hours, never trained on) and since week 15 IndicVoices Hindi (6,670 clips, 200
+   speakers). IndicVoices speech is mostly Hindi rather than Hindi-English, so speaking style
+   and language mix both differ from the read training data, and its clones were made by
+   XTTS-v2 alone.
 6. **Gender metadata is absent** for the MUCS train pool, so no gender balance can be
    reported for the cloned voices.
 

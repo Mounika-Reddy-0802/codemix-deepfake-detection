@@ -158,7 +158,7 @@ It is the candidate for the next release: it keeps up with a live call even on t
 (1.14 s per window, inside the 2 s hop), and on our 30 real calls it did better than the final
 recipe (Q33a). But on spontaneous speech two trainings with equal development scores call 5.8%
 and 46.7% of genuine clips fake, so it is not yet reliable. Retrained with spontaneous speech,
-both trainings call only 1-2% of HiACC fake, which removes that instability, and in the voice
+both trainings call under 2% of HiACC fake, which removes that instability, and in the voice
 check they catch far more clones; one of them misses the read-speech bar we set before measuring,
 so it is the next version, not this one (Q37).
 
@@ -320,7 +320,7 @@ both (`docs/results/operating_points_spont_v1.md`). We adopted the new point for
 as agreed before the results, because a false alarm on a real person is the costlier error, and
 we say plainly what it lets through. The fix has to be in the model, so part (b) retrained with
 150 spontaneous IndicVoices speakers, hypotheses written before launch. Both families are a
-trade-off. HiACC, a corpus never trained on, falls to 1-2% of genuine clips called fake for every
+trade-off. HiACC, a corpus never trained on, falls below 2% of genuine clips called fake for every
 seed (from 43.9% for the adapter, 26.2% for SSL-AASIST), and spontaneous genuine speech moves away
 from every tool's clones: for SSL-AASIST, IndicF5 and Chatterbox go from 39-57% to 8-20% EER,
 which no threshold could do. But the read-speech benchmarks pay more than the 2 points we
@@ -397,9 +397,10 @@ shortcut floor to its detector's own training data; and rebuilt the references (
 checked). IndicF5, Chatterbox and spontaneous speech are still open, and we say so.
 
 **Q48. Can the system handle an English caller?**
-Not with one detector: the final recipe misses English clones (25.00% EER over the phone line).
+Not with one detector: the final recipe misses English clones (25.95% EER over the phone line).
 With a language gate in front (a spoken-language identifier; English goes to S1, everything else
-to the Hindi-English detector), English EER is 0.60% clean and 9.80% over G.711, and Hindi-English
+to the Hindi-English detector), English EER on the routing test sample is 0.60% clean and 9.80%
+over G.711 (25.00% for the final recipe alone on that sample), and Hindi-English
 loses at most 0.4 points. The rule was chosen on development audio before any test output existed.
 English spoken by our Hindi-English speakers stays with the right detector (0.4% routed to S1).
 One catch, said plainly: the gate also seems to catch Tortoise, but only because Tortoise's Hindi
@@ -421,6 +422,15 @@ whatever its source column says. It runs as a test before every training launch.
 transcripts come only from the speaker's own pool. HiACC, the other spontaneous test set, was
 never trained on, which is why its numbers are the ones we judge on.
 
+**Q51. What if the attacker re-encodes the clone or adds noise?**
+The usual sharing formats do not help an attacker: MP3, Opus, AAC and a second phone hop raise
+no EER by more than 2 points, for the final adapter or either SSL-AASIST checkpoint. The weak
+points are elsewhere. A reverberant room makes genuine speech look cloned (genuine clips called
+fake: adapter 0.3% to 25.7%, SSL-AASIST 0.7% to 35.7%), loud background talk lets more clones
+through, and a one-semitone pitch shift makes SSL-AASIST call 90-99% of genuine clips fake. The
+transforms, clips and reading rule were fixed before any clip was scored
+(`docs/results/robustness_v1.md`).
+
 ## 10. Numbers to remember
 
 | What | Number |
@@ -439,4 +449,4 @@ never trained on, which is why its numbers are the ones we judge on.
 | HiACC genuine called fake, frozen vs retrained with spontaneous speech (adapter / SSL-AASIST) | 43.9% vs 1.2% / 26.2% vs 1.5% |
 | Spontaneous genuine against IndicF5 clones, threshold-free, SSL-AASIST frozen vs retrained | 49% vs 15-20% EER |
 | Cost of that retraining on read-speech benchmarks (adapter / SSL-AASIST, seed mean) | +8-11 / +1-4 EER points |
-| English over the phone line: final adapter alone vs behind the language gate | 25.00% vs 9.80% EER |
+| English over the phone line, routing test sample: final adapter alone vs behind the language gate | 25.00% vs 9.80% EER |
