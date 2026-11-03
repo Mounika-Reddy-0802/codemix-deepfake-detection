@@ -154,6 +154,10 @@ audio, sends English to S1: English EER 0.60% clean and 9.80% over the phone lin
 alone 13.50% and 25.00% on the same 1,000-clip sample), at most 0.4 points lost on Hindi-English. **Calibration**
 ([calibration_v1](docs/results/calibration_v1.md)): at the fixed rule the final systems almost never
 call genuine speech fake, but miss most clones of the newest tools and are confident when wrong.
+**Robustness** ([robustness_v1](docs/results/robustness_v1.md)): MP3, Opus, AAC and a second phone
+hop raise no EER by more than 2 points; a reverberant room makes genuine speech look cloned
+(25.7% of genuine clips called fake by the adapter, 35.7% by SSL-AASIST) and a one-semitone pitch
+shift makes SSL-AASIST call 90-99% of genuine clips fake.
 
 ### Week 14 — what a caller meets
 
@@ -945,6 +949,8 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/spontaneous_training_v1.md`](docs/results/spontaneous_training_v1.md) | **Training with spontaneous speech** (decision D1 part b) — hypotheses before launch, both families a trade-off, the voice-check rule and its result |
 | [`docs/results/routing_v1.md`](docs/results/routing_v1.md) | **English routing** — a language gate in front of the detectors |
 | [`docs/results/calibration_v1.md`](docs/results/calibration_v1.md) | **DET curves and calibration** — every trade-off point, Brier score, calibration error |
+| [`docs/results/robustness_v1.md`](docs/results/robustness_v1.md) | **Robustness to post-processing** — 15 transforms (codecs, noise, room, speed, pitch) on 1,122 clips, three models |
+| [`docs/viva/review_sheet.md`](docs/viva/review_sheet.md) | **The external review on one page** — each comment, what we could show then and what we show now |
 | [`docs/results/encoder_spontaneous_v1.md`](docs/results/encoder_spontaneous_v1.md) | **The larger encoder** on spontaneous speech, and its speed on a live call |
 | [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) | **Model card** for the final recipe (draft, not published) |
 | [`docs/release.md`](docs/release.md) | **What is published and what is not**, and the weights package ready for the release decision |
