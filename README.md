@@ -303,7 +303,7 @@ that beat their matched floor at the speaker level on Tortoise.
 | **S2 LoRA — XTTS + RVC (deployed)** | 3.27 ± 1.17 | 35.59 ± 3.35 | 5.33 ± 1.27 | 0 of 5 |
 | S2 LoRA — XTTS | 3.45 ± 0.72 | 25.59 ± 5.27 | 27.07 ± 2.76 | 1 of 5 |
 | S3 native — XTTS | 1.78 ± 0.93 | **19.72 ± 5.36** | 36.83 ± 3.39 | 3 of 5 (all 5 below it) |
-| S2 + crop + augment + layer mix *(exploratory)* | 2.65 ± 0.53 | 26.63 ± 1.66 | 7.72 ± 1.33 | 0 of 5 |
+| S2 + crop + augment + layer mix *(exploratory; not confirmed on the final recipe, point 3)* | 2.65 ± 0.53 | 26.63 ± 1.66 | 7.72 ± 1.33 | 0 of 5 |
 
 What it says:
 
@@ -315,7 +315,10 @@ What it says:
 3. **A variant combining random crops, cue augmentation and a layer mix lowers Tortoise
    by 9 points** across seeds, its parts not separated (exact
    p = 0.008), but the variant was singled out after seeing a test score, does not
-   clear the floor, and is invisible on the dev set: a lead, not a result.
+   clear the floor, and is invisible on the dev set: a lead, not a result. Tested in
+   week 15 on the final recipe under a rule committed first, it was **not confirmed**:
+   worse on IndicF5 in all five seeds (34.24% against 21.68%)
+   ([`variants_final_v1.md`](docs/results/variants_final_v1.md)).
 4. **The deployed model suits Hindi–English calls only.** English over the phone line
    rises to 24.20% (S1: 6.50%), and new speakers talking freely are called fake 54%
    of the time.
@@ -919,6 +922,7 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/shortcut_floor_v2.md`](docs/results/shortcut_floor_v2.md) | **Matched shortcut floors** — each detector's floor fitted on its own training data, and the paired speaker-level test |
 | [`docs/results/seed_stability_v1.md`](docs/results/seed_stability_v1.md) | **Five training seeds** — the deployed Tortoise number was a good draw; S3 XTTS-only holds in every seed |
 | [`docs/results/variants_v1.md`](docs/results/variants_v1.md) | **Changes aimed at the unseen tool** — the dev-only selection, and the exploratory augmentation lead |
+| [`docs/results/variants_final_v1.md`](docs/results/variants_final_v1.md) | **The exploratory lead tested on the final recipe** — rule committed first, five seeds: not confirmed (IndicF5 21.68 → 34.24%, worse in every seed) |
 | [`docs/results/tradeoff_v1.md`](docs/results/tradeoff_v1.md) | **Phone line vs clean** — every adapter in the condition it was not trained in |
 | [`docs/results/english_channel_v1.md`](docs/results/english_channel_v1.md) | **English over the phone line** — 2.30% clean, 24.20% over the line |
 | [`docs/results/hiacc_false_alarm_v1.md`](docs/results/hiacc_false_alarm_v1.md) | **New speakers talking freely** — 54% of genuine HiACC speech called fake |

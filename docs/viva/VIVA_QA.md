@@ -370,7 +370,9 @@ comparisons) are marked as one seed wherever they appear.
 
 **Q44. Did you tune anything on the test sets?**
 No. Thresholds, checkpoints and recipe choices are made on development data by rules fixed in
-advance. One variant chosen after a test score was seen is reported as exploratory. Be ready
+advance. One variant chosen after a test score was seen is reported as exploratory, and when we
+tested it properly on the final recipe (five seeds, rule committed first) it was not confirmed:
+worse on IndicF5 in every seed, 34.24% against 21.68%. Be ready
 for the follow-up: the final recipe joins two changes whose gains were first seen on test sets,
 so we report it with five seeds and shortcut floors, not as a blind selection. This week's two
 decisions on spontaneous speech followed rules committed before the measurement; when the

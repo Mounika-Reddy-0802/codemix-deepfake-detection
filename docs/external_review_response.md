@@ -113,6 +113,13 @@ deployed model scores 30.6% on it, about where Tortoise is on the new speakers
 (`docs/results/new_speakers_v1.md`, `floor_new_sets_v1.md`). The exploratory variant
 (crops, augmentation and a layer mix together) could not be checked on it: those variants' checkpoints were not kept.
 
+**Done (week 15, the confirmation).** The variant was retrained on the final recipe with the
+final recipe's five seeds, under a hypothesis and decision rule committed before any result
+(`docs/results/variants_final_v1.md`, `src/reporting/variant_final.py`). **Not confirmed:**
+IndicF5 rises from 21.68 ± 3.74% to 34.24 ± 6.70% over the line, worse in all five seeds, and
+new-speaker Tortoise from 8.81 ± 1.43% to 10.62 ± 2.94%; CM04 and RVC rise too. The lead is
+closed and the final recipe stays as it is.
+
 **Done (week 13, the final recipe).** The two largest gains, more genuine speakers
 (comment 3) and real AMR-NB audio next to the simulated G.711 line, combined: the adapter
 trained on 248 speakers over both codecs (16,036 clips), five seeds paired with the
