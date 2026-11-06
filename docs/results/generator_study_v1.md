@@ -78,13 +78,25 @@ under a separate rule written before it is measured there (as P-040 required).
 
 ## Run
 
-Five seeds of each of the four systems (20 trainings) on one AWS g5.2xlarge (A10G), scored
-on every week-13 set plus Chatterbox (CM09). The run script and the commit it ran are
-recorded with the results. Then:
+Five seeds of each of the four systems (20 trainings), scored on every week-13 set plus
+Chatterbox (CM09), all at the registration commit `a66b2a8`; then:
 
 ```
-python -m src.reporting.generator_study --results <results folder>
+python -m src.reporting.generator_study --results <results folder with both parts>
 ```
+
+**First attempt, AWS (3-4 November).** One g5.2xlarge (A10G) started the 20 trainings on
+3 November at 21:54 with `notebooks/aws_w15_generator_study.py` (22 minutes a training). The
+account was suspended before the results could be fetched, so none of them are used; the
+only number seen was the first run's summary line over all speakers, and nothing in the
+design or the rule changed after it.
+
+**Run used, Kaggle (from 7 November).** The same commit in two notebooks of ten trainings
+each, started together when the weekly GPU quota refreshed:
+`notebooks/kaggle_w15_genstudy_a.ipynb` (control, fold A and fold B for seeds 1234, 2025 and
+7, then fold C seed 1234) and `kaggle_w15_genstudy_b.ipynb` (the three judged systems for
+seeds 42 and 99, then fold C for the other four seeds). The judged systems run first in both,
+so the decision needs only the first nine and six trainings of each part.
 
 ## Results
 
