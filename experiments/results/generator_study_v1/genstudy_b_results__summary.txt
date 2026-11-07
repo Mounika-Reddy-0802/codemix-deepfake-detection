@@ -1,0 +1,30 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: a66b2a862cf6503bc7e32611e8e1caec588e472c
+
+EER (%) per run, phone line; control_fa = genuine clips called fake (%)
+run                  status    dev        eval_pool             cm04         rvc_test         new_xtts     new_tortoise             cm07       control_fa     new_xtts_amr new_tortoise_amr         cm07_amr         cm04_amr             cm09
+control_s42              ok   0.00             0.91            15.71             7.92             0.62             6.30            20.90             0.23             0.24             4.56            20.04             7.38            25.34
+fold_a_s42               ok   0.00             1.79            17.07             7.59             0.74             4.40             6.11             0.54             0.34             4.96            11.22             7.65            15.64
+fold_b_s42               ok   0.00             0.83             9.18             7.27             0.62             5.41            10.87             1.71             0.29             4.40            14.62             4.56             6.46
+control_s99              ok   0.00             1.34            15.51             8.24             0.79             9.46            18.09             0.00             0.67             8.51            22.41             5.89            26.10
+fold_a_s99               ok   0.00             1.16             9.59             6.62             0.34             5.76             2.12             0.62             0.34             4.15             6.63             4.15            14.88
+fold_b_s99               ok   0.00             1.54            10.48             5.98             0.91             4.50            11.22             0.70             0.50             4.92            10.87             5.03             4.00
+fold_c_s2025             ok   0.00             1.46            12.89             7.92             0.96             5.41             4.59             1.01             0.34             3.16             7.05             3.98             8.59
+fold_c_s7                ok   0.00             0.83            12.89             6.30             0.84             5.35             2.64             0.47             0.22             4.96             7.57             7.21             4.00
+fold_c_s42               ok   0.00             2.75            21.36             7.59             2.42            10.80             3.82             0.23             1.08            11.28            10.28            15.10             4.42
+fold_c_s99               ok   0.58             1.86            17.07             5.65             1.30             5.47             3.65             0.16             0.29             3.59             9.09             4.80             5.87
+
+MEAN +/- SD over seeds (all speakers; the study judges held-out speakers only)
+  eval_pool     control   1.12 +/-  0.31 (n=2)   fold_a   1.47 +/-  0.45 (n=2)   fold_b   1.18 +/-  0.50 (n=2)   fold_c   1.73 +/-  0.80 (n=4)   
+  cm04          control  15.61 +/-  0.14 (n=2)   fold_a  13.33 +/-  5.29 (n=2)   fold_b   9.83 +/-  0.91 (n=2)   fold_c  16.05 +/-  4.05 (n=4)   
+  rvc_test      control   8.08 +/-  0.23 (n=2)   fold_a   7.11 +/-  0.69 (n=2)   fold_b   6.62 +/-  0.91 (n=2)   fold_c   6.87 +/-  1.07 (n=4)   
+  new_xtts      control   0.71 +/-  0.12 (n=2)   fold_a   0.54 +/-  0.29 (n=2)   fold_b   0.77 +/-  0.20 (n=2)   fold_c   1.38 +/-  0.72 (n=4)   
+  new_tortoise  control   7.88 +/-  2.23 (n=2)   fold_a   5.08 +/-  0.96 (n=2)   fold_b   4.96 +/-  0.64 (n=2)   fold_c   6.76 +/-  2.70 (n=4)   
+  cm07          control  19.50 +/-  1.99 (n=2)   fold_a   4.12 +/-  2.82 (n=2)   fold_b  11.04 +/-  0.24 (n=2)   fold_c   3.67 +/-  0.80 (n=4)   
+  control_fa    control   0.12 +/-  0.16 (n=2)   fold_a   0.58 +/-  0.05 (n=2)   fold_b   1.20 +/-  0.71 (n=2)   fold_c   0.47 +/-  0.39 (n=4)   
+  new_xtts_amr  control   0.46 +/-  0.31 (n=2)   fold_a   0.34 +/-  0.00 (n=2)   fold_b   0.40 +/-  0.15 (n=2)   fold_c   0.48 +/-  0.40 (n=4)   
+  new_tortoise_amr control   6.54 +/-  2.79 (n=2)   fold_a   4.55 +/-  0.57 (n=2)   fold_b   4.66 +/-  0.37 (n=2)   fold_c   5.75 +/-  3.77 (n=4)   
+  cm07_amr      control  21.23 +/-  1.68 (n=2)   fold_a   8.92 +/-  3.24 (n=2)   fold_b  12.74 +/-  2.65 (n=2)   fold_c   8.50 +/-  1.47 (n=4)   
+  cm04_amr      control   6.63 +/-  1.06 (n=2)   fold_a   5.90 +/-  2.48 (n=2)   fold_b   4.80 +/-  0.34 (n=2)   fold_c   7.77 +/-  5.08 (n=4)   
+  cm09          control  25.72 +/-  0.54 (n=2)   fold_a  15.26 +/-  0.54 (n=2)   fold_b   5.23 +/-  1.74 (n=2)   fold_c   5.72 +/-  2.07 (n=4)   
