@@ -48,6 +48,10 @@ UNSEEN = (
     ("tortoise_cm04", "cm04", ("spoof", None)),
     ("rvc", "rvc_test", ("spoof", None)),
 )
+#: the sets that hold any of the 61 cloned speakers (the eval and eval_ext pools); HiACC, the
+#: language control and RVC hold none of them, and the reference's HiACC file has no speaker
+#: column, so the exclusion is applied where it can matter and nowhere else
+POOL_SETS = frozenset({"new_speakers", "cm04", "cm07", "cm09"})
 
 
 def measures(model: str, exclude: frozenset[str]) -> dict:
@@ -55,7 +59,7 @@ def measures(model: str, exclude: frozenset[str]) -> dict:
     from src.reporting import any_audio_accuracy as acc
 
     def pct(key, rows, expected):
-        r = acc.accuracy(model, key, rows, expected, exclude)
+        r = acc.accuracy(model, key, rows, expected, exclude if key in POOL_SETS else frozenset())
         return None if r is None else r[0]
 
     out = {name: pct(key, ("bonafide", None), "bonafide") for name, key in GENUINE}

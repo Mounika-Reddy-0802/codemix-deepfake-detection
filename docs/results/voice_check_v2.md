@@ -65,6 +65,15 @@ calls, and:
 python -m src.reporting.voice_check_v2 --out experiments/results/voice_check_v2.json
 ```
 
+**Correction before any result (7 November, 09:50, before training started).** An independent
+read of the code found that excluding the `gen_train` speakers crashed on the reference's HiACC
+file, which has no speaker column. The exclusion is now applied to the four sets that hold any of
+the 61 cloned speakers (new speakers, CM04, IndicF5, Chatterbox); HiACC, the language control,
+RVC and the calls hold none of them. The conditions and thresholds are unchanged. The guard gate
+`configs/train_lora_vcv2.yaml` is a LoRA config only so that `config_guard` checks the same
+manifests, as `train_lora_spont.yaml` does for the spontaneous recipe; the model itself is
+SSL-AASIST fine-tuned whole.
+
 ## Results
 
 Not run yet.

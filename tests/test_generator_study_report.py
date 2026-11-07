@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 import pandas as pd
+import pytest
 
 from src.reporting import generator_study as rep
 
@@ -77,3 +78,36 @@ def test_collect_reads_scores_and_false_alarms_of_finished_runs(tmp_path):
     assert table["control"][7]["control_fa"] == 0.004
     assert table["control"][7]["chatterbox"] is None
     assert table["fold_a"] == {}
+
+
+def _write_part(folder, runs):
+    folder.mkdir()
+    (folder / "runs.json").write_text(json.dumps(runs))
+    for r in runs:
+        pd.DataFrame(
+            {
+                "speaker": ["b", "b"],
+                "label": ["bonafide", "spoof"],
+                "tool": ["none", "indicf5"],
+                "score": [0.9, 0.1],
+            }
+        ).to_csv(folder / f"{r['system']}_s{r['seed']}__cm07_scores.csv", index=False)
+
+
+def test_both_kaggle_parts_are_read_and_a_partial_run_still_counts(tmp_path):
+    _write_part(
+        tmp_path / "a", [{"system": "control", "seed": 7, "status": "ok", "control_fa": 0.0}]
+    )
+    _write_part(
+        tmp_path / "b", [{"system": "control", "seed": 42, "status": "partial", "control_fa": 0.0}]
+    )
+    table = rep.collect(tmp_path / "a", tmp_path / "b", train=set())
+    assert set(table["control"]) == {7, 42}
+
+
+def test_the_same_run_in_two_parts_is_refused(tmp_path):
+    runs = [{"system": "control", "seed": 7, "status": "ok", "control_fa": 0.0}]
+    _write_part(tmp_path / "a", runs)
+    _write_part(tmp_path / "b", runs)
+    with pytest.raises(ValueError):
+        rep.collect(tmp_path / "a", tmp_path / "b", train=set())

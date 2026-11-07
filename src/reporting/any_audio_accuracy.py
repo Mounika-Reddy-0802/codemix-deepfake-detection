@@ -211,6 +211,8 @@ def accuracy(
     if tool:
         d = d[d["tool"] == tool]
     if exclude:
+        if "speaker" not in d.columns:
+            raise ValueError(f"{model} {key}: no speaker column to exclude speakers from")
         d = d[~d["speaker"].astype(str).isin(exclude)]
     if d.empty:
         return None

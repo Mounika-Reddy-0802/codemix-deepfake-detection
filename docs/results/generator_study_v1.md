@@ -98,6 +98,13 @@ each, started together when the weekly GPU quota refreshed:
 seeds 42 and 99, then fold C for the other four seeds). The judged systems run first in both,
 so the decision needs only the first nine and six trainings of each part.
 
+**Corrections before any result (7 November, 09:50).** An independent read of the code before
+the runs finished found two faults in how results are read, not in the rule: the two Kaggle
+parts each write a `runs.json`, so `src/reporting/generator_study.py` now reads one folder per
+part and refuses a run found in both; and a run whose only failure was an unjudged set (status
+`partial`) is now read, since the rule itself already checks that every quantity it judges is
+present. The hypotheses, thresholds and decision are unchanged.
+
 ## Results
 
 Not run yet.

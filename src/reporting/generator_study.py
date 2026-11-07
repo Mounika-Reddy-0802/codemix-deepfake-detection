@@ -21,7 +21,7 @@ The study's answer: **carries over** if both folds are confirmed, **partly** if 
 **does not carry over** if neither; **incomplete** with fewer than five seeds of any of
 the three systems. Fold C (both tools, the demo model) is reported, not judged here::
 
-    python -m src.reporting.generator_study --results genstudy_results
+    python -m src.reporting.generator_study --results <part a folder> <part b folder>
 """
 
 from __future__ import annotations
@@ -150,17 +150,28 @@ def means(table: dict) -> dict:
     return out
 
 
-def collect(results: Path, train: set[str]) -> dict:
-    """``table[system][seed]`` from a results folder (its runs.json gives control_fa)."""
-    runs = json.loads((results / "runs.json").read_text(encoding="utf-8"))
+#: a run counts if it trained and was scored; "partial" means an unjudged set failed to score,
+#: and ``judge`` itself checks that every quantity the rule reads is present
+SCORED = ("ok", "partial")
+
+
+def collect(*folders: Path, train: set[str]) -> dict:
+    """``table[system][seed]`` from one or more results folders (one per Kaggle part).
+
+    Each folder's ``runs.json`` gives ``control_fa``; a (system, seed) found in two folders
+    stops the reading rather than letting one silently replace the other.
+    """
     table: dict = {s: {} for s in SYSTEMS}
-    for r in runs:
-        system, seed = r.get("system"), int(r["seed"])
-        if system not in table or r.get("status") != "ok":
-            continue
-        row = measure_run(results, f"{system}_s{seed}", train)
-        row["control_fa"] = r.get("control_fa")
-        table[system][seed] = row
+    for results in folders:
+        for r in json.loads((results / "runs.json").read_text(encoding="utf-8")):
+            system, seed = r.get("system"), int(r["seed"])
+            if system not in table or r.get("status") not in SCORED:
+                continue
+            if seed in table[system]:
+                raise ValueError(f"{system} seed {seed} appears in two results folders")
+            row = measure_run(results, f"{system}_s{seed}", train)
+            row["control_fa"] = r.get("control_fa")
+            table[system][seed] = row
     return table
 
 
@@ -169,11 +180,16 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="The generator study, by its registered rule")
-    parser.add_argument("--results", required=True, help="folder with runs.json and score files")
+    parser.add_argument(
+        "--results",
+        nargs="+",
+        required=True,
+        help="one folder per Kaggle part (runs.json + scores)",
+    )
     parser.add_argument("--pools", default=f"data/manifests/{gs.POOLS_OUT}")
     parser.add_argument("--out", default="experiments/results/generator_study_v1.json")
     args = parser.parse_args()
-    table = collect(Path(args.results), gs.train_speakers(args.pools))
+    table = collect(*map(Path, args.results), train=gs.train_speakers(args.pools))
     report = judge(table)
     report["means"] = means(table)
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)

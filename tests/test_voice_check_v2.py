@@ -63,3 +63,20 @@ def test_the_manifest_is_the_spontaneous_recipe_plus_fold_c_rows():
     assert set(extra.loc[extra["label"] == "spoof", "tool"]) == {"indicf5", "chatterbox"}
     assert not out["tool"].str.lower().eq("tortoise").any()
     assert base["filepath"].isin(out["filepath"]).all()
+
+
+def test_speakers_are_excluded_only_from_the_sets_that_hold_them(monkeypatch):
+    from src.reporting import any_audio_accuracy as acc
+
+    seen = {}
+
+    def fake_accuracy(model, key, rows, expected, exclude=frozenset()):
+        seen[(key, rows)] = exclude
+        return (100.0, 10)
+
+    monkeypatch.setattr(acc, "accuracy", fake_accuracy)
+    monkeypatch.setattr(acc, "call_counts", lambda model: {})
+    rule.measures(rule.REFERENCE, frozenset({"s1"}))
+    for (key, _), exclude in seen.items():
+        assert exclude == (frozenset({"s1"}) if key in rule.POOL_SETS else frozenset()), key
+    assert {"cm07", "cm09", "new_speakers", "cm04"} <= {k for k, _ in seen}
