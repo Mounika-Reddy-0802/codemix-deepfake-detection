@@ -433,6 +433,37 @@ through, and a one-semitone pitch shift makes SSL-AASIST call 90-99% of genuine 
 transforms, clips and reading rule were fixed before any clip was scored
 (`docs/results/robustness_v1.md`).
 
+**Q52. IndicF5 and Chatterbox are your unseen tools. Did you then train on them?**
+Two experiments did, and neither touches the paper's unseen-tool numbers. The 61 speakers those
+tools cloned were split once into two frozen halves (31 and 30, hash checked by the tests). The
+generator study and voice check v2 train only on the first half's clones (and that half's
+genuine clips, so their voices are not "always fake"), and every number they report is computed
+on the other half. `config_guard` admits those clones only in runs that declare the study, only
+from the first half, and still refuses Tortoise in every run, so Tortoise stays a never-trained
+check. The detectors in the paper's tables never saw either tool.
+
+**Q53. The week-12 variant looked good. Why did you drop it?**
+Because it failed a test written before its results. It had been picked after its CM04 score was
+seen, so we retrained it on the final recipe with five seeds under a fixed rule: on IndicF5 it
+was worse in all five seeds (34.24% against 21.68% EER), and Tortoise rose 1.81 points. The
+likely reason: with 248 speakers and two codecs the final recipe already has the variety the
+options added, and they made the model fit the training tool more closely (XTTS-v2 improved,
+every unseen tool got worse). That is untested; the result itself is not (`variants_final_v1.md`).
+
+**Q54. What does the voice check do with a clean file someone uploads?**
+On 3,306 clean recordings it called no genuine recording with two seconds of speech cloned, and
+caught 96.7% of XTTS-v2 and 66.7% of Tortoise clones, but none of the IndicF5 or Chatterbox
+clones. Without the phone line's distortion those clones sit with genuine speech. The telephone
+front end stays on because it was better on the development clips (97.4% against 93.2%
+balanced accuracy), chosen before any test row was read (`docs/voice_check.md`).
+
+**Q55. How can we check that a rule really came before its result?**
+From the commit history. Each rule is a commit that lands before the run: the study's rule in
+`a66b2a8`, voice check v2's in `cb33e57`. The training notebooks check out exactly that commit
+and stop if the checked-out hash differs, so a run cannot use a rule edited afterwards. When the
+first attempt at the study was lost (the AWS account was suspended before its results could be
+fetched), the rerun used the same commit and the page records it.
+
 ## 10. Numbers to remember
 
 | What | Number |
