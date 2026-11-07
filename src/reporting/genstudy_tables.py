@@ -10,6 +10,7 @@ is copied by hand from a terminal. Reads ``experiments/results/generator_study_v
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 REPORT = "experiments/results/generator_study_v1.json"
@@ -104,6 +105,9 @@ def render(report: dict, floors: dict | None = None) -> str:
 
 
 def main() -> None:
+    # the tables are redirected into markdown files; Windows would write them in its code page
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     report = json.loads(Path(REPORT).read_text(encoding="utf-8"))
     floors = (
         json.loads(Path(FLOORS).read_text(encoding="utf-8")) if Path(FLOORS).is_file() else None

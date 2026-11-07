@@ -23,3 +23,10 @@ def test_draws_png_and_pdf_from_a_finished_report(tmp_path):
 def test_refuses_an_incomplete_study():
     with pytest.raises(ValueError):
         gf.draw({"answer": "incomplete"})
+
+
+def test_every_condition_of_the_rule_has_a_reason():
+    report = rep.judge(_table(fold_a=0.10, fold_b=0.25))
+    for f in report["folds"].values():
+        assert set(f["conditions"]) == set(gf.FAILED)
+        assert all(gf.FAILED[k](f) for k in f["conditions"])

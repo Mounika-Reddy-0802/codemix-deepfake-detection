@@ -25,6 +25,17 @@ NAMES = {
     "indicf5": "IndicF5",
     "new_tortoise": "Tortoise (new speakers)",
 }
+#: why a fold is not confirmed, one phrase per failed condition of the rule
+FAILED = {
+    "1_lower_in_4_of_5": lambda f: f"lower in only {f['lower_in_seeds']} of 5 seeds",
+    "2_mann_whitney": lambda f: f"p = {f['mann_whitney_p']:.3f}, limit 0.025",
+    "3_tortoise_within_1_point": lambda f: (
+        f"Tortoise {100 * f['tortoise_mean_rise']:+.2f} points, limit +1.00"
+    ),
+    "4_false_alarms_within_half_point": lambda f: (
+        f"genuine called fake {100 * f['false_alarm_mean_rise']:+.2f} points, limit +0.50"
+    ),
+}
 SYSTEMS = (
     ("control", "#7f7f7f"),
     ("fold_a", "#4393c3"),
@@ -49,9 +60,11 @@ def draw(report: dict, out: str = OUT) -> list[Path]:
         ax.set_xticks([0, 1], ["control", f"+ {TRAINED_ON[fold]}"])
         ax.set_xlim(-0.4, 1.4)
         ax.set_ylabel("EER (%)")
+        failed = [FAILED[k](f) for k, ok in f["conditions"].items() if not ok]
         ax.set_title(
             f"{NAMES[f['unseen_tool']]}, never heard\n"
-            f"lower in {f['lower_in_seeds']}/5 seeds, p = {f['mann_whitney_p']:.3f}: {f['decision']}",
+            f"lower in {f['lower_in_seeds']}/5 seeds, p = {f['mann_whitney_p']:.3f}: {f['decision']}"
+            + "".join(f"\n({why})" for why in failed),
             fontsize=8.5,
         )
     ax = axes[2]
