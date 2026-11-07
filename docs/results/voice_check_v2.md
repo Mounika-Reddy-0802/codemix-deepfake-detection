@@ -65,7 +65,7 @@ calls, and:
 python -m src.reporting.voice_check_v2 --out experiments/results/voice_check_v2.json
 ```
 
-**Correction before any result (7 November, 09:50, before training started).** An independent
+**Correction before any result (7 November, 09:42, before training started).** An independent
 read of the code found that excluding the `gen_train` speakers crashed on the reference's HiACC
 file, which has no speaker column. The exclusion is now applied to the four sets that hold any of
 the 61 cloned speakers (new speakers, CM04, IndicF5, Chatterbox); HiACC, the language control,
