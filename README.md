@@ -739,6 +739,9 @@ final recipe catches, a second genuine speaker and a spontaneous call for the li
 
 ## Quick start
 
+`requirements.txt` gives readable version ranges; `requirements-lock-laptop.txt` pins the exact
+environment that ran the voice check and the laptop scoring (its header has the install line).
+
 ```bash
 pip install -r requirements.txt
 
@@ -861,8 +864,9 @@ outside this repo.
 **Open:** the newest generators (IndicF5, Chatterbox) still pass the voice check at its current
 point; the SSL-AASIST retrained with spontaneous speech catches far more of them, and adopting it
 needs a recipe whose every training meets the rule, or a rule for the two-checkpoint average
-written before it is measured ([voice_check](docs/voice_check.md)); measure the voice check on clean
-wideband files and on field recordings; run the final recipe as the live system's default
+written before it is measured ([voice_check](docs/voice_check.md)); on clean wideband files the
+voice check calls no genuine recording cloned but lets every IndicF5 and Chatterbox clone through
+(measured 3 November); measure it on field recordings; run the final recipe as the live system's default
 everywhere (the demo already runs it, `scripts/run_demo.bat`); fund the Twilio account and run the
 carrier on real numbers for the first time; real development calls, to set a stricter speech gate
 for the first seconds of a call ([early_warning_v1](docs/results/early_warning_v1.md)); decide on
