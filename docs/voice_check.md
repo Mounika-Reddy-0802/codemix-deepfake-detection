@@ -96,17 +96,47 @@ needs a recipe whose every training meets the rule, or a rule for the average of
 checkpoints written before that average is measured; picking the seed that passed would be
 choosing on test results.
 
+## Clean wideband files (measured 3 November)
+
+A file that never went through a phone line (a studio clone downloaded as wav, say) is the
+case the page meets most often and the paper never measured. The clean copies of the dev and
+test clips (3,306 recordings) were judged by the page's own scoring path at the frozen point
+(0.082), once with the telephone front end and once without
+(`python -m src.inference.any_audio_eval`; per-recording verdicts in
+`experiments/any_audio/clean_scored.csv`, table in `experiments/results/any_audio_clean.md`).
+
+**Front end, chosen on the 506 development clips only:** with it 97.4 % balanced accuracy,
+without it 93.2 %, so the page keeps converting every input to the telephone domain. The test
+rows below are with the front end.
+
+| Clean test recordings | Judged correctly | Recordings |
+|---|---|---|
+| Genuine speech (read and HiACC spontaneous) | 100.0 % of those with 2 s of speech; 22.1 % too short to judge | 1,695 |
+| XTTS-v2 clones | 96.7 % | 305 |
+| Tortoise clones | 66.7 % | 81 |
+| RVC conversions | 22.6 % | 154 |
+| IndicF5 clones | 0 of 105 | 134 |
+| Chatterbox clones | 0 of 130 | 134 |
+
+**What it says.** No genuine recording was called cloned, with or without the front end; the
+only genuine misses are clips with under two seconds of speech, which the page declines to
+judge. Clones of the tool it was trained on are still caught. Every clean clone of the two
+newest tools passes as real, worse than over the phone line (12.5 % and 4.4 %): without the
+line's distortion, IndicF5 and Chatterbox clones sit with genuine speech (IndicF5 EER 25.8 %
+threshold-free). This is the gap the generator study (P-041) is aimed at, and the reason the
+page must not be described as catching clones of new tools.
+
+The run took several restarts on the laptop; recordings scored twice got identical scores in
+every case, and the table counts each once.
+
 ## Not measured yet, and how to measure it
 
 | Gap | Command |
 |---|---|
-| Clean wideband files (a studio clone uploaded as wav), with and without the telephone front end | `python -m src.inference.any_audio_eval build --out experiments/any_audio/clean.csv`, then `... score experiments/any_audio/clean.csv --out experiments/any_audio/clean_scored.csv`, then `... report experiments/any_audio/clean_scored.csv` |
-| Speech straight into a laptop microphone, and clones played into it | record with the page, open "Help measure accuracy", label each recording; then `... score data/field_validation/log.csv --out experiments/any_audio/field_scored.csv` and `... report` |
+| Speech straight into a laptop microphone, and clones played into it | record with the page, open "Help measure accuracy", label each recording; then `python -m src.inference.any_audio_eval score data/field_validation/log.csv --out experiments/any_audio/field_scored.csv` and `... report` |
 
-The clean manifest covers 3,306 clips (dev and seven test sets). The front end is chosen on
-the 506 development clips only, then the test rows are reported. Saved recordings stay in
-`data/field_validation/` (ignored by git) and are kept only when the speaker's consent is
-ticked.
+Saved recordings stay in `data/field_validation/` (ignored by git) and are kept only when the
+speaker's consent is ticked.
 
 ## Ways to raise accuracy (team decisions)
 
