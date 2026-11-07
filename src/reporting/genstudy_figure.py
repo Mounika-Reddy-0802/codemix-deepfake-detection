@@ -85,11 +85,47 @@ def draw(report: dict, out: str = OUT) -> list[Path]:
     ax.set_title(f"All systems, held-out speakers (answer: {report['answer']})", fontsize=8.5)
     ax.legend(fontsize=7, ncols=2)
     fig.tight_layout()
+    return _save(plt, fig, out)
+
+
+def draw_column(report: dict, out: str = OUT + "_column") -> list[Path]:
+    """The two judged folds only, one IEEE column wide (3.5 in), for the papers.
+
+    Same numbers as panels 1-2 of :func:`draw`; the reasons a fold is not confirmed go in the
+    caption, the decision stays on the panel so the figure cannot be read against the rule.
+    """
+    if "folds" not in report:
+        raise ValueError(f"the study is {report.get('answer')!r}: nothing to draw yet")
+    plt = _style()
+    fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.2), sharey=True)
+    for k, (ax, (fold, f)) in enumerate(zip(axes, report["folds"].items(), strict=True)):
+        ctrl = [100 * v for v in f["control"]]
+        fold_v = [100 * v for v in f["fold"]]
+        for c, v in zip(ctrl, fold_v, strict=True):
+            ax.plot([0, 1], [c, v], color="#999999", lw=0.8, zorder=1)
+        ax.scatter([0] * len(ctrl), ctrl, color="#555555", marker="o", zorder=2, s=10)
+        ax.scatter([1] * len(fold_v), fold_v, color=dict(SYSTEMS)[fold], marker="s", zorder=2, s=10)
+        ax.set_xticks([0, 1], ["control", f"+{TRAINED_ON[fold]}"], fontsize=6)
+        ax.set_xlim(-0.35, 1.35)
+        ax.tick_params(axis="y", labelsize=6)
+        ax.set_title(
+            f"({chr(ord('a') + k)}) {NAMES[f['unseen_tool']]}, never heard\n"
+            f"p = {f['mann_whitney_p']:.3f}, {f['decision']}",
+            fontsize=6.6,
+        )
+        ax.grid(axis="x", visible=False)
+    axes[0].set_ylabel("EER (%), held-out speakers", fontsize=6.6)
+    axes[0].set_ylim(bottom=0)
+    fig.subplots_adjust(left=0.13, right=0.99, bottom=0.12, top=0.84, wspace=0.12)
+    return _save(plt, fig, out, dpi=300)
+
+
+def _save(plt, fig, out: str, dpi: int | None = None) -> list[Path]:
     paths = []
     for ext in ("png", "pdf"):
         path = Path(f"{out}.{ext}")
         path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(path)
+        fig.savefig(path, dpi=dpi)
         paths.append(path)
     plt.close(fig)
     return paths
@@ -97,7 +133,7 @@ def draw(report: dict, out: str = OUT) -> list[Path]:
 
 def main() -> None:
     report = json.loads(Path(REPORT).read_text(encoding="utf-8"))
-    for path in draw(report):
+    for path in [*draw(report), *draw_column(report)]:
         print("written", path)
 
 
