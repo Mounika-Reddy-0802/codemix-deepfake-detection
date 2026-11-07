@@ -47,6 +47,12 @@ Recorded real mobile calls were scored offline through the same path.
 > it is not adopted because one of its two trainings misses the read-speech bar set before
 > measuring ([voice_check](docs/voice_check.md)). A language gate fixes English calls: 9.80% EER over
 > the phone line instead of 25.00% on the routing test sample ([routing_v1](docs/results/routing_v1.md)).
+> **More tools in training partly carry over to a tool never heard** (rule fixed before training,
+> speakers no system heard, five seeds): trained also on Chatterbox, the final recipe's IndicF5 EER
+> falls from 20.44% to 12.43% in every seed (confirmed); trained also on IndicF5, its Chatterbox EER
+> falls from 24.32% to 15.75% in every seed but it calls slightly more genuine speech fake than the
+> rule allows (not confirmed). Tortoise, never trained on, falls in both
+> ([generator_study_v1](docs/results/generator_study_v1.md)).
 
 ---
 
@@ -923,6 +929,7 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/seed_stability_v1.md`](docs/results/seed_stability_v1.md) | **Five training seeds** — the deployed Tortoise number was a good draw; S3 XTTS-only holds in every seed |
 | [`docs/results/variants_v1.md`](docs/results/variants_v1.md) | **Changes aimed at the unseen tool** — the dev-only selection, and the exploratory augmentation lead |
 | [`docs/results/variants_final_v1.md`](docs/results/variants_final_v1.md) | **The exploratory lead tested on the final recipe** — rule committed first, five seeds: not confirmed (IndicF5 21.68 → 34.24%, worse in every seed) |
+| [`docs/results/generator_study_v1.md`](docs/results/generator_study_v1.md) | **The generator study** — one more tool in training, measured on a tool never heard and on unheard speakers, rule committed first: partly (IndicF5 20.44 → 12.43% confirmed; Chatterbox 24.32 → 15.75% short on false alarms) · floors in [`floor_genstudy_v1.md`](docs/results/floor_genstudy_v1.md) |
 | [`docs/results/tradeoff_v1.md`](docs/results/tradeoff_v1.md) | **Phone line vs clean** — every adapter in the condition it was not trained in |
 | [`docs/results/english_channel_v1.md`](docs/results/english_channel_v1.md) | **English over the phone line** — 2.30% clean, 24.20% over the line |
 | [`docs/results/hiacc_false_alarm_v1.md`](docs/results/hiacc_false_alarm_v1.md) | **New speakers talking freely** — 54% of genuine HiACC speech called fake |

@@ -39,8 +39,12 @@ plot of every 4-second window's score against the threshold line.
 ## After scene 7 (1 minute): what we did about it
 
 - The generator study asks whether training on one more tool catches a tool never heard
-  (`docs/results/generator_study_v1.md`; rule committed before training). Give its answer as it
-  came out.
+  (`docs/results/generator_study_v1.md`; rule committed before training). Its answer is
+  **partly**: trained also on Chatterbox, the final recipe's error on IndicF5, never heard, falls
+  from 20.44% to 12.43% in every seed (confirmed); trained also on IndicF5, its error on
+  Chatterbox falls from 24.32% to 15.75% in every seed, but it calls slightly more genuine speech
+  fake than the rule allows, so that half is not confirmed. Show
+  `experiments/figures/generator_study.png`.
 - Voice check v2 is the same model trained also on IndicF5 and Chatterbox clones of other
   speakers (`docs/results/voice_check_v2.md`). Scenes 6 and 7 use speakers it never heard. If the
   rule adopted it, re-run scenes 6 and 7 on v2 and say what changed; if not, say which condition

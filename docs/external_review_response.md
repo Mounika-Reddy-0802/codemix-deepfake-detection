@@ -154,6 +154,22 @@ speakers from the same references and sentences (CM09, 525 clips, held out). It 
 adapters' hardest tool: 35.8% for the deployed adapter, 32.0% for the final recipe (one seed), 12.9%
 for the larger encoder over five seeds. IndicF5 stays at 15.8-21.8% for both final systems.
 
+**Done (week 15, more tools in training: the generator study, P-041).** The direct test of
+the comment's question: does training on one more tool lower the error on a tool never
+heard? The 61 speakers IndicF5 and Chatterbox cloned were split into frozen halves; the final
+recipe was retrained with one half's clones of one tool (fold A: IndicF5; fold B:
+Chatterbox), against a control with the same extra genuine speech, five seeds each, every
+number on the other half's speakers, hypotheses and rule committed before any training
+(`docs/results/generator_study_v1.md`). **Answer: partly.** Fold B lowers IndicF5, never
+heard, from 20.44% to 12.43% (lower in all five seeds, p = 0.016) and is confirmed. Fold A
+lowers Chatterbox, never heard, from 24.32% to 15.75% (all five seeds, p = 0.008) but calls
+0.67 points more genuine clips fake than the 0.5 allowed, so it is not confirmed. Both folds
+also lower Tortoise, which no system trained on (7.16% to 4.13-5.00% over the line), and
+every system beats its matched floor on every study set in every seed
+(`floor_genstudy_v1.md`). Of the two levers tested under committed rules, adding a tool
+carries over in part (one direction confirmed, the other short only on false alarms) and
+adding augmentation on the same tool (the variant above) does not.
+
 ## 3. More speakers and speaking styles
 
 > Expand the Hinglish adaptation dataset beyond the current 10-speaker pool and

@@ -44,6 +44,21 @@ of every result, and one fetch-only watcher replaced both.
 The front-end test needed `librosa`, which CI does not install; it now skips there, as the
 other audio tests do.
 
+### The generator study (P-041)
+
+The study asks whether one more tool in training catches a tool never heard. I split the 61
+speakers IndicF5 and Chatterbox cloned into frozen halves, built the four training manifests
+and the guard's narrow exception, and committed the hypotheses and the decision rule
+(`a66b2a8`) before any training. The first attempt ran on AWS and was lost with the account;
+the rerun used the same commit in two Kaggle notebooks of ten trainings each. An independent
+read of the reporting code before the runs finished found three faults in how results are read
+(two notebooks' run lists, partial runs, a missing speaker column for v2); they were fixed and
+recorded on the pages before any result. All 20 trainings finished; the rule's answer is
+**partly**: trained also on Chatterbox, IndicF5 falls from 20.44% to 12.43% (confirmed);
+trained also on IndicF5, Chatterbox falls from 24.32% to 15.75% but genuine clips called fake
+rise 0.67 points against 0.5 allowed (not confirmed). Every system beats its matched floor in
+every seed (`docs/results/generator_study_v1.md`, `floor_genstudy_v1.md`).
+
 ## What is still open
 
 The voice check is weak on the newest generators at its current point (IndicF5 12.5%,

@@ -464,6 +464,24 @@ and stop if the checked-out hash differs, so a run cannot use a rule edited afte
 first attempt at the study was lost (the AWS account was suspended before its results could be
 fetched), the rerun used the same commit and the page records it.
 
+**Q56. Does training on more cloning tools help against a tool the detector never heard?**
+Partly, and that is the rule's word, fixed before training. We retrained the final recipe with
+one more tool's clones of one half of the speakers and measured the other tool on the other
+half, five seeds against a control with the same extra genuine speech. Trained also on
+Chatterbox, the error on IndicF5 (never heard) fell from 20.44% to 12.43%, lower in every seed:
+confirmed. Trained also on IndicF5, the error on Chatterbox fell from 24.32% to 15.75%, also in
+every seed, but it was not confirmed (Q57). Tortoise, which no system trained on, fell too
+(7.16% to 4.13-5.00%), and every system beat its matched floor in every seed
+(`generator_study_v1.md`).
+
+**Q57. Fold A was better in all five seeds with the smallest p possible. Why "not confirmed"?**
+Because the rule also limits the cost: genuine clips called fake may rise by at most 0.5
+points, and fold A's rose 0.67 (1.01% against 0.34% of 1,290 genuine clips, about 13 instead
+of about 4). The limit was committed before the run; moving it now would be fitting the rule to
+the result. So we report the drop as measured and the hypothesis as not confirmed. For a
+detector that guards phone calls, a few more genuine callers flagged is a real cost, which is
+why the condition was there.
+
 ## 10. Numbers to remember
 
 | What | Number |

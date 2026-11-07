@@ -1,7 +1,9 @@
 # The generator study: does training on more cloning tools catch a tool never heard? (v1)
 
-**Status: registered, not run.** Written on 3 November 2026 before any training or scoring
-of these systems, so the hypotheses and the decision rule cannot be fitted to the results.
+**Status: run on 7 November 2026. Answer: partly** (H-B confirmed, H-A not confirmed; see
+[Results](#results)). Everything above the Results section was written on 3 November 2026
+before any training or scoring of these systems, so the hypotheses and the decision rule
+cannot be fitted to the results.
 Team decision P-041. The rule is coded in `src/reporting/generator_study.py` and committed
 with this page.
 
@@ -107,4 +109,95 @@ present. The hypotheses, thresholds and decision are unchanged.
 
 ## Results
 
-Not run yet.
+All 20 trainings finished (both Kaggle parts: "every step ran without error", every run
+status `ok`). Every number below is on speakers outside `gen_train`. The rule's own output is
+`experiments/results/generator_study_v1.json`, the per-clip scores are in
+`experiments/results/generator_study_v1/` (reproduce with
+`python -m src.reporting.generator_study --results experiments/results/generator_study_v1`),
+the tables come from `src/reporting/genstudy_tables.py` and the figure is
+`experiments/figures/generator_study.png`.
+
+### The answer: partly
+
+| Hypothesis | Unseen tool | Control → fold, mean EER | Lower in | p | Tortoise | Genuine called fake | Decision |
+|---|---|---|---|---|---|---|---|
+| H-A: fold A (+ IndicF5) | Chatterbox | 24.32 → **15.75** | 5 of 5 | 0.008 | −3.04 points | **+0.67 points** (limit +0.50) | **not confirmed** |
+| H-B: fold B (+ Chatterbox) | IndicF5 | 20.44 → **12.43** | 5 of 5 | 0.016 | −2.17 points | +0.48 points | **confirmed** |
+
+- **H-B is confirmed.** A detector that also trained on Chatterbox clones has lower EER on
+  IndicF5, a tool it never heard, in all five seeds (mean 20.44% → 12.43%, 39% lower), and
+  it is better, not worse, on Tortoise and within the false-alarm limit.
+- **H-A is not confirmed.** A detector that also trained on IndicF5 clones has lower EER on
+  Chatterbox in all five seeds (24.32% → 15.75%, 35% lower; p = 0.008 is the smallest p five
+  seeds against five can give) and is better on Tortoise, but it calls more genuine
+  language-control clips fake than the rule allows: 1.01% against 0.34%, about 13 of the 1,290
+  clips instead of about 4. The limit was fixed before the run, so the hypothesis is not
+  confirmed; the drop on Chatterbox is reported as measured, not as a confirmed carry-over.
+
+Per seed (EER %, unseen tool, held-out speakers):
+
+| Seed | Chatterbox: control | Chatterbox: fold A | IndicF5: control | IndicF5: fold B |
+|---|---|---|---|---|
+| 1234 | 22.73 | 13.50 | 19.29 | 18.79 |
+| 2025 | 24.56 | 16.48 | 20.97 | 8.63 |
+| 7 | 23.88 | 17.64 | 22.16 | 12.69 |
+| 42 | 24.56 | 15.47 | 22.16 | 11.01 |
+| 99 | 25.85 | 15.67 | 17.60 | 11.01 |
+
+### Every measure (reported, held-out speakers)
+
+EER (%), mean ± SD over the five seeds. A tool a system trained on is marked *seen*; the
+rest are tools that system never heard.
+
+| Measure | control | fold A (+ IndicF5) | fold B (+ Chatterbox) | fold C (+ both) |
+|---|---|---|---|---|
+| Chatterbox, G.711 | 24.32 ± 1.14 | 15.75 ± 1.52 | 7.80 ± 4.42 *seen* | 7.04 ± 1.34 *seen* |
+| IndicF5, G.711 | 20.44 ± 1.97 | 4.19 ± 1.71 *seen* | 12.43 ± 3.84 | 4.10 ± 0.55 *seen* |
+| IndicF5, AMR-NB | 19.40 ± 2.13 | 8.23 ± 3.03 *seen over G.711* | 14.31 ± 4.56 | 7.41 ± 1.47 *seen over G.711* |
+| Tortoise, new speakers, G.711 | 7.16 ± 1.98 | 4.13 ± 1.85 | 5.00 ± 2.76 | 4.91 ± 2.31 |
+| Tortoise, new speakers, AMR-NB | 4.05 ± 1.24 | 4.89 ± 2.71 | 3.53 ± 0.66 | 4.01 ± 2.79 |
+| CM04 Tortoise, G.711 | 13.67 ± 2.13 | 11.84 ± 2.67 | 10.40 ± 3.67 | 12.03 ± 4.50 |
+| CM04 Tortoise, AMR-NB | 4.73 ± 1.45 | 4.60 ± 2.43 | 4.16 ± 1.18 | 5.33 ± 4.62 |
+| RVC test half | 7.72 ± 0.74 | 6.88 ± 1.01 | 7.75 ± 3.57 | 7.08 ± 1.04 |
+| XTTS-v2, new speakers, G.711 | 0.74 ± 0.44 | 0.57 ± 0.30 | 0.75 ± 0.33 | 1.04 ± 0.71 |
+| Code-mixed test pool (XTTS-v2) | 0.53 ± 0.21 | 0.81 ± 0.30 | 0.36 ± 0.15 | 0.79 ± 0.49 |
+| Language-control genuine called fake | 0.34 ± 0.45 | 1.01 ± 0.61 | 0.82 ± 0.50 | 0.64 ± 0.51 |
+
+- **Tortoise, never in any training set, gets easier for every fold over G.711** (7.16% →
+  4.13-5.00%) and on CM04 (13.67% → 10.40-12.03%); over AMR-NB, new-speaker Tortoise stays
+  level (4.05% for the control, 3.53-4.89% for the folds).
+- **Over AMR-NB the carry-over to IndicF5 is smaller**: fold B lowers it from 19.40% to
+  14.31% (G.711: 20.44% → 12.43%). The folds' extra clones are all over G.711 (Chatterbox
+  exists only there), so the AMR-NB rows measure a change of codec as well as of tool.
+- **Fold C** (both tools; reported, not judged) has the lowest error on both of its seen
+  tools on new voices (Chatterbox 7.04%, IndicF5 4.10%), lower than the control on RVC and on
+  Tortoise over G.711, within 0.3 points of it on XTTS-v2, and 0.64% genuine called fake
+  (+0.30 points). It enters the voice
+  check only under a rule written before it is measured there; the voice check's own model
+  is trained on the same rows under P-042 (`voice_check_v2.md`).
+- **The development set cannot see any of this.** Over the 100 epochs of the 20 runs, dev
+  EER is 0.00-3.18% (best epoch 0.00-0.58% in every run), while the unseen-tool EER of the
+  same runs is 8.6-25.9%. Held-out tools are what separate the systems, as the design
+  expected.
+
+### Shortcut floors
+
+Every system beats its matched floor (eight low-level statistics fitted on that system's own
+training manifest) on every study set, in **5 of 5 seeds** each, with the whole 95% interval
+below zero (`docs/results/floor_genstudy_v1.md`, `experiments/results/floor_genstudy_v1.json`).
+The floors sit at 38-53% EER, so the clones of these tools are not separable by the eight
+low-level statistics, and the drops above are not explained by such a cue.
+
+### What it means
+
+- **More tools do carry over, with a cost to watch.** In both directions, adding one tool's
+  clones of other speakers lowered the error on a tool the detector never heard by about 8
+  points, in every seed, and lowered it on Tortoise too. One direction meets every condition
+  fixed in advance; the other meets the error conditions but pays in genuine speech called
+  fake. The answer the rule gives, and the one to quote, is **partly**.
+- **It answers the review's comment 2** with a controlled leave-one-tool-out experiment: one
+  tool changed at a time, against a control with the same extra genuine speech, on speakers
+  no system heard, with the decision fixed before the runs.
+- **Limits.** Two tools, one codec for the judged numbers, 30 held-out speakers, five seeds.
+  The false-alarm cost was measured on one genuine set (the language control); spontaneous
+  genuine speech was not part of this study.
