@@ -22,7 +22,11 @@ to the rows it would really train on:
    adaptation or a config that declares ``system: s3_native``;
 4. an S3 native run starts from the pretrained encoder (no ``init_from``), because
    the point of S3 is that it has never seen English spoofing data;
-5. RVC conversions only from speakers absent from the RVC test half (P-025).
+5. RVC conversions only from speakers absent from the RVC test half (P-025);
+6. the generator study (P-041, ``system: generator_study``, LoRA only) may train on IndicF5
+   and Chatterbox clones and on the genuine clips of the cloned test speakers, but only of
+   the frozen ``gen_train`` half (``src/data/generator_study``). Tortoise stays refused in
+   every run, this one included.
 
 Pure pandas/yaml, so CI runs it on every committed config.
 """
@@ -46,6 +50,9 @@ EVAL_ONLY = (bm.EVAL_ONLY_SOURCES - {"indicvoices"}) | {"hiacc", "field_validati
 #: rows only a Stage-3 run may train on: code-mixed MUCS and IndicVoices Hindi
 STAGE3_LANGUAGES = {"hi-en", "hi"}
 S3_NATIVE = "s3_native"
+GENERATOR_STUDY = "generator_study"
+#: the held-out tools the generator study may train on (gen_train speakers only)
+STUDY_TOOLS = {"indicf5", "chatterbox"}
 
 
 @dataclass
@@ -82,18 +89,27 @@ def check_rows(
     eval_speakers: set[str],
     rvc_test_speakers: set[str],
     indicvoices_allowed: set[str] | None = None,
+    study_speakers: set[str] | None = None,
 ) -> list[str]:
     """Every rule the rows of one config break. Empty means clean.
 
     ``indicvoices_allowed`` holds the IndicVoices speakers decision D1 admits (the
     ``iv_train`` and ``iv_dev`` pools); every other IndicVoices speaker is refused.
+    ``study_speakers`` is the generator study's ``gen_train`` half (P-041), used only when
+    the config declares ``system: generator_study``.
     """
     problems = []
     tool = rows["tool"].astype(str).str.lower()
     source = rows["source"].astype(str).str.lower()
     speaker = rows["speaker"].astype(str)
+    study = cfg.get("system") == GENERATOR_STUDY
+    admitted = (study_speakers or set()) if study else set()
+    if study and not cfg.get("lora"):
+        problems.append("the generator study is a LoRA run (P-041)")
 
     held_out = tool.isin(bm.HELD_OUT_TOOLS)
+    if study:
+        held_out &= ~(tool.isin(STUDY_TOOLS) & speaker.isin(admitted))
     if held_out.any():
         problems.append(f"{int(held_out.sum())} rows of a held-out tool")
     bad_sources = sorted(set(source) & EVAL_ONLY)
@@ -111,7 +127,7 @@ def check_rows(
     if (source.str.contains("child") | speaker.str.lower().str.contains("child")).any():
         problems.append("child audio in training")
 
-    leaked = sorted(set(speaker) & eval_speakers)
+    leaked = sorted((set(speaker) & eval_speakers) - admitted)
     if leaked:
         problems.append(f"{len(leaked)} eval-pool speakers in training, e.g. {leaked[:3]}")
 
@@ -160,7 +176,14 @@ def check_config(path: str, root: str = ".") -> ConfigReport:
 
     report.rows = len(rows)
     report.codemix_rows = int(rows["language"].astype(str).str.lower().eq("hi-en").sum())
-    report.problems = check_rows(rows, cfg, eval_speakers, rvc_test_speakers, iv_train | iv_dev)
+    study_speakers = None
+    if cfg.get("system") == GENERATOR_STUDY:
+        from src.data import generator_study as gs
+
+        study_speakers = gs.train_speakers(str(base / "data/manifests" / gs.POOLS_OUT))
+    report.problems = check_rows(
+        rows, cfg, eval_speakers, rvc_test_speakers, iv_train | iv_dev, study_speakers
+    )
     speakers = rows["speaker"].astype(str)
     in_train = set(speakers[rows["manifest"] == "train_manifest"])
     in_dev = set(speakers[rows["manifest"] == "dev_manifest"])

@@ -1,0 +1,29 @@
+# Week 15, owner SK. Voice check v2 (P-042): the guard gate of the SSL-AASIST run, as
+# train_lora_spont.yaml is for the spontaneous recipe. Same manifests the SSL notebook trains on:
+# the spontaneous recipe plus the generator study's training half (src/data/voice_check_v2).
+system: generator_study
+encoder: wav2vec2-base
+init_from: checkpoints/baseline/best.pt
+
+lora: true
+lora_r: 8
+lora_alpha: 16.0
+lora_dropout: 0.05
+
+train_manifest: data/manifests/codemix_adapt_train_vcv2.csv
+dev_manifest: data/manifests/codemix_adapt_dev_spont_channel20.csv
+out_dir: checkpoints/lora_vcv2
+
+lr: 1.0e-4
+weight_decay: 1.0e-5
+batch_size: 8
+max_seconds: 4.0
+epochs: 5
+num_workers: 4
+seed: 1234
+
+device: cuda
+amp: true
+class_weighted: true
+log_every: 25
+wandb_mode: offline

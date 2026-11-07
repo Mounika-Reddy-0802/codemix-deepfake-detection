@@ -55,6 +55,11 @@ SPONTRAIN = {
     f"ssl_spontrain_s{seed}": REPO / f"experiments/results/spontaneous_training_v1/ssl_s{seed}"
     for seed in (1234, 2025)
 }
+#: voice check v2 (P-042): the spontaneous recipe plus the generator study's training half
+VCV2 = {
+    f"ssl_vcv2_s{seed}": REPO / f"experiments/results/voice_check_v2/ssl_s{seed}"
+    for seed in (1234, 2025)
+}
 #: each column's 30 real calls, as scored by ``src.inference.real_calls score``
 CALLS = {
     "deployed": RC / "calls_deployed_recorded.csv",
@@ -63,9 +68,20 @@ CALLS = {
     "ssl_s1234_spont": RC / "calls_ssl_aasist_recorded.csv",
     **{
         m: REPO / f"experiments/results/real_calls_v1/{m}/calls_ssl_aasist_recorded.csv"
-        for m in SPONTRAIN
+        for m in (*SPONTRAIN, *VCV2)
     },
 }
+
+
+def threshold(model: str) -> float:
+    """The frozen operating point; v2's come from the configs the dev-only rule writes."""
+    if model in THRESHOLDS:
+        return THRESHOLDS[model]
+    import yaml
+
+    seed = model.rsplit("_s", 1)[1]
+    path = REPO / f"configs/threshold_ssl_aasist_vcv2_s{seed}.yaml"
+    return float(yaml.safe_load(path.read_text(encoding="utf-8"))["threshold"])
 
 
 def sigmoid(x):
@@ -98,9 +114,9 @@ def calibration_hiacc(d: pd.DataFrame) -> pd.DataFrame:
     return d[d["filepath"].map(lambda p: Path(p).name in names)].copy()
 
 
-def spontrain_scores(folder: Path, model: str) -> dict[str, pd.DataFrame]:
+def spontrain_scores(folder: Path, model: str, prefix: str = "spont") -> dict[str, pd.DataFrame]:
     """A spontaneous-recipe checkpoint's head-crop scores, HiACC on the reference's clips."""
-    run = "spont_s" + model.rsplit("_s", 1)[1]
+    run = f"{prefix}_s" + model.rsplit("_s", 1)[1]
     out = {}
     for path in sorted(folder.glob(f"{run}__*_scores.csv")):
         d = pd.read_csv(path)
@@ -143,6 +159,7 @@ def sources() -> dict:
             )
         },
         **{m: {"zip": spontrain_scores(z, m)} for m, z in SPONTRAIN.items()},
+        **{m: {"zip": spontrain_scores(z, m, "vcv2")} for m, z in VCV2.items() if z.is_dir()},
     }
 
 
@@ -178,8 +195,14 @@ CONDITIONS = [
 ]
 
 
-def accuracy(model: str, key: str, rows, expected: str) -> tuple[float, int] | None:
-    """Percent of items judged correctly and their number; None if the set is missing."""
+def accuracy(
+    model: str, key: str, rows, expected: str, exclude: frozenset[str] = frozenset()
+) -> tuple[float, int] | None:
+    """Percent of items judged correctly and their number; None if the set is missing.
+
+    ``exclude`` drops those speakers' rows (voice check v2 is measured without the generator
+    study's training half).
+    """
     d = get(model, key)
     if d is None:
         return None
@@ -187,9 +210,13 @@ def accuracy(model: str, key: str, rows, expected: str) -> tuple[float, int] | N
     d = d[d["label"].str.lower() == lab]
     if tool:
         d = d[d["tool"] == tool]
+    if exclude:
+        if "speaker" not in d.columns:
+            raise ValueError(f"{model} {key}: no speaker column to exclude speakers from")
+        d = d[~d["speaker"].astype(str).isin(exclude)]
     if d.empty:
         return None
-    thr = THRESHOLDS[model]
+    thr = threshold(model)
     correct = (d["p"] >= thr) if expected == "bonafide" else (d["p"] < thr)
     return 100 * float(correct.mean()), len(d)
 
@@ -213,7 +240,7 @@ def call_counts(model: str) -> dict[tuple[str, str], tuple[int, int]] | None:
     if path is None or not path.exists():
         return None
     c = pd.read_csv(path)
-    thr = THRESHOLDS[model]
+    thr = threshold(model)
     out = {}
     for kind, tool, _ in CALL_KINDS:
         d = c[(c["kind"] == kind) & (c["tool"] == tool)]

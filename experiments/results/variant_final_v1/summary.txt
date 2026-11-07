@@ -1,0 +1,24 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: e59480cfe026802a8b5c6779c32fdf89d2972cf8
+
+EER (%) per run, phone line; control_fa = genuine clips called fake (%)
+run                  status    dev        eval_pool             cm04         rvc_test         new_xtts     new_tortoise             cm07       control_fa     new_xtts_amr new_tortoise_amr         cm07_amr         cm04_amr
+variant_s1234            ok   0.00             0.78            20.13            17.61             0.67            13.42            43.92             0.08             0.17             8.55            35.35            11.77
+variant_s2025            ok   0.00             1.03            21.39            18.58             1.01            12.16            38.57             0.39             1.01             8.55            33.30            11.53
+variant_s7               ok   0.00             1.01            23.37            13.57             0.34             9.91            28.89             0.16             0.39             7.21            30.00            13.54
+variant_s42              ok   0.43             0.58            17.48            13.89             0.62             5.87            29.23             0.23             0.46             4.96            23.02             9.59
+variant_s99              ok   0.00             0.96            24.49            14.54             0.84            11.73            30.59             0.16             0.62             6.22            29.48             9.59
+
+MEAN +/- SD over seeds, and the paired difference final - deployed (same seeds)
+  eval_pool     variant   0.87 +/-  0.19 (n=5)   
+  cm04          variant  21.37 +/-  2.75 (n=5)   
+  rvc_test      variant  15.64 +/-  2.29 (n=5)   
+  new_xtts      variant   0.70 +/-  0.25 (n=5)   
+  new_tortoise  variant  10.62 +/-  2.94 (n=5)   
+  cm07          variant  34.24 +/-  6.70 (n=5)   
+  control_fa    variant   0.20 +/-  0.12 (n=5)   
+  new_xtts_amr  variant   0.53 +/-  0.31 (n=5)   
+  new_tortoise_amr variant   7.10 +/-  1.55 (n=5)   
+  cm07_amr      variant  30.23 +/-  4.69 (n=5)   
+  cm04_amr      variant  11.21 +/-  1.66 (n=5)   

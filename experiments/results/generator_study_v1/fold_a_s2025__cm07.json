@@ -1,0 +1,27 @@
+{
+  "checkpoint": "/kaggle/temp/codemix-deepfake-detection/checkpoints/w13/fold_a_s2025/best.pt",
+  "manifest": "data/manifests/score_cm07_channel20.csv",
+  "encoder": "wav2vec2-base",
+  "max_seconds": 4.0,
+  "pooled": {
+    "eer": 0.03649401622540344,
+    "eer_ci_low": 0.024494058505506164,
+    "eer_ci_high": 0.050920914804469274,
+    "auc": 0.9950996711698294,
+    "auc_ci_low": 0.9925195923802641,
+    "auc_ci_high": 0.996981876583152,
+    "f1": 0.966846569005397,
+    "threshold": 0.9333798885345459,
+    "clips": 1177,
+    "bonafide": 651,
+    "spoof": 526,
+    "score_std": 0.484959
+  },
+  "per_attack": [
+    {
+      "attack": "indicf5",
+      "spoof_clips": 526,
+      "eer": 0.036494
+    }
+  ]
+}
