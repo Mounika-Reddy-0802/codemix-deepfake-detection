@@ -739,6 +739,9 @@ final recipe catches, a second genuine speaker and a spontaneous call for the li
 
 ## Quick start
 
+`requirements.txt` gives readable version ranges; `requirements-lock-laptop.txt` pins the exact
+environment that ran the voice check and the laptop scoring (its header has the install line).
+
 ```bash
 pip install -r requirements.txt
 
