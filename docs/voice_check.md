@@ -31,19 +31,48 @@ python -m src.inference.any_audio clip.mp3 call.m4a note.ogg --out verdicts.csv
 3. pass through an 8 kHz G.711 telephone round trip, because the detector was trained only
    on telephone-band audio;
 4. score 4 s windows every 2 s, each brought to −23 dBFS; silent windows are skipped;
-5. average P(genuine) over the windows and compare it with the frozen threshold (0.082,
-   chosen on development calls only; since decision D1 part a the development calls include
-   20 spontaneous IndicVoices speakers, and the point chosen on read speech alone was 0.580).
+5. average P(genuine) over the windows and compare it with the frozen threshold (0.073 for
+   voice check v2, chosen on development calls only by the unchanged rule; the development
+   calls include 20 spontaneous IndicVoices speakers since decision D1 part a).
 
 A replayed recording of a real person counts as **real**: the question is whether the voice
 was cloned, not whether it was played back.
 
-## How accurate it is today
+## How accurate it is today: voice check v2 (since 8 November)
 
-From stored scores of the exact checkpoint the page uses
-(`python -m src.reporting.any_audio_accuracy`; full table in
-`experiments/results/any_audio_accuracy.md`). Percent judged correctly at the frozen
-threshold, and in brackets at the earlier point chosen on read-speech development calls only.
+Since 8 November the page runs **voice check v2** (P-042): SSL-AASIST trained on the
+spontaneous recipe plus IndicF5 and Chatterbox clones of 31 speakers, seed 1234 at 0.073. It
+replaced the detector below under a rule written before v2 was trained; both seeds met all five
+conditions (`docs/results/voice_check_v2.md`). Percent judged correctly, from stored scores of
+the exact checkpoint, with the 31 training speakers left out of both columns
+(`python -m src.reporting.voice_check_v2_table`; full table in
+`experiments/results/voice_check_v2_table.md`).
+
+| Audio | v2 at 0.073 | Before 8 November (0.082) |
+|---|---|---|
+| Genuine read speech, telephone line | 100.0 % of 1,480 | 99.9 % |
+| Genuine **spontaneous** speech, telephone line | 99.8 % of 1,000 | 99.3 % |
+| Genuine live mobile calls / replayed into a phone | 12 of 12 / 6 of 6 | 12 of 12 / 6 of 6 |
+| XTTS-v2 clones (line and AMR-NB codec) | 100.0 % | 99.0–99.7 % |
+| XTTS-v2 clones replayed into a phone | 4 of 6 | 5 of 6 |
+| Tortoise clones (in no training set): new speakers / CM04 | 94.1 % / 91.9 % | 80.0 % / 83.7 % |
+| IndicF5 clones (held-out speakers): line / AMR-NB | 89.3 % / 68.0 % | 12.3 % / 1.6 % |
+| Chatterbox clones (held-out speakers) | 93.8 %; 0 of 6 replayed into a phone | 4.2 %; 0 of 6 |
+| RVC voice conversion (held-out speakers) | 73.5 % | 45.4 % |
+
+**Strong:** real voices of every kind, and XTTS-v2, Tortoise (which no training set holds),
+IndicF5 and Chatterbox clones over the telephone line. **Weak:** RVC (73.5 %; the spontaneous recipe
+without the IndicF5 and Chatterbox rows caught 85.8 %), IndicF5 through AMR-NB (68.0 %), and
+clones played aloud into a phone: no model has caught a replayed Chatterbox clone. IndicF5 and
+Chatterbox are now tools this model heard (other speakers), so the page must not be described
+as catching clones of tools it never heard; only Tortoise shows that.
+
+### The detector before 8 November
+
+SSL-AASIST, final-recipe data, seed 1234, measured with every speaker
+(`python -m src.reporting.any_audio_accuracy`; `experiments/results/any_audio_accuracy.md`).
+Percent judged correctly at its frozen threshold, and in brackets at the earlier point chosen
+on read-speech development calls only.
 
 | Audio | Correct at 0.082 (at 0.580) |
 |---|---|
@@ -58,8 +87,8 @@ threshold, and in brackets at the earlier point chosen on read-speech developmen
 | IndicF5 clones (never seen in training) | 12.5 %, 2.3 % through AMR-NB (33.1 %, 11.8 %) |
 | Chatterbox clones (never seen in training) | 4.4 %; 0 of 6 replayed into a phone (20.0 %; 0 of 6) |
 
-**Strong:** real voices of every kind, unscripted speech included, and clones from the tool
-family it was trained on (XTTS-v2). **Weak:** every other generator. The move from 0.580 to
+It was strong on real voices of every kind and on XTTS-v2 clones, and weak on every other
+generator. The move from 0.580 to
 0.082 removed most false alarms on unscripted speech and let through more clones of every
 unseen tool; no single threshold serves both, because the newest generators' clones score
 as high as genuine unscripted speech (`docs/results/operating_points_spont_v1.md`).
@@ -94,9 +123,13 @@ current detector (IndicF5 over AMR-NB too: 38.6-39.0 % against 2.3 %), at no cos
 spontaneous speech, so this is where the next version of the voice check comes from. Adopting it
 needs a recipe whose every training meets the rule, or a rule for the average of the two
 checkpoints written before that average is measured; picking the seed that passed would be
-choosing on test results.
+choosing on test results. Voice check v2 (P-042) is that recipe plus the generator study's
+training half; both of its seeds met their rule and it was adopted on 8 November.
 
-## Clean wideband files (measured 3 November)
+## Clean wideband files (measured 3 November, detector before 8 November)
+
+Voice check v2 on the same 3,306 recordings is being measured; its numbers go in
+`docs/results/voice_check_v2.md` when the run ends.
 
 A file that never went through a phone line (a studio clone downloaded as wav, say) is the
 case the page meets most often and the paper never measured. The clean copies of the dev and
@@ -143,10 +176,10 @@ speaker's consent is ticked.
 1. **Average two checkpoints.** The seed-2025 checkpoint catches 49.0 % of Chatterbox clones
    at its own development-chosen point (0.334) where seed 1234 catches 20.0 % at 0.580; the
    average of the two, with its own development-chosen point, is not yet measured here.
-2. **Train on more generators.** Adding IndicF5 and Chatterbox clones of some speakers to
-   training, and testing on other speakers, is the most direct fix for the weak rows. They
-   would then no longer be unseen tools in the paper's sense, so the paper's numbers stay as
-   they are and this becomes a separate demo model.
+2. **Train on more generators (done: voice check v2, adopted 8 November).** IndicF5 and
+   Chatterbox clones of 31 speakers in training, tested on 30 others: 89-94 % of their clones
+   caught over the line, at a cost of 11-12 points on RVC. They are no longer unseen tools for
+   this model, so the paper's numbers stay as they are.
 3. **Add spontaneous genuine speech to training** (decision D1 part b, done): retrained with
    150 spontaneous speakers, SSL-AASIST catches 36-52 % of IndicF5 and Chatterbox clones here
    instead of 4-13 %, with spontaneous speech still judged real 99 % of the time; one of its two

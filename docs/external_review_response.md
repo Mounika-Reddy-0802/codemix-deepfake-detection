@@ -232,7 +232,11 @@ Tortoise and Chatterbox EER rise 3.7 and 3.4 points. The frozen models stay the 
 (`docs/results/spontaneous_training_v1.md`). In the voice check, under a rule committed before
 measuring, both retrained trainings catch far more unseen clones (mean 70-75% against 44%), but
 one judges 97.6% of read genuine speech real against 99% required, so the voice check keeps its
-detector (P-040, `docs/voice_check.md`).
+detector (P-040, `docs/voice_check.md`). The same recipe trained also on IndicF5 and Chatterbox
+clones of 31 speakers (voice check v2, rule committed before training) met every condition in
+both seeds on the other speakers and replaced it on 8 November: genuine spontaneous speech 99.7-
+99.8% judged real, IndicF5 and Chatterbox 89-94% caught instead of 12% and 4%, at 11-12 points of
+RVC (P-043, `docs/results/voice_check_v2.md`). The paper's unseen-tool numbers are unchanged.
 
 ## 4. Hinglish phone-line vs clean-English trade-off
 

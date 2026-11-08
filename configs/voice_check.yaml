@@ -1,15 +1,18 @@
 # The detector behind the voice check (src/inference/any_audio.py, voice_check/app.py).
 #
-# SSL-AASIST, final-recipe data, seed 1234: the most accurate checkpoint measured on every
-# condition we have scores for (direct microphone, real phone calls, replayed recordings,
-# G.711, AMR-NB, spontaneous speech); see experiments/results/any_audio_accuracy.md.
-# The weights are 632 MB and stay outside git.
+# Voice check v2 (P-042, adopted 8 November 2026 by the rule fixed before it was trained):
+# SSL-AASIST on the spontaneous recipe plus IndicF5 and Chatterbox clones of the generator
+# study's 31 training speakers, seed 1234. Both seeds met all five conditions; see
+# docs/results/voice_check_v2.md and experiments/results/voice_check_v2.json.
+# The weights are 632 MB and stay outside git (Kaggle output of w15-vcv2-ssl-s1234).
 kind: ssl_aasist
-checkpoint: D:/kaggle_realcall/ssl_out/ssl_aasist_final_s1234_fp16.pt
-# Frozen operating point, chosen on development calls only (never on a test set). Since
-# decision D1 part a (P-038) the dev set includes 20 spontaneous IndicVoices speakers; the
-# point chosen on read-speech dev calls alone was configs/threshold_ssl_aasist.yaml (0.580).
-threshold_file: configs/threshold_ssl_aasist_spont.yaml
+checkpoint: C:/Users/kuchu/kaggle_w15/w15-vcv2-ssl-s1234/ssl_aasist_vcv2_s1234_fp16.pt
+# Frozen operating point, chosen on the same development calls as before (read and 20
+# spontaneous IndicVoices speakers, P-038) by the unchanged rule (P-031), never on a test set.
+# Until 8 November: final-recipe SSL-AASIST seed 1234
+# (D:/kaggle_realcall/ssl_out/ssl_aasist_final_s1234_fp16.pt) at
+# configs/threshold_ssl_aasist_spont.yaml (0.082).
+threshold_file: configs/threshold_ssl_aasist_vcv2_s1234.yaml
 # g711: every input passes an 8 kHz G.711 round trip first (the training domain).
 # none: score the audio as it is. any_audio_eval measures both on the clean test sets.
 front_end: g711
