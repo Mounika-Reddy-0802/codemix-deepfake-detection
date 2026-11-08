@@ -455,7 +455,8 @@ On 3,306 clean recordings it called no genuine recording with two seconds of spe
 caught 96.7% of XTTS-v2 and 66.7% of Tortoise clones, but none of the IndicF5 or Chatterbox
 clones. Without the phone line's distortion those clones sit with genuine speech. The telephone
 front end stays on because it was better on the development clips (97.4% against 93.2%
-balanced accuracy), chosen before any test row was read (`docs/voice_check.md`).
+balanced accuracy), chosen before any test row was read (`docs/voice_check.md`). These are the
+detector before 8 November; voice check v2 on the same files is being measured.
 
 **Q55. How can we check that a rule really came before its result?**
 From the commit history. Each rule is a commit that lands before the run: the study's rule in
@@ -482,6 +483,23 @@ the result. So we report the drop as measured and the hypothesis as not confirme
 detector that guards phone calls, a few more genuine callers flagged is a real cost, which is
 why the condition was there.
 
+**Q58. You changed the voice check's detector days before the review. Why trust the new one?**
+Because the change was decided by a rule committed before the new model was trained (`cb33e57`),
+not by us after seeing its numbers. Voice check v2 is the same SSL-AASIST recipe trained also on
+IndicF5 and Chatterbox clones of 31 speakers; both seeds had to meet all five conditions,
+measured without those 31 speakers. They did: genuine speech 99.7-100% judged real, 12 of 12
+live calls, IndicF5 89-90% and Chatterbox 93.5-93.8% caught instead of 12% and 4%. Had either
+seed missed one condition, the old detector would have stayed, as it did for the retrained model
+a week earlier (P-040).
+
+**Q59. Isn't v2 just memorising IndicF5 and Chatterbox?**
+It heard those tools, so its numbers on them are seen-tool numbers, measured on 30 speakers it
+never heard; the paper's unseen-tool claims rest on detectors that never heard them. Tortoise,
+in no training set, also rose (80.0% to 94.1-98.5%), though most of that came from the
+spontaneous recipe itself. The price is RVC: 11-12 points lower than the recipe without the new
+rows, and a Chatterbox clone played aloud into a phone still passes (0 of 6). Those are reported
+beside the decision (`docs/results/voice_check_v2.md`).
+
 ## 10. Numbers to remember
 
 | What | Number |
@@ -498,6 +516,7 @@ why the condition was there.
 | First caution / warning on a live call | about 6 s / 10 s (deployed); 8 s / 12 s (final recipe) |
 | Speakers in the language-controlled test | 183 |
 | HiACC genuine called fake, frozen vs retrained with spontaneous speech (adapter / SSL-AASIST) | 43.9% vs 1.2% / 26.2% vs 1.5% |
+| Voice check v2: IndicF5 / Chatterbox caught, before vs after (held-out speakers) | 12.3% / 4.2% vs 89.3% / 93.8% |
 | Spontaneous genuine against IndicF5 clones, threshold-free, SSL-AASIST frozen vs retrained | 49% vs 15-20% EER |
 | Cost of that retraining on read-speech benchmarks (adapter / SSL-AASIST, seed mean) | +8-11 / +1-4 EER points |
 | English over the phone line, routing test sample: final adapter alone vs behind the language gate | 25.00% vs 9.80% EER |
