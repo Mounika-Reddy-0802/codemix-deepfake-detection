@@ -30,16 +30,20 @@ TRAIN_OUT = "codemix_adapt_train_vcv2"
 DEV = spont_recipe.DEV_OUT  # unchanged: the 506 dev clips plus the 20 iv_dev speakers
 
 
-def build(manifests_dir: str = "data/manifests") -> pd.DataFrame:
-    """The spontaneous recipe's training rows plus fold C's extra rows."""
+def build(manifests_dir: str = "data/manifests", system: str = "fold_c") -> pd.DataFrame:
+    """The spontaneous recipe's training rows plus one study system's extra rows.
+
+    ``fold_c`` (both tools) is voice check v2; ``control``, ``fold_a`` and ``fold_b`` are the
+    same recipe for the generator study on SSL-AASIST (``src/data/ssl_generator_study``).
+    """
     mdir = Path(manifests_dir)
     base = pd.read_csv(mdir / f"{spont_recipe.TRAIN_OUT}.csv", dtype={"speaker": str})
-    study = gs.build("fold_c", manifests_dir)
+    study = gs.build(system, manifests_dir)
     extra = study[study["speaker"].isin(gs.train_speakers(str(mdir / gs.POOLS_OUT)))]
     out = pd.concat([base, extra.reindex(columns=base.columns)], ignore_index=True)
     out["split"] = "train"
     if out["filepath"].duplicated().any():
-        raise ValueError("duplicate clips in the voice check v2 training manifest")
+        raise ValueError(f"duplicate clips in the {system} training manifest")
     return out
 
 
