@@ -1,0 +1,62 @@
+{
+  "reference": "ssl_s1234_spont",
+  "measures": {
+    "ssl_s1234_spont": {
+      "hiacc": 99.3,
+      "read_new_speakers": 99.86486486486487,
+      "read_control": 99.92248062015504,
+      "xtts": 99.72776769509983,
+      "indicf5": 12.295081967213115,
+      "chatterbox": 4.230769230769231,
+      "tortoise_new": 80.0,
+      "tortoise_cm04": 83.710407239819,
+      "rvc": 45.42586750788644,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_vcv2_s1234": {
+      "hiacc": 99.8,
+      "read_new_speakers": 100.0,
+      "read_control": 100.0,
+      "xtts": 100.0,
+      "indicf5": 89.34426229508196,
+      "chatterbox": 93.84615384615384,
+      "tortoise_new": 94.07407407407408,
+      "tortoise_cm04": 91.8552036199095,
+      "rvc": 73.50157728706624,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_vcv2_s2025": {
+      "hiacc": 99.7,
+      "read_new_speakers": 99.86486486486487,
+      "read_control": 100.0,
+      "xtts": 100.0,
+      "indicf5": 90.1639344262295,
+      "chatterbox": 93.46153846153847,
+      "tortoise_new": 98.51851851851852,
+      "tortoise_cm04": 98.19004524886877,
+      "rvc": 77.60252365930599,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    }
+  },
+  "conditions": {
+    "ssl_vcv2_s1234": {
+      "1_spontaneous": true,
+      "2_read": true,
+      "3_new_tools": true,
+      "4_unseen": true,
+      "5_xtts": true
+    },
+    "ssl_vcv2_s2025": {
+      "1_spontaneous": true,
+      "2_read": true,
+      "3_new_tools": true,
+      "4_unseen": true,
+      "5_xtts": true
+    }
+  },
+  "decision": "adopt ssl_vcv2_s1234",
+  "excluded_speakers": 31
+}
