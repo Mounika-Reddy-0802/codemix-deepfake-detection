@@ -892,9 +892,10 @@ outside this repo.
 
 **Open:** voice check v2 catches IndicF5 and Chatterbox clones over the phone line, but RVC
 falls to 73.5% and a Chatterbox clone replayed into a phone still passes
-([voice_check_v2](docs/results/voice_check_v2.md)); v2 on clean wideband files is being measured
-(the detector before it let every IndicF5 and Chatterbox clone through there); measure it on
-field recordings; run the final recipe as the live system's default
+([voice_check_v2](docs/results/voice_check_v2.md)); on clean wideband files v2 catches 73% of
+IndicF5 and 86% of Chatterbox clones where the detector before it caught none
+([voice_check_v2_clean](experiments/results/voice_check_v2_clean.md)); measure it on field
+recordings; run the final recipe as the live system's default
 everywhere (the demo already runs it, `scripts/run_demo.bat`); fund the Twilio account and run the
 carrier on real numbers for the first time; real development calls, to set a stricter speech gate
 for the first seconds of a call ([early_warning_v1](docs/results/early_warning_v1.md)); decide on

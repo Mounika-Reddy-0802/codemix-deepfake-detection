@@ -456,7 +456,9 @@ caught 96.7% of XTTS-v2 and 66.7% of Tortoise clones, but none of the IndicF5 or
 clones. Without the phone line's distortion those clones sit with genuine speech. The telephone
 front end stays on because it was better on the development clips (97.4% against 93.2%
 balanced accuracy), chosen before any test row was read (`docs/voice_check.md`). These are the
-detector before 8 November; voice check v2 on the same files is being measured.
+detector before 8 November. Voice check v2, on the same files without its 31 training
+speakers, catches 72.7% of IndicF5 and 86.1% of Chatterbox clones and judges genuine speech as
+before (one of 1,455 genuine recordings called cloned; `voice_check_v2_clean.md`).
 
 **Q55. How can we check that a rule really came before its result?**
 From the commit history. Each rule is a commit that lands before the run: the study's rule in

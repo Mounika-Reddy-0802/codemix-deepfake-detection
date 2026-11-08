@@ -128,8 +128,11 @@ training half; both of its seeds met their rule and it was adopted on 8 November
 
 ## Clean wideband files (measured 3 November, detector before 8 November)
 
-Voice check v2 on the same 3,306 recordings is being measured; its numbers go in
-`docs/results/voice_check_v2.md` when the run ends.
+Voice check v2 on the same recordings, without its 31 training speakers
+(`experiments/results/voice_check_v2_clean.md`): IndicF5 clones caught 72.7% and Chatterbox
+86.1% where the detector below caught none, RVC 58.4% (20.1%), Tortoise 86.8% (71.1%), XTTS-v2
+100%; genuine speech judged as before, with one of 1,455 genuine recordings (HiACC) called
+cloned. The rest of this section is the detector before 8 November.
 
 A file that never went through a phone line (a studio clone downloaded as wav, say) is the
 case the page meets most often and the paper never measured. The clean copies of the dev and

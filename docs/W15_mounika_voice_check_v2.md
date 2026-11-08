@@ -75,5 +75,5 @@ the operating points (`configs/threshold_ssl_aasist_vcv2_s*.yaml`, from
 
 ## Still open
 
-Clean wideband files with v2 (running); field recordings from people using the page; a replayed
+Clean wideband files with v2 are measured in Lahari's week record (`voice_check_v2_clean.md`); field recordings from people using the page; a replayed
 Chatterbox clone.
