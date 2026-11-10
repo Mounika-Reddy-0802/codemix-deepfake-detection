@@ -58,6 +58,8 @@ def test_speakers_with_too_little_audio_are_not_drawn():
 
 
 def test_join_resamples_stops_at_the_target_and_sets_one_level():
+    pytest.importorskip("scipy")  # heavy wheel, not installed in CI
+
     def read(path):
         sr = 24_000 if "loud" in path else 16_000
         amp = 0.5 if "loud" in path else 0.01
