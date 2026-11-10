@@ -475,7 +475,7 @@ Chatterbox, the error on IndicF5 (never heard) fell from 20.44% to 12.43%, lower
 confirmed. Trained also on IndicF5, the error on Chatterbox fell from 24.32% to 15.75%, also in
 every seed, but it was not confirmed (Q57). Tortoise, which no system trained on, fell too
 (7.16% to 4.13-5.00%), and every system beat its matched floor in every seed
-(`generator_study_v1.md`).
+(`generator_study_v1.md`). On SSL-AASIST both directions are confirmed (Q62).
 
 **Q57. Fold A was better in all five seeds with the smallest p possible. Why "not confirmed"?**
 Because the rule also limits the cost: genuine clips called fake may rise by at most 0.5
@@ -523,6 +523,17 @@ The average moves the balance between attacks rather than giving both, and it do
 scoring cost, so the page keeps v2. Which balance is better depends on whether voice
 conversion or the newest TTS tools matter more where the check is used.
 
+**Q62. Is the generator study's answer just a property of the adapter?**
+No. The same question was asked of SSL-AASIST with its rule committed before training (P-044,
+`docs/results/ssl_generator_study_v1.md`): the same speaker halves and measure, two seeds per
+system, and a 95% speaker-bootstrap interval because two seeds cannot pass the rank test. Both
+directions are confirmed. Trained also on IndicF5, Chatterbox (never heard) fell from 11.53% to
+3.29% EER; trained also on Chatterbox, IndicF5 (never heard) fell from 20.97% to 9.22%. Fold A,
+not confirmed on the adapter only because of false alarms, moved them by 0.08 points here.
+The limits: two seeds, so the size of the gain (6-17 points by seed) is not pinned down; the
+two studies also differ in recipe; and it shows that these two tools help with each other, not
+with every tool.
+
 ## 10. Numbers to remember
 
 | What | Number |
@@ -546,3 +557,4 @@ conversion or the newest TTS tools matter more where the check is used.
 | Voice check v2, IndicF5 caught with 95% speaker interval (detector before v2) | 89.3% [83.2, 94.2] (12.3% [7.1, 18.1]) |
 | v2 averaged with the spontaneous recipe, seed 1234: RVC / IndicF5 caught (v2 alone) | 90.2% / 70.5% (73.5% / 89.3%): not adopted |
 | Voice check v2 over four seeds, EER on held-out speakers: IndicF5 / Chatterbox / RVC (mean, range) | 3.2% (2.5-5.3) / 1.4% (0.8-2.3) / 4.2% (2.6-6.0) |
+| Generator study on SSL-AASIST, never-heard tool, control vs one more tool: Chatterbox / IndicF5 | 11.53% to 3.29% / 20.97% to 9.22%: both confirmed |
