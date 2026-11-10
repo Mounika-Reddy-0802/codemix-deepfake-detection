@@ -67,6 +67,15 @@ clones played aloud into a phone: no model has caught a replayed Chatterbox clon
 Chatterbox are now tools this model heard (other speakers), so the page must not be described
 as catching clones of tools it never heard; only Tortoise shows that.
 
+How sure: the 95% speaker intervals of IndicF5 (89.3 % [83.2, 94.2]) and Chatterbox
+(93.8 % [87.5, 98.8]) do not overlap the detector before (12.3 % and 4.2 %); RVC rests on 6
+speakers and the calls only bound the genuine rate above about 73.5 %
+(`experiments/results/voice_check_v2_intervals.md`). Trained four times (seeds 1234, 2025, 7,
+42), v2 keeps every clone EER under 6 % over the line; seed 1234, the one on this page, is at
+the good end of that spread (`experiments/results/voice_check_v2_seeds.md`). Averaging v2 with the spontaneous recipe
+wins RVC back (90.2 %) but gives up 13-19 points of IndicF5, so it was not adopted (P-046,
+`docs/results/voice_check_v2_avg.md`).
+
 ### The detector before 8 November
 
 SSL-AASIST, final-recipe data, seed 1234, measured with every speaker
