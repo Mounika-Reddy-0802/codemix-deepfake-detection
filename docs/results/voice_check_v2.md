@@ -155,3 +155,33 @@ change. Tortoise is the only tool here that no model heard.
   generator has not been tested.
 - The 30 real calls are the team's own recordings, a small sample.
 - Field recordings (people using the page) are still to come (review plan A4).
+
+## Seeds 7 and 42 (registered 10 November 2026, before training)
+
+Two seeds are a thin base for numbers that go into the paper. Voice check v2 is therefore
+trained twice more, with seeds 7 and 42 (the project's next two seeds), from the same notebook
+and the same pinned commit (`cb33e57`); only the seed changes
+(`notebooks/kaggle_w15_vcv2_ssl_s{7,42}.ipynb`, team decision P-045). The two trainings run on
+team members' Kaggle accounts beside the last generator-study runs.
+
+These runs are **reported, not judged**:
+
+- The adoption (P-043) is not reopened, whatever they show. The voice check keeps seed 1234 at
+  0.073.
+- No seed is dropped or replaced. All four are reported, each seed's value with the mean, the
+  standard deviation and the range (`src/reporting/voice_check_v2_seeds.py`, written with this
+  section).
+- Every EER is on speakers outside `gen_train`, computed by the same code as the adoption:
+  IndicF5 and Chatterbox clones, Tortoise (new speakers and CM04), RVC and XTTS-v2, on the G.711
+  line and, where the sets exist, the AMR-NB codec. The genuine clips called fake (language
+  control, HiACC, IndicVoices) are the notebook's own rates.
+- If the two checkpoints are later scored on the development calls, the five conditions at each
+  seed's dev-only point are reported as a check of whether the rule would have held for them.
+  That cannot change the adoption either.
+
+```
+python -m src.reporting.voice_check_v2_seeds --results <the four run folders> \
+    --out experiments/results/voice_check_v2_seeds.md
+```
+
+**Results.** Not run yet.
