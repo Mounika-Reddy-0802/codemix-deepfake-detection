@@ -146,6 +146,14 @@ change. Tortoise is the only tool here that no model heard.
   against 76.5% of 1,455; the rest have under 2 s of speech, which the page declines to judge),
   and v2 calls one genuine recording cloned, a HiACC clip, where the detector before called none.
   Threshold-free, IndicF5 against genuine speech goes from 24.82% to 1.77% EER.
+- **Uncertainty** (`experiments/results/voice_check_v2_intervals.md`,
+  `python -m src.reporting.voice_check_v2_intervals`; 95% speaker-bootstrap intervals). IndicF5
+  clones caught 89.3% [83.2, 94.2] and 90.2% [83.5, 95.5] against 12.3% [7.1, 18.1]; Chatterbox
+  93.8% [87.5, 98.8] and 93.5% [87.1, 98.5] against 4.2% [1.6, 7.3]; the intervals do not
+  overlap. RVC rests on 6 speakers (73.5% [62.1, 84.4] and 77.6% [65.5, 86.4] against 45.4%
+  [29.0, 62.8]) and Tortoise on CM04 on 7. Twelve of 12 genuine live calls is consistent with a
+  true rate as low as 73.5% (exact interval) and 6 of 6 replays with 54.1%: the calls show no
+  failure, not a measured rate.
 
 ### Limits
 
