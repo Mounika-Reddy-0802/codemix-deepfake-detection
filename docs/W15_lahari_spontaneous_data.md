@@ -138,7 +138,7 @@ same run gives v2's verdict on every demo clip: scene 6 (IndicF5) is now caught,
 Chatterbox clip still passes (P 0.25 against 0.073); `docs/viva/voice_check_demo.md` and the
 demo folder's `expected.csv` now hold v2's verdicts.
 
-### The generator study on SSL-AASIST, registered (P-044)
+### The generator study on SSL-AASIST (P-044): carries over
 
 Voice check v2 heard both new tools, so its numbers on them say nothing about tools it never
 heard. I registered the generator study's question for SSL-AASIST before any training
@@ -147,11 +147,21 @@ on the spontaneous recipe, seeds 1234 and 2025, six Kaggle notebooks pinned to t
 commit. With two seeds the exact rank test cannot pass, so each seed's difference must also
 have a 95% speaker-bootstrap interval wholly below zero.
 
+All six ran clean on 10 November and **both folds are confirmed**. Trained also on IndicF5,
+Chatterbox (never heard) falls from 11.53% to 3.29% EER on held-out speakers; trained also on
+Chatterbox, IndicF5 (never heard) falls from 20.97% to 9.22%. Both seeds lower, every bootstrap
+interval below zero, Tortoise and false alarms inside the guards. The adapter study's
+unconfirmed direction (fold A, short only on false alarms) holds here: its false alarms move
+0.08 points. Two seeds only, and the size of the gain differs a lot between them (fold B 17.4
+and 6.1 points), so the direction is shown and the size is not. For the paper,
+`src/reporting/genstudy_both_figure.py` draws both studies side by side in one column.
+
 ## What is still open
 
 Since 8 November the voice check runs v2 (P-043), which catches most IndicF5 and Chatterbox
 clones; a Chatterbox clone replayed into a phone still passes, and the generator rows cost RVC
-11-12 points. Whether a tool SSL-AASIST heard helps it catch the other is the open study above. Telling apart the two
+11-12 points. A tool SSL-AASIST heard helps it catch the other (P-044, above); whether that
+reaches tools beyond these two is untested. Telling apart the two
 explanations of the trade-off, a delivery cue learned from spontaneous genuine speech against
 fluent TTS, or a model made more XTTS-specific by XTTS-only clones, needs clones that speak
 spontaneously, or the added speakers cloned by other tools.

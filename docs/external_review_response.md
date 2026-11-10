@@ -170,6 +170,17 @@ every system beats its matched floor on every study set in every seed
 carries over in part (one direction confirmed, the other short only on false alarms) and
 adding augmentation on the same tool (the variant above) does not.
 
+**Done (week 15, the same study on SSL-AASIST, P-044).** The question repeated on the second
+detector, with the same speaker halves and measure, on its spontaneous recipe, two seeds per
+system, and a 95% speaker-bootstrap interval in place of the rank test that two seeds cannot
+pass; rule committed before training (`docs/results/ssl_generator_study_v1.md`). **Answer:
+carries over.** Trained also on IndicF5, Chatterbox (never heard) falls from 11.53% to 3.29%
+EER; trained also on Chatterbox, IndicF5 (never heard) falls from 20.97% to 9.22%. Both are
+lower in both seeds with every interval below zero, and Tortoise and false alarms stay within
+the adapter study's guards, so the direction the adapter left unconfirmed is confirmed here
+(false alarms +0.08 points). Two detectors now give the same direction; the second rests on
+two seeds, so the size of the gain (6-17 points by seed) is not pinned down.
+
 ## 3. More speakers and speaking styles
 
 > Expand the Hinglish adaptation dataset beyond the current 10-speaker pool and

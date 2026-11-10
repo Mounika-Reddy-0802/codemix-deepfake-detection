@@ -52,7 +52,9 @@ Recorded real mobile calls were scored offline through the same path.
 > falls from 20.44% to 12.43% in every seed (confirmed); trained also on IndicF5, its Chatterbox EER
 > falls from 24.32% to 15.75% in every seed but it calls slightly more genuine speech fake than the
 > rule allows (not confirmed). Tortoise, never trained on, falls in both
-> ([generator_study_v1](docs/results/generator_study_v1.md)).
+> ([generator_study_v1](docs/results/generator_study_v1.md)). **On SSL-AASIST both directions are
+> confirmed** (two seeds, speaker bootstrap): Chatterbox never heard 11.53% to 3.29% EER, IndicF5
+> never heard 20.97% to 9.22% ([ssl_generator_study_v1](docs/results/ssl_generator_study_v1.md)).
 > **Voice check v2 is adopted** (rule fixed before training, both seeds pass): trained also on
 > IndicF5 and Chatterbox clones of other speakers, the voice check catches 89-94% of their clones
 > over the phone line instead of 4-12%, keeps 99.7-100% of genuine speech and all 12 live calls,
@@ -954,6 +956,7 @@ teammate — never your own. (`dev` stopped in week 8 and is unused.) Full rules
 | [`docs/results/variants_v1.md`](docs/results/variants_v1.md) | **Changes aimed at the unseen tool** — the dev-only selection, and the exploratory augmentation lead |
 | [`docs/results/variants_final_v1.md`](docs/results/variants_final_v1.md) | **The exploratory lead tested on the final recipe** — rule committed first, five seeds: not confirmed (IndicF5 21.68 → 34.24%, worse in every seed) |
 | [`docs/results/generator_study_v1.md`](docs/results/generator_study_v1.md) | **The generator study** — one more tool in training, measured on a tool never heard and on unheard speakers, rule committed first: partly (IndicF5 20.44 → 12.43% confirmed; Chatterbox 24.32 → 15.75% short on false alarms) · floors in [`floor_genstudy_v1.md`](docs/results/floor_genstudy_v1.md) |
+| [`docs/results/ssl_generator_study_v1.md`](docs/results/ssl_generator_study_v1.md) | **The generator study on SSL-AASIST** — the same question, rule committed first, two seeds with a speaker bootstrap: carries over (Chatterbox 11.53 → 3.29%, IndicF5 20.97 → 9.22%, both confirmed) |
 | [`docs/results/tradeoff_v1.md`](docs/results/tradeoff_v1.md) | **Phone line vs clean** — every adapter in the condition it was not trained in |
 | [`docs/results/english_channel_v1.md`](docs/results/english_channel_v1.md) | **English over the phone line** — 2.30% clean, 24.20% over the line |
 | [`docs/results/hiacc_false_alarm_v1.md`](docs/results/hiacc_false_alarm_v1.md) | **New speakers talking freely** — 54% of genuine HiACC speech called fake |

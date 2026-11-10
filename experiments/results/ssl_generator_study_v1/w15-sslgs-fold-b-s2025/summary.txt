@@ -1,0 +1,27 @@
+STATUS: FINISHED - every run ran.
+RUN HEALTH: every step ran without error.
+commit: 0fbf1423d5a8a851a45d92cc42eb1aefdc739595
+timing per 4 s window: not measured yet
+
+SSL-AASIST on the spontaneous recipe, EER (%): G.711 line, *_amr = real AMR-NB codec; hiacc_fa, iv_test_fa = spontaneous genuine called fake (%); control_fa = genuine clips called fake (%)
+run                    status    dev        eval_pool             cm04         rvc_test         new_xtts     new_tortoise             cm07       control_fa     new_xtts_amr new_tortoise_amr         cm07_amr         cm04_amr         hiacc_fa          iv_test      iv_test_amr       iv_test_fa             cm09
+sslgs_fold_b_s2025         ok   0.13             0.38             3.27             7.92             0.12             0.87            11.81             0.00             0.05             0.45            12.57             2.15             0.06             0.18             0.18             0.29             3.82
+
+MEAN +/- SD over seeds
+  fine-tuned on sslgs_fold_b:
+    eval_pool           0.38 (n=1)
+    cm04                3.27 (n=1)
+    rvc_test            7.92 (n=1)
+    new_xtts            0.12 (n=1)
+    new_tortoise        0.87 (n=1)
+    cm07               11.81 (n=1)
+    control_fa          0.00 (n=1)
+    new_xtts_amr        0.05 (n=1)
+    new_tortoise_amr    0.45 (n=1)
+    cm07_amr           12.57 (n=1)
+    cm04_amr            2.15 (n=1)
+    hiacc_fa            0.06 (n=1)
+    iv_test             0.18 (n=1)
+    iv_test_amr         0.18 (n=1)
+    iv_test_fa          0.29 (n=1)
+    cm09                3.82 (n=1)
