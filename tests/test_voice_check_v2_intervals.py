@@ -34,6 +34,7 @@ def test_points_match_the_rule_and_training_speakers_are_left_out(fake_sources):
 
 
 def test_all_correct_gets_an_exact_interval_and_no_speakers_gets_wilson(fake_sources):
+    pytest.importorskip("scipy")  # heavy wheel, not installed in CI
     r = iv.measure("m", "cm09", ("spoof", None), "spoof", frozenset())
     assert r["method"] == "clips (exact)" and r["point"] == 100.0
     assert r["interval"][1] == 100.0 and r["interval"][0] < 100.0
@@ -43,6 +44,7 @@ def test_all_correct_gets_an_exact_interval_and_no_speakers_gets_wilson(fake_sou
 
 
 def test_interval_helpers():
+    pytest.importorskip("scipy")  # heavy wheel, not installed in CI
     assert iv.exact(12, 12) == (pytest.approx(73.535, abs=0.01), 100.0)
     low, high = iv.wilson(50, 100)
     assert low == pytest.approx(40.38, abs=0.01) and high == pytest.approx(59.62, abs=0.01)
