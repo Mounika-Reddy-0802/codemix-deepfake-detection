@@ -216,3 +216,5 @@ Thumbs.db
 desktop.ini
 ~$*
 *.swp
+# averaged clip scores of P-046, rebuilt by python -m src.reporting.rvc_average build
+experiments/results/voice_check_v2_avg/

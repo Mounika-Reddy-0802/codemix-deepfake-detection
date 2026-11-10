@@ -1,7 +1,7 @@
 # Voice check v2 averaged with the spontaneous recipe (v1)
 
-**Status: registered, not measured.** Written on 10 November 2026 before any averaged number
-existed, so the rule cannot be fitted to its results. Team decision P-046. The rule is coded in
+**Status: measured on 10 November 2026: not recommended.** Registered the same day before any
+averaged number existed, so the rule cannot be fitted to its results. Team decision P-046. The rule is coded in
 `src/reporting/rvc_average.py` and committed with this page.
 
 ## Why
@@ -57,4 +57,41 @@ and the averaged call windows and verdicts (`experiments/results/real_calls_v1/s
 
 ## Results
 
-Not measured yet.
+**Answer: not recommended.** `python -m src.reporting.rvc_average judge`
+(`experiments/results/rvc_average.json`): both seed pairs meet conditions 1, 2, 3 and 5 and miss
+condition 4. The voice check keeps v2 seed 1234.
+
+Operating points chosen on dev only: 0.496 (seed 1234) and 0.529 (seed 2025).
+
+| Measure (percent judged correctly) | v2 s1234 | average s1234 | v2 s2025 | average s2025 |
+|---|---|---|---|---|
+| 1. Spontaneous genuine (HiACC) | 99.8 | 99.6 | 99.7 | 99.6 |
+| 1. Read genuine, new speakers / language control | 100.0 / 100.0 | 99.9 / 100.0 | 99.9 / 100.0 | 99.1 / 99.1 |
+| 1. Genuine live calls / genuine replays | 12/12, 6/6 | 12/12, 6/6 | 12/12, 6/6 | 12/12, 6/6 |
+| 2. XTTS-v2 clones caught | 100.0 | 100.0 | 100.0 | 100.0 |
+| 3. RVC conversions caught (at least +5) | 73.5 | **90.2** (+16.7) | 77.6 | **87.4** (+9.8) |
+| 4. IndicF5 clones caught (at most -5) | 89.3 | 70.5 (-18.8) | 90.2 | 77.5 (-12.7) |
+| 4. Chatterbox clones caught (at most -5) | 93.8 | 86.5 (-7.3) | 93.5 | 86.5 (-7.0) |
+| 5. Tortoise, new speakers | 94.1 | 97.8 | 98.5 | 97.0 |
+| 5. Tortoise, CM04 | 91.9 | 97.7 | 98.2 | 98.2 |
+
+Reported, not judged: replayed XTTS-v2 clones 6 of 6 for both averages (v2: 4 and 6);
+replayed Chatterbox clones 1 and 0 of 6 (v2: 0 and 0); IndicF5 through the real AMR-NB codec
+69.3% and 42.6% (v2: 68.0% and 54.9%); genuine read speech over AMR-NB 99.7-99.8%.
+
+### What it means
+
+- **Averaging moves the balance; it does not give both.** RVC rises past even the spontaneous
+  recipe alone (85.8% and 89.0%), and Tortoise rises in seed 1234, but IndicF5 and Chatterbox
+  fall back part of the way v2 had raised them: 70-78% and 86.5%, still far above the 12.3% and
+  4.2% of the detector before v2.
+- **Genuine speech is unaffected**: every genuine live call and replay is still judged real.
+- **Which model is better depends on the attack that matters more.** For the newest TTS tools
+  v2 alone is better; for voice conversion the average is. The rule asked for both and the
+  average does not deliver both, so the page keeps v2.
+
+### Limits
+
+- RVC rests on 6 speakers and CM04 Tortoise on 7 (`voice_check_v2_intervals.md`).
+- Two seed pairs; the average was not tried with other weights, because any weight chosen on
+  these test sets would be tuned on them.
