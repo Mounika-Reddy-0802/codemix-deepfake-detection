@@ -1,0 +1,74 @@
+{
+  "conditions": {
+    "1234": {
+      "1_genuine": true,
+      "2_xtts": true,
+      "3_rvc_gain": true,
+      "4_new_tools_kept": false,
+      "5_tortoise_kept": true
+    },
+    "2025": {
+      "1_genuine": true,
+      "2_xtts": true,
+      "3_rvc_gain": true,
+      "4_new_tools_kept": false,
+      "5_tortoise_kept": true
+    }
+  },
+  "answer": "not recommended",
+  "measures": {
+    "ssl_vcv2avg_s1234": {
+      "hiacc": 99.6,
+      "read_new_speakers": 99.93243243243242,
+      "read_control": 100.0,
+      "xtts": 100.0,
+      "indicf5": 70.49180327868852,
+      "chatterbox": 86.53846153846155,
+      "tortoise_new": 97.77777777777777,
+      "tortoise_cm04": 97.73755656108597,
+      "rvc": 90.22082018927445,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_vcv2_s1234": {
+      "hiacc": 99.8,
+      "read_new_speakers": 100.0,
+      "read_control": 100.0,
+      "xtts": 100.0,
+      "indicf5": 89.34426229508196,
+      "chatterbox": 93.84615384615384,
+      "tortoise_new": 94.07407407407408,
+      "tortoise_cm04": 91.8552036199095,
+      "rvc": 73.50157728706624,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_vcv2avg_s2025": {
+      "hiacc": 99.6,
+      "read_new_speakers": 99.12162162162163,
+      "read_control": 99.14728682170542,
+      "xtts": 100.0,
+      "indicf5": 77.45901639344262,
+      "chatterbox": 86.53846153846155,
+      "tortoise_new": 97.03703703703704,
+      "tortoise_cm04": 98.19004524886877,
+      "rvc": 87.38170347003155,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    },
+    "ssl_vcv2_s2025": {
+      "hiacc": 99.7,
+      "read_new_speakers": 99.86486486486487,
+      "read_control": 100.0,
+      "xtts": 100.0,
+      "indicf5": 90.1639344262295,
+      "chatterbox": 93.46153846153847,
+      "tortoise_new": 98.51851851851852,
+      "tortoise_cm04": 98.19004524886877,
+      "rvc": 77.60252365930599,
+      "genuine_live": 12,
+      "genuine_replay": 6
+    }
+  },
+  "excluded_speakers": 31
+}

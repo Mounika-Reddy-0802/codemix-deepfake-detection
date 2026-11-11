@@ -146,12 +146,83 @@ change. Tortoise is the only tool here that no model heard.
   against 76.5% of 1,455; the rest have under 2 s of speech, which the page declines to judge),
   and v2 calls one genuine recording cloned, a HiACC clip, where the detector before called none.
   Threshold-free, IndicF5 against genuine speech goes from 24.82% to 1.77% EER.
+- **Uncertainty** (`experiments/results/voice_check_v2_intervals.md`,
+  `python -m src.reporting.voice_check_v2_intervals`; 95% speaker-bootstrap intervals). IndicF5
+  clones caught 89.3% [83.2, 94.2] and 90.2% [83.5, 95.5] against 12.3% [7.1, 18.1]; Chatterbox
+  93.8% [87.5, 98.8] and 93.5% [87.1, 98.5] against 4.2% [1.6, 7.3]; the intervals do not
+  overlap. RVC rests on 6 speakers (73.5% [62.1, 84.4] and 77.6% [65.5, 86.4] against 45.4%
+  [29.0, 62.8]) and Tortoise on CM04 on 7. Twelve of 12 genuine live calls is consistent with a
+  true rate as low as 73.5% (exact interval) and 6 of 6 replays with 54.1%: the calls show no
+  failure, not a measured rate.
 
 ### Limits
 
-- Two seeds; their operating points differ a lot (0.073 and 0.591) because their score scales
-  differ, and each was chosen on dev only.
+- Two seeds decided the adoption; their operating points differ a lot (0.073 and 0.591)
+  because their score scales differ, and each was chosen on dev only. Two more seeds (7 and 42,
+  below) give the spread of the EERs but have no operating point.
 - IndicF5 and Chatterbox are measured on held-out speakers of the same two tools; a new
   generator has not been tested.
 - The 30 real calls are the team's own recordings, a small sample.
 - Field recordings (people using the page) are still to come (review plan A4).
+
+## Seeds 7 and 42 (registered 10 November 2026, before training)
+
+Two seeds are a thin base for numbers that go into the paper. Voice check v2 is therefore
+trained twice more, with seeds 7 and 42 (the project's next two seeds), from the same notebook
+and the same pinned commit (`cb33e57`); only the seed changes
+(`notebooks/kaggle_w15_vcv2_ssl_s{7,42}.ipynb`, team decision P-045). The two trainings run on
+team members' Kaggle accounts beside the last generator-study runs.
+
+These runs are **reported, not judged**:
+
+- The adoption (P-043) is not reopened, whatever they show. The voice check keeps seed 1234 at
+  0.073.
+- No seed is dropped or replaced. All four are reported, each seed's value with the mean, the
+  standard deviation and the range (`src/reporting/voice_check_v2_seeds.py`, written with this
+  section).
+- Every EER is on speakers outside `gen_train`, computed by the same code as the adoption:
+  IndicF5 and Chatterbox clones, Tortoise (new speakers and CM04), RVC and XTTS-v2, on the G.711
+  line and, where the sets exist, the AMR-NB codec. The genuine clips called fake (language
+  control, HiACC, IndicVoices) are the notebook's own rates.
+- If the two checkpoints are later scored on the development calls, the five conditions at each
+  seed's dev-only point are reported as a check of whether the rule would have held for them.
+  That cannot change the adoption either.
+
+```
+python -m src.reporting.voice_check_v2_seeds --results <the four run folders> \
+    --out experiments/results/voice_check_v2_seeds.md
+```
+
+**Results (10 November).** Both trainings finished with every step clean, from the pinned
+commit (`experiments/results/voice_check_v2_seeds.md`). EER (%) on speakers outside
+`gen_train`; genuine clips called fake (%) at the notebook's fixed score.
+
+| Measure | s1234 | s2025 | s7 | s42 | Mean ± SD | Range |
+|---|---|---|---|---|---|---|
+| IndicF5 clones, G.711 | 2.53 | 2.53 | 5.26 | 2.53 | 3.21 ± 1.37 | 2.53-5.26 |
+| IndicF5 clones, AMR-NB | 3.22 | 8.98 | 6.94 | 4.07 | 5.80 ± 2.65 | 3.22-8.98 |
+| Chatterbox clones, G.711 | 1.49 | 1.15 | 2.31 | 0.82 | 1.44 ± 0.64 | 0.82-2.31 |
+| Tortoise, new speakers, G.711 | 0.03 | 0.17 | 1.62 | 0.14 | 0.49 ± 0.76 | 0.03-1.62 |
+| Tortoise, CM04, G.711 | 0.57 | 0.43 | 1.36 | 0.50 | 0.71 ± 0.43 | 0.43-1.36 |
+| RVC, held-out half, G.711 | 2.59 | 5.98 | 5.33 | 2.91 | 4.20 ± 1.70 | 2.59-5.98 |
+| XTTS-v2, new speakers, G.711 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 ± 0.00 | 0.00-0.00 |
+| Language-control genuine called fake | 0.08 | 0.00 | 0.23 | 0.08 | 0.10 ± 0.10 | 0.00-0.23 |
+| HiACC spontaneous genuine called fake | 0.30 | 0.24 | 0.90 | 0.24 | 0.42 ± 0.32 | 0.24-0.90 |
+| IndicVoices spontaneous genuine called fake | 0.29 | 0.39 | 0.88 | 1.07 | 0.66 ± 0.38 | 0.29-1.07 |
+
+The AMR-NB rows for Tortoise and the XTTS-v2 evaluation pool are in the full table.
+
+- **The two new seeds agree with the first two.** Over the G.711 line every clone EER is under
+  6% in every seed, and at most about 1% of genuine speech is called fake. The weakest number
+  in any seed is IndicF5 through AMR-NB (9.0%, seed 2025).
+- **Seed 7 is the weakest training** on most rows: IndicF5 5.3%, Tortoise on new speakers 1.6%,
+  HiACC genuine called fake 0.9%. It is reported as it came out; nothing is dropped.
+- **The voice check's seed sits at the favourable end.** Seed 1234 was named before any
+  training. Of the eight clone rows other than XTTS-v2 (where every seed is at or near 0), it
+  has the lowest EER, alone or tied, on five: IndicF5 on both codecs, Tortoise new speakers on
+  both codecs, and RVC. It is never the highest. The numbers the page reports at 0.073 are
+  therefore on the good side of what this recipe gives; for the paper, the four-seed mean and
+  range are the fair figure.
+- **The adoption is not reopened**, as registered. The two new checkpoints were not scored on
+  the development calls (only their result files were downloaded), so the five conditions at
+  their own operating points are not reported.

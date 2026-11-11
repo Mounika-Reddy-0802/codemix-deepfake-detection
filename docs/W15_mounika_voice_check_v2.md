@@ -61,11 +61,30 @@ Both seeds met all five conditions, so `configs/voice_check.yaml` now names seed
   written from those windows (`src.inference.real_calls.report`). The rule's code was not
   touched.
 
+## After the adoption (9-10 November)
+
+- **How sure (reported).** 95% speaker-bootstrap intervals for every row
+  (`src/reporting/voice_check_v2_intervals.py`): IndicF5 89.3% [83.2, 94.2] and Chatterbox
+  93.8% [87.5, 98.8] do not overlap the detector before (12.3%, 4.2%). RVC rests on 6 speakers;
+  12 of 12 genuine calls only bounds the true rate above 73.5%.
+- **Winning RVC back (P-046, rule committed before measuring).** v2 averaged with the
+  spontaneous recipe's model of the same seed: RVC 73.5/77.6% to 90.2/87.4% and genuine speech
+  kept, but IndicF5 fell 13-19 points and Chatterbox 7, past the 5 allowed. Not recommended;
+  the page keeps v2 (`docs/results/voice_check_v2_avg.md`).
+- **Four seeds (P-045, registered before training).** Seeds 7 and 42 from the same notebook
+  and commit: every clone EER over the line under 6% in every seed (IndicF5 2.5-5.3%,
+  Chatterbox 0.8-2.3%, RVC 2.6-6.0%, Tortoise 0.0-1.6%), genuine called fake at most about 1%.
+  Seed 1234, the page's, is at the good end of the spread; the four-seed mean is the figure for
+  the paper (`experiments/results/voice_check_v2_seeds.md`).
+
 ## How to reproduce
 
 ```bash
 python -m src.reporting.voice_check_v2 --out experiments/results/voice_check_v2.json
 python -m src.reporting.voice_check_v2_table --out experiments/results/voice_check_v2_table.md
+python -m src.reporting.voice_check_v2_intervals
+python -m src.reporting.voice_check_v2_seeds --results experiments/results/voice_check_v2/ssl_s{1234,2025,7,42} \
+    --out experiments/results/voice_check_v2_seeds.md
 ```
 
 Both read committed files only: the head-crop scores (`experiments/results/voice_check_v2/`),

@@ -1,0 +1,332 @@
+{
+  "ssl_s1234_spont": {
+    "hiacc": {
+      "point": 99.3,
+      "n": 1000,
+      "method": "clips (Wilson)",
+      "interval": [
+        98.562168445634,
+        99.66051316176056
+      ]
+    },
+    "read_new_speakers": {
+      "point": 99.86486486486487,
+      "n": 1480,
+      "method": "speakers",
+      "speakers": 37,
+      "interval": [
+        99.66216216216216,
+        100.0
+      ]
+    },
+    "read_control": {
+      "point": 99.92248062015504,
+      "n": 1290,
+      "method": "speakers",
+      "speakers": 183,
+      "interval": [
+        99.74575732091257,
+        100.0
+      ]
+    },
+    "indicf5": {
+      "point": 12.295081967213115,
+      "n": 244,
+      "method": "speakers",
+      "speakers": 25,
+      "interval": [
+        7.083333333333333,
+        18.106995884773664
+      ]
+    },
+    "chatterbox": {
+      "point": 4.230769230769231,
+      "n": 260,
+      "method": "speakers",
+      "speakers": 30,
+      "interval": [
+        1.5810276679841897,
+        7.251908396946565
+      ]
+    },
+    "tortoise_new": {
+      "point": 80.0,
+      "n": 135,
+      "method": "speakers",
+      "speakers": 37,
+      "interval": [
+        72.53521126760563,
+        86.88619167717528
+      ]
+    },
+    "tortoise_cm04": {
+      "point": 83.710407239819,
+      "n": 221,
+      "method": "speakers",
+      "speakers": 7,
+      "interval": [
+        76.74418604651163,
+        90.5829596412556
+      ]
+    },
+    "rvc": {
+      "point": 45.42586750788644,
+      "n": 317,
+      "method": "speakers",
+      "speakers": 6,
+      "interval": [
+        29.022082018927446,
+        62.82051282051282
+      ]
+    },
+    "xtts": {
+      "point": 99.72776769509983,
+      "n": 1102,
+      "method": "speakers",
+      "speakers": 37,
+      "interval": [
+        99.36821677933987,
+        100.0
+      ]
+    },
+    "genuine_live": {
+      "point": 100.0,
+      "k": 12,
+      "n": 12,
+      "method": "calls (exact)",
+      "interval": [
+        73.53515306029487,
+        100.0
+      ]
+    },
+    "genuine_replay": {
+      "point": 100.0,
+      "k": 6,
+      "n": 6,
+      "method": "calls (exact)",
+      "interval": [
+        54.07418735600995,
+        100.0
+      ]
+    }
+  },
+  "ssl_vcv2_s1234": {
+    "hiacc": {
+      "point": 99.8,
+      "n": 1000,
+      "method": "speakers",
+      "speakers": 24,
+      "interval": [
+        99.50347567030785,
+        100.0
+      ]
+    },
+    "read_new_speakers": {
+      "point": 100.0,
+      "n": 1480,
+      "method": "clips (exact)",
+      "interval": [
+        99.75106175467297,
+        100.0
+      ]
+    },
+    "read_control": {
+      "point": 100.0,
+      "n": 1290,
+      "method": "clips (exact)",
+      "interval": [
+        99.71444882754376,
+        100.0
+      ]
+    },
+    "indicf5": {
+      "point": 89.34426229508196,
+      "n": 244,
+      "method": "speakers",
+      "speakers": 25,
+      "interval": [
+        83.19672131147541,
+        94.23868312757202
+      ]
+    },
+    "chatterbox": {
+      "point": 93.84615384615384,
+      "n": 260,
+      "method": "speakers",
+      "speakers": 30,
+      "interval": [
+        87.5,
+        98.84169884169884
+      ]
+    },
+    "tortoise_new": {
+      "point": 94.07407407407408,
+      "n": 135,
+      "method": "speakers",
+      "speakers": 37,
+      "interval": [
+        88.40579710144928,
+        98.52941176470588
+      ]
+    },
+    "tortoise_cm04": {
+      "point": 91.8552036199095,
+      "n": 221,
+      "method": "speakers",
+      "speakers": 7,
+      "interval": [
+        88.0,
+        95.81395348837209
+      ]
+    },
+    "rvc": {
+      "point": 73.50157728706624,
+      "n": 317,
+      "method": "speakers",
+      "speakers": 6,
+      "interval": [
+        62.11180124223603,
+        84.44444444444444
+      ]
+    },
+    "xtts": {
+      "point": 100.0,
+      "n": 1102,
+      "method": "clips (exact)",
+      "interval": [
+        99.66581559117294,
+        100.0
+      ]
+    },
+    "genuine_live": {
+      "point": 100.0,
+      "k": 12,
+      "n": 12,
+      "method": "calls (exact)",
+      "interval": [
+        73.53515306029487,
+        100.0
+      ]
+    },
+    "genuine_replay": {
+      "point": 100.0,
+      "k": 6,
+      "n": 6,
+      "method": "calls (exact)",
+      "interval": [
+        54.07418735600995,
+        100.0
+      ]
+    }
+  },
+  "ssl_vcv2_s2025": {
+    "hiacc": {
+      "point": 99.7,
+      "n": 1000,
+      "method": "speakers",
+      "speakers": 24,
+      "interval": [
+        99.23224568138195,
+        100.0
+      ]
+    },
+    "read_new_speakers": {
+      "point": 99.86486486486487,
+      "n": 1480,
+      "method": "speakers",
+      "speakers": 37,
+      "interval": [
+        99.66216216216216,
+        100.0
+      ]
+    },
+    "read_control": {
+      "point": 100.0,
+      "n": 1290,
+      "method": "clips (exact)",
+      "interval": [
+        99.71444882754376,
+        100.0
+      ]
+    },
+    "indicf5": {
+      "point": 90.1639344262295,
+      "n": 244,
+      "method": "speakers",
+      "speakers": 25,
+      "interval": [
+        83.54430379746836,
+        95.54655870445345
+      ]
+    },
+    "chatterbox": {
+      "point": 93.46153846153847,
+      "n": 260,
+      "method": "speakers",
+      "speakers": 30,
+      "interval": [
+        87.07190785059271,
+        98.51301115241635
+      ]
+    },
+    "tortoise_new": {
+      "point": 98.51851851851852,
+      "n": 135,
+      "method": "speakers",
+      "speakers": 37,
+      "interval": [
+        96.2406015037594,
+        100.0
+      ]
+    },
+    "tortoise_cm04": {
+      "point": 98.19004524886877,
+      "n": 221,
+      "method": "speakers",
+      "speakers": 7,
+      "interval": [
+        96.41255605381166,
+        99.55357142857143
+      ]
+    },
+    "rvc": {
+      "point": 77.60252365930599,
+      "n": 317,
+      "method": "speakers",
+      "speakers": 6,
+      "interval": [
+        65.527950310559,
+        86.43533123028391
+      ]
+    },
+    "xtts": {
+      "point": 100.0,
+      "n": 1102,
+      "method": "clips (exact)",
+      "interval": [
+        99.66581559117294,
+        100.0
+      ]
+    },
+    "genuine_live": {
+      "point": 100.0,
+      "k": 12,
+      "n": 12,
+      "method": "calls (exact)",
+      "interval": [
+        73.53515306029487,
+        100.0
+      ]
+    },
+    "genuine_replay": {
+      "point": 100.0,
+      "k": 6,
+      "n": 6,
+      "method": "calls (exact)",
+      "interval": [
+        54.07418735600995,
+        100.0
+      ]
+    }
+  }
+}
