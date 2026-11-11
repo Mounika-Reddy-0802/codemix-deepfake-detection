@@ -1,0 +1,29 @@
+# Week 15, owner L. Generator study on SSL-AASIST (P-044), system control: the guard gate of its
+# SSL-AASIST runs, as train_lora_vcv2.yaml is for voice check v2. Same manifests the notebooks train on:
+# the spontaneous recipe plus this system's rows of the training half (src/data/ssl_generator_study).
+system: generator_study
+encoder: wav2vec2-base
+init_from: checkpoints/baseline/best.pt
+
+lora: true
+lora_r: 8
+lora_alpha: 16.0
+lora_dropout: 0.05
+
+train_manifest: data/manifests/codemix_adapt_train_sslgs_control.csv
+dev_manifest: data/manifests/codemix_adapt_dev_spont_channel20.csv
+out_dir: checkpoints/lora_sslgs_control
+
+lr: 1.0e-4
+weight_decay: 1.0e-5
+batch_size: 8
+max_seconds: 4.0
+epochs: 5
+num_workers: 4
+seed: 1234
+
+device: cuda
+amp: true
+class_weighted: true
+log_every: 25
+wandb_mode: offline

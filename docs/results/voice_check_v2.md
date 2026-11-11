@@ -138,8 +138,14 @@ change. Tortoise is the only tool here that no model heard.
   and a microphone. XTTS-v2 replays: seed 1234 4 of 6 (current detector 5 of 6), seed 2025 6 of 6.
 - **AMR-NB.** IndicF5 clones through the real mobile codec: 68.0% and 54.9% (current detector
   1.6%); genuine read speech 99.8-100%.
-- **Clean wideband files** (the page's own scoring path, no phone line): being measured with
-  `python -m src.inference.any_audio_eval`; added here when the run ends.
+- **Clean wideband files** (the page's own scoring path, telephone front end, no phone line;
+  `experiments/results/voice_check_v2_clean.md`, `python -m src.reporting.voice_check_v2_clean`).
+  On the recordings both detectors scored, without the 31 training speakers: IndicF5 clones
+  caught 72.7% of 55 (detector before: 0%), Chatterbox 86.1% of 72 (0%), RVC 58.4% (20.1%),
+  Tortoise 86.8% (71.1%), XTTS-v2 100.0% (97.3%). Genuine speech is judged as before (76.4%
+  against 76.5% of 1,455; the rest have under 2 s of speech, which the page declines to judge),
+  and v2 calls one genuine recording cloned, a HiACC clip, where the detector before called none.
+  Threshold-free, IndicF5 against genuine speech goes from 24.82% to 1.77% EER.
 
 ### Limits
 
